@@ -32,11 +32,10 @@ def calculateEMA(coin_pair, period, unit):
     return current_EMA
 
 def calculateRSI(coin_pair, period, unit):
-    historical_data = my_bittrex.getHistoricalData(coin_pair, period, unit)
-    return historical_data
+    closing_prices = getClosingPrices(coin_pair, period, unit)
 
 def findBreakout(coin_pair, period, unit):
-    historical_data = my_bittrex.getHistoricalData(coin_pair, period, unit)
+    closing_prices = getClosingPrices(coin_pair, period, unit)
 
 
 
