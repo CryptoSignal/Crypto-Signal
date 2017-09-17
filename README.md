@@ -2,9 +2,9 @@
 
 This script will automate the Technical Analysis for coin pairs on Bittrex
 Shoutouts:
-⋅⋅* To Bittrex for an awesome API
-⋅⋅* Eric Somdahl for writing a python wrapper
-⋅⋅* Ryan Mullin for implementing the getHistoricalData method on v2 of the Bittrex API
+* To Bittrex for an awesome API
+* Eric Somdahl for writing a python wrapper
+* Ryan Mullin for implementing the getHistoricalData method on v2 of the Bittrex API
 
 # How to use
 
