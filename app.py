@@ -17,7 +17,10 @@ coin_pairs = ['BTC-ETH', 'BTC-OMG', 'BTC-GNT', 'BTC-CVC']
 
 def calculateSMA(coin_pair, period, unit):
     historical_data = my_bittrex.getHistoricalData(coin_pair, period, unit)
-    return historical_data
+    total_closing = []
+    for i in historical_data:
+        total_closing.append(i['C'])
+    return (sum(total_closing) / period)
 
 def calculateEMA(coin_pair, period, unit):
     historical_data = my_bittrex.getHistoricalData(coin_pair, period, unit)
@@ -29,7 +32,7 @@ def calculateRSI(coin_pair, period, unit):
 
 def findBreakout(coin_pair, period, unit):
     historical_data = my_bittrex.getHistoricalData(coin_pair, period, unit)
-    return historical_data
 
 
-print(findBreakout(coin_pair='BTC-ETH', period=30, unit="thirtyMin"))
+
+print(calculateSMA(coin_pair='BTC-ETH', period=30, unit="thirtyMin"))
