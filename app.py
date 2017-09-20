@@ -3,12 +3,20 @@ import json
 import time
 import os
 import rumps
-
+from twilio.rest import Client
 rumps.debug_mode(True)
+
+# Creating an instance of the Bittrex class with our secrets.json file
 with open("secrets.json") as secrets_file:
     secrets = json.load(secrets_file)
     secrets_file.close()
     my_bittrex = Bittrex(secrets['bittrex_key'], secrets['bittrex_secret'])
+
+# Setting up Twilio for SMS alerts
+account_sid = secrets['twilio_key']
+auth_token = secrets['twilio_secret']
+client = Client(account_sid, auth_token)
+
 
 # Let's test an API call to get our BTC balance as a test
 # print(my_bittrex.get_balance('BTC')['result']['Balance'])
@@ -45,7 +53,8 @@ def findBreakout(coin_pair, period, unit):
             hit += 1
 
     if (hit / period) >= .75:
-        rumps.alert("BREAKING OUT!!!")
+        rumps.alert("{}: BREAKING OUT!!!".format(coin_pair))
+        message = client.api.account.messages.create(to=secrets['my_number'],from_=secrets['twilio_number'],body="{} is breaking out!".format(coin_pair))
         return "{}: BREAKING OUT!!!".format(coin_pair)
     else:
         return "{}: #Bagholding".format(coin_pair)
