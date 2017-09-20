@@ -9,7 +9,7 @@ with open("secrets.json") as secrets_file:
 # Let's test an API call to get our BTC balance as a test
 # print(my_bittrex.get_balance('BTC')['result']['Balance'])
 
-coin_pairs = ['BTC-ETH', 'BTC-OMG', 'BTC-GNT', 'BTC-CVC']
+coin_pairs = ['BTC-ETH', 'BTC-OMG', 'BTC-GNT', 'BTC-CVC', 'BTC-BAT', 'BTC-XEL', 'BTC-FUN', 'BTC-STRAT', 'BTC-LSK']
 
 
 #print(historical_data = my_bittrex.getHistoricalData('BTC-ETH', 30, "thirtyMin"))
@@ -35,8 +35,16 @@ def calculateRSI(coin_pair, period, unit):
     closing_prices = getClosingPrices(coin_pair, period, unit)
 
 def findBreakout(coin_pair, period, unit):
-    closing_prices = getClosingPrices(coin_pair, period, unit)
+    hit = 0
+    historical_data = my_bittrex.getHistoricalData(coin_pair, period, unit)
+    for i in historical_data:
+        if (i['C'] == i['H']) and (i['O'] == i['L']):
+            hit += 1
 
+    if (hit / period) >= .75:
+        return "{} is breaking out!".format(coin_pair)
+    else:
+        return "{}: #Bagholding".format(coin_pair)
 
-
-print(calculateEMA(coin_pair='BTC-ETH', period=10, unit="thirtyMin"))
+for i in coin_pairs:
+    print(findBreakout(coin_pair=i, period=5, unit="oneMin"))

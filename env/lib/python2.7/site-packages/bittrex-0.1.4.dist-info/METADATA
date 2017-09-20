@@ -1,0 +1,22 @@
+Metadata-Version: 2.0
+Name: bittrex
+Version: 0.1.4
+Summary: Unofficial Python bindings for the Bittrex API
+Home-page: https://github.com/panchr/python-bittrex
+Author: Rushy Panchal
+Author-email: panchal.rushy@gmail.com
+License: MIT
+Description-Content-Type: UNKNOWN
+Keywords: bittrex,bitcoin,exchange
+Platform: UNKNOWN
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Operating System :: OS Independent
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Development Status :: 3 - Alpha
+Classifier: Topic :: Office/Business :: Financial
+Requires-Dist: requests (==2.7.0)
+
+UNKNOWN
+
+
