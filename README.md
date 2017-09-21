@@ -24,9 +24,9 @@ Shoutouts:
 * Ryan Mullin for implementing the getHistoricalData() method on v2 of the Bittrex API
 
 # How to use
-
+To install the dependencies for this project, run "pip install -r requirements.txt"  
 Add a secrets.json file to the root directory of your project.  
-The contents of the file should mirror this:
+The contents of the file should mirror the following:
 
 ```json
 {

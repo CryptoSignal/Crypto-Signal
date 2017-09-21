@@ -81,8 +81,10 @@ def calculateRSI(coin_pair, period, unit):
     average_gain = (sum(advances) / len(advances))
     average_loss = (sum(declines) / len(declines))
     relative_strength = (average_gain / average_loss)
+    # smooth_rsi = ((((average_gain * (period - 1)) + 0) / 14)) / ((((average_loss * (period - 1)) + 1.0) / 14))
     RSI = 100 - (100 / (1 + relative_strength))
     return RSI
+
 
 def calculateBaseLine(coin_pair, unit):
     """
@@ -151,3 +153,4 @@ if __name__ == "__main__":
         time.sleep(300)
         loop_script()
     loop_script()
+    #print(calculateRSI(coin_pair='BTC-ETH', period=14, unit="thirtyMin"))
