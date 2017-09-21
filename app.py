@@ -59,8 +59,31 @@ def calculateEMA(coin_pair, period, unit):
 def calculateRSI(coin_pair, period, unit):
     """
     Calculates the Relative Strength Index for a coin_pair
+    If the returned value is above 70, it's overbought (SELL IT!)
+    If the returned value is below 30, it's oversold (BUY IT!)
     """
     closing_prices = getClosingPrices(coin_pair, period, unit)
+    count = 0
+    change = []
+    # Calculating Change
+    for i in closing_prices:
+        if count != 0:
+            change.append(i - closing_prices[count - 1])
+        count += 1
+    advances = []
+    declines = []
+    for i in change:
+        if i > 0:
+            advances.append(i)
+        if i < 0:
+            declines.append(abs(i))
+    average_gain = (sum(advances) / len(advances))
+    average_loss = (sum(declines) / len(declines))
+    relative_strength = (average_gain / average_loss)
+    RSI = 100 - (100 / (1 + relative_strength))
+    return RSI
+
+
 
 
 def calculateBaseLine(coin_pair, unit):
@@ -116,15 +139,17 @@ def findBreakout(coin_pair, period, unit):
 
     if (hit / period) >= .75:
         message = client.api.account.messages.create(to=secrets['my_number'],from_=secrets['twilio_number'],body="{} is breaking out!".format(coin_pair))
-        return "{}: BREAKING OUT!!!".format(coin_pair)
+        return "Breaking out!"
     else:
-        return "{}: #Bagholding".format(coin_pair)
+        return "#Bagholding"
 
 
 if __name__ == "__main__":
     def loop_script():
         for i in coin_pairs:
-            print(findBreakout(coin_pair=i, period=5, unit="fiveMin"))
+            breakout = findBreakout(coin_pair=i, period=5, unit="fiveMin")
+            rsi = calculateRSI(coin_pair=i, period=14, unit="fiveMin")
+            print("{}: Breakout: {} | RSI: {}".format(i, breakout, rsi))
         time.sleep(300)
         loop_script()
     loop_script()
