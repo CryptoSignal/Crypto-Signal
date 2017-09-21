@@ -65,11 +65,12 @@ def calculateRSI(coin_pair, period, unit):
     closing_prices = getClosingPrices(coin_pair, period, unit)
     count = 0
     change = []
-    # Calculating Change
+    # Calculating price changes
     for i in closing_prices:
         if count != 0:
             change.append(i - closing_prices[count - 1])
         count += 1
+    # Calculating gains and losses
     advances = []
     declines = []
     for i in change:
@@ -82,9 +83,6 @@ def calculateRSI(coin_pair, period, unit):
     relative_strength = (average_gain / average_loss)
     RSI = 100 - (100 / (1 + relative_strength))
     return RSI
-
-
-
 
 def calculateBaseLine(coin_pair, unit):
     """
