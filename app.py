@@ -66,6 +66,7 @@ def calculateRSI(coin_pair, period, unit):
 def calculateBaseLine(coin_pair, unit):
     """
     Calculates (26 period high + 26 period low) / 2
+    Also known as the "Kijun-sen" line
     """
 
     closing_prices = getClosingPrices(coin_pair, 26, unit)
@@ -76,8 +77,29 @@ def calculateBaseLine(coin_pair, unit):
 def calculateConversionLine(coin_pair, unit):
     """
     Calculates (9 period high + 9 period low) / 2
+    Also known as the "Tenkan-sen" line
     """
     closing_prices = getClosingPrices(coin_pair, 9, unit)
+    period_high = max(closing_prices)
+    period_low = min(closing_prices)
+    return (period_high + period_low) / 2
+
+def calculateLeadingSpanA(coin_pair, unit):
+    """
+    Calculates (Conversion Line + Base Line) / 2
+    Also known as the "Senkou Span A" line
+    """
+
+    base_line = calculateBaseLine(coin_pair, unit)
+    conversion_line = calculateConversionLine(coin_pair, unit)
+    return (base_line + conversion_line) / 2
+
+def calculateLeadingSpanB(coin_pair, unit):
+    """
+    Calculates (52 period high + 52 period low) / 2
+    Also known as the "Senkou Span B" line
+    """
+    closing_prices = getClosingPrices(coin_pair, 52, unit)
     period_high = max(closing_prices)
     period_low = min(closing_prices)
     return (period_high + period_low) / 2
