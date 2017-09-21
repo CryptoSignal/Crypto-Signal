@@ -147,7 +147,7 @@ if __name__ == "__main__":
         for i in coin_pairs:
             breakout = findBreakout(coin_pair=i, period=5, unit="fiveMin")
             rsi = calculateRSI(coin_pair=i, period=14, unit="fiveMin")
-            print("{}: Breakout: {} | RSI: {}".format(i, breakout, rsi))
+            print("{}: \tBreakout: {} \tRSI: {}".format(i, breakout, rsi))
         time.sleep(300)
         loop_script()
     loop_script()
