@@ -4,6 +4,20 @@ This script will automate the Technical Analysis for coin pairs on Bittrex
 
 It's also intended to alert you when a breakout occurs through your desktop, SMS, and console.
 
+Technical Analysis Automated:
+* Relative Strength Index (RSI)
+* Ichimoku Cloud
+* Simple Moving Average
+* Exponential Moving Average
+* Breakouts
+
+
+Coming Soon:
+* MACD
+* Bollinger Band
+* Web Client :)
+
+
 Shoutouts:
 * To Bittrex for an awesome API
 * Eric Somdahl for writing the Python wrapper for the Bittrex API
