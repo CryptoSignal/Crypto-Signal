@@ -19,7 +19,7 @@ client = Client(account_sid, auth_token)
 # Let's test an API call to get our BTC balance as a test
 # print(my_bittrex.get_balance('BTC')['result']['Balance'])
 
-coin_pairs = ['BTC-ETH', 'BTC-OMG', 'BTC-GNT', 'BTC-CVC', 'BTC-BAT', 'BTC-XEL', 'BTC-STRAT', 'BTC-LSK', 'BTC-BCC', 'BTC-NEO', 'BTC-OK', 'BTC-TRIG', 'BTC-PAY', 'BTC-XMR']
+coin_pairs = ['BTC-ETH', 'BTC-OMG', 'BTC-GNT', 'BTC-CVC', 'BTC-BAT', 'BTC-STRAT', 'BTC-LSK', 'BTC-BCC', 'BTC-NEO', 'BTC-OK', 'BTC-TRIG', 'BTC-PAY', 'BTC-XMR']
 
 #print(historical_data = my_bittrex.getHistoricalData('BTC-ETH', 30, "thirtyMin"))
 def getClosingPrices(coin_pair, period, unit):
@@ -30,6 +30,7 @@ def getClosingPrices(coin_pair, period, unit):
     :type unit: int
     :return: Array of closing prices
     """
+
     historical_data = my_bittrex.getHistoricalData(coin_pair, period, unit)
     closing_prices = []
     for i in historical_data:
@@ -61,6 +62,26 @@ def calculateRSI(coin_pair, period, unit):
     """
     closing_prices = getClosingPrices(coin_pair, period, unit)
 
+
+def calculateBaseLine(coin_pair, unit):
+    """
+    Calculates (26 period high + 26 period low) / 2
+    """
+
+    closing_prices = getClosingPrices(coin_pair, 26, unit)
+    period_high = max(closing_prices)
+    period_low = min(closing_prices)
+    return (period_high + period_low) / 2
+
+def calculateConversionLine(coin_pair, unit):
+    """
+    Calculates (9 period high + 9 period low) / 2
+    """
+    closing_prices = getClosingPrices(coin_pair, 9, unit)
+    period_high = max(closing_prices)
+    period_low = min(closing_prices)
+    return (period_high + period_low) / 2
+
 def findBreakout(coin_pair, period, unit):
     """
     Finds breakout based on how close the High was to Closing and Low to Opening
@@ -82,6 +103,6 @@ if __name__ == "__main__":
     def loop_script():
         for i in coin_pairs:
             print(findBreakout(coin_pair=i, period=5, unit="fiveMin"))
-        time.sleep(60)
+        time.sleep(300)
         loop_script()
     loop_script()
