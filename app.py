@@ -81,8 +81,11 @@ def calculateRSI(coin_pair, period, unit):
     average_gain = (sum(advances) / len(advances))
     average_loss = (sum(declines) / len(declines))
     relative_strength = (average_gain / average_loss)
-    # smooth_rsi = ((((average_gain * (period - 1)) + 0) / 14)) / ((((average_loss * (period - 1)) + 1.0) / 14))
-    RSI = 100 - (100 / (1 + relative_strength))
+    if change[-1] >= 0:
+        smoothed_rs = (((average_gain * 13) + change[-1]) / 14) / (((average_loss * 13) + 0) / 14)
+    if change[-1] < 0:
+        smoothed_rs = (((average_gain * 13) + 0) / 14) / (((average_loss * 13) + abs(change[-1])) / 14)
+    RSI = 100 - (100 / (1 + smoothed_rs))
     return RSI
 
 
@@ -148,9 +151,8 @@ if __name__ == "__main__":
     def loop_script():
         for i in coin_pairs:
             breakout = findBreakout(coin_pair=i, period=5, unit="fiveMin")
-            rsi = calculateRSI(coin_pair=i, period=14, unit="fiveMin")
+            rsi = calculateRSI(coin_pair=i, period=14, unit="thirtyMin")
             print("{}: \tBreakout: {} \tRSI: {}".format(i, breakout, rsi))
         time.sleep(300)
         loop_script()
     loop_script()
-    #print(calculateRSI(coin_pair='BTC-ETH', period=14, unit="thirtyMin"))
