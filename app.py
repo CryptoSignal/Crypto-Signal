@@ -148,11 +148,11 @@ def findBreakout(coin_pair, period, unit):
 
 
 if __name__ == "__main__":
-    def loop_script():
+    def get_signal():
         for i in coin_pairs:
             breakout = findBreakout(coin_pair=i, period=5, unit="fiveMin")
             rsi = calculateRSI(coin_pair=i, period=14, unit="thirtyMin")
             print("{}: \tBreakout: {} \tRSI: {}".format(i, breakout, rsi))
-        time.sleep(300)
-        loop_script()
-    loop_script()
+        time.sleep(30)
+    while True:
+        get_signal()
