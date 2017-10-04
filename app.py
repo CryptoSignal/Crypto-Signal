@@ -153,6 +153,6 @@ if __name__ == "__main__":
             breakout = findBreakout(coin_pair=i, period=5, unit="fiveMin")
             rsi = calculateRSI(coin_pair=i, period=14, unit="thirtyMin")
             print("{}: \tBreakout: {} \tRSI: {}".format(i, breakout, rsi))
-        time.sleep(30)
+        time.sleep(300)
     while True:
         get_signal()
