@@ -2,7 +2,7 @@ from bittrex import Bittrex
 import json
 import time
 import os
-from twilio.rest import Client
+# from twilio.rest import Client
 
 # Creating an instance of the Bittrex class with our secrets.json file
 with open("secrets.json") as secrets_file:
@@ -11,9 +11,9 @@ with open("secrets.json") as secrets_file:
     my_bittrex = Bittrex(secrets['bittrex_key'], secrets['bittrex_secret'])
 
 # Setting up Twilio for SMS alerts
-account_sid = secrets['twilio_key']
-auth_token = secrets['twilio_secret']
-client = Client(account_sid, auth_token)
+# account_sid = secrets['twilio_key']
+# auth_token = secrets['twilio_secret']
+# client = Client(account_sid, auth_token)
 
 
 # Let's test an API call to get our BTC balance as a test
@@ -78,8 +78,8 @@ def calculateRSI(coin_pair, period, unit):
             advances.append(i)
         if i < 0:
             declines.append(abs(i))
-    average_gain = (sum(advances) / len(advances))
-    average_loss = (sum(declines) / len(declines))
+    average_gain = (sum(advances) / period)
+    average_loss = (sum(declines) / period)
     relative_strength = (average_gain / average_loss)
     if change[-1] >= 0:
         smoothed_rs = (((average_gain * 13) + change[-1]) / 14) / (((average_loss * 13) + 0) / 14)
