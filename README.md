@@ -40,3 +40,9 @@ The contents of the file should mirror the following:
 ```
 
 If you don't want to use the Twilio notifications, you can remove the code
+
+# How to run
+Navigate to your file directory in terminal, run with "python app.py"
+
+# Liability
+I am not your financial advisor, nor is this tool. Use this program as an educational tool, and nothing more. None of the contributors to this project are liable for any loses you may incur. Be wise and always do your own research.

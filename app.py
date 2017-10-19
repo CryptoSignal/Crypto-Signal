@@ -2,7 +2,7 @@ from bittrex import Bittrex
 import json
 import time
 import os
-# from twilio.rest import Client
+from twilio.rest import Client
 
 # Creating an instance of the Bittrex class with our secrets.json file
 with open("secrets.json") as secrets_file:
@@ -11,9 +11,9 @@ with open("secrets.json") as secrets_file:
     my_bittrex = Bittrex(secrets['bittrex_key'], secrets['bittrex_secret'])
 
 # Setting up Twilio for SMS alerts
-# account_sid = secrets['twilio_key']
-# auth_token = secrets['twilio_secret']
-# client = Client(account_sid, auth_token)
+account_sid = secrets['twilio_key']
+auth_token = secrets['twilio_secret']
+client = Client(account_sid, auth_token)
 
 
 # Let's test an API call to get our BTC balance as a test
