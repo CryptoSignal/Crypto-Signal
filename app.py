@@ -56,13 +56,14 @@ def calculateEMA(coin_pair, period, unit):
     current_EMA = (closing_prices[-1] * (2 / (1 + period))) + (previous_EMA * (1 - (2 / (1 + period))))
     return current_EMA
 
+# Improvemnts to calculateRSI are courtesy of community contributor "pcartwright81"
 def calculateRSI(coin_pair, period, unit):
     """
     Calculates the Relative Strength Index for a coin_pair
     If the returned value is above 70, it's overbought (SELL IT!)
     If the returned value is below 30, it's oversold (BUY IT!)
     """
-    closing_prices = getClosingPrices(coin_pair, period, unit)
+    closing_prices = getClosingPrices(coin_pair, period * 3, unit)
     count = 0
     change = []
     # Calculating price changes
@@ -70,6 +71,8 @@ def calculateRSI(coin_pair, period, unit):
         if count != 0:
             change.append(i - closing_prices[count - 1])
         count += 1
+        if count == 15:
+           break
     # Calculating gains and losses
     advances = []
     declines = []
@@ -78,15 +81,27 @@ def calculateRSI(coin_pair, period, unit):
             advances.append(i)
         if i < 0:
             declines.append(abs(i))
-    average_gain = (sum(advances) / period)
-    average_loss = (sum(declines) / period)
-    relative_strength = (average_gain / average_loss)
-    if change[-1] >= 0:
-        smoothed_rs = (((average_gain * 13) + change[-1]) / 14) / (((average_loss * 13) + 0) / 14)
-    if change[-1] < 0:
-        smoothed_rs = (((average_gain * 13) + 0) / 14) / (((average_loss * 13) + abs(change[-1])) / 14)
-    RSI = 100 - (100 / (1 + smoothed_rs))
-    return RSI
+    average_gain = (sum(advances) / 14)
+    average_loss = (sum(declines) / 14)
+    newAvgGain = average_gain
+    newAvgLoss = average_loss
+    for i in closing_prices:
+        if count > 14 and count < len(closing_prices):
+          close = closing_prices[count]
+          newChange = close - closing_prices[count - 1]
+          addLoss = 0;
+          addGain = 0;
+          if newChange > 0:
+              addGain = newChange
+          if newChange < 0:
+              addLoss = abs(newChange)
+          newAvgGain = (newAvgGain * 13 + addGain) / 14
+          newAvgLoss = (newAvgLoss * 13 + addLoss) / 14
+          count += 1
+
+    rs = newAvgGain / newAvgLoss;
+    newRS = 100 - 100 / (1 + rs);
+    return newRS
 
 
 def calculateBaseLine(coin_pair, unit):

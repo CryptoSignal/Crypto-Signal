@@ -1,16 +1,21 @@
 # Crypto Signals
 
-This script will automate the Technical Analysis for coin pairs on Bittrex
-
-It's also intended to alert you when a breakout occurs through your desktop, SMS, and console.
+Track 250+ crypto currencies and their trading signals through Crypto signals.
 
 Technical Analysis Automated:
 * Relative Strength Index (RSI)
-* Ichimoku Cloud
+* Ichimoku Cloud (Leading Span A, Leading Span B, Conversion Line, Base Line)
 * Simple Moving Average
 * Exponential Moving Average
 * Breakouts
 
+Features:
+* Tracking for over 250 coins on Bittrex
+* SMS alerts for coin breakouts and price changes
+* Well documented script
+* Automated Technical Analysis that's implemented from scratch for simplicity and ease of use
+
+You can build on top of this tool and implement algorithm trading and some machine learning models to experiment with predictive analysis.
 
 Coming Soon:
 * MACD
