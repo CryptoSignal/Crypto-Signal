@@ -169,6 +169,7 @@ def findBreakout(coin_pair, period, unit):
     if (hit / period) >= .75:
         sc.api_call(
           "chat.postMessage",
+          as_user="true",
           channel="#test-bots",
          text="{} is breaking out!".format(coin_pair))
         return "Breaking out!"
