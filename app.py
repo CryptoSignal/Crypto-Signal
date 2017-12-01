@@ -170,7 +170,7 @@ def findBreakout(coin_pair, period, unit):
         sc.api_call(
           "chat.postMessage",
           as_user="true",
-          channel="#test-bots",
+          channel=secrets['slack_channel'],
          text="{} is breaking out!".format(coin_pair))
         return "Breaking out!"
     else:
