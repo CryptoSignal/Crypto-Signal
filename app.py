@@ -4,6 +4,11 @@ import time
 import os
 from twilio.rest import Client
 
+from slackclient import SlackClient
+
+slack_token = '<PUT SLACK TOKEN HERE>'
+sc = SlackClient(slack_token)
+
 # Creating an instance of the Bittrex class with our secrets.json file
 with open("secrets.json") as secrets_file:
     secrets = json.load(secrets_file)
@@ -161,7 +166,15 @@ def findBreakout(coin_pair, period, unit):
     else:
         return "#Bagholding"
 
-
+    if (hit / period) >= .75:
+        sc.api_call(
+          "chat.postMessage",
+          channel="#test-bots",
+         text="{} is breaking out!".format(coin_pair))
+        return "Breaking out!"
+    else:
+        return "#Bagholding"
+    
 if __name__ == "__main__":
     def get_signal():
         for i in coin_pairs:
