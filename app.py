@@ -6,7 +6,8 @@ from twilio.rest import Client
 
 from slackclient import SlackClient
 
-slack_token = '<PUT SLACK TOKEN HERE>' # creating a new bot user: https://my.slack.com/services/new/bot
+# Slack settings
+slack_token = secrets['slack_token']
 sc = SlackClient(slack_token)
 
 # Creating an instance of the Bittrex class with our secrets.json file
