@@ -3,6 +3,7 @@ import json
 import time
 import os
 from twilio.rest import Client
+import pandas as pd
 
 # Creating an instance of the Bittrex class with our secrets.json file
 with open("secrets.json") as secrets_file:
@@ -37,6 +38,31 @@ def getClosingPrices(coin_pair, period, unit):
         closing_prices.append(i['C'])
     return closing_prices
 
+def calculateMACD(coin_pair, period, unit, param=(26,12,9)):
+    """
+    Return MACD as list for a coin pair
+    """
+    data = getClosingPrices(coin_pair, period, unit)
+    emadict = {"Prices": data}
+    frame = pd.DataFrame(emadict)
+    moving_avg = frame.ewm(span=pariod)
+    emalong = frame.ewm(span=param[0])
+    emashort = frame.ewm(span=param[1])
+    moving_avg = list(moving_avg.mean()["Prices"])
+    emalong = list(emalong.mean()["Prices"])
+    emashort = list(emashort.mean()["Prices"])
+    macd = []     
+    for i in range(len(emashort)):
+        macd.append(emashort[i] - emalong[i])        
+    signaldata = []  
+    for i in macd:
+        signaldata.append(i)   
+    signaldict = {"Prices": signaldata}
+    signal = pd.DataFrame(signaldict)
+    signal = signal.ewm(span=param[2])
+    signal = list(signal.mean()["Prices"])
+    return macd, signal
+    
 def calculateSMA(coin_pair, period, unit):
     """
     Returns the Simple Moving Average for a coin pair
