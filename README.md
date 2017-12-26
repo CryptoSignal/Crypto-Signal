@@ -28,9 +28,16 @@ Shoutouts:
 * Eric Somdahl for writing the Python wrapper for the Bittrex API
 * Ryan Mullin for implementing the getHistoricalData() method on v2 of the Bittrex API
 
-# How to use
-To install the dependencies for this project, run "pip install -r requirements.txt"  
-Add a secrets.json file to the root directory of your project.
+# How to use (Docker)
+To create the docker image run `make build` in the root of the project directory.
+Once built copy template.env to .env and add your API keys, at a minimum read-only Bittrex keys are required.
+
+## How to run
+In the root directory run `docker-compose up` or `make run` if you don't have docker-compose.
+
+# How to use (Local)
+To install the dependencies for this project, run "pip install -r requirements.txt" in the app directory.
+Add a secrets.json file to the app directory of your project.
 The contents of the file should mirror the following:
 
 ```json
@@ -44,10 +51,10 @@ The contents of the file should mirror the following:
 }
 ```
 
-If you don't want to use the Twilio notifications, you can remove the code
+If you don't want to use the Twilio notifications, leave them as the default values.
 
-# How to run
-Navigate to your file directory in terminal, run with "python app.py"
+## How to run
+Navigate to the app directory in your terminal and run with "python app.py"
 
 # Liability
 I am not your financial advisor, nor is this tool. Use this program as an educational tool, and nothing more. None of the contributors to this project are liable for any loses you may incur. Be wise and always do your own research.

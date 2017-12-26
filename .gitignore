@@ -1,4 +1,2 @@
-secrets.json
-__pycache__
-*.pyc
-venv
+dev.sh
+.env
