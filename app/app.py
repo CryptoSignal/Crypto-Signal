@@ -3,13 +3,26 @@
 import os
 import json
 import time
+from pathlib import Path
 from bittrex import Bittrex
 from twilio.rest import Client
 
 # Read in the configurtion
-with open("secrets.json") as secrets_file:
-    SECRETS = json.load(secrets_file)
-    secrets_file.close()
+print(os.environ)
+
+SECRETS = {
+    "bittrex_key" : "BITTREX_API_KEY",
+    "bittrex_secret" : "BITTREX_SECRET",
+    "twilio_key": "TWILIO_API_KEY",
+    "twilio_secret": "TWILIO_SECRET",
+    "twilio_number": "TWILIO_PHONE_NUMBER",
+    "my_number": "YOUR_PHONE_NUMBER"
+}
+SECRETS_FILE_PATH = Path('secrets.json')
+if SECRETS_FILE_PATH.is_file():
+    with open(SECRETS_FILE_PATH) as secrets_file:
+        SECRETS = json.load(secrets_file)
+        secrets_file.close()
 
 CONFIG = {
     'bittrex_key': os.environ.get('BITTREX_KEY', SECRETS['bittrex_key']),
