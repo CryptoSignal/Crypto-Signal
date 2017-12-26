@@ -1,7 +1,6 @@
-from bittrex import Bittrex
 import json
 import time
-import os
+from bittrex import Bittrex
 from twilio.rest import Client
 
 # Creating an instance of the Bittrex class with our secrets.json file
@@ -19,7 +18,7 @@ client = Client(account_sid, auth_token)
 # Let's test an API call to get our BTC balance as a test
 # print(my_bittrex.get_balance('BTC')['result']['Balance'])
 
-coin_pairs = ['BTC-ETH', 'BTC-OMG', 'BTC-GNT', 'BTC-CVC', 'BTC-BAT', 'BTC-STRAT', 'BTC-LSK', 'BTC-BCC', 'BTC-NEO', 'BTC-OK', 'BTC-TRIG', 'BTC-PAY', 'BTC-XMR']
+COIN_PAIRS = ['BTC-ETH', 'BTC-OMG', 'BTC-GNT', 'BTC-CVC', 'BTC-BAT', 'BTC-STRAT', 'BTC-LSK', 'BTC-BCC', 'BTC-NEO', 'BTC-OK', 'BTC-TRIG', 'BTC-PAY', 'BTC-XMR']
 
 #print(historical_data = my_bittrex.getHistoricalData('BTC-ETH', 30, "thirtyMin"))
 def getClosingPrices(coin_pair, period, unit):
@@ -164,7 +163,7 @@ def findBreakout(coin_pair, period, unit):
 
 if __name__ == "__main__":
     def get_signal():
-        for i in coin_pairs:
+        for i in COIN_PAIRS:
             breakout = findBreakout(coin_pair=i, period=5, unit="fiveMin")
             rsi = calculateRSI(coin_pair=i, period=14, unit="thirtyMin")
             print("{}: \tBreakout: {} \tRSI: {}".format(i, breakout, rsi))
