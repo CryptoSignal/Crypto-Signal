@@ -8,8 +8,6 @@ from bittrex import Bittrex
 from twilio.rest import Client
 
 # Read in the configurtion
-print(os.environ)
-
 SECRETS = {
     "bittrex_key" : "BITTREX_API_KEY",
     "bittrex_secret" : "BITTREX_SECRET",
