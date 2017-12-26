@@ -16,7 +16,8 @@ CONFIG = {
     'bittrex_secret': os.environ.get('BITTREX_SECRET', secrets['bittrex_secret']),
     'twilio_key': os.environ.get('TWILIO_KEY', secrets['twilio_key']),
     'twilio_secret': os.environ.get('TWILIO_SECRET', secrets['twilio_secret']),
-    'twilio_phone_number': os.environ.get('TWILIO_PHONE_NUMBER', secrets['my_number'])
+    'twilio_phone_number': os.environ.get('TWILIO_PHONE_NUMBER', secrets['twilio_number']),
+    'twilio_my_number': os.environ.get('TWILIO_PHONE_NUMBER', secrets['my_number'])
 }
 
 # Let's test an API call to get our BTC balance as a test
@@ -159,7 +160,7 @@ def findBreakout(coin_pair, period, unit):
             hit += 1
 
     if (hit / period) >= .75:
-        message = TWILIO_CLIENT.api.account.messages.create(to=secrets['my_number'],from_=secrets['twilio_number'],body="{} is breaking out!".format(coin_pair))
+        TWILIO_CLIENT.api.account.messages.create(to=CONFIG['twilio_my_number'],from_=CONFIG['twilio_phone_number'],body="{} is breaking out!".format(coin_pair))
         return "Breaking out!"
     else:
         return "#Bagholding"
