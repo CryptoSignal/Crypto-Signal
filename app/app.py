@@ -8,16 +8,16 @@ from twilio.rest import Client
 
 # Read in the configurtion
 with open("secrets.json") as secrets_file:
-    secrets = json.load(secrets_file)
+    SECRETS = json.load(secrets_file)
     secrets_file.close()
 
 CONFIG = {
-    'bittrex_key': os.environ.get('BITTREX_KEY', secrets['bittrex_key']),
-    'bittrex_secret': os.environ.get('BITTREX_SECRET', secrets['bittrex_secret']),
-    'twilio_key': os.environ.get('TWILIO_KEY', secrets['twilio_key']),
-    'twilio_secret': os.environ.get('TWILIO_SECRET', secrets['twilio_secret']),
-    'twilio_phone_number': os.environ.get('TWILIO_PHONE_NUMBER', secrets['twilio_number']),
-    'twilio_my_number': os.environ.get('TWILIO_PHONE_NUMBER', secrets['my_number'])
+    'bittrex_key': os.environ.get('BITTREX_KEY', SECRETS['bittrex_key']),
+    'bittrex_secret': os.environ.get('BITTREX_SECRET', SECRETS['bittrex_secret']),
+    'twilio_key': os.environ.get('TWILIO_KEY', SECRETS['twilio_key']),
+    'twilio_secret': os.environ.get('TWILIO_SECRET', SECRETS['twilio_secret']),
+    'twilio_phone_number': os.environ.get('TWILIO_PHONE_NUMBER', SECRETS['twilio_number']),
+    'twilio_my_number': os.environ.get('TWILIO_PHONE_NUMBER', SECRETS['my_number'])
 }
 
 # Let's test an API call to get our BTC balance as a test
