@@ -1,26 +1,30 @@
+#!/usr/local/bin/python
+
+import os
 import json
 import time
 from bittrex import Bittrex
 from twilio.rest import Client
 
-# Creating an instance of the Bittrex class with our secrets.json file
+# Read in the configurtion
 with open("secrets.json") as secrets_file:
     secrets = json.load(secrets_file)
     secrets_file.close()
-    my_bittrex = Bittrex(secrets['bittrex_key'], secrets['bittrex_secret'])
 
-# Setting up Twilio for SMS alerts
-account_sid = secrets['twilio_key']
-auth_token = secrets['twilio_secret']
-client = Client(account_sid, auth_token)
-
+CONFIG = {
+    'bittrex_key': os.environ.get('BITTREX_KEY', secrets['bittrex_key']),
+    'bittrex_secret': os.environ.get('BITTREX_SECRET', secrets['bittrex_secret']),
+    'twilio_key': os.environ.get('TWILIO_KEY', secrets['twilio_key']),
+    'twilio_secret': os.environ.get('TWILIO_SECRET', secrets['twilio_secret']),
+    'twilio_phone_number': os.environ.get('TWILIO_PHONE_NUMBER', secrets['my_number'])
+}
 
 # Let's test an API call to get our BTC balance as a test
-# print(my_bittrex.get_balance('BTC')['result']['Balance'])
+# print(BITTREX_CLIENT.get_balance('BTC')['result']['Balance'])
 
 COIN_PAIRS = ['BTC-ETH', 'BTC-OMG', 'BTC-GNT', 'BTC-CVC', 'BTC-BAT', 'BTC-STRAT', 'BTC-LSK', 'BTC-BCC', 'BTC-NEO', 'BTC-OK', 'BTC-TRIG', 'BTC-PAY', 'BTC-XMR']
 
-#print(historical_data = my_bittrex.getHistoricalData('BTC-ETH', 30, "thirtyMin"))
+#print(historical_data = BITTREX_CLIENT.getHistoricalData('BTC-ETH', 30, "thirtyMin"))
 def getClosingPrices(coin_pair, period, unit):
     """
     Returns closing prices within a specified time frame for a coin pair
@@ -30,7 +34,7 @@ def getClosingPrices(coin_pair, period, unit):
     :return: Array of closing prices
     """
 
-    historical_data = my_bittrex.getHistoricalData(coin_pair, period, unit)
+    historical_data = BITTREX_CLIENT.getHistoricalData(coin_pair, period, unit)
     closing_prices = []
     for i in historical_data:
         closing_prices.append(i['C'])
@@ -149,24 +153,27 @@ def findBreakout(coin_pair, period, unit):
     Finds breakout based on how close the High was to Closing and Low to Opening
     """
     hit = 0
-    historical_data = my_bittrex.getHistoricalData(coin_pair, period, unit)
+    historical_data = BITTREX_CLIENT.getHistoricalData(coin_pair, period, unit)
     for i in historical_data:
         if (i['C'] == i['H']) and (i['O'] == i['L']):
             hit += 1
 
     if (hit / period) >= .75:
-        message = client.api.account.messages.create(to=secrets['my_number'],from_=secrets['twilio_number'],body="{} is breaking out!".format(coin_pair))
+        message = TWILIO_CLIENT.api.account.messages.create(to=secrets['my_number'],from_=secrets['twilio_number'],body="{} is breaking out!".format(coin_pair))
         return "Breaking out!"
     else:
         return "#Bagholding"
 
+def get_signal():
+    for coin_pair in COIN_PAIRS:
+        breakout = findBreakout(coin_pair=coin_pair, period=5, unit="fiveMin")
+        rsi = calculateRSI(coin_pair=coin_pair, period=14, unit="thirtyMin")
+        print("{}: \tBreakout: {} \tRSI: {}".format(coin_pair, breakout, rsi))
+    time.sleep(300)
 
 if __name__ == "__main__":
-    def get_signal():
-        for i in COIN_PAIRS:
-            breakout = findBreakout(coin_pair=i, period=5, unit="fiveMin")
-            rsi = calculateRSI(coin_pair=i, period=14, unit="thirtyMin")
-            print("{}: \tBreakout: {} \tRSI: {}".format(i, breakout, rsi))
-        time.sleep(300)
+    BITTREX_CLIENT = Bittrex(CONFIG['bittrex_key'], CONFIG['bittrex_secret'])
+    TWILIO_CLIENT = Client(CONFIG['twilio_key'], CONFIG['twilio_secret'])
+
     while True:
         get_signal()
