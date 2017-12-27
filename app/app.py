@@ -3,41 +3,16 @@
 import os
 import json
 import time
+import logging
 from pathlib import Path
 from bittrex import Bittrex
 from twilio.rest import Client
 
-# Read in the configurtion
-SECRETS = {
-    "bittrex_key" : "BITTREX_API_KEY",
-    "bittrex_secret" : "BITTREX_SECRET",
-    "twilio_key": "TWILIO_API_KEY",
-    "twilio_secret": "TWILIO_SECRET",
-    "twilio_number": "TWILIO_PHONE_NUMBER",
-    "my_number": "YOUR_PHONE_NUMBER"
-}
-SECRETS_FILE_PATH = Path('secrets.json')
-if SECRETS_FILE_PATH.is_file():
-    with open(SECRETS_FILE_PATH) as secrets_file:
-        SECRETS = json.load(secrets_file)
-        secrets_file.close()
-
-CONFIG = {
-    'bittrex_key': os.environ.get('BITTREX_KEY', SECRETS['bittrex_key']),
-    'bittrex_secret': os.environ.get('BITTREX_SECRET', SECRETS['bittrex_secret']),
-    'twilio_key': os.environ.get('TWILIO_KEY', SECRETS['twilio_key']),
-    'twilio_secret': os.environ.get('TWILIO_SECRET', SECRETS['twilio_secret']),
-    'twilio_phone_number': os.environ.get('TWILIO_PHONE_NUMBER', SECRETS['twilio_number']),
-    'twilio_my_number': os.environ.get('TWILIO_PHONE_NUMBER', SECRETS['my_number'])
-}
-
 # Let's test an API call to get our BTC balance as a test
 # print(BITTREX_CLIENT.get_balance('BTC')['result']['Balance'])
 
-COIN_PAIRS = ['BTC-ETH', 'BTC-OMG', 'BTC-GNT', 'BTC-CVC', 'BTC-BAT', 'BTC-STRAT', 'BTC-LSK', 'BTC-BCC', 'BTC-NEO', 'BTC-OK', 'BTC-TRIG', 'BTC-PAY', 'BTC-XMR']
-
 #print(historical_data = BITTREX_CLIENT.getHistoricalData('BTC-ETH', 30, "thirtyMin"))
-def getClosingPrices(coin_pair, period, unit):
+def get_closing_prices(coin_pair, period, unit):
     """
     Returns closing prices within a specified time frame for a coin pair
     :type coin_pair: str
@@ -52,33 +27,33 @@ def getClosingPrices(coin_pair, period, unit):
         closing_prices.append(i['C'])
     return closing_prices
 
-def calculateSMA(coin_pair, period, unit):
+def calculate_sma(coin_pair, period, unit):
     """
     Returns the Simple Moving Average for a coin pair
     """
 
-    total_closing = sum(getClosingPrices(coin_pair, period, unit))
+    total_closing = sum(get_closing_prices(coin_pair, period, unit))
     return (total_closing / period)
 
-def calculateEMA(coin_pair, period, unit):
+def calculate_ema(coin_pair, period, unit):
     """
     Returns the Exponential Moving Average for a coin pair
     """
 
-    closing_prices = getClosingPrices(coin_pair, period, unit)
-    previous_EMA = calculateSMA(coin_pair, period, unit)
+    closing_prices = get_closing_prices(coin_pair, period, unit)
+    previous_EMA = calculate_sma(coin_pair, period, unit)
     constant = (2 / (period + 1))
     current_EMA = (closing_prices[-1] * (2 / (1 + period))) + (previous_EMA * (1 - (2 / (1 + period))))
     return current_EMA
 
-# Improvemnts to calculateRSI are courtesy of community contributor "pcartwright81"
-def calculateRSI(coin_pair, period, unit):
+# Improvemnts to calculate_rsi are courtesy of community contributor "pcartwright81"
+def calculate_rsi(coin_pair, period, unit):
     """
     Calculates the Relative Strength Index for a coin_pair
     If the returned value is above 70, it's overbought (SELL IT!)
     If the returned value is below 30, it's oversold (BUY IT!)
     """
-    closing_prices = getClosingPrices(coin_pair, period * 3, unit)
+    closing_prices = get_closing_prices(coin_pair, period * 3, unit)
     count = 0
     change = []
     # Calculating price changes
@@ -119,48 +94,48 @@ def calculateRSI(coin_pair, period, unit):
     return newRS
 
 
-def calculateBaseLine(coin_pair, unit):
+def calculate_base_line(coin_pair, unit):
     """
     Calculates (26 period high + 26 period low) / 2
     Also known as the "Kijun-sen" line
     """
 
-    closing_prices = getClosingPrices(coin_pair, 26, unit)
+    closing_prices = get_closing_prices(coin_pair, 26, unit)
     period_high = max(closing_prices)
     period_low = min(closing_prices)
     return (period_high + period_low) / 2
 
-def calculateConversionLine(coin_pair, unit):
+def calculate_conversion_line(coin_pair, unit):
     """
     Calculates (9 period high + 9 period low) / 2
     Also known as the "Tenkan-sen" line
     """
-    closing_prices = getClosingPrices(coin_pair, 9, unit)
+    closing_prices = get_closing_prices(coin_pair, 9, unit)
     period_high = max(closing_prices)
     period_low = min(closing_prices)
     return (period_high + period_low) / 2
 
-def calculateLeadingSpanA(coin_pair, unit):
+def calculate_leading_span_a(coin_pair, unit):
     """
     Calculates (Conversion Line + Base Line) / 2
     Also known as the "Senkou Span A" line
     """
 
-    base_line = calculateBaseLine(coin_pair, unit)
-    conversion_line = calculateConversionLine(coin_pair, unit)
+    base_line = calculate_base_line(coin_pair, unit)
+    conversion_line = calculate_conversion_line(coin_pair, unit)
     return (base_line + conversion_line) / 2
 
-def calculateLeadingSpanB(coin_pair, unit):
+def calculate_leading_span_b(coin_pair, unit):
     """
     Calculates (52 period high + 52 period low) / 2
     Also known as the "Senkou Span B" line
     """
-    closing_prices = getClosingPrices(coin_pair, 52, unit)
+    closing_prices = get_closing_prices(coin_pair, 52, unit)
     period_high = max(closing_prices)
     period_low = min(closing_prices)
     return (period_high + period_low) / 2
 
-def findBreakout(coin_pair, period, unit):
+def find_breakout(coin_pair, period, unit):
     """
     Finds breakout based on how close the High was to Closing and Low to Opening
     """
@@ -171,19 +146,59 @@ def findBreakout(coin_pair, period, unit):
             hit += 1
 
     if (hit / period) >= .75:
-        TWILIO_CLIENT.api.account.messages.create(to=CONFIG['twilio_my_number'],from_=CONFIG['twilio_phone_number'],body="{} is breaking out!".format(coin_pair))
+        TWILIO_CLIENT.api.account.messages.create(to=CONFIG['twilio_my_number'], from_=CONFIG['twilio_phone_number'], body="{} is breaking out!".format(coin_pair))
         return "Breaking out!"
     else:
         return "#Bagholding"
 
 def get_signal():
     for coin_pair in COIN_PAIRS:
-        breakout = findBreakout(coin_pair=coin_pair, period=5, unit="fiveMin")
-        rsi = calculateRSI(coin_pair=coin_pair, period=14, unit="thirtyMin")
+        breakout = find_breakout(coin_pair=coin_pair, period=5, unit="fiveMin")
+        rsi = calculate_rsi(coin_pair=coin_pair, period=14, unit="thirtyMin")
         print("{}: \tBreakout: {} \tRSI: {}".format(coin_pair, breakout, rsi))
     time.sleep(300)
 
 if __name__ == "__main__":
+    # Load settings and create the CONFIG object
+    SECRETS = {
+        "bittrex_key" : "BITTREX_API_KEY",
+        "bittrex_secret" : "BITTREX_SECRET",
+        "twilio_key": "TWILIO_API_KEY",
+        "twilio_secret": "TWILIO_SECRET",
+        "twilio_number": "TWILIO_PHONE_NUMBER",
+        "my_number": "YOUR_PHONE_NUMBER"
+    }
+
+    SECRETS_FILE_PATH = Path('secrets.json')
+    if SECRETS_FILE_PATH.is_file():
+        with open(SECRETS_FILE_PATH) as secrets_file:
+            SECRETS = json.load(secrets_file)
+            secrets_file.close()
+
+    CONFIG = {
+        'bittrex_key': os.environ.get('BITTREX_KEY', SECRETS['bittrex_key']),
+        'bittrex_secret': os.environ.get('BITTREX_SECRET', SECRETS['bittrex_secret']),
+        'twilio_key': os.environ.get('TWILIO_KEY', SECRETS['twilio_key']),
+        'twilio_secret': os.environ.get('TWILIO_SECRET', SECRETS['twilio_secret']),
+        'twilio_phone_number': os.environ.get('TWILIO_PHONE_NUMBER', SECRETS['twilio_number']),
+        'twilio_my_number': os.environ.get('TWILIO_PHONE_NUMBER', SECRETS['my_number']),
+        'log_level': os.environ.get('LOGLEVEL', 'INFO')
+    }
+
+    # Set up logger
+    LOGGER = logging.getLogger(__name__)
+    LOGGER.setLevel(CONFIG['log_level'])
+
+    LOG_FORMAT = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    LOG_HANDLE = logging.StreamHandler()
+    LOG_HANDLE.setLevel(logging.DEBUG)
+    LOG_HANDLE.setFormatter(LOG_FORMAT)
+    LOGGER.addHandler(LOG_HANDLE)
+
+    # The coin pairs
+    COIN_PAIRS = ['BTC-ETH', 'BTC-OMG', 'BTC-GNT', 'BTC-CVC', 'BTC-BAT', 'BTC-STRAT', 'BTC-LSK', 'BTC-BCC', 'BTC-NEO', 'BTC-OK', 'BTC-TRIG', 'BTC-PAY', 'BTC-XMR']
+
+    # Configure clients for bittrex and twilio
     BITTREX_CLIENT = Bittrex(CONFIG['bittrex_key'], CONFIG['bittrex_secret'])
     TWILIO_CLIENT = Client(CONFIG['twilio_key'], CONFIG['twilio_secret'])
 
