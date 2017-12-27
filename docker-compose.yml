@@ -5,4 +5,7 @@ services:
     image: crypto-signal
     volumes:
       - ./app:/app
+    env_file:
+      - .env
+
 

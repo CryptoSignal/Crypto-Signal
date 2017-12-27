@@ -4,6 +4,7 @@ import os
 import json
 import time
 import logging
+from string import whitespace
 from pathlib import Path
 from bittrex import Bittrex
 from twilio.rest import Client
@@ -167,12 +168,13 @@ def get_signal():
 if __name__ == "__main__":
     # Load settings and create the CONFIG object
     SECRETS = {
-        "bittrex_key" : "BITTREX_API_KEY",
-        "bittrex_secret" : "BITTREX_SECRET",
-        "twilio_key": "TWILIO_API_KEY",
-        "twilio_secret": "TWILIO_SECRET",
-        "twilio_number": "TWILIO_PHONE_NUMBER",
-        "my_number": "YOUR_PHONE_NUMBER"
+        "bittrex_key": None,
+        "bittrex_secret": None,
+        "twilio_key": None,
+        "twilio_secret": None,
+        "twilio_number": None,
+        "my_number": None,
+        "market_pairs": None
     }
 
     SECRETS_FILE_PATH = Path('secrets.json')
@@ -188,7 +190,8 @@ if __name__ == "__main__":
         'twilio_secret': os.environ.get('TWILIO_SECRET', SECRETS['twilio_secret']),
         'twilio_phone_number': os.environ.get('TWILIO_PHONE_NUMBER', SECRETS['twilio_number']),
         'twilio_my_number': os.environ.get('TWILIO_PHONE_NUMBER', SECRETS['my_number']),
-        'log_level': os.environ.get('LOGLEVEL', 'INFO')
+        'log_level': os.environ.get('LOGLEVEL', logging.INFO),
+        'market_pairs': os.environ.get('MARKET_PAIRS', SECRETS['market_pairs'])
     }
 
     # Set up logger
@@ -201,12 +204,22 @@ if __name__ == "__main__":
     LOG_HANDLE.setFormatter(LOG_FORMAT)
     LOGGER.addHandler(LOG_HANDLE)
 
-    # The coin pairs
-    COIN_PAIRS = ['BTC-ETH', 'BTC-OMG', 'BTC-GNT', 'BTC-CVC', 'BTC-BAT', 'BTC-STRAT', 'BTC-LSK', 'BTC-BCC', 'BTC-NEO', 'BTC-OK', 'BTC-TRIG', 'BTC-PAY', 'BTC-XMR']
-
     # Configure clients for bittrex and twilio
     BITTREX_CLIENT = Bittrex(CONFIG['bittrex_key'], CONFIG['bittrex_secret'])
     TWILIO_CLIENT = Client(CONFIG['twilio_key'], CONFIG['twilio_secret'])
+
+    # The coin pairs
+    COIN_PAIRS = []
+    if CONFIG['market_pairs']:
+        COIN_PAIRS = CONFIG['market_pairs'].translate(str.maketrans('', '', whitespace)).split(",")
+    else:
+        user_markets = BITTREX_CLIENT.get_balances()
+        for user_market in user_markets['result']:
+            if 'BTC' in user_market['Currency']:
+                continue
+            market_pair = 'BTC-' + user_market['Currency']
+            COIN_PAIRS.append(market_pair)
+    LOGGER.debug(COIN_PAIRS)
 
     while True:
         get_signal()
