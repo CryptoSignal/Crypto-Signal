@@ -11,7 +11,7 @@ from twilio.rest import Client
 # Let's test an API call to get our BTC balance as a test
 # print(BITTREX_CLIENT.get_balance('BTC')['result']['Balance'])
 
-#print(historical_data = BITTREX_CLIENT.getHistoricalData('BTC-ETH', 30, "thirtyMin"))
+#print(historical_data = BITTREX_CLIENT.get_historical_data('BTC-ETH', 30, "thirtyMin"))
 def get_closing_prices(coin_pair, period, unit):
     """
     Returns closing prices within a specified time frame for a coin pair
@@ -21,10 +21,10 @@ def get_closing_prices(coin_pair, period, unit):
     :return: Array of closing prices
     """
 
-    historical_data = BITTREX_CLIENT.getHistoricalData(coin_pair, period, unit)
+    historical_data = BITTREX_CLIENT.get_historical_data(coin_pair, period, unit)
     closing_prices = []
-    for i in historical_data:
-        closing_prices.append(i['C'])
+    for data_point in historical_data:
+        closing_prices.append(data_point['C'])
     return closing_prices
 
 def calculate_sma(coin_pair, period, unit):
@@ -33,7 +33,7 @@ def calculate_sma(coin_pair, period, unit):
     """
 
     total_closing = sum(get_closing_prices(coin_pair, period, unit))
-    return (total_closing / period)
+    return total_closing / period
 
 def calculate_ema(coin_pair, period, unit):
     """
@@ -41,10 +41,11 @@ def calculate_ema(coin_pair, period, unit):
     """
 
     closing_prices = get_closing_prices(coin_pair, period, unit)
-    previous_EMA = calculate_sma(coin_pair, period, unit)
-    constant = (2 / (period + 1))
-    current_EMA = (closing_prices[-1] * (2 / (1 + period))) + (previous_EMA * (1 - (2 / (1 + period))))
-    return current_EMA
+    previous_ema = calculate_sma(coin_pair, period, unit)
+    period_constant = 2 / (1 + period)
+    current_ema = (closing_prices[-1] * period_constant) \
+                  + (previous_ema * (1 - period_constant))
+    return current_ema
 
 # Improvemnts to calculate_rsi are courtesy of community contributor "pcartwright81"
 def calculate_rsi(coin_pair, period, unit):
@@ -55,43 +56,45 @@ def calculate_rsi(coin_pair, period, unit):
     """
     closing_prices = get_closing_prices(coin_pair, period * 3, unit)
     count = 0
-    change = []
+    changes = []
     # Calculating price changes
-    for i in closing_prices:
+    for closing_price in closing_prices:
         if count != 0:
-            change.append(i - closing_prices[count - 1])
+            changes.append(closing_price - closing_prices[count - 1])
         count += 1
         if count == 15:
-           break
+            break
+
     # Calculating gains and losses
     advances = []
     declines = []
-    for i in change:
-        if i > 0:
-            advances.append(i)
-        if i < 0:
-            declines.append(abs(i))
+    for change in changes:
+        if change > 0:
+            advances.append(change)
+        if change < 0:
+            declines.append(abs(change))
+
     average_gain = (sum(advances) / 14)
     average_loss = (sum(declines) / 14)
-    newAvgGain = average_gain
-    newAvgLoss = average_loss
-    for i in closing_prices:
+    new_average_gain = average_gain
+    new_average_loss = average_loss
+    for closing_price in closing_prices:
         if count > 14 and count < len(closing_prices):
-          close = closing_prices[count]
-          newChange = close - closing_prices[count - 1]
-          addLoss = 0;
-          addGain = 0;
-          if newChange > 0:
-              addGain = newChange
-          if newChange < 0:
-              addLoss = abs(newChange)
-          newAvgGain = (newAvgGain * 13 + addGain) / 14
-          newAvgLoss = (newAvgLoss * 13 + addLoss) / 14
-          count += 1
+            close = closing_prices[count]
+            new_change = close - closing_prices[count - 1]
+            add_loss = 0
+            add_gain = 0
+            if new_change > 0:
+                add_gain = new_change
+            if new_change < 0:
+                add_loss = abs(new_change)
+            new_average_gain = (new_average_gain * 13 + add_gain) / 14
+            new_average_loss = (new_average_loss * 13 + add_loss) / 14
+            count += 1
 
-    rs = newAvgGain / newAvgLoss;
-    newRS = 100 - 100 / (1 + rs);
-    return newRS
+    rs = new_average_gain / new_average_loss
+    new_rs = 100 - 100 / (1 + rs)
+    return new_rs
 
 
 def calculate_base_line(coin_pair, unit):
@@ -140,13 +143,16 @@ def find_breakout(coin_pair, period, unit):
     Finds breakout based on how close the High was to Closing and Low to Opening
     """
     hit = 0
-    historical_data = BITTREX_CLIENT.getHistoricalData(coin_pair, period, unit)
-    for i in historical_data:
-        if (i['C'] == i['H']) and (i['O'] == i['L']):
+    historical_data = BITTREX_CLIENT.get_historical_data(coin_pair, period, unit)
+    for data_point in historical_data:
+        if (data_point['C'] == data_point['H']) and (data_point['O'] == data_point['L']):
             hit += 1
 
     if (hit / period) >= .75:
-        TWILIO_CLIENT.api.account.messages.create(to=CONFIG['twilio_my_number'], from_=CONFIG['twilio_phone_number'], body="{} is breaking out!".format(coin_pair))
+        TWILIO_CLIENT.api.account.messages.create(
+            to=CONFIG['twilio_my_number'],
+            from_=CONFIG['twilio_phone_number'],
+            body="{} is breaking out!".format(coin_pair))
         return "Breaking out!"
     else:
         return "#Bagholding"

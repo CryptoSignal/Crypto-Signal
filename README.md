@@ -33,7 +33,7 @@ To create the docker image run `make build` in the root of the project directory
 Once built copy template.env to .env and add your API keys, at a minimum read-only Bittrex keys are required.
 
 ## How to run
-In the root directory run `docker-compose up` or `make run` if you don't have docker-compose.
+In the root directory run `docker-compose run app` or `make run` if you don't have docker-compose.
 
 # How to use (Local)
 To install the dependencies for this project, run "pip install -r requirements.txt" in the app directory.
