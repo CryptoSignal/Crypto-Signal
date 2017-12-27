@@ -11,18 +11,18 @@ import hmac
 import hashlib
 try:
     from urllib import urlencode
-    from urlparse import urljoin
 except ImportError:
     from urllib.parse import urlencode
-    from urllib.parse import urljoin
 import requests
 
 try:
     from Crypto.Cipher import AES
-    import getpass, ast, json
-    encrypted = True
+    import getpass
+    import ast
+    import json
+    ENCRYPTED = True
 except ImportError:
-    encrypted = False
+    ENCRYPTED = False
 
 BUY_ORDERBOOK = 'buy'
 SELL_ORDERBOOK = 'sell'
@@ -63,9 +63,8 @@ def encrypt(api_key, api_secret, export=True, export_fn='secrets.json'):
 
 def using_requests(request_url, apisign):
     return requests.get(
-                request_url,
-                headers={"apisign": apisign}
-            ).json()
+        request_url,
+        headers={"apisign": apisign}).json()
 
 class Bittrex(object):
     """
@@ -77,7 +76,7 @@ class Bittrex(object):
         self.dispatch = dispatch
 
     def decrypt(self):
-        if encrypted:
+        if ENCRYPTED:
             cipher = AES.new(getpass.getpass('Input decryption password (string will not show)'))
             try:
                 self.api_key = ast.literal_eval(self.api_key) if type(self.api_key) == str else self.api_key
@@ -128,13 +127,14 @@ class Bittrex(object):
     #period is the number of units to be analyzed
     #valid values for periods are 'oneMin', 'fiveMin', 'thirtyMin', 'hour', 'week', 'day', and 'month'
     #unit is the number of periods to be returned
-    def getHistoricalData(self, market, period, unit):
+    def get_historical_data(self, market, period, unit):
         request_url = 'https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName=%s&tickInterval=%s' % (market, unit)
-        historicalData = requests.get(request_url,
-            headers={"apisign": hmac.new(self.api_secret.encode(), request_url.encode(), hashlib.sha512).hexdigest()}
-        ).json()
-        
-        return historicalData['result'][-period:]
+        historical_data = requests.get(request_url,
+                                       headers={"apisign": hmac.new(self.api_secret.encode(),
+                                                                    request_url.encode(),
+                                                                    hashlib.sha512).hexdigest()
+                                               }).json()
+        return historical_data['result'][-period:]
 
     def get_markets(self):
         """
