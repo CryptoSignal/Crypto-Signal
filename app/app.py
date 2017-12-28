@@ -169,7 +169,10 @@ def get_signal():
 
 if __name__ == "__main__":
     # Load settings and create the CONFIG object
+    SECRETS = json.load(open('secrets.json'))
     CONFIG = json.load(open('default-config.json'))
+
+    CONFIG.update(SECRETS)
 
     CONFIG['settings']['market_pairs'] = os.environ.get('MARKET_PAIRS', CONFIG['settings']['market_pairs'])
     CONFIG['settings']['loglevel'] = os.environ.get('LOGLEVEL', logging.INFO)
