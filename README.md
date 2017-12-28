@@ -47,14 +47,21 @@ The contents of the file should mirror the following:
     "twilio_key": "TWILIO_API_KEY",
     "twilio_secret": "TWILIO_SECRET",
     "twilio_number": "TWILIO_PHONE_NUMBER",
-    "my_number": "YOUR_PHONE_NUMBER"
+    "my_number": "YOUR_PHONE_NUMBER",
+    "gmail_username": "GMAIL_USERNAME",
+    "gmail_password": "GMAIL_PASSWORD",
+    "gmail_address_list": [
+        "EXAMPLE_RECIPIENT_1@GMAIL.COM",
+        "EXAMPLE_RECIPIENT_2@GMAIL.COM",
+        "ETC..."
+    ]
 }
 ```
 
-If you don't want to use the Twilio notifications, leave them as the default values.
+If you don't want to use the Twilio or Gmail notifications, leave them as the default values.
 
 ## How to run
 Navigate to the app directory in your terminal and run with "python app.py"
 
 # Liability
-I am not your financial advisor, nor is this tool. Use this program as an educational tool, and nothing more. None of the contributors to this project are liable for any loses you may incur. Be wise and always do your own research.
+I am not your financial adviser, nor is this tool. Use this program as an educational tool, and nothing more. None of the contributors to this project are liable for any loses you may incur. Be wise and always do your own research.

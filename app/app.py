@@ -4,6 +4,7 @@ import os
 import json
 import time
 import logging
+import smtplib
 from string import whitespace
 from pathlib import Path
 from bittrex import Bittrex
@@ -154,6 +155,7 @@ def find_breakout(coin_pair, period, unit):
             to=CONFIG['twilio_my_number'],
             from_=CONFIG['twilio_phone_number'],
             body="{} is breaking out!".format(coin_pair))
+        send_email("Bittrex Market Breakout", "{} is breaking out!".format(coin_pair))
         return "Breaking out!"
     else:
         return "#Bagholding"
@@ -165,6 +167,37 @@ def get_signal():
         print("{}: \tBreakout: {} \tRSI: {}".format(coin_pair, breakout, rsi))
     time.sleep(300)
 
+def send_email(subject, message):
+    """
+    Used to send an email from the account specified in the secrets.json file to the entire
+    address list specified in the secrets.json file
+
+    :param subject: Email subject
+    :type subject: str
+    :param message: Email content
+    :type message: str
+
+    :return: Errors received from the smtp server (if any)
+    :rtype : dict
+    """
+    from_address = CONFIG['gmail_username']
+    to_address_list = CONFIG['gmail_address_list']
+    login = CONFIG['gmail_username']
+    password = CONFIG['gmail_password']
+    smtp_server = 'smtp.gmail.com:587'
+
+    header = 'From: %s\n' % from_address
+    header += 'To: %s\n' % ','.join(to_address_list)
+    header += 'Subject: %s\n\n' % subject
+    message = header + message
+
+    server = smtplib.SMTP(smtp_server)
+    server.starttls()
+    server.login(login, password)
+    errors = server.sendmail(from_address, to_address_list, message)
+    server.quit()
+    return errors
+
 if __name__ == "__main__":
     # Load settings and create the CONFIG object
     SECRETS = {
@@ -174,7 +207,10 @@ if __name__ == "__main__":
         "twilio_secret": None,
         "twilio_number": None,
         "my_number": None,
-        "market_pairs": None
+        "market_pairs": None,
+        "gmail_username": None,
+        "gmail_password": None,
+        "gmail_address_list": None
     }
 
     SECRETS_FILE_PATH = Path('secrets.json')
@@ -191,7 +227,10 @@ if __name__ == "__main__":
         'twilio_phone_number': os.environ.get('TWILIO_PHONE_NUMBER', SECRETS['twilio_number']),
         'twilio_my_number': os.environ.get('TWILIO_PHONE_NUMBER', SECRETS['my_number']),
         'log_level': os.environ.get('LOGLEVEL', logging.INFO),
-        'market_pairs': os.environ.get('MARKET_PAIRS', SECRETS['market_pairs'])
+        'market_pairs': os.environ.get('MARKET_PAIRS', SECRETS['market_pairs']),
+        'gmail_username': os.environ.get('GMAIL_USERNAME', SECRETS['gmail_username']),
+        'gmail_password': os.environ.get('GMAIL_PASSWORD', SECRETS['gmail_password']),
+        'gmail_address_list': os.environ.get('GMAIL_ADDRESS_LIST', SECRETS['gmail_address_list'])
     }
 
     # Set up logger
