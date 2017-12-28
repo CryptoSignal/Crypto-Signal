@@ -160,13 +160,6 @@ def find_breakout(coin_pair, period, unit):
     else:
         return "#Bagholding"
 
-def get_signal():
-    for coin_pair in COIN_PAIRS:
-        breakout = find_breakout(coin_pair=coin_pair, period=5, unit="fiveMin")
-        rsi = calculate_rsi(coin_pair=coin_pair, period=14, unit="thirtyMin")
-        print("{}: \tBreakout: {} \tRSI: {}".format(coin_pair, breakout, rsi))
-    time.sleep(300)
-
 def send_email(subject, message):
     """
     Used to send an email from the account specified in the secrets.json file to the entire
@@ -197,6 +190,13 @@ def send_email(subject, message):
     errors = server.sendmail(from_address, to_address_list, message)
     server.quit()
     return errors
+
+def get_signal():
+    for coin_pair in COIN_PAIRS:
+        breakout = find_breakout(coin_pair=coin_pair, period=5, unit="fiveMin")
+        rsi = calculate_rsi(coin_pair=coin_pair, period=14, unit="thirtyMin")
+        print("{}: \tBreakout: {} \tRSI: {}".format(coin_pair, breakout, rsi))
+    time.sleep(300)
 
 if __name__ == "__main__":
     # Load settings and create the CONFIG object
