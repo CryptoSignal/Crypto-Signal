@@ -1,19 +1,29 @@
-def calculate_sma(coin_pair, period, unit):
-    """
-    Returns the Simple Moving Average for a coin pair
-    """
+"""
+Calculates the Moving Averages for a coin pair
+"""
+from strategies.strategy_utils import Utils
 
-    total_closing = sum(get_closing_prices(coin_pair, period, unit))
-    return total_closing / period
-
-def calculate_ema(coin_pair, period, unit):
+class MovingAverages():
     """
-    Returns the Exponential Moving Average for a coin pair
+    Calculates the Moving Averages for a coin pair
     """
+    def __init__(self):
+        self.utils = Utils()
 
-    closing_prices = get_closing_prices(coin_pair, period, unit)
-    previous_ema = calculate_sma(coin_pair, period, unit)
-    period_constant = 2 / (1 + period)
-    current_ema = (closing_prices[-1] * period_constant) \
-                  + (previous_ema * (1 - period_constant))
-    return current_ema
+    def calculate_sma(self, period_count, historical_data):
+        """
+        Returns the Simple Moving Average for a coin pair
+        """
+        total_closing = sum(self.utils.get_closing_prices(historical_data))
+        return total_closing / period_count
+
+    def calculate_ema(self, period_count, historical_data):
+        """
+        Returns the Exponential Moving Average for a coin pair
+        """
+        closing_prices = self.utils.get_closing_prices(historical_data)
+        previous_ema = self.calculate_sma(period_count, historical_data)
+        period_constant = 2 / (1 + period_count)
+        current_ema = (closing_prices[-1] * period_constant) \
+                    + (previous_ema * (1 - period_constant))
+        return current_ema

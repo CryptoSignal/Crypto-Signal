@@ -1,13 +1,15 @@
 """
-Runs the breakout strategy over the market data
+Runs the RSI strategy over the market data
 """
 
 from strategies.strategy_utils import Utils
 
 class RelativeStrengthIndex():
     """
-    Runs the breakout strategy over the market data
+    Runs the RSI strategy over the market data
     """
+    def __init__(self):
+        self.utils = Utils()
 
     # Improvemnts to calculate_rsi are courtesy of community contributor "pcartwright81"
     def find_rsi(self, historical_data):
@@ -16,8 +18,7 @@ class RelativeStrengthIndex():
         If the returned value is above 70, it's overbought (SELL IT!)
         If the returned value is below 30, it's oversold (BUY IT!)
         """
-        utils = Utils()
-        closing_prices = utils.get_closing_prices(historical_data)
+        closing_prices = self.utils.get_closing_prices(historical_data)
         count = 0
         changes = []
 

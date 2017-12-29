@@ -13,7 +13,6 @@ from exchange import ExchangeAggregator
 from notification import Notifier
 from analysis import StrategyAnalyzer
 
-
 # Let's test an API call to get our BTC balance as a test
 # print(BITTREX_CLIENT.get_balance('BTC')['result']['Balance'])
 
@@ -21,25 +20,13 @@ from analysis import StrategyAnalyzer
 
 def get_signal():
     for coin_pair in COIN_PAIRS:
-        breakout_historical_data = EXCHANGE_AGGREGATOR.get_historical_data(
-            coin_pair=coin_pair,
-            period_count=5,
-            time_unit='fiveMin')
-
-        rsi_historical_data = EXCHANGE_AGGREGATOR.get_historical_data(
-            coin_pair=coin_pair,
-            period_count=36,
-            time_unit='thirtyMin'
-        )
-
-        breakout_value, is_breaking_out = STRATEGY_ANALYZER.analyze_breakout(
-            breakout_historical_data)
+        rsi_value = STRATEGY_ANALYZER.analyze_rsi(coin_pair)
+        sma_value, ema_value = STRATEGY_ANALYZER.analyze_moving_averages(coin_pair)
+        breakout_value, is_breaking_out = STRATEGY_ANALYZER.analyze_breakout(coin_pair)
         if is_breaking_out:
             NOTIFIER.notify_all(message="{} is breaking out!".format(coin_pair))
 
-        rsi_value = STRATEGY_ANALYZER.analyze_rsi(rsi_historical_data)
-
-        print("{}: \tBreakout: {} \tRSI: {}".format(coin_pair, breakout_value, rsi_value))
+        print("{}: \tBreakout: {} \tRSI: {} \tSMA: {} \tEMA: {}".format(coin_pair, breakout_value, format(rsi_value, '.5f'), format(sma_value, '.5f'), format(ema_value, '.5f')))
     time.sleep(300)
 
 if __name__ == "__main__":
@@ -71,7 +58,7 @@ if __name__ == "__main__":
     LOGGER.addHandler(LOG_HANDLE)
 
     EXCHANGE_AGGREGATOR = ExchangeAggregator(CONFIG)
-    STRATEGY_ANALYZER = StrategyAnalyzer()
+    STRATEGY_ANALYZER = StrategyAnalyzer(CONFIG)
     NOTIFIER = Notifier(CONFIG)
 
     # The coin pairs
