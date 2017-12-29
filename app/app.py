@@ -30,11 +30,11 @@ def get_signal():
         print("{}: \tBreakout: {} \tRSI: {} \tSMA: {} \tEMA: {} \tIMA: {} \tIMB: {}".format(
             coin_pair,
             breakout_value,
-            format(rsi_value, '.5f'),
-            format(sma_value, '.5f'),
-            format(ema_value, '.5f'),
-            format(ichimoku_span_a, '.5f'),
-            format(ichimoku_span_b, '.5f')))
+            format(rsi_value, '.2f'),
+            format(sma_value, '.7f'),
+            format(ema_value, '.7f'),
+            format(ichimoku_span_a, '.7f'),
+            format(ichimoku_span_b, '.7f')))
     time.sleep(300)
 
 if __name__ == "__main__":
