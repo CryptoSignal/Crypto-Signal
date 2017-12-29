@@ -29,8 +29,10 @@ Shoutouts:
 * Ryan Mullin for implementing the getHistoricalData() method on v2 of the Bittrex API
 
 # How to use (Docker)
-To create the docker image run `make build` in the root of the project directory.
-Once built copy template.env to .env and add your API keys, at a minimum read-only Bittrex keys are required.
+* First make sure you have [Docker installed](https://docs.docker.com/engine/installation/)
+* Next, to create the docker image run `make build` in the root of the project directory.
+* Once built copy template.env to .env and add your API keys, at a minimum read-only Bittrex keys are required.
+* Make sure to also update the market\_pairs environment or app.py variable with comma seperated market pair values that match Bittrex's format (i.e. BTC-ETH)
 
 ## How to run
 In the root directory run `docker-compose run app` or `make run` if you don't have docker-compose.
