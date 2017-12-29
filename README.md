@@ -61,4 +61,4 @@ For other available options see the app/default-config.json directory.
 Navigate to the app directory in your terminal and run with "python app.py"
 
 # Liability
-I am not your financial advisor, nor is this tool. Use this program as an educational tool, and nothing more. None of the contributors to this project are liable for any loses you may incur. Be wise and always do your own research.
+I am not your financial adviser, nor is this tool. Use this program as an educational tool, and nothing more. None of the contributors to this project are liable for any loses you may incur. Be wise and always do your own research.

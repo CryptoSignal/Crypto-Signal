@@ -27,6 +27,13 @@
         "key": "",
         "channel": ""
       }
+    },
+    "gmail": {
+      "required": {
+        "username": "",
+        "password": "",
+        "destination_emails": ""
+      }
     }
   }
 }

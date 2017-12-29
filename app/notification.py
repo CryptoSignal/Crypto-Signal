@@ -4,6 +4,7 @@ Handles sending notifications via the configured notifiers
 
 from notifiers.twilio import TwilioNotifier
 from notifiers.slack import SlackNotifier
+from notifiers.gmail import GmailNotifier
 
 class Notifier():
     """
@@ -32,12 +33,24 @@ class Notifier():
                 slack_channel=config['notifiers']['slack']['required']['channel']
             )
 
+        self.gmail_configured = True
+        for opt, val in config['notifiers']['gmail']['required'].items():
+            if not val:
+                self.gmail_configured = False
+        if self.gmail_configured:
+            self.gmail_client = GmailNotifier(
+                username=config['notifiers']['gmail']['required']['username'],
+                password=config['notifiers']['gmail']['required']['password'],
+                destination_addresses=config['notifiers']['gmail']['required']['destination_emails']
+            )
+
     def notify_all(self, message):
         """
         Triggers the notification with all configured notifiers
         """
         self.notify_slack(message)
         self.notify_twilio(message)
+        self.notify_gmail(message)
 
     def notify_slack(self, message):
         """
@@ -53,3 +66,10 @@ class Notifier():
         """
         if self.twilio_configured:
             self.twilio_client.notify(message)
+
+    def notify_gmail(self, message):
+        """
+        Triggers the notification via email using gmail
+        """
+        if self.gmail_configured:
+            self.gmail_client.notify(message)
