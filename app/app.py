@@ -23,10 +23,18 @@ def get_signal():
         rsi_value = STRATEGY_ANALYZER.analyze_rsi(coin_pair)
         sma_value, ema_value = STRATEGY_ANALYZER.analyze_moving_averages(coin_pair)
         breakout_value, is_breaking_out = STRATEGY_ANALYZER.analyze_breakout(coin_pair)
+        ichimoku_span_a, ichimoku_span_b = STRATEGY_ANALYZER.analyze_ichimoku_cloud(coin_pair)
         if is_breaking_out:
             NOTIFIER.notify_all(message="{} is breaking out!".format(coin_pair))
 
-        print("{}: \tBreakout: {} \tRSI: {} \tSMA: {} \tEMA: {}".format(coin_pair, breakout_value, format(rsi_value, '.5f'), format(sma_value, '.5f'), format(ema_value, '.5f')))
+        print("{}: \tBreakout: {} \tRSI: {} \tSMA: {} \tEMA: {} \tIMA: {} \tIMB: {}".format(
+            coin_pair,
+            breakout_value,
+            format(rsi_value, '.5f'),
+            format(sma_value, '.5f'),
+            format(ema_value, '.5f'),
+            format(ichimoku_span_a, '.5f'),
+            format(ichimoku_span_b, '.5f')))
     time.sleep(300)
 
 if __name__ == "__main__":

@@ -16,7 +16,6 @@ class IchimokuCloud():
         Calculates (26 period high + 26 period low) / 2
         Also known as the "Kijun-sen" line
         """
-
         closing_prices = self.utils.get_closing_prices(historical_data)
         period_high = max(closing_prices)
         period_low = min(closing_prices)
@@ -32,14 +31,13 @@ class IchimokuCloud():
         period_low = min(closing_prices)
         return (period_high + period_low) / 2
 
-    def calculate_leading_span_a(self, historical_data):
+    def calculate_leading_span_a(self, base_line_data, conversion_line_data):
         """
         Calculates (Conversion Line + Base Line) / 2
         Also known as the "Senkou Span A" line
         """
-
-        base_line = self.calculate_base_line(historical_data)
-        conversion_line = self.calculate_conversion_line(historical_data)
+        base_line = self.calculate_base_line(base_line_data)
+        conversion_line = self.calculate_conversion_line(conversion_line_data)
         return (base_line + conversion_line) / 2
 
     def calculate_leading_span_b(self, historical_data):
