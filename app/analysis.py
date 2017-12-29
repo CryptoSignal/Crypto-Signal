@@ -4,7 +4,7 @@ Executes the trading strategies and analyzes the results.
 
 from strategies.breakout import Breakout
 #from strategies.ichimoku_cloud import IchimokuCloud
-#from strategies.relative_string_index import RelativeStrengthIndex
+from strategies.relative_strength_index import RelativeStrengthIndex
 #from strategies.moving_averages import MovingAverages
 
 
@@ -16,3 +16,8 @@ class StrategyAnalyzer():
         breakout_analyzer = Breakout()
         breakout_value, is_breaking_out = breakout_analyzer.find_breakout(historical_data)
         return breakout_value, is_breaking_out
+
+    def analyze_rsi(self, historical_data):
+        rsi_analyzer = RelativeStrengthIndex()
+        rsi_value = rsi_analyzer.find_rsi(historical_data)
+        return rsi_value

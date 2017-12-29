@@ -20,13 +20,26 @@ from analysis import StrategyAnalyzer
 #print(historical_data = BITTREX_CLIENT.get_historical_data('BTC-ETH', 30, "thirtyMin"))
 
 def get_signal():
-    
     for coin_pair in COIN_PAIRS:
+        breakout_historical_data = EXCHANGE_AGGREGATOR.get_historical_data(
+            coin_pair=coin_pair,
+            period_count=5,
+            time_unit='fiveMin')
+
+        rsi_historical_data = EXCHANGE_AGGREGATOR.get_historical_data(
+            coin_pair=coin_pair,
+            period_count=36,
+            time_unit='thirtyMin'
+        )
+
         breakout_value, is_breaking_out = STRATEGY_ANALYZER.analyze_breakout(
-            EXCHANGE_AGGREGATOR.get_historical_data(coin_pair))
+            breakout_historical_data)
         if is_breaking_out:
             NOTIFIER.notify_all(message="{} is breaking out!".format(coin_pair))
-        print("{}: \tBreakout: {}".format(coin_pair, breakout_value))
+
+        rsi_value = STRATEGY_ANALYZER.analyze_rsi(rsi_historical_data)
+
+        print("{}: \tBreakout: {} \tRSI: {}".format(coin_pair, breakout_value, rsi_value))
     time.sleep(300)
 
 if __name__ == "__main__":
