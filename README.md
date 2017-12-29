@@ -29,8 +29,11 @@ Shoutouts:
 * Ryan Mullin for implementing the getHistoricalData() method on v2 of the Bittrex API
 
 # How to use (Docker)
-To create the docker image run `make build` in the root of the project directory.
+First make sure you install docker (https://docs.docker.com/engine/installation/).
+
+Next, to create the docker image run `make build` in the root of the project directory.
 Once built copy template.env to .env and add your API keys, at a minimum read-only Bittrex keys are required.
+Make sure to also create a CSV of market pairs and update the market\_pairs variable with your file
 
 ## How to run
 In the root directory run `docker-compose run app` or `make run` if you don't have docker-compose.
