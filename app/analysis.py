@@ -2,7 +2,7 @@
 Executes the trading strategies and analyzes the results.
 """
 
-from exchange import ExchangeAggregator
+from exchange import ExchangeInterface
 from strategies.breakout import Breakout
 from strategies.ichimoku_cloud import IchimokuCloud
 from strategies.relative_strength_index import RelativeStrengthIndex
@@ -14,9 +14,9 @@ class StrategyAnalyzer():
     Executes the trading strategies and analyzes the results.
     """
     def __init__(self, config):
-        self.exchange_aggregator = ExchangeAggregator(config)
+        self.exchange_aggregator = ExchangeInterface(config)
 
-    def analyze_breakout(self, coin_pair, period_count=5, time_unit='fiveMin'):
+    def analyze_breakout(self, coin_pair, period_count=5, time_unit='5m'):
         breakout_analyzer = Breakout()
         historical_data = self.exchange_aggregator.get_historical_data(
             coin_pair=coin_pair,
@@ -25,7 +25,7 @@ class StrategyAnalyzer():
         breakout_value, is_breaking_out = breakout_analyzer.find_breakout(historical_data)
         return breakout_value, is_breaking_out
 
-    def analyze_rsi(self, coin_pair, period_count=36, time_unit='thirtyMin'):
+    def analyze_rsi(self, coin_pair, period_count=18, time_unit='1h'):
         rsi_analyzer = RelativeStrengthIndex()
         historical_data = self.exchange_aggregator.get_historical_data(
             coin_pair=coin_pair,
@@ -35,7 +35,7 @@ class StrategyAnalyzer():
         rsi_value = rsi_analyzer.find_rsi(historical_data)
         return rsi_value
 
-    def analyze_moving_averages(self, coin_pair, period_count=20, time_unit='fiveMin'):
+    def analyze_moving_averages(self, coin_pair, period_count=20, time_unit='5m'):
         ma_analyzer = MovingAverages()
         historical_data = self.exchange_aggregator.get_historical_data(
             coin_pair=coin_pair,
@@ -51,17 +51,17 @@ class StrategyAnalyzer():
         base_line_data = self.exchange_aggregator.get_historical_data(
             coin_pair=coin_pair,
             period_count=26,
-            time_unit='day'
+            time_unit='1d'
         )
         conversion_line_data = self.exchange_aggregator.get_historical_data(
             coin_pair=coin_pair,
             period_count=9,
-            time_unit='day'
+            time_unit='1d'
         )
         span_b_data = self.exchange_aggregator.get_historical_data(
             coin_pair=coin_pair,
             period_count=52,
-            time_unit='day'
+            time_unit='1d'
         )
 
         leading_span_a = ic_analyzer.calculate_leading_span_a(base_line_data, conversion_line_data)
