@@ -57,6 +57,9 @@ class RelativeStrengthIndex():
                 new_average_loss = (new_average_loss * 13 + add_loss) / 14
                 count += 1
 
-        rs = new_average_gain / new_average_loss
+        if new_average_loss > 0:
+            rs = new_average_gain / new_average_loss
+        else:
+            rs = 0
         new_rs = 100 - 100 / (1 + rs)
         return new_rs

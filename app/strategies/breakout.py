@@ -12,7 +12,7 @@ class Breakout():
         """
         hit = 0
         for data_period in historical_data:
-            if (data_period['C'] == data_period['H']) and (data_period['O'] == data_period['L']):
+            if (data_period[4] == data_period[2]) and (data_period[1] == data_period[3]):
                 hit += 1
 
         percent_positive_trend = hit / len(historical_data)

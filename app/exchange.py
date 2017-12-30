@@ -2,31 +2,40 @@
 Collect required information from exchanges
 """
 
-import ccxt.async as ccxt
+import ccxt
 
 class ExchangeInterface():
     """
     Collect required information from exchanges
     """
     def __init__(self, config):
-        exchanges = []
+        self.exchanges = []
         for exchange in config['exchanges']:
-            exchanges.append(getattr(ccxt, exchange))
-        print(exchanges[0].load_markets())
-    '''
-        self.bittrex_client = Bittrex(
-            config['exchanges']['bittrex']['required']['key'],
-            config['exchanges']['bittrex']['required']['secret'])
+            new_exchange = getattr(ccxt, exchange)()
+            if new_exchange:
+                new_exchange.apiKey = config['exchanges'][exchange]['required']['key']
+                new_exchange.secret = config['exchanges'][exchange]['required']['secret']
+                self.exchanges.append(new_exchange)
+            else:
+                print("Unable to load exchange %s", new_exchange)
 
     def get_historical_data(self, coin_pair, period_count, time_unit):
         """
         Get history data
         """
-        return self.bittrex_client.get_historical_data(coin_pair, period_count, time_unit)
+        historical_data = []
+        for exchange in self.exchanges:
+            historical_data.append(exchange.fetch_ohlcv(
+                coin_pair,
+                timeframe=time_unit,
+                limit=period_count))
+        return historical_data[0]
 
     def get_user_markets(self):
         """
         Get user market balances
         """
-        return self.bittrex_client.get_balances()
-    '''
+        user_markets = {}
+        for exchange in self.exchanges:
+            user_markets.update(exchange.fetch_balance())
+        return user_markets

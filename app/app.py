@@ -78,10 +78,10 @@ if __name__ == "__main__":
         COIN_PAIRS = CONFIG['settings']['market_pairs'].translate(str.maketrans('', '', whitespace)).split(",")
     else:
         user_markets = EXCHANGE_AGGREGATOR.get_user_markets()
-        for user_market in user_markets['result']:
+        for user_market in user_markets['info']:
             if 'BTC' in user_market['Currency']:
                 continue
-            market_pair = 'BTC-' + user_market['Currency']
+            market_pair = user_market['Currency'] + '/BTC'
             COIN_PAIRS.append(market_pair)
     LOGGER.debug(COIN_PAIRS)
 
