@@ -18,14 +18,65 @@ from analysis import StrategyAnalyzer
 
 #print(historical_data = BITTREX_CLIENT.get_historical_data('BTC-ETH', 30, "thirtyMin"))
 
-def get_signal():
-    for coin_pair in COIN_PAIRS:
-        rsi_value = STRATEGY_ANALYZER.analyze_rsi(coin_pair)
-        sma_value, ema_value = STRATEGY_ANALYZER.analyze_moving_averages(coin_pair)
-        breakout_value, is_breaking_out = STRATEGY_ANALYZER.analyze_breakout(coin_pair)
-        ichimoku_span_a, ichimoku_span_b = STRATEGY_ANALYZER.analyze_ichimoku_cloud(coin_pair)
+def main():
+     # Load settings and create the config object
+    secrets = {}
+    if os.path.isfile('secrets.json'):
+        secrets = json.load(open('secrets.json'))
+    config = json.load(open('default-config.json'))
+
+    config.update(secrets)
+
+    config['settings']['market_pairs'] = os.environ.get('MARKET_PAIRS', config['settings']['market_pairs'])
+    config['settings']['loglevel'] = os.environ.get('LOGLEVEL', logging.INFO)
+    config['exchanges']['bittrex']['required']['key'] = os.environ.get('BITTREX_KEY', config['exchanges']['bittrex']['required']['key'])
+    config['exchanges']['bittrex']['required']['secret'] = os.environ.get('BITTREX_SECRET', config['exchanges']['bittrex']['required']['secret'])
+    config['notifiers']['twilio']['required']['key'] = os.environ.get('TWILIO_KEY', config['notifiers']['twilio']['required']['key'])
+    config['notifiers']['twilio']['required']['secret'] = os.environ.get('TWILIO_SECRET', config['notifiers']['twilio']['required']['secret'])
+    config['notifiers']['twilio']['required']['sender_number'] = os.environ.get('TWILIO_SENDER_NUMBER', config['notifiers']['twilio']['required']['sender_number'])
+    config['notifiers']['twilio']['required']['receiver_number'] = os.environ.get('TWILIO_RECEIVER_NUMBER', config['notifiers']['twilio']['required']['receiver_number'])
+    config['notifiers']['gmail']['required']['username'] = os.environ.get('GMAIL_USERNAME', config['notifiers']['gmail']['required']['username'])
+    config['notifiers']['gmail']['required']['password'] = os.environ.get('GMAIL_PASSWORD', config['notifiers']['gmail']['required']['password'])
+    config['notifiers']['gmail']['required']['destination_emails'] = os.environ.get('GMAIL_DESTINATION_EMAILS', config['notifiers']['gmail']['required']['destination_emails'])
+
+    # Set up logger
+    LOGGER = logging.getLogger(__name__)
+    LOGGER.setLevel(config['settings']['loglevel'])
+
+    LOG_FORMAT = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    LOG_HANDLE = logging.StreamHandler()
+    LOG_HANDLE.setLevel(logging.DEBUG)
+    LOG_HANDLE.setFormatter(LOG_FORMAT)
+    LOGGER.addHandler(LOG_HANDLE)
+
+    exchange_interface = ExchangeInterface(config)
+    strategy_analyzer = StrategyAnalyzer(config)
+    notifier = Notifier(config)
+
+    # The coin pairs
+    coin_pairs = []
+    if config['settings']['market_pairs']:
+        coin_pairs = config['settings']['market_pairs'].translate(str.maketrans('', '', whitespace)).split(",")
+    else:
+        user_markets = exchange_interface.get_user_markets()
+        for user_market in user_markets['info']:
+            if 'BTC' in user_market['Currency']:
+                continue
+            market_pair = user_market['Currency'] + '/BTC'
+            coin_pairs.append(market_pair)
+    LOGGER.debug(coin_pairs)
+
+    while True:
+        get_signal(coin_pairs, strategy_analyzer, notifier)
+
+def get_signal(coin_pairs, strategy_analyzer, notifier):
+    for coin_pair in coin_pairs:
+        rsi_value = strategy_analyzer.analyze_rsi(coin_pair)
+        sma_value, ema_value = strategy_analyzer.analyze_moving_averages(coin_pair)
+        breakout_value, is_breaking_out = strategy_analyzer.analyze_breakout(coin_pair)
+        ichimoku_span_a, ichimoku_span_b = strategy_analyzer.analyze_ichimoku_cloud(coin_pair)
         if is_breaking_out:
-            NOTIFIER.notify_all(message="{} is breaking out!".format(coin_pair))
+            notifier.notify_all(message="{} is breaking out!".format(coin_pair))
 
         print("{}: \tBreakout: {} \tRSI: {} \tSMA: {} \tEMA: {} \tIMA: {} \tIMB: {}".format(
             coin_pair,
@@ -38,52 +89,4 @@ def get_signal():
     time.sleep(300)
 
 if __name__ == "__main__":
-    # Load settings and create the CONFIG object
-    SECRETS = {}
-    if os.path.isfile('secrets.json'):
-        SECRETS = json.load(open('secrets.json'))
-    CONFIG = json.load(open('default-config.json'))
-
-    CONFIG.update(SECRETS)
-
-    CONFIG['settings']['market_pairs'] = os.environ.get('MARKET_PAIRS', CONFIG['settings']['market_pairs'])
-    CONFIG['settings']['loglevel'] = os.environ.get('LOGLEVEL', logging.INFO)
-    CONFIG['exchanges']['bittrex']['required']['key'] = os.environ.get('BITTREX_KEY', CONFIG['exchanges']['bittrex']['required']['key'])
-    CONFIG['exchanges']['bittrex']['required']['secret'] = os.environ.get('BITTREX_SECRET', CONFIG['exchanges']['bittrex']['required']['secret'])
-    CONFIG['notifiers']['twilio']['required']['key'] = os.environ.get('TWILIO_KEY', CONFIG['notifiers']['twilio']['required']['key'])
-    CONFIG['notifiers']['twilio']['required']['secret'] = os.environ.get('TWILIO_SECRET', CONFIG['notifiers']['twilio']['required']['secret'])
-    CONFIG['notifiers']['twilio']['required']['sender_number'] = os.environ.get('TWILIO_SENDER_NUMBER', CONFIG['notifiers']['twilio']['required']['sender_number'])
-    CONFIG['notifiers']['twilio']['required']['receiver_number'] = os.environ.get('TWILIO_RECEIVER_NUMBER', CONFIG['notifiers']['twilio']['required']['receiver_number'])
-    CONFIG['notifiers']['gmail']['required']['username'] = os.environ.get('GMAIL_USERNAME', CONFIG['notifiers']['gmail']['required']['username'])
-    CONFIG['notifiers']['gmail']['required']['password'] = os.environ.get('GMAIL_PASSWORD', CONFIG['notifiers']['gmail']['required']['password'])
-    CONFIG['notifiers']['gmail']['required']['destination_emails'] = os.environ.get('GMAIL_DESTINATION_EMAILS', CONFIG['notifiers']['gmail']['required']['destination_emails'])
-
-    # Set up logger
-    LOGGER = logging.getLogger(__name__)
-    LOGGER.setLevel(CONFIG['settings']['loglevel'])
-
-    LOG_FORMAT = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    LOG_HANDLE = logging.StreamHandler()
-    LOG_HANDLE.setLevel(logging.DEBUG)
-    LOG_HANDLE.setFormatter(LOG_FORMAT)
-    LOGGER.addHandler(LOG_HANDLE)
-
-    EXCHANGE_AGGREGATOR = ExchangeInterface(CONFIG)
-    STRATEGY_ANALYZER = StrategyAnalyzer(CONFIG)
-    NOTIFIER = Notifier(CONFIG)
-
-    # The coin pairs
-    COIN_PAIRS = []
-    if CONFIG['settings']['market_pairs']:
-        COIN_PAIRS = CONFIG['settings']['market_pairs'].translate(str.maketrans('', '', whitespace)).split(",")
-    else:
-        user_markets = EXCHANGE_AGGREGATOR.get_user_markets()
-        for user_market in user_markets['info']:
-            if 'BTC' in user_market['Currency']:
-                continue
-            market_pair = user_market['Currency'] + '/BTC'
-            COIN_PAIRS.append(market_pair)
-    LOGGER.debug(COIN_PAIRS)
-
-    while True:
-        get_signal()
+   main()
