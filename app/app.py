@@ -54,6 +54,9 @@ if __name__ == "__main__":
     CONFIG['notifiers']['twilio']['required']['secret'] = os.environ.get('TWILIO_SECRET', CONFIG['notifiers']['twilio']['required']['secret'])
     CONFIG['notifiers']['twilio']['required']['sender_number'] = os.environ.get('TWILIO_SENDER_NUMBER', CONFIG['notifiers']['twilio']['required']['sender_number'])
     CONFIG['notifiers']['twilio']['required']['receiver_number'] = os.environ.get('TWILIO_RECEIVER_NUMBER', CONFIG['notifiers']['twilio']['required']['receiver_number'])
+    CONFIG['notifiers']['gmail']['required']['username'] = os.environ.get('GMAIL_USERNAME', CONFIG['notifiers']['gmail']['required']['username'])
+    CONFIG['notifiers']['gamil']['required']['password'] = os.environ.get('GMAIL_PASSWORD', CONFIG['notifiers']['gmail']['required']['password'])
+    CONFIG['notifiers']['gamil']['required']['destination_emails'] = os.environ.get('GMAIL_DESTINATION_EMAILS', CONFIG['notifiers']['gmail']['required']['destination_emails'])
 
     # Set up logger
     LOGGER = logging.getLogger(__name__)

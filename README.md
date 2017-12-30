@@ -29,8 +29,10 @@ Shoutouts:
 * Ryan Mullin for implementing the getHistoricalData() method on v2 of the Bittrex API
 
 # How to use (Docker)
-To create the docker image run `make build` in the root of the project directory.
-Once built copy template.env to .env and add your API keys, at a minimum read-only Bittrex keys are required.
+* First make sure you have [Docker installed](https://docs.docker.com/engine/installation/)
+* Next, to create the docker image run `make build` in the root of the project directory.
+* Once built copy template.env to .env and add your API keys, at a minimum read-only Bittrex keys are required.
+* Make sure to also update the market\_pairs environment or app.py variable with comma seperated market pair values that match Bittrex's format (i.e. BTC-ETH)
 
 ## How to run
 In the root directory run `docker-compose run app` or `make run` if you don't have docker-compose.
@@ -42,19 +44,21 @@ The contents of the file should mirror the following:
 
 ```json
 {
-    "bittrex_key" : "BITTREX_API_KEY",
-    "bittrex_secret" : "BITTREX_SECRET",
-    "twilio_key": "TWILIO_API_KEY",
-    "twilio_secret": "TWILIO_SECRET",
-    "twilio_number": "TWILIO_PHONE_NUMBER",
-    "my_number": "YOUR_PHONE_NUMBER"
+    "exchanges": {
+        "bittrex": {
+            "required": {
+                "key": "BITTREX_API_KEY",
+                "secret": "BITTREX_SECRET"
+            }
+        }
+    }
 }
 ```
 
-If you don't want to use the Twilio notifications, leave them as the default values.
+For other available options see the app/default-config.json directory.
 
 ## How to run
 Navigate to the app directory in your terminal and run with "python app.py"
 
 # Liability
-I am not your financial advisor, nor is this tool. Use this program as an educational tool, and nothing more. None of the contributors to this project are liable for any loses you may incur. Be wise and always do your own research.
+I am not your financial adviser, nor is this tool. Use this program as an educational tool, and nothing more. None of the contributors to this project are liable for any loses you may incur. Be wise and always do your own research.
