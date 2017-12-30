@@ -2,7 +2,7 @@
 Executes the trading strategies and analyzes the results.
 """
 
-from exchange import ExchangeAggregator
+from exchange import ExchangeInterface
 from strategies.breakout import Breakout
 from strategies.ichimoku_cloud import IchimokuCloud
 from strategies.relative_strength_index import RelativeStrengthIndex
@@ -14,7 +14,7 @@ class StrategyAnalyzer():
     Executes the trading strategies and analyzes the results.
     """
     def __init__(self, config):
-        self.exchange_aggregator = ExchangeAggregator(config)
+        self.exchange_aggregator = ExchangeInterface(config)
 
     def analyze_breakout(self, coin_pair, period_count=5, time_unit='fiveMin'):
         breakout_analyzer = Breakout()

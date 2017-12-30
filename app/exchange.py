@@ -2,13 +2,18 @@
 Collect required information from exchanges
 """
 
-from exchanges.bittrex import Bittrex
+import ccxt.async as ccxt
 
-class ExchangeAggregator():
+class ExchangeInterface():
     """
     Collect required information from exchanges
     """
     def __init__(self, config):
+        exchanges = []
+        for exchange in config['exchanges']:
+            exchanges.append(getattr(ccxt, exchange))
+        print(exchanges[0].load_markets())
+    '''
         self.bittrex_client = Bittrex(
             config['exchanges']['bittrex']['required']['key'],
             config['exchanges']['bittrex']['required']['secret'])
@@ -24,3 +29,4 @@ class ExchangeAggregator():
         Get user market balances
         """
         return self.bittrex_client.get_balances()
+    '''

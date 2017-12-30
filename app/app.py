@@ -9,7 +9,7 @@ import time
 import logging
 from string import whitespace
 
-from exchange import ExchangeAggregator
+from exchange import ExchangeInterface
 from notification import Notifier
 from analysis import StrategyAnalyzer
 
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     LOG_HANDLE.setFormatter(LOG_FORMAT)
     LOGGER.addHandler(LOG_HANDLE)
 
-    EXCHANGE_AGGREGATOR = ExchangeAggregator(CONFIG)
+    EXCHANGE_AGGREGATOR = ExchangeInterface(CONFIG)
     STRATEGY_ANALYZER = StrategyAnalyzer(CONFIG)
     NOTIFIER = Notifier(CONFIG)
 
