@@ -1,0 +1,39 @@
+{
+  "settings": {
+    "market_pairs": "",
+    "loglevel": ""
+  },
+
+  "exchanges": {
+    "bittrex": {
+      "required": {
+        "key": "",
+        "secret": ""
+      }
+    }
+  },
+
+  "notifiers": {
+    "twilio": {
+      "required": {
+        "key": "",
+        "secret": "",
+        "sender_number": "",
+        "receiver_number": ""
+      }
+    },
+    "slack": {
+      "required": {
+        "key": "",
+        "channel": ""
+      }
+    },
+    "gmail": {
+      "required": {
+        "username": "",
+        "password": "",
+        "destination_emails": ""
+      }
+    }
+  }
+}

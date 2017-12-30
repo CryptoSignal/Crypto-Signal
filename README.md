@@ -44,23 +44,18 @@ The contents of the file should mirror the following:
 
 ```json
 {
-    "bittrex_key" : "BITTREX_API_KEY",
-    "bittrex_secret" : "BITTREX_SECRET",
-    "twilio_key": "TWILIO_API_KEY",
-    "twilio_secret": "TWILIO_SECRET",
-    "twilio_number": "TWILIO_PHONE_NUMBER",
-    "my_number": "YOUR_PHONE_NUMBER",
-    "gmail_username": "GMAIL_USERNAME",
-    "gmail_password": "GMAIL_PASSWORD",
-    "gmail_address_list": [
-        "EXAMPLE_RECIPIENT_1@GMAIL.COM",
-        "EXAMPLE_RECIPIENT_2@GMAIL.COM",
-        "ETC..."
-    ]
+    "exchanges": {
+        "bittrex": {
+            "required": {
+                "key": "BITTREX_API_KEY",
+                "secret": "BITTREX_SECRET"
+            }
+        }
+    }
 }
 ```
 
-If you don't want to use the Twilio or Gmail notifications, leave them as the default values.
+For other available options see the app/default-config.json directory.
 
 ## How to run
 Navigate to the app directory in your terminal and run with "python app.py"

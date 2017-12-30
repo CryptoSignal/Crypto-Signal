@@ -1,14 +1,16 @@
 #!/usr/local/bin/python
+"""
+Main
+"""
 
 import os
 import json
 import time
 import logging
-import smtplib
 from string import whitespace
-from pathlib import Path
-from bittrex import Bittrex
-from twilio.rest import Client
+
+from notification import Notifier
+from exchanges.bittrex import Bittrex
 
 # Let's test an API call to get our BTC balance as a test
 # print(BITTREX_CLIENT.get_balance('BTC')['result']['Balance'])
@@ -151,45 +153,12 @@ def find_breakout(coin_pair, period, unit):
             hit += 1
 
     if (hit / period) >= .75:
-        TWILIO_CLIENT.api.account.messages.create(
-            to=CONFIG['twilio_my_number'],
-            from_=CONFIG['twilio_phone_number'],
-            body="{} is breaking out!".format(coin_pair))
-        send_email("Bittrex Market Breakout", "{} is breaking out!".format(coin_pair))
+        notifier = Notifier(CONFIG)
+        notifier.notify_all(message="{} is breaking out!".format(coin_pair))
         return "Breaking out!"
     else:
         return "#Bagholding"
-
-def send_email(subject, message):
-    """
-    Used to send an email from the account specified in the secrets.json file to the entire
-    address list specified in the secrets.json file
-
-    :param subject: Email subject
-    :type subject: str
-    :param message: Email content
-    :type message: str
-
-    :return: Errors received from the smtp server (if any)
-    :rtype : dict
-    """
-    from_address = CONFIG['gmail_username']
-    to_address_list = CONFIG['gmail_address_list']
-    login = CONFIG['gmail_username']
-    password = CONFIG['gmail_password']
-    smtp_server = 'smtp.gmail.com:587'
-
-    header = 'From: %s\n' % from_address
-    header += 'To: %s\n' % ','.join(to_address_list)
-    header += 'Subject: %s\n\n' % subject
-    message = header + message
-
-    server = smtplib.SMTP(smtp_server)
-    server.starttls()
-    server.login(login, password)
-    errors = server.sendmail(from_address, to_address_list, message)
-    server.quit()
-    return errors
+    exit()
 
 def get_signal():
     for coin_pair in COIN_PAIRS:
@@ -200,42 +169,28 @@ def get_signal():
 
 if __name__ == "__main__":
     # Load settings and create the CONFIG object
-    SECRETS = {
-        "bittrex_key": None,
-        "bittrex_secret": None,
-        "twilio_key": None,
-        "twilio_secret": None,
-        "twilio_number": None,
-        "my_number": None,
-        "market_pairs": None,
-        "gmail_username": None,
-        "gmail_password": None,
-        "gmail_address_list": None
-    }
+    SECRETS = {}
+    if os.path.isfile('secrets.json'):
+        SECRETS = json.load(open('secrets.json'))
+    CONFIG = json.load(open('default-config.json'))
 
-    SECRETS_FILE_PATH = Path('secrets.json')
-    if SECRETS_FILE_PATH.is_file():
-        with open(SECRETS_FILE_PATH) as secrets_file:
-            SECRETS = json.load(secrets_file)
-            secrets_file.close()
+    CONFIG.update(SECRETS)
 
-    CONFIG = {
-        'bittrex_key': os.environ.get('BITTREX_KEY', SECRETS['bittrex_key']),
-        'bittrex_secret': os.environ.get('BITTREX_SECRET', SECRETS['bittrex_secret']),
-        'twilio_key': os.environ.get('TWILIO_KEY', SECRETS['twilio_key']),
-        'twilio_secret': os.environ.get('TWILIO_SECRET', SECRETS['twilio_secret']),
-        'twilio_phone_number': os.environ.get('TWILIO_PHONE_NUMBER', SECRETS['twilio_number']),
-        'twilio_my_number': os.environ.get('TWILIO_PHONE_NUMBER', SECRETS['my_number']),
-        'log_level': os.environ.get('LOGLEVEL', logging.INFO),
-        'market_pairs': os.environ.get('MARKET_PAIRS', SECRETS['market_pairs']),
-        'gmail_username': os.environ.get('GMAIL_USERNAME', SECRETS['gmail_username']),
-        'gmail_password': os.environ.get('GMAIL_PASSWORD', SECRETS['gmail_password']),
-        'gmail_address_list': os.environ.get('GMAIL_ADDRESS_LIST', SECRETS['gmail_address_list'])
-    }
+    CONFIG['settings']['market_pairs'] = os.environ.get('MARKET_PAIRS', CONFIG['settings']['market_pairs'])
+    CONFIG['settings']['loglevel'] = os.environ.get('LOGLEVEL', logging.INFO)
+    CONFIG['exchanges']['bittrex']['required']['key'] = os.environ.get('BITTREX_KEY', CONFIG['exchanges']['bittrex']['required']['key'])
+    CONFIG['exchanges']['bittrex']['required']['secret'] = os.environ.get('BITTREX_SECRET', CONFIG['exchanges']['bittrex']['required']['secret'])
+    CONFIG['notifiers']['twilio']['required']['key'] = os.environ.get('TWILIO_KEY', CONFIG['notifiers']['twilio']['required']['key'])
+    CONFIG['notifiers']['twilio']['required']['secret'] = os.environ.get('TWILIO_SECRET', CONFIG['notifiers']['twilio']['required']['secret'])
+    CONFIG['notifiers']['twilio']['required']['sender_number'] = os.environ.get('TWILIO_SENDER_NUMBER', CONFIG['notifiers']['twilio']['required']['sender_number'])
+    CONFIG['notifiers']['twilio']['required']['receiver_number'] = os.environ.get('TWILIO_RECEIVER_NUMBER', CONFIG['notifiers']['twilio']['required']['receiver_number'])
+    CONFIG['notifiers']['gmail']['required']['username'] = os.environ.get('GMAIL_USERNAME', CONFIG['notifiers']['gmail']['required']['username'])
+    CONFIG['notifiers']['gmail']['required']['password'] = os.environ.get('GMAIL_PASSWORD', CONFIG['notifiers']['gmail']['required']['password'])
+    CONFIG['notifiers']['gmail']['required']['destination_emails'] = os.environ.get('GMAIL_DESTINATION_EMAILS', CONFIG['notifiers']['gmail']['required']['destination_emails'])
 
     # Set up logger
     LOGGER = logging.getLogger(__name__)
-    LOGGER.setLevel(CONFIG['log_level'])
+    LOGGER.setLevel(CONFIG['settings']['loglevel'])
 
     LOG_FORMAT = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     LOG_HANDLE = logging.StreamHandler()
@@ -244,13 +199,14 @@ if __name__ == "__main__":
     LOGGER.addHandler(LOG_HANDLE)
 
     # Configure clients for bittrex and twilio
-    BITTREX_CLIENT = Bittrex(CONFIG['bittrex_key'], CONFIG['bittrex_secret'])
-    TWILIO_CLIENT = Client(CONFIG['twilio_key'], CONFIG['twilio_secret'])
+    BITTREX_CLIENT = Bittrex(
+        CONFIG['exchanges']['bittrex']['required']['key'],
+        CONFIG['exchanges']['bittrex']['required']['secret'])
 
     # The coin pairs
     COIN_PAIRS = []
-    if CONFIG['market_pairs']:
-        COIN_PAIRS = CONFIG['market_pairs'].translate(str.maketrans('', '', whitespace)).split(",")
+    if CONFIG['settings']['market_pairs']:
+        COIN_PAIRS = CONFIG['settings']['market_pairs'].translate(str.maketrans('', '', whitespace)).split(",")
     else:
         user_markets = BITTREX_CLIENT.get_balances()
         for user_market in user_markets['result']:
