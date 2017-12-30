@@ -11,10 +11,7 @@ class Notifier():
     Handles sending notifications via the configured notifiers
     """
     def __init__(self, config):
-        self.twilio_configured = True
-        for opt, val in config['notifiers']['twilio']['required'].items():
-            if not val:
-                self.twilio_configured = False
+        self.twilio_configured = self.__validate_required_config('twilio', config)
         if self.twilio_configured:
             self.twilio_client = TwilioNotifier(
                 twilio_key=config['notifiers']['twilio']['required']['key'],
@@ -23,26 +20,27 @@ class Notifier():
                 twilio_receiver_number=config['notifiers']['twilio']['required']['receiver_number']
             )
 
-        self.slack_configured = True
-        for opt, val in config['notifiers']['slack']['required'].items():
-            if not val:
-                self.slack_configured = False
+        self.slack_configured = self.__validate_required_config('slack', config)
         if self.slack_configured:
             self.slack_client = SlackNotifier(
                 slack_key=config['notifiers']['slack']['required']['key'],
                 slack_channel=config['notifiers']['slack']['required']['channel']
             )
 
-        self.gmail_configured = True
-        for opt, val in config['notifiers']['gmail']['required'].items():
-            if not val:
-                self.gmail_configured = False
+        self.gmail_configured = self.__validate_required_config('gmail', config)
         if self.gmail_configured:
             self.gmail_client = GmailNotifier(
                 username=config['notifiers']['gmail']['required']['username'],
                 password=config['notifiers']['gmail']['required']['password'],
                 destination_addresses=config['notifiers']['gmail']['required']['destination_emails']
             )
+
+    def __validate_required_config(self, notifier, config):
+        notifier_configured = True
+        for opt, val in config['notifiers'][notifier]['required'].items():
+            if not val:
+                notifier_configured = False
+        return notifier_configured
 
     def notify_all(self, message):
         """
