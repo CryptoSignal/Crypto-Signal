@@ -169,7 +169,9 @@ def get_signal():
 
 if __name__ == "__main__":
     # Load settings and create the CONFIG object
-    SECRETS = json.load(open('secrets.json'))
+    SECRETS = {}
+    if os.path.isfile('secrets.json'):
+        SECRETS = json.load(open('secrets.json'))
     CONFIG = json.load(open('default-config.json'))
 
     CONFIG.update(SECRETS)
