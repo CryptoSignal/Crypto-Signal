@@ -19,7 +19,6 @@ try:
     from Crypto.Cipher import AES
     import getpass
     import ast
-    import json
     ENCRYPTED = True
 except ImportError:
     ENCRYPTED = False
@@ -49,17 +48,6 @@ ACCOUNT_SET = {
     'getdeposithistory',
     'getwithdrawalhistory'
 }
-
-
-def encrypt(api_key, api_secret, export=True, export_fn='secrets.json'):
-    cipher = AES.new(getpass.getpass('Input encryption password (string will not show)'))
-    api_key_n = cipher.encrypt(api_key)
-    api_secret_n = cipher.encrypt(api_secret)
-    api = {'key': str(api_key_n), 'secret': str(api_secret_n)}
-    if export:
-        with open(export_fn, 'w') as outfile:
-            json.dump(api, outfile)
-    return api
 
 def using_requests(request_url, apisign):
     return requests.get(
