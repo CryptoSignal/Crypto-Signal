@@ -15,7 +15,7 @@ def configure_logging(loglevel, app_mode):
     if app_mode == 'bot':
       log_formatter = jsonlogger.JsonFormatter()
     elif app_mode == 'user':
-      log_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+      log_formatter = logging.Formatter('%(message)s')
     else:
       log_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
