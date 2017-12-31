@@ -1,6 +1,8 @@
 """
 Calculates the Moving Averages for a coin pair
 """
+
+import structlog
 from strategies.strategy_utils import Utils
 
 class MovingAverages():
@@ -8,6 +10,7 @@ class MovingAverages():
     Calculates the Moving Averages for a coin pair
     """
     def __init__(self):
+        self.logger = structlog.get_logger()
         self.utils = Utils()
 
     def calculate_sma(self, period_count, historical_data):

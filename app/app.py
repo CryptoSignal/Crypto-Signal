@@ -4,22 +4,15 @@ Main
 """
 
 import os
-import sys
 import json
 import time
-import logging
 from string import whitespace
 
+import logs
 import structlog
-from pythonjsonlogger import jsonlogger
 from exchange import ExchangeInterface
 from notification import Notifier
 from analysis import StrategyAnalyzer
-
-# Let's test an API call to get our BTC balance as a test
-# print(BITTREX_CLIENT.get_balance('BTC')['result']['Balance'])
-
-#print(historical_data = BITTREX_CLIENT.get_historical_data('BTC-ETH', 30, "thirtyMin"))
 
 def main():
      # Load settings and create the config object
@@ -31,7 +24,8 @@ def main():
     config.update(secrets)
 
     config['settings']['market_pairs'] = os.environ.get('MARKET_PAIRS', config['settings']['market_pairs'])
-    config['settings']['loglevel'] = os.environ.get('LOGLEVEL', logging.INFO)
+    config['settings']['loglevel'] = os.environ.get('LOGLEVEL', config['settings']['loglevel'])
+    config['settings']['app_mode'] = os.environ.get('APP_MODE', config['settings']['app_mode'])
     config['exchanges']['bittrex']['required']['key'] = os.environ.get('BITTREX_KEY', config['exchanges']['bittrex']['required']['key'])
     config['exchanges']['bittrex']['required']['secret'] = os.environ.get('BITTREX_SECRET', config['exchanges']['bittrex']['required']['secret'])
     config['notifiers']['twilio']['required']['key'] = os.environ.get('TWILIO_KEY', config['notifiers']['twilio']['required']['key'])
@@ -43,7 +37,7 @@ def main():
     config['notifiers']['gmail']['required']['destination_emails'] = os.environ.get('GMAIL_DESTINATION_EMAILS', config['notifiers']['gmail']['required']['destination_emails'])
 
     # Set up logger
-    configure_logging(config['settings']['loglevel'])
+    logs.configure_logging(config['settings']['loglevel'], config['settings']['app_mode'])
     logger = structlog.get_logger()
 
     exchange_interface = ExchangeInterface(config)
@@ -85,30 +79,5 @@ def get_signal(coin_pairs, strategy_analyzer, notifier):
             format(ichimoku_span_b, '.7f')))
     time.sleep(300)
 
-def configure_logging(loglevel):
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(jsonlogger.JsonFormatter())
-    root_logger = logging.getLogger()
-    root_logger.addHandler(handler)
-    root_logger.setLevel(loglevel)
-
-    structlog.configure(
-        processors=[
-            structlog.stdlib.filter_by_level,
-            structlog.stdlib.add_logger_name,
-            structlog.stdlib.add_log_level,
-            structlog.stdlib.PositionalArgumentsFormatter(),
-            structlog.processors.StackInfoRenderer(),
-            structlog.processors.format_exc_info,
-            structlog.processors.UnicodeDecoder(),
-            structlog.stdlib.render_to_log_kwargs,
-        ],
-        context_class=dict,
-        logger_factory=structlog.stdlib.LoggerFactory(),
-        wrapper_class=structlog.stdlib.BoundLogger,
-        cache_logger_on_first_use=True
-    )
-
-
 if __name__ == "__main__":
-   main()
+    main()

@@ -2,10 +2,15 @@
 Runs the breakout strategy over the market data
 """
 
+import structlog
+
 class Breakout():
     """
     Runs the breakout strategy over the market data
     """
+    def __init__(self):
+        self.logger = structlog.get_logger()
+
     def find_breakout(self, historical_data, breakout_threshold=.75):
         """
         Finds breakout based on how close the High was to Closing and Low to Opening

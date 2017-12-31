@@ -2,6 +2,7 @@
 Handles sending notifications via the configured notifiers
 """
 
+import structlog
 from notifiers.twilio import TwilioNotifier
 from notifiers.slack import SlackNotifier
 from notifiers.gmail import GmailNotifier
@@ -11,6 +12,7 @@ class Notifier():
     Handles sending notifications via the configured notifiers
     """
     def __init__(self, config):
+        self.logger = structlog.get_logger()
         self.twilio_configured = self.__validate_required_config('twilio', config)
         if self.twilio_configured:
             self.twilio_client = TwilioNotifier(

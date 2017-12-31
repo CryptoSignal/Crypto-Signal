@@ -1,7 +1,9 @@
+import structlog
 import smtplib
 
 class GmailNotifier:
     def __init__(self, username, password, destination_addresses):
+        self.logger = structlog.get_logger()
         smtp_server = 'smtp.gmail.com:587'
         self.smtp_handler = smtplib.SMTP(smtp_server)
         self.username = username

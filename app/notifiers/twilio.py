@@ -3,6 +3,7 @@
 Used to notify user of event via twilio
 """
 
+import structlog
 from twilio.rest import Client
 
 class TwilioNotifier():
@@ -10,6 +11,7 @@ class TwilioNotifier():
     Used to notify user of event via twilio
     """
     def __init__(self, twilio_key, twilio_secret, twilio_sender_number, twilio_receiver_number):
+        self.logger = structlog.get_logger()
         self.twilio_sender_number = twilio_sender_number
         self.twilio_receiver_number = twilio_receiver_number
         self.twilio_client = Client(twilio_key, twilio_secret)
