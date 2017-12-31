@@ -4,11 +4,14 @@ Main
 """
 
 import os
+import sys
 import json
 import time
 import logging
 from string import whitespace
 
+import structlog
+from pythonjsonlogger import jsonlogger
 from exchange import ExchangeInterface
 from notification import Notifier
 from analysis import StrategyAnalyzer
@@ -40,14 +43,8 @@ def main():
     config['notifiers']['gmail']['required']['destination_emails'] = os.environ.get('GMAIL_DESTINATION_EMAILS', config['notifiers']['gmail']['required']['destination_emails'])
 
     # Set up logger
-    LOGGER = logging.getLogger(__name__)
-    LOGGER.setLevel(config['settings']['loglevel'])
-
-    LOG_FORMAT = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    LOG_HANDLE = logging.StreamHandler()
-    LOG_HANDLE.setLevel(logging.DEBUG)
-    LOG_HANDLE.setFormatter(LOG_FORMAT)
-    LOGGER.addHandler(LOG_HANDLE)
+    configure_logging(config['settings']['loglevel'])
+    logger = structlog.get_logger()
 
     exchange_interface = ExchangeInterface(config)
     strategy_analyzer = StrategyAnalyzer(config)
@@ -64,7 +61,7 @@ def main():
                 continue
             market_pair = user_market['Currency'] + '/BTC'
             coin_pairs.append(market_pair)
-    LOGGER.debug(coin_pairs)
+    logger.debug(coin_pairs)
 
     while True:
         get_signal(coin_pairs, strategy_analyzer, notifier)
@@ -87,6 +84,31 @@ def get_signal(coin_pairs, strategy_analyzer, notifier):
             format(ichimoku_span_a, '.7f'),
             format(ichimoku_span_b, '.7f')))
     time.sleep(300)
+
+def configure_logging(loglevel):
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(jsonlogger.JsonFormatter())
+    root_logger = logging.getLogger()
+    root_logger.addHandler(handler)
+    root_logger.setLevel(loglevel)
+
+    structlog.configure(
+        processors=[
+            structlog.stdlib.filter_by_level,
+            structlog.stdlib.add_logger_name,
+            structlog.stdlib.add_log_level,
+            structlog.stdlib.PositionalArgumentsFormatter(),
+            structlog.processors.StackInfoRenderer(),
+            structlog.processors.format_exc_info,
+            structlog.processors.UnicodeDecoder(),
+            structlog.stdlib.render_to_log_kwargs,
+        ],
+        context_class=dict,
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        wrapper_class=structlog.stdlib.BoundLogger,
+        cache_logger_on_first_use=True
+    )
+
 
 if __name__ == "__main__":
    main()
