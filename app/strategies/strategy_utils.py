@@ -15,7 +15,5 @@ class Utils():
         """
         Returns closing prices within a specified time frame for a coin pair
         """
-        closing_prices = []
-        for data_point in historical_data:
-            closing_prices.append(data_point[4])
+        closing_prices = [data_point[4] for data_point in historical_data]
         return closing_prices
