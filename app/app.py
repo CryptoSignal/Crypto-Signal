@@ -3,12 +3,12 @@
 Main
 """
 
-import os
-import json
+
 import time
 from string import whitespace
 
 import logs
+import conf
 import structlog
 from exchange import ExchangeInterface
 from notification import Notifier
@@ -16,26 +16,10 @@ from analysis import StrategyAnalyzer
 
 def main():
      # Load settings and create the config object
-    secrets = {}
-    if os.path.isfile('secrets.json'):
-        secrets = json.load(open('secrets.json'))
-    config = json.load(open('default-config.json'))
-
-    config.update(secrets)
-
-    config['settings']['market_pairs'] = os.environ.get('MARKET_PAIRS', config['settings']['market_pairs'])
-    config['settings']['loglevel'] = os.environ.get('LOGLEVEL', config['settings']['loglevel'])
-    config['settings']['app_mode'] = os.environ.get('APP_MODE', config['settings']['app_mode'])
-    config['exchanges']['bittrex']['required']['key'] = os.environ.get('BITTREX_KEY', config['exchanges']['bittrex']['required']['key'])
-    config['exchanges']['bittrex']['required']['secret'] = os.environ.get('BITTREX_SECRET', config['exchanges']['bittrex']['required']['secret'])
-    config['notifiers']['twilio']['required']['key'] = os.environ.get('TWILIO_KEY', config['notifiers']['twilio']['required']['key'])
-    config['notifiers']['twilio']['required']['secret'] = os.environ.get('TWILIO_SECRET', config['notifiers']['twilio']['required']['secret'])
-    config['notifiers']['twilio']['required']['sender_number'] = os.environ.get('TWILIO_SENDER_NUMBER', config['notifiers']['twilio']['required']['sender_number'])
-    config['notifiers']['twilio']['required']['receiver_number'] = os.environ.get('TWILIO_RECEIVER_NUMBER', config['notifiers']['twilio']['required']['receiver_number'])
-    config['notifiers']['gmail']['required']['username'] = os.environ.get('GMAIL_USERNAME', config['notifiers']['gmail']['required']['username'])
-    config['notifiers']['gmail']['required']['password'] = os.environ.get('GMAIL_PASSWORD', config['notifiers']['gmail']['required']['password'])
-    config['notifiers']['gmail']['required']['destination_emails'] = os.environ.get('GMAIL_DESTINATION_EMAILS', config['notifiers']['gmail']['required']['destination_emails'])
-
+    config = conf.Configuration().fetch_configuration()
+    print(config)
+    exit()
+    
     # Set up logger
     logs.configure_logging(config['settings']['loglevel'], config['settings']['app_mode'])
     logger = structlog.get_logger()
