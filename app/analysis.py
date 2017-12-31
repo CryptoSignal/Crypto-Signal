@@ -25,7 +25,7 @@ class StrategyAnalyzer():
         breakout_value, is_breaking_out = breakout_analyzer.find_breakout(historical_data)
         return breakout_value, is_breaking_out
 
-    def analyze_rsi(self, coin_pair, period_count=18, time_unit='1h'):
+    def analyze_rsi(self, coin_pair, period_count=1000, time_unit='1h'):
         rsi_analyzer = RelativeStrengthIndex()
         historical_data = self.exchange_aggregator.get_historical_data(
             coin_pair=coin_pair,

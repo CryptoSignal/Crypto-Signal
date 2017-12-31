@@ -13,31 +13,54 @@ from exchange import ExchangeInterface
 from notification import Notifier
 from analysis import StrategyAnalyzer
 
-# Let's test an API call to get our BTC balance as a test
-# print(BITTREX_CLIENT.get_balance('BTC')['result']['Balance'])
 
-#print(historical_data = BITTREX_CLIENT.get_historical_data('BTC-ETH', 30, "thirtyMin"))
+SECRETS_FILE = "secrets.json"
+CONFIG_FILE = "default-config.json"
 
-def main():
-     # Load settings and create the config object
-    secrets = {}
-    if os.path.isfile('secrets.json'):
-        secrets = json.load(open('secrets.json'))
-    config = json.load(open('default-config.json'))
+def setup_config():
+    """
+    Setups config w/ secrets & config files.
+    """
+    secrets = json.load(open(SECRETS_FILE)) if os.path.isfile(SECRETS_FILE) else {}
+    config = json.load(open(CONFIG_FILE))
 
     config.update(secrets)
 
-    config['settings']['market_pairs'] = os.environ.get('MARKET_PAIRS', config['settings']['market_pairs'])
+    # Load config settings from environment if existing.
+
+    # Exchanges
+    config['settings']['market_pairs'] = os.environ.get(
+        'MARKET_PAIRS', config['settings']['market_pairs']
+        )
     config['settings']['loglevel'] = os.environ.get('LOGLEVEL', logging.INFO)
-    config['exchanges']['bittrex']['required']['key'] = os.environ.get('BITTREX_KEY', config['exchanges']['bittrex']['required']['key'])
-    config['exchanges']['bittrex']['required']['secret'] = os.environ.get('BITTREX_SECRET', config['exchanges']['bittrex']['required']['secret'])
-    config['notifiers']['twilio']['required']['key'] = os.environ.get('TWILIO_KEY', config['notifiers']['twilio']['required']['key'])
-    config['notifiers']['twilio']['required']['secret'] = os.environ.get('TWILIO_SECRET', config['notifiers']['twilio']['required']['secret'])
-    config['notifiers']['twilio']['required']['sender_number'] = os.environ.get('TWILIO_SENDER_NUMBER', config['notifiers']['twilio']['required']['sender_number'])
-    config['notifiers']['twilio']['required']['receiver_number'] = os.environ.get('TWILIO_RECEIVER_NUMBER', config['notifiers']['twilio']['required']['receiver_number'])
-    config['notifiers']['gmail']['required']['username'] = os.environ.get('GMAIL_USERNAME', config['notifiers']['gmail']['required']['username'])
-    config['notifiers']['gmail']['required']['password'] = os.environ.get('GMAIL_PASSWORD', config['notifiers']['gmail']['required']['password'])
-    config['notifiers']['gmail']['required']['destination_emails'] = os.environ.get('GMAIL_DESTINATION_EMAILS', config['notifiers']['gmail']['required']['destination_emails'])
+    config['exchanges']['bittrex']['required']['key'] = os.environ.get(
+        'BITTREX_KEY', config['exchanges']['bittrex']['required']['key'])
+    config['exchanges']['bittrex']['required']['secret'] = os.environ.get(
+        'BITTREX_SECRET', config['exchanges']['bittrex']['required']['secret'])
+
+    ## Twillio
+    config['notifiers']['twilio']['required']['key'] = os.environ.get(
+        'TWILIO_KEY', config['notifiers']['twilio']['required']['key'])
+    config['notifiers']['twilio']['required']['secret'] = os.environ.get(
+        'TWILIO_SECRET', config['notifiers']['twilio']['required']['secret'])
+    config['notifiers']['twilio']['required']['sender_number'] = os.environ.get(
+        'TWILIO_SENDER_NUMBER', config['notifiers']['twilio']['required']['sender_number'])
+    config['notifiers']['twilio']['required']['receiver_number'] = os.environ.get(
+        'TWILIO_RECEIVER_NUMBER', config['notifiers']['twilio']['required']['receiver_number'])
+
+    ## GMAIL
+    config['notifiers']['gmail']['required']['username'] = os.environ.get(
+        'GMAIL_USERNAME', config['notifiers']['gmail']['required']['username'])
+    config['notifiers']['gmail']['required']['password'] = os.environ.get(
+        'GMAIL_PASSWORD', config['notifiers']['gmail']['required']['password'])
+    config['notifiers']['gmail']['required']['destination_emails'] = os.environ.get(
+        'GMAIL_DESTINATION_EMAILS', config['notifiers']['gmail']['required']['destination_emails'])
+
+    return config
+
+
+def main():
+    config = setup_config()
 
     # Set up logger
     LOGGER = logging.getLogger(__name__)
@@ -69,6 +92,7 @@ def main():
     while True:
         get_signal(coin_pairs, strategy_analyzer, notifier)
 
+
 def get_signal(coin_pairs, strategy_analyzer, notifier):
     for coin_pair in coin_pairs:
         rsi_value = strategy_analyzer.analyze_rsi(coin_pair)
@@ -86,7 +110,9 @@ def get_signal(coin_pairs, strategy_analyzer, notifier):
             format(ema_value, '.7f'),
             format(ichimoku_span_a, '.7f'),
             format(ichimoku_span_b, '.7f')))
-    time.sleep(300)
+
+    time.sleep(config["update_interval"])
+
 
 if __name__ == "__main__":
    main()
