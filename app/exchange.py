@@ -2,6 +2,7 @@
 Collect required information from exchanges
 """
 
+import structlog
 import ccxt
 
 class ExchangeInterface():
@@ -9,6 +10,7 @@ class ExchangeInterface():
     Collect required information from exchanges
     """
     def __init__(self, config):
+        self.logger = structlog.get_logger()
         self.exchanges = []
         for exchange in config['exchanges']:
             new_exchange = getattr(ccxt, exchange)()

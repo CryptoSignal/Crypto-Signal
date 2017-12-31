@@ -1,5 +1,6 @@
 {
   "settings": {
+    "app_mode": "user",
     "market_pairs": "",
     "loglevel": ""
   },

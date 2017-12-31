@@ -2,6 +2,7 @@
 Runs the ichimoku strategy over the market data
 """
 
+import structlog
 from strategies.strategy_utils import Utils
 
 class IchimokuCloud():
@@ -9,6 +10,7 @@ class IchimokuCloud():
     Runs the ichimoku strategy over the market data
     """
     def __init__(self):
+        self.logger = structlog.get_logger()
         self.utils = Utils()
 
     def calculate_base_line(self, historical_data):

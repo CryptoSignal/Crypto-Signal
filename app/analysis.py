@@ -2,6 +2,7 @@
 Executes the trading strategies and analyzes the results.
 """
 
+import structlog
 from exchange import ExchangeInterface
 from strategies.breakout import Breakout
 from strategies.ichimoku_cloud import IchimokuCloud
@@ -15,6 +16,7 @@ class StrategyAnalyzer():
     """
     def __init__(self, config):
         self.exchange_aggregator = ExchangeInterface(config)
+        self.logger = structlog.get_logger()
 
     def analyze_breakout(self, coin_pair, period_count=5, time_unit='5m'):
         breakout_analyzer = Breakout()

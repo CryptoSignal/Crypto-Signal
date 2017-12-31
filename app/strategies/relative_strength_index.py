@@ -2,6 +2,7 @@
 Runs the RSI strategy over the market data
 """
 
+import structlog
 from strategies.strategy_utils import Utils
 
 class RelativeStrengthIndex():
@@ -9,6 +10,7 @@ class RelativeStrengthIndex():
     Runs the RSI strategy over the market data
     """
     def __init__(self):
+        self.logger = structlog.get_logger()
         self.utils = Utils()
 
     # Improvemnts to calculate_rsi are courtesy of community contributor "pcartwright81"
