@@ -1,23 +1,29 @@
 # Crypto Signals
 
-Track 250+ crypto currencies and their trading signals through Crypto signals.
+Crypto Signals is automates your crpyto currency Technical Analysis (TA) and trading.
+
+Track over 500 coins across Bittrex, Bitfinex, GDAX, Gemini and more!
 
 Technical Analysis Automated:
 * Relative Strength Index (RSI)
 * Ichimoku Cloud (Leading Span A, Leading Span B, Conversion Line, Base Line)
 * Simple Moving Average
 * Exponential Moving Average
-* Breakouts
+* Breakouts / Pumps
+
+Alerts:
+* SMS via Twilio
+* Email
+* Slack
 
 Features:
-* Tracking for over 250 coins on Bittrex
-* SMS alerts for coin breakouts and price changes
-* Well documented script
-* Automated Technical Analysis that's implemented from scratch for simplicity and ease of use
+* Modular code for easy trading strategy implementation
+* Easy install with Docker
 
 You can build on top of this tool and implement algorithm trading and some machine learning models to experiment with predictive analysis.
 
 Coming Soon:
+* Automtated buying/selling
 * MACD
 * Bollinger Band
 * Web Client :)
@@ -32,7 +38,7 @@ Shoutouts:
 * First make sure you have [Docker installed](https://docs.docker.com/engine/installation/)
 * Next, to create the docker image run `make build` in the root of the project directory.
 * Once built copy template.env to .env and add your API keys, at a minimum read-only Bittrex keys are required.
-* Make sure to also update the market\_pairs environment or app.py variable with comma seperated market pair values that match Bittrex's format (i.e. BTC-ETH)
+* Make sure to also update the market\_pairs settings within the .env with comma seperated market pair values that match Bittrex's format (i.e. ETH/BTC)
 
 ## How to run
 In the root directory run `docker-compose run app` or `make run` if you don't have docker-compose.
