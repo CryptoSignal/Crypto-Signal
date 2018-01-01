@@ -9,14 +9,14 @@ class ExchangeInterface():
     """
     Collect required information from exchanges
     """
-    def __init__(self, config):
+    def __init__(self, exchange_config):
         self.logger = structlog.get_logger()
         self.exchanges = []
-        for exchange in config['exchanges']:
+        for exchange in exchange_config:
             new_exchange = getattr(ccxt, exchange)()
             if new_exchange:
-                new_exchange.apiKey = config['exchanges'][exchange]['required']['key']
-                new_exchange.secret = config['exchanges'][exchange]['required']['secret']
+                new_exchange.apiKey = exchange_config[exchange]['required']['key']
+                new_exchange.secret = exchange_config[exchange]['required']['secret']
                 self.exchanges.append(new_exchange)
             else:
                 print("Unable to load exchange %s", new_exchange)

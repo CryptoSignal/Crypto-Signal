@@ -2,7 +2,8 @@
   "settings": {
     "app_mode": "user",
     "market_pairs": "",
-    "loglevel": ""
+    "loglevel": "",
+    "update_interval": 300
   },
 
   "exchanges": {

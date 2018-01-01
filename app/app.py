@@ -3,7 +3,6 @@
 Main
 """
 
-
 import time
 from string import whitespace
 
@@ -16,22 +15,23 @@ from analysis import StrategyAnalyzer
 
 def main():
      # Load settings and create the config object
-    config = conf.Configuration().fetch_configuration()
-    print(config)
-    exit()
-    
+    config = conf.Configuration()
+    settings = config.fetch_settings()
+    exchange_config = config.fetch_exchange_config()
+    notifier_config = config.fetch_notifier_config()
+
     # Set up logger
-    logs.configure_logging(config['settings']['loglevel'], config['settings']['app_mode'])
+    logs.configure_logging(settings['loglevel'], settings['app_mode'])
     logger = structlog.get_logger()
 
-    exchange_interface = ExchangeInterface(config)
-    strategy_analyzer = StrategyAnalyzer(config)
-    notifier = Notifier(config)
+    exchange_interface = ExchangeInterface(exchange_config)
+    strategy_analyzer = StrategyAnalyzer(exchange_interface)
+    notifier = Notifier(notifier_config)
 
     # The coin pairs
     coin_pairs = []
-    if config['settings']['market_pairs']:
-        coin_pairs = config['settings']['market_pairs'].translate(str.maketrans('', '', whitespace)).split(",")
+    if settings['market_pairs']:
+        coin_pairs = settings['market_pairs'].translate(str.maketrans('', '', whitespace)).split(",")
     else:
         user_markets = exchange_interface.get_user_markets()
         for user_market in user_markets['info']:
@@ -42,9 +42,9 @@ def main():
     logger.debug(coin_pairs)
 
     while True:
-        get_signal(coin_pairs, strategy_analyzer, notifier)
+        get_signal(coin_pairs, strategy_analyzer, notifier, settings['update_interval'])
 
-def get_signal(coin_pairs, strategy_analyzer, notifier):
+def get_signal(coin_pairs, strategy_analyzer, notifier, update_interval):
     for coin_pair in coin_pairs:
         rsi_value = strategy_analyzer.analyze_rsi(coin_pair)
         sma_value, ema_value = strategy_analyzer.analyze_moving_averages(coin_pair)
@@ -61,7 +61,7 @@ def get_signal(coin_pairs, strategy_analyzer, notifier):
             format(ema_value, '.7f'),
             format(ichimoku_span_a, '.7f'),
             format(ichimoku_span_b, '.7f')))
-    time.sleep(300)
+    time.sleep(update_interval)
 
 if __name__ == "__main__":
     main()
