@@ -15,8 +15,25 @@ class RelativeStrengthIndex():
     def find_rsi(self, historical_data, periods=14):
         """
         Calculates the Relative Strength Index for a coin_pair
-        If the returned value is above 70, it's overbought (SELL IT!)
-        If the returned value is below 30, it's oversold (BUY IT!)
+    
+        RSI = 100 - ( 100 / ( 1 + RS ) )
+    
+        RS = Average Gains / Average Losses
+    
+        Average Gains
+            1st avg gain = sum of gains over past n periods / n
+            Everything after = (Prev Avg Gain * (n-1) + current gain) / n
+    
+        Average Loss
+            1st avg loss = sum of losses over past n period / n
+            Everything after = (Prev Avg Gain * (n-1) + current loss) / n
+        
+        Args:
+            historical_data: Data used to find price changes used for RSI calc.
+            periods: periods used tocalculate avg gains & avg losses.
+
+        Returns:
+            The RSI of market.
         """
 
         closing_prices = self.utils.get_closing_prices(historical_data)
@@ -26,9 +43,9 @@ class RelativeStrengthIndex():
 
         # Sort initial price changes from [first, period)
         # IE Orders [1, 14) [1, 13]
-        for i in range(1, periods):
+        for order_index in range(1, periods):
             # subtract new from old
-            change = closing_prices[i] - closing_prices[i - 1]
+            change = closing_prices[order_index] - closing_prices[order_index - 1]
 
             # sort
             advances.append(change) if change > 0 else declines.append(abs(change))
@@ -38,8 +55,8 @@ class RelativeStrengthIndex():
 
         # Process orders periods to end. 
         # IE [14, length) [14, length-1]
-        for i in range(periods, len(closing_prices)):
-            change = closing_prices[i] - closing_prices[i - 1]
+        for order_index in range(periods, len(closing_prices)):
+            change = closing_prices[order_index] - closing_prices[order_index - 1]
 
             # sort
             gain = change if change > 0 else 0
