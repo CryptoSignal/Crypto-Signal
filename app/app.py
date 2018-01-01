@@ -31,7 +31,7 @@ def main():
     # The coin pairs
     coin_pairs = []
     if settings['market_pairs']:
-        coin_pairs = settings['market_pairs'].translate(str.maketrans('', '', whitespace)).split(",")
+        coin_pairs = settings['market_pairs']
     else:
         user_markets = exchange_interface.get_user_markets()
         for user_market in user_markets['info']:
@@ -39,7 +39,6 @@ def main():
                 continue
             market_pair = user_market['Currency'] + '/BTC'
             coin_pairs.append(market_pair)
-    logger.debug(coin_pairs)
 
     while True:
         get_signal(coin_pairs, strategy_analyzer, notifier, settings['update_interval'])

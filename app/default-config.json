@@ -1,7 +1,7 @@
 {
   "settings": {
     "app_mode": "user",
-    "market_pairs": "",
+    "market_pairs": [],
     "loglevel": "",
     "update_interval": 300
   },
@@ -34,7 +34,7 @@
       "required": {
         "username": "",
         "password": "",
-        "destination_emails": ""
+        "destination_emails": []
       }
     }
   }
