@@ -9,6 +9,9 @@
   "exchanges": {
     "bittrex": {
       "required": {
+        "enabled": true
+      },
+      "optional": {
         "key": "",
         "secret": ""
       }
