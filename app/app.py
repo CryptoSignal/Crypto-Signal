@@ -35,6 +35,7 @@ def main():
     config['notifiers']['gmail']['required']['username'] = os.environ.get('GMAIL_USERNAME', config['notifiers']['gmail']['required']['username'])
     config['notifiers']['gmail']['required']['password'] = os.environ.get('GMAIL_PASSWORD', config['notifiers']['gmail']['required']['password'])
     config['notifiers']['gmail']['required']['destination_emails'] = os.environ.get('GMAIL_DESTINATION_EMAILS', config['notifiers']['gmail']['required']['destination_emails'])
+    config['notifiers']['integram']['required']['url'] = os.environ.get('INTEGRAM_URL', config['notifiers']['integram']['required']['url'])
 
     # Set up logger
     logs.configure_logging(config['settings']['loglevel'], config['settings']['app_mode'])

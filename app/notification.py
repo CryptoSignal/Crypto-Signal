@@ -6,6 +6,7 @@ import structlog
 from notifiers.twilio import TwilioNotifier
 from notifiers.slack import SlackNotifier
 from notifiers.gmail import GmailNotifier
+from notifiers.integram import IntegramNotifier
 
 class Notifier():
     """
@@ -37,6 +38,12 @@ class Notifier():
                 destination_addresses=config['notifiers']['gmail']['required']['destination_emails']
             )
 
+        self.integram_configured = self.__validate_required_config('integram', config)
+        if self.integram_configured:
+            self.integram_client = IntegramNotifier(
+                url=config['notifiers']['integram']['required']['url']
+            )
+
     def __validate_required_config(self, notifier, config):
         notifier_configured = True
         for opt, val in config['notifiers'][notifier]['required'].items():
@@ -51,6 +58,7 @@ class Notifier():
         self.notify_slack(message)
         self.notify_twilio(message)
         self.notify_gmail(message)
+        self.notify_integram(message)
 
     def notify_slack(self, message):
         """
@@ -73,3 +81,10 @@ class Notifier():
         """
         if self.gmail_configured:
             self.gmail_client.notify(message)
+
+    def notify_integram(self, message):
+        """
+        Triggers the notification via email using gmail
+        """
+        if self.integram_configured:
+            self.integram_client.notify(message)
