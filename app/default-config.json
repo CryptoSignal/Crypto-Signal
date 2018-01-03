@@ -1,7 +1,7 @@
 {
   "settings": {
     "app_mode": "user",
-    "symbol_pairs": ["BURST/BTC"],
+    "symbol_pairs": [],
     "loglevel": "",
     "update_interval": 300,
     "selected_task": "default"
