@@ -1,9 +1,10 @@
 {
   "settings": {
     "app_mode": "user",
-    "market_pairs": [],
+    "symbol_pairs": [],
     "loglevel": "",
-    "update_interval": 300
+    "update_interval": 300,
+    "selected_task": "default"
   },
 
   "exchanges": {
@@ -40,5 +41,9 @@
         "destination_emails": []
       }
     }
+  },
+
+  "behaviours": {
+
   }
 }
