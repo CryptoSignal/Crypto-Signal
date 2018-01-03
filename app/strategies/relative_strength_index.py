@@ -14,54 +14,65 @@ class RelativeStrengthIndex():
         self.utils = Utils()
 
     # Improvemnts to calculate_rsi are courtesy of community contributor "pcartwright81"
-    def find_rsi(self, historical_data):
+    def find_rsi(self, historical_data, period_count):
         """
         Calculates the Relative Strength Index for a coin_pair
-        If the returned value is above 70, it's overbought (SELL IT!)
-        If the returned value is below 30, it's oversold (BUY IT!)
+
+        RSI = 100 - ( 100 / ( 1 + RS ) )
+
+        RS = Average Gains / Average Losses
+
+        Average Gains
+            1st avg gain = sum of gains over past n period_count / n
+            Everything after = (Prev Avg Gain * (n-1) + current gain) / n
+
+        Average Loss
+            1st avg loss = sum of losses over past n period / n
+            Everything after = (Prev Avg Gain * (n-1) + current loss) / n
+
+        Args:
+            historical_data: Data used to find price changes used for RSI calc.
+            period_count: period_count used tocalculate avg gains & avg losses.
+
+        Returns:
+            The RSI of market.
         """
+
         closing_prices = self.utils.get_closing_prices(historical_data)
-        count = 0
-        changes = []
 
-        # Calculating price changes
-        for closing_price in closing_prices:
-            if count != 0:
-                changes.append(closing_price - closing_prices[count - 1])
-            count += 1
-            if count == 15:
-                break
-
-        # Calculating gains and losses
         advances = []
         declines = []
-        for change in changes:
-            if change > 0:
-                advances.append(change)
-            if change < 0:
-                declines.append(abs(change))
 
-        average_gain = (sum(advances) / 14)
-        average_loss = (sum(declines) / 14)
-        new_average_gain = average_gain
-        new_average_loss = average_loss
-        for closing_price in closing_prices:
-            if count > 14 and count < len(closing_prices):
-                close = closing_prices[count]
-                new_change = close - closing_prices[count - 1]
-                add_loss = 0
-                add_gain = 0
-                if new_change > 0:
-                    add_gain = new_change
-                if new_change < 0:
-                    add_loss = abs(new_change)
-                new_average_gain = (new_average_gain * 13 + add_gain) / 14
-                new_average_loss = (new_average_loss * 13 + add_loss) / 14
-                count += 1
+        # Sort initial price changes from [first, period)
+        # IE Orders [1, 14) [1, 13]
+        for order_index in range(1, period_count):
+            # subtract new from old
+            change = closing_prices[order_index] - closing_prices[order_index - 1]
 
-        if new_average_loss > 0:
-            rs = new_average_gain / new_average_loss
+            # sort
+            advances.append(change) if change > 0 else declines.append(abs(change))
+    
+        avg_gain = sum(advances) / period_count
+        avg_loss = sum(declines) / period_count
+
+        # Process orders period_count to end.
+        # IE [14, length) [14, length-1]
+        for order_index in range(period_count, len(closing_prices)):
+            change = closing_prices[order_index] - closing_prices[order_index - 1]
+
+            # sort
+            gain = change if change > 0 else 0
+            loss = abs(change) if change < 0 else 0
+
+            # Smooth RSI
+            avg_gain = (avg_gain * (period_count - 1) + gain) / period_count
+            avg_loss = (avg_loss * (period_count - 1) + loss) / period_count
+
+        if avg_loss > 0:
+            rs = avg_gain / avg_loss
         else:
-            rs = 0
-        new_rs = 100 - 100 / (1 + rs)
-        return new_rs
+            # No losses, prevents ZeroDivision Exception
+            rs = 100
+
+        rsi = 100 - (100 / (1 + rs))
+        return rsi

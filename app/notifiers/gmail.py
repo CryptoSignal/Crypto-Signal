@@ -8,7 +8,7 @@ class GmailNotifier:
         self.smtp_handler = smtplib.SMTP(smtp_server)
         self.username = username
         self.password = password
-        self.destination_addresses = destination_addresses
+        self.destination_addresses = ','.join(destination_addresses)
 
     def notify(self, message):
         """

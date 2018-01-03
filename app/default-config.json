@@ -1,13 +1,17 @@
 {
   "settings": {
     "app_mode": "user",
-    "market_pairs": "",
-    "loglevel": ""
+    "market_pairs": [],
+    "loglevel": "",
+    "update_interval": 300
   },
 
   "exchanges": {
     "bittrex": {
       "required": {
+        "enabled": true
+      },
+      "optional": {
         "key": "",
         "secret": ""
       }
@@ -33,7 +37,7 @@
       "required": {
         "username": "",
         "password": "",
-        "destination_emails": ""
+        "destination_emails": []
       }
     }
   }

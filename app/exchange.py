@@ -2,6 +2,8 @@
 Collect required information from exchanges
 """
 
+import distutils.util
+
 import structlog
 import ccxt
 
@@ -9,17 +11,24 @@ class ExchangeInterface():
     """
     Collect required information from exchanges
     """
-    def __init__(self, config):
+    def __init__(self, exchange_config):
         self.logger = structlog.get_logger()
         self.exchanges = []
-        for exchange in config['exchanges']:
-            new_exchange = getattr(ccxt, exchange)()
-            if new_exchange:
-                new_exchange.apiKey = config['exchanges'][exchange]['required']['key']
-                new_exchange.secret = config['exchanges'][exchange]['required']['secret']
-                self.exchanges.append(new_exchange)
-            else:
-                print("Unable to load exchange %s", new_exchange)
+        for exchange in exchange_config:
+            if exchange_config[exchange]['required']['enabled']:
+                new_exchange = getattr(ccxt, exchange)()
+                if new_exchange:
+                    if 'key' in exchange_config[exchange]['optional']:
+                        new_exchange.apiKey = exchange_config[exchange]['optional']['key']
+                    if 'secret' in exchange_config[exchange]['optional']:
+                        new_exchange.secret = exchange_config[exchange]['optional']['secret']
+                    if 'username' in exchange_config[exchange]['optional']:
+                        new_exchange.username = exchange_config[exchange]['optional']['username']
+                    if 'password' in exchange_config[exchange]['optional']:
+                        new_exchange.password = exchange_config[exchange]['optional']['password']
+                    self.exchanges.append(new_exchange)
+                else:
+                    print("Unable to load exchange %s", new_exchange)
 
     def get_historical_data(self, coin_pair, period_count, time_unit):
         """
