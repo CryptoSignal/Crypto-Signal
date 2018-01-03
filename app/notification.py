@@ -12,41 +12,41 @@ class Notifier():
     """
     Handles sending notifications via the configured notifiers
     """
-    def __init__(self, config):
+    def __init__(self, notifier_config):
         self.logger = structlog.get_logger()
-        self.twilio_configured = self.__validate_required_config('twilio', config)
+        self.twilio_configured = self.__validate_required_config('twilio', notifier_config)
         if self.twilio_configured:
             self.twilio_client = TwilioNotifier(
-                twilio_key=config['notifiers']['twilio']['required']['key'],
-                twilio_secret=config['notifiers']['twilio']['required']['secret'],
-                twilio_sender_number=config['notifiers']['twilio']['required']['sender_number'],
-                twilio_receiver_number=config['notifiers']['twilio']['required']['receiver_number']
+                twilio_key=notifier_config['twilio']['required']['key'],
+                twilio_secret=notifier_config['twilio']['required']['secret'],
+                twilio_sender_number=notifier_config['twilio']['required']['sender_number'],
+                twilio_receiver_number=notifier_config['twilio']['required']['receiver_number']
             )
 
-        self.slack_configured = self.__validate_required_config('slack', config)
+        self.slack_configured = self.__validate_required_config('slack', notifier_config)
         if self.slack_configured:
             self.slack_client = SlackNotifier(
-                slack_key=config['notifiers']['slack']['required']['key'],
-                slack_channel=config['notifiers']['slack']['required']['channel']
+                slack_key=notifier_config['slack']['required']['key'],
+                slack_channel=notifier_config['slack']['required']['channel']
             )
 
-        self.gmail_configured = self.__validate_required_config('gmail', config)
+        self.gmail_configured = self.__validate_required_config('gmail', notifier_config)
         if self.gmail_configured:
             self.gmail_client = GmailNotifier(
-                username=config['notifiers']['gmail']['required']['username'],
-                password=config['notifiers']['gmail']['required']['password'],
-                destination_addresses=config['notifiers']['gmail']['required']['destination_emails']
+                username=notifier_config['gmail']['required']['username'],
+                password=notifier_config['gmail']['required']['password'],
+                destination_addresses=notifier_config['gmail']['required']['destination_emails']
             )
 
-        self.integram_configured = self.__validate_required_config('integram', config)
+        self.integram_configured = self.__validate_required_config('integram', notifier_config)
         if self.integram_configured:
             self.integram_client = IntegramNotifier(
                 url=config['notifiers']['integram']['required']['url']
             )
 
-    def __validate_required_config(self, notifier, config):
+    def __validate_required_config(self, notifier, notifier_config):
         notifier_configured = True
-        for opt, val in config['notifiers'][notifier]['required'].items():
+        for opt, val in notifier_config[notifier]['required'].items():
             if not val:
                 notifier_configured = False
         return notifier_configured

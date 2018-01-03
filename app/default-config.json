@@ -1,13 +1,18 @@
 {
   "settings": {
     "app_mode": "user",
-    "market_pairs": "",
-    "loglevel": ""
+    "symbol_pairs": [],
+    "loglevel": "",
+    "update_interval": 300,
+    "selected_task": "default"
   },
 
   "exchanges": {
     "bittrex": {
       "required": {
+        "enabled": true
+      },
+      "optional": {
         "key": "",
         "secret": ""
       }
@@ -33,7 +38,7 @@
       "required": {
         "username": "",
         "password": "",
-        "destination_emails": ""
+        "destination_emails": []
       }
     },
     "integram": {
@@ -41,5 +46,9 @@
         "url": ""
       }
     }
+  },
+
+  "behaviours": {
+
   }
 }
