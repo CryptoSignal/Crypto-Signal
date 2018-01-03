@@ -41,7 +41,7 @@ class Notifier():
         self.integram_configured = self.__validate_required_config('integram', notifier_config)
         if self.integram_configured:
             self.integram_client = IntegramNotifier(
-                url=config['notifiers']['integram']['required']['url']
+                url=notifier_config['integram']['required']['url']
             )
 
     def __validate_required_config(self, notifier, notifier_config):
