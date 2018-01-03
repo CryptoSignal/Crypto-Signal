@@ -1,7 +1,7 @@
 {
   "settings": {
-    "app_mode": "user",
-    "symbol_pairs": ["BURST/BTC"],
+    "log_mode": "text",
+    "market_pairs": [],
     "loglevel": "",
     "update_interval": 300,
     "selected_task": "default"
@@ -44,6 +44,30 @@
   },
 
   "behaviours": {
+    "default": {
+      "breakout_threshold": 0.75,
+      "rsi_overbought_threshold": 0,
+      "rsi_oversold_threshold": 0,
+      "sma_threshold": 0,
+      "ema_threshold": 0,
+      "ichimoku_threshold": 0
+    },
 
+    "simple_bot": {
+      "trade_parameters": {
+        "mode": "simulate",
+        "buy": {
+          "btc_amount": 0,
+          "rsi_threshold": 75,
+          "daily_volume_threshold": 0,
+          "min_unit_rice": 0,
+          "max_open_trades": 0
+        },
+        "sell": {
+          "rsi_threshold": 25,
+          "profit_margin_threshold": 0
+        }
+      }
+    }
   }
 }

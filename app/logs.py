@@ -8,13 +8,13 @@ import logging
 import structlog
 from pythonjsonlogger import jsonlogger
 
-def configure_logging(loglevel, app_mode):
+def configure_logging(loglevel, log_mode):
     if not loglevel:
         loglevel = logging.WARNING
 
-    if app_mode == 'bot':
+    if log_mode == 'json':
         log_formatter = jsonlogger.JsonFormatter()
-    elif app_mode == 'user':
+    elif log_mode == 'text':
         log_formatter = logging.Formatter('%(message)s')
     else:
         log_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')

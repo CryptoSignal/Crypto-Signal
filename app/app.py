@@ -22,7 +22,7 @@ def main():
     behaviour_config = config.fetch_behaviour_config()
 
     # Set up logger
-    logs.configure_logging(settings['loglevel'], settings['app_mode'])
+    logs.configure_logging(settings['loglevel'], settings['log_mode'])
 
     exchange_interface = ExchangeInterface(exchange_config)
     strategy_analyzer = StrategyAnalyzer(exchange_interface)
@@ -32,7 +32,7 @@ def main():
     behaviour = behaviour_manager.get_behaviour(settings['selected_task'])
 
     behaviour.run(
-        settings['symbol_pairs'],
+        settings['market_pairs'],
         settings['update_interval'],
         exchange_interface,
         strategy_analyzer,

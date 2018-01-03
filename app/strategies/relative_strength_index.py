@@ -14,7 +14,7 @@ class RelativeStrengthIndex():
         self.utils = Utils()
 
     # Improvemnts to calculate_rsi are courtesy of community contributor "pcartwright81"
-    def find_rsi(self, historical_data, period_count):
+    def get_rsi_value(self, historical_data, period_count):
         """
         Calculates the Relative Strength Index for a coin_pair
 
@@ -76,3 +76,15 @@ class RelativeStrengthIndex():
 
         rsi = 100 - (100 / (1 + rs))
         return rsi
+
+    def is_overbought(self, rsi_value, overbought_threshold):
+        if overbought_threshold:
+            if rsi_value >= overbought_threshold:
+                return True
+        return False
+
+    def is_oversold(self, rsi_value, oversold_threshold):
+        if oversold_threshold:
+            if rsi_value <= oversold_threshold:
+                return True
+        return False

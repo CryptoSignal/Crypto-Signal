@@ -27,7 +27,7 @@ class Configuration():
         self.settings = self.__merge_setting_opts(config['settings'])
         self.exchange_config = self.__merge_exchange_opts(config['exchanges'])
         self.notifier_config = self.__merge_notifier_opts(config['notifiers'])
-        self.behaviour_config = {}
+        self.behaviour_config = config['behaviours']
 
     def __merge_setting_opts(self, settings):
         for setting_key, setting_val in settings.items():
