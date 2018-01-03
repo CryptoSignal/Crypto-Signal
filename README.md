@@ -45,23 +45,7 @@ In the root directory run `docker-compose run app` or `make run` if you don't ha
 
 # How to use (Local)
 To install the dependencies for this project, run "pip install -r requirements.txt" in the app directory.
-Add a secrets.json file to the app directory of your project.
-The contents of the file should mirror the following:
-
-```json
-{
-    "exchanges": {
-        "bittrex": {
-            "required": {
-                "key": "BITTREX_API_KEY",
-                "secret": "BITTREX_SECRET"
-            }
-        }
-    }
-}
-```
-
-For other available options see the app/default-config.json directory.
+You can add a secrets.json file to the app directory of your project to customize the configuration, the defaults are in app/default-config.json.
 
 ## How to run
 Navigate to the app directory in your terminal and run with "python app.py"
