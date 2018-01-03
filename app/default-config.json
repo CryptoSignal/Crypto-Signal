@@ -40,6 +40,11 @@
         "password": "",
         "destination_emails": []
       }
+    },
+    "integram": {
+      "required": {
+        "url": ""
+      }
     }
   },
 

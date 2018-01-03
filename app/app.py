@@ -15,6 +15,7 @@ from behaviour import Behaviour
 
 def main():
      # Load settings and create the config object
+
     config = conf.Configuration()
     settings = config.fetch_settings()
     exchange_config = config.fetch_exchange_config()
