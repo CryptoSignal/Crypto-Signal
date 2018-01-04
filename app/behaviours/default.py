@@ -23,14 +23,16 @@ class DefaultBehaviour():
                 sma_value, ema_value = strategy_analyzer.analyze_moving_averages(market_pairs[exchange][market_pair]['symbol'])
                 breakout_value, is_breaking_out = strategy_analyzer.analyze_breakout(market_pairs[exchange][market_pair]['symbol'])
                 ichimoku_span_a, ichimoku_span_b = strategy_analyzer.analyze_ichimoku_cloud(market_pairs[exchange][market_pair]['symbol'])
+                macd_value = strategy_analyzer.analyze_macd(market_pairs[exchange][market_pair]['symbol'])
                 if is_breaking_out:
                     notifier.notify_all(message="{} is breaking out!".format(market_pair))
 
-                print("{}: \tBreakout: {} \tRSI: {} \tSMA: {} \tEMA: {} \tIMA: {} \tIMB: {}".format(
+                print("{}: \tBreakout: {} \tRSI: {} \tSMA: {} \tEMA: {} \tIMA: {} \tIMB: {} \tMACD: {}".format(
                     market_pair,
                     breakout_value,
                     format(rsi_value, '.2f'),
                     format(sma_value, '.7f'),
                     format(ema_value, '.7f'),
                     format(ichimoku_span_a, '.7f'),
-                    format(ichimoku_span_b, '.7f')))
+                    format(ichimoku_span_b, '.7f'),
+                    format(macd_value, '.7f')))
