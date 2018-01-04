@@ -38,7 +38,7 @@ Shoutouts:
 * First make sure you have [Docker installed](https://docs.docker.com/engine/installation/)
 * Next, to create the docker image run `make build` in the root of the project directory.
 * Once built copy template.env to .env and add your API keys, at a minimum read-only Bittrex keys are required.
-* Make sure to also update the market\_pairs settings within the .env with comma seperated market pair values that match Bittrex's format (i.e. ETH/BTC)
+* Make sure to also update the symbol\_pairs you'd like to monitor within app/default-config.json, following the symbol pair format in the second column found [here](https://gist.github.com/coinmining/95a21ad38f68f2da194052a8b066eca7)
 
 ## How to run
 In the root directory run `docker-compose run app` or `make run` if you don't have docker-compose.
