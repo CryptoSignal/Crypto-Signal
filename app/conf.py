@@ -28,6 +28,7 @@ class Configuration():
         self.exchange_config = self.__merge_exchange_opts(config['exchanges'])
         self.notifier_config = self.__merge_notifier_opts(config['notifiers'])
         self.behaviour_config = config['behaviours']
+        self.database_config = config['database']
 
     def __merge_setting_opts(self, settings):
         for setting_key, setting_val in settings.items():
@@ -84,5 +85,8 @@ class Configuration():
     def fetch_notifier_config(self):
         return self.notifier_config
 
-    def fetch_behaviour_config(self):
-        return self.behaviour_config
+    def fetch_database_config(self):
+        return self.database_config
+
+    def fetch_behaviour_config(self, selected_behaviour):
+        return self.behaviour_config[selected_behaviour]

@@ -65,8 +65,8 @@ class ExchangeInterface():
         """
         symbol_markets = {}
         for exchange in self.exchanges:
-            exchange.load_markets()
-            symbol_markets[exchange.id] = {}
+            self.exchanges[exchange].load_markets()
+            symbol_markets[exchange] = {}
             for market_pair in market_pairs:
                 symbol_markets[exchange][market_pair] = self.exchanges[exchange].markets[market_pair]
         return symbol_markets

@@ -7,6 +7,15 @@
     "selected_task": "default"
   },
 
+  "database": {
+    "engine": "sqlite",
+    "host": "",
+    "port": "",
+    "db_name": "",
+    "username": "",
+    "password": ""
+  },
+
   "exchanges": {
     "bittrex": {
       "required": {
@@ -53,7 +62,7 @@
       "ichimoku_threshold": 0
     },
 
-    "simple_bot": {
+    "rsi_bot": {
       "trade_parameters": {
         "mode": "simulate",
         "buy": {
