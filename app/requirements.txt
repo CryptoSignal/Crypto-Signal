@@ -1,4 +1,5 @@
 asn1crypto==0.22.0
+
 certifi==2017.7.27.1
 cffi==1.11.0
 chardet==3.0.4
@@ -18,3 +19,5 @@ slackclient==1.1.0
 ccxt==1.10.521
 structlog==17.2.0
 python-json-logger==0.1.8
+pandas==0.21.0
+
