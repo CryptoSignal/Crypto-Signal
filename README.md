@@ -10,11 +10,13 @@ Technical Analysis Automated:
 * Simple Moving Average
 * Exponential Moving Average
 * Breakouts / Pumps
+* MACD
 
 Alerts:
 * SMS via Twilio
 * Email
 * Slack
+* Telegram
 
 Features:
 * Modular code for easy trading strategy implementation
@@ -24,7 +26,6 @@ You can build on top of this tool and implement algorithm trading and some machi
 
 Coming Soon:
 * Automtated buying/selling
-* MACD
 * Bollinger Band
 * Web Client :)
 
