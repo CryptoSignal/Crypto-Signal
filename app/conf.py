@@ -29,6 +29,7 @@ class Configuration():
         self.notifier_config = self.__merge_notifier_opts(config['notifiers'])
         self.behaviour_config = config['behaviours']
         self.database_config = config['database']
+        self.analysis_config = config['analysis']
 
 
     def __merge_setting_opts(self, settings):
@@ -105,3 +106,6 @@ class Configuration():
 
     def fetch_behaviour_config(self, selected_behaviour):
         return self.behaviour_config[selected_behaviour]
+
+    def fetch_analysis_config(self):
+        return self.analysis_config

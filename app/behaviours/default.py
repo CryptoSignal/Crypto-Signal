@@ -30,33 +30,29 @@ class DefaultBehaviour():
                 try:
                     rsi_data = await self.strategy_analyzer.analyze_rsi(
                         market_data[exchange][market_pair]['symbol'],
-                        exchange,
-                        self.behaviour_config['rsi_overbought_threshold'],
-                        self.behaviour_config['rsi_oversold_threshold'])
+                        exchange
+                        )
 
                     ma_data = await self.strategy_analyzer.analyze_moving_averages(
                         market_data[exchange][market_pair]['symbol'],
-                        exchange,
-                        self.behaviour_config['sma_threshold'],
-                        self.behaviour_config['ema_threshold'])
+                        exchange
+                        )
 
                     breakout_data = await self.strategy_analyzer.analyze_breakout(
                         market_data[exchange][market_pair]['symbol'],
-                        exchange,
-                        self.behaviour_config['breakout_threshold'])
+                        exchange
+                        )
 
                     ichimoku_data = await self.strategy_analyzer.analyze_ichimoku_cloud(
                         market_data[exchange][market_pair]['symbol'],
-                        exchange,
-                        self.behaviour_config['ichimoku_threshold'])
+                        exchange
+                        )
 
                 # bandaid fixes
                 except ccxt.errors.RequestTimeout:
-                    print("timeout, ignoring")
                     continue
 
                 except asyncio.TimeoutError:
-                    print("timeout, ignoring")
                     continue
 
 

@@ -11,7 +11,6 @@ import structlog
 
 from behaviour import Behaviour
 
-
 def main():
      # Load settings and create the config object
     config = conf.Configuration()

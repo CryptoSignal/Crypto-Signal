@@ -52,16 +52,41 @@
     }
   },
 
-  "behaviours": {
-    "default": {
-      "breakout_threshold": 0.75,
-      "rsi_overbought_threshold": 0,
-      "rsi_oversold_threshold": 0,
-      "sma_threshold": 0,
-      "ema_threshold": 0,
-      "ichimoku_threshold": 0
-    },
+  "analysis": {
+      "breakout": {
+        "period_count": 5,
+        "time_unit": "5m",
+        "breakout_threshold": 0.75
+      },
+      "rsi": {
+        "period_count": 1000,
+        "time_unit": "1h",
+        "overbought": 80,
+        "oversold": 20
+      },
+      "moving_averages": {
+        "period_count": 20,
+        "time_unit": "5m",
+        "sma_threshold": 0,
+        "ema_threshold": 0
+      },
+      "ichimoku_cloud": {
+        "time_unit": "1d",
+        "ichimoku_threshold": 0,
+        "base_line": {
+          "period_count": 26
+        },
+        "conversion_line": {
+          "period_count": 9
+        },
+        "span_b": {
+          "period_count": 52
+        }
+      }
+  },
 
+  "behaviours": {
+    "default": "",
     "rsi_bot": {
       "trade_parameters": {
         "mode": "simulate",

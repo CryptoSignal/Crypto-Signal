@@ -20,7 +20,7 @@ class MovingAverages():
         """
         total_closing = sum(self.utils.get_closing_prices(historical_data))
 
-        return round(total_closing / period_count, 2)
+        return total_closing / period_count
 
 
     def get_ema_value(self, period_count, historical_data):
@@ -33,7 +33,7 @@ class MovingAverages():
         current_ema = (closing_prices[-1] * period_constant) \
                     + (previous_ema * (1 - period_constant))
 
-        return round(current_ema, 2)
+        return current_ema
 
 
     def is_sma_trending(self, sma_value, sma_threshold):
