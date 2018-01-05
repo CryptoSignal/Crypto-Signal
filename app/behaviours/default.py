@@ -27,27 +27,37 @@ class DefaultBehaviour():
         for exchange in market_data:
             for market_pair in market_data[exchange]:
 
-                rsi_data = await self.strategy_analyzer.analyze_rsi(
-                    market_data[exchange][market_pair]['symbol'],
-                    exchange,
-                    self.behaviour_config['rsi_overbought_threshold'],
-                    self.behaviour_config['rsi_oversold_threshold'])
+                try:
+                    rsi_data = await self.strategy_analyzer.analyze_rsi(
+                        market_data[exchange][market_pair]['symbol'],
+                        exchange,
+                        self.behaviour_config['rsi_overbought_threshold'],
+                        self.behaviour_config['rsi_oversold_threshold'])
 
-                ma_data = await self.strategy_analyzer.analyze_moving_averages(
-                    market_data[exchange][market_pair]['symbol'],
-                    exchange,
-                    self.behaviour_config['sma_threshold'],
-                    self.behaviour_config['ema_threshold'])
+                    ma_data = await self.strategy_analyzer.analyze_moving_averages(
+                        market_data[exchange][market_pair]['symbol'],
+                        exchange,
+                        self.behaviour_config['sma_threshold'],
+                        self.behaviour_config['ema_threshold'])
 
-                breakout_data = await self.strategy_analyzer.analyze_breakout(
-                    market_data[exchange][market_pair]['symbol'],
-                    exchange,
-                    self.behaviour_config['breakout_threshold'])
+                    breakout_data = await self.strategy_analyzer.analyze_breakout(
+                        market_data[exchange][market_pair]['symbol'],
+                        exchange,
+                        self.behaviour_config['breakout_threshold'])
 
-                ichimoku_data = await self.strategy_analyzer.analyze_ichimoku_cloud(
-                    market_data[exchange][market_pair]['symbol'],
-                    exchange,
-                    self.behaviour_config['ichimoku_threshold'])
+                    ichimoku_data = await self.strategy_analyzer.analyze_ichimoku_cloud(
+                        market_data[exchange][market_pair]['symbol'],
+                        exchange,
+                        self.behaviour_config['ichimoku_threshold'])
+
+                # bandaid fixes
+                except ccxt.errors.RequestTimeout:
+                    print("timeout, ignoring")
+                    continue
+
+                except asyncio.TimeoutError:
+                    print("timeout, ignoring")
+                    continue
 
 
                 if breakout_data['is_breaking_out']:
@@ -90,3 +100,5 @@ class DefaultBehaviour():
                     format(ma_data['ema_value'], '.7f'),
                     format(ichimoku_data['span_a_value'], '.7f'),
                     format(ichimoku_data['span_b_value'], '.7f')))
+
+                time.sleep(self.exchange_interface.exchanges[exchange].rateLimit / 1000)

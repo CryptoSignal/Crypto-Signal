@@ -41,7 +41,7 @@ class StrategyAnalyzer():
 
 
     async def analyze_breakout(self, market_pair, exchange, breakout_threshold=0.75, 
-        period_count=5, time_unit='5m'):
+        period_count=5, time_unit='5m', historical_data=None):
 
         breakout_analyzer = Breakout()
 
@@ -49,11 +49,12 @@ class StrategyAnalyzer():
         # kwargs = {"market_pair:": market_pair, "exchange": exchange, 
         #     "period_count": period_count, "time_unit": time_unit}
 
-        historical_data = await self.__exchange_interface.get_historical_data(
-            market_pair=market_pair,
-            exchange=exchange,
-            period_count=period_count,
-            time_unit=time_unit)
+        if not historical_data:
+            historical_data = await self.__exchange_interface.get_historical_data(
+                market_pair=market_pair,
+                exchange=exchange,
+                period_count=period_count,
+                time_unit=time_unit)
 
         breakout_value = breakout_analyzer.get_breakout_value(historical_data)
         is_breaking_out = breakout_analyzer.is_breaking_out(
@@ -65,15 +66,17 @@ class StrategyAnalyzer():
 
 
     async def analyze_rsi(self, market_pair, exchange, overbought_threshold=0, 
-        oversold_threshold=0, period_count=1000, time_unit='1h'):
+        oversold_threshold=0, period_count=1000, time_unit='1h', historical_data=None):
 
         rsi_analyzer = RelativeStrengthIndex()
-        historical_data = await self.__exchange_interface.get_historical_data(
-            market_pair=market_pair,
-            exchange=exchange,
-            period_count=period_count,
-            time_unit=time_unit
-        )
+
+        if not historical_data:
+            historical_data = await self.__exchange_interface.get_historical_data(
+                market_pair=market_pair,
+                exchange=exchange,
+                period_count=period_count,
+                time_unit=time_unit
+            )
 
         rsi_value = rsi_analyzer.get_rsi_value(historical_data, period_count)
         is_overbought = rsi_analyzer.is_overbought(rsi_value, overbought_threshold)
@@ -86,16 +89,17 @@ class StrategyAnalyzer():
 
 
     async def analyze_moving_averages(self, market_pair, exchange, sma_threshold=0, 
-        ema_threshold=0, period_count=20, time_unit='5m'):
+        ema_threshold=0, period_count=20, time_unit='5m', historical_data=None):
 
         ma_analyzer = MovingAverages()
 
-        historical_data = await self.__exchange_interface.get_historical_data(
-            market_pair=market_pair,
-            exchange=exchange,
-            period_count=period_count,
-            time_unit=time_unit
-        )
+        if not historical_data:
+            historical_data = await self.__exchange_interface.get_historical_data(
+                market_pair=market_pair,
+                exchange=exchange,
+                period_count=period_count,
+                time_unit=time_unit
+            )
 
         sma_value = ma_analyzer.get_sma_value(period_count, historical_data)
         ema_value = ma_analyzer.get_ema_value(period_count, historical_data)
@@ -107,8 +111,19 @@ class StrategyAnalyzer():
 
         return ma_data
 
+
     async def analyze_ichimoku_cloud(self, market_pair, exchange, ichimoku_threshold=0):
         ic_analyzer = IchimokuCloud()
+
+        history = await self.__exchange_interface.get_historical_data(
+            market_pair=market_pair,
+            exchange=exchange,
+            period_count=52,
+            time_unit='1d'
+        )
+
+        base_line_data = history
+        base_line_data[]
 
         base_line_data = await self.__exchange_interface.get_historical_data(
             market_pair=market_pair,

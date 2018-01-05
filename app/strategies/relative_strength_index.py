@@ -13,6 +13,7 @@ class RelativeStrengthIndex():
         self.logger = structlog.get_logger()
         self.utils = Utils()
 
+
     # Improvemnts to calculate_rsi are courtesy of community contributor "pcartwright81"
     def get_rsi_value(self, historical_data, period_count):
         """
@@ -80,14 +81,10 @@ class RelativeStrengthIndex():
         rsi = 100 - (100 / (1 + rs))
         return rsi
 
+
     def is_overbought(self, rsi_value, overbought_threshold):
-        if overbought_threshold:
-            if rsi_value >= overbought_threshold:
-                return True
-        return False
+        return bool(overbought_threshold and rsi_value >= overbought_threshold)
+
 
     def is_oversold(self, rsi_value, oversold_threshold):
-        if oversold_threshold:
-            if rsi_value <= oversold_threshold:
-                return True
-        return False
+        return bool(oversold_threshold and rsi_value >= oversold_threshold)
