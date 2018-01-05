@@ -2,8 +2,8 @@
 Computes the Bollinger Bands over a series of historical data points
 """
 
-from strategy_utils import Utils
-from moving_averages import MovingAverages
+from strategies.strategy_utils import Utils
+from strategies.moving_averages import MovingAverages
 import structlog
 import numpy as np
 
