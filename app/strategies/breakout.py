@@ -4,6 +4,7 @@ Runs the breakout strategy over the market data
 
 import structlog
 
+
 class Breakout():
     """
     Runs the breakout strategy over the market data
@@ -18,10 +19,12 @@ class Breakout():
                 hit += 1
 
         percent_positive_trend = hit / len(historical_data)
+
         return percent_positive_trend
 
     def is_breaking_out(self, breakout_value, breakout_threshold):
         if breakout_threshold:
             if breakout_value >= breakout_threshold:
                 return True
+                
         return False

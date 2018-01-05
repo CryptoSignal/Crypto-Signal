@@ -17,7 +17,9 @@ def configure_logging(loglevel, log_mode):
     elif log_mode == 'text':
         log_formatter = logging.Formatter('%(message)s')
     else:
-        log_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        log_formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            )
 
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(log_formatter)

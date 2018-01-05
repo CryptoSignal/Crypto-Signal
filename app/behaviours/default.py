@@ -1,6 +1,8 @@
 
 import time
+import asyncio
 
+import ccxt
 import structlog
 
 
@@ -11,53 +13,74 @@ class DefaultBehaviour():
         self.strategy_analyzer = strategy_analyzer
         self.notifier = notifier
 
-    def run(self, market_pairs, update_interval):
+    async def run(self, market_pairs, update_interval):
         if market_pairs:
-            market_data = self.exchange_interface.get_symbol_markets(market_pairs)
+            market_data = await self.exchange_interface.get_symbol_markets(market_pairs)
         else:
-            market_data = self.exchange_interface.get_exchange_markets()
-        while True:
-            self.test_strategies(market_data)
-            time.sleep(update_interval)
+            market_data = await self.exchange_interface.get_exchange_markets()
 
-    def test_strategies(self, market_data):
+        while True:
+            await self.test_strategies(market_data)
+            await asyncio.sleep(update_interval)
+
+    async def test_strategies(self, market_data):
         for exchange in market_data:
             for market_pair in market_data[exchange]:
-                rsi_data = self.strategy_analyzer.analyze_rsi(
+
+                rsi_data = await self.strategy_analyzer.analyze_rsi(
                     market_data[exchange][market_pair]['symbol'],
                     exchange,
                     self.behaviour_config['rsi_overbought_threshold'],
                     self.behaviour_config['rsi_oversold_threshold'])
-                ma_data = self.strategy_analyzer.analyze_moving_averages(
+
+                ma_data = await self.strategy_analyzer.analyze_moving_averages(
                     market_data[exchange][market_pair]['symbol'],
                     exchange,
                     self.behaviour_config['sma_threshold'],
                     self.behaviour_config['ema_threshold'])
-                breakout_data = self.strategy_analyzer.analyze_breakout(
+
+                breakout_data = await self.strategy_analyzer.analyze_breakout(
                     market_data[exchange][market_pair]['symbol'],
                     exchange,
                     self.behaviour_config['breakout_threshold'])
-                ichimoku_data = self.strategy_analyzer.analyze_ichimoku_cloud(
+
+                ichimoku_data = await self.strategy_analyzer.analyze_ichimoku_cloud(
                     market_data[exchange][market_pair]['symbol'],
                     exchange,
                     self.behaviour_config['ichimoku_threshold'])
 
+
                 if breakout_data['is_breaking_out']:
-                    self.notifier.notify_all(message="{} is breaking out!".format(market_pair))
+                    self.notifier.notify_all(
+                        message="{} is breaking out!".format(market_pair)
+                        )
 
                 if rsi_data['is_overbought']:
-                    self.notifier.notify_all(message="{} is over bought!".format(market_pair))
+                    self.notifier.notify_all(
+                        message="{} is over bought!".format(market_pair)
+                        )
+
                 elif rsi_data['is_oversold']:
-                    self.notifier.notify_all(message="{} is over sold!".format(market_pair))
+                    self.notifier.notify_all(
+                        message="{} is over sold!".format(market_pair)
+                        )
 
                 if ma_data['is_sma_trending']:
-                    self.notifier.notify_all(message="{} is trending well according to SMA!".format(market_pair))
+                    self.notifier.notify_all(
+                        message="{} is trending well according to SMA!".format(market_pair)
+                        )
 
                 if ma_data['is_ema_trending']:
-                    self.notifier.notify_all(message="{} is trending well according to EMA!".format(market_pair))
+                    self.notifier.notify_all(
+                        message="{} is trending well according to EMA!".format(market_pair)
+                        )
 
                 if ichimoku_data['is_ichimoku_trending']:
-                    self.notifier.notify_all(message="{} is trending well according to Ichimoku!".format(market_pair))
+                    self.notifier.notify_all(
+                        message="{} is trending well according to Ichimoku!".format(
+                            market_pair
+                            )
+                        )
 
                 print("{}: \tBreakout: {} \tRSI: {} \tSMA: {} \tEMA: {} \tIMA: {} \tIMB: {}".format(
                     market_pair,

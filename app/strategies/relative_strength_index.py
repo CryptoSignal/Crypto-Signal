@@ -40,6 +40,9 @@ class RelativeStrengthIndex():
 
         closing_prices = self.utils.get_closing_prices(historical_data)
 
+        if period_count > len(closing_prices):
+            period_count = len(closing_prices) 
+
         advances = []
         declines = []
 
