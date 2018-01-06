@@ -18,4 +18,5 @@ class Utils():
         closing_prices = []
         for data_point in historical_data:
             closing_prices.append(data_point[4])
+            
         return closing_prices

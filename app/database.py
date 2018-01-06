@@ -1,11 +1,13 @@
 
 import datetime
-
 import structlog
+
+
 from sqlalchemy import create_engine
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+
 
 Base = declarative_base()
 
@@ -31,6 +33,7 @@ class Transaction(Base):
             self.quote_value,
             self.is_open)
 
+
 class DatabaseHandler():
     def __init__(self, database_config):
         connection_string = self.__create_connection_string(database_config)
@@ -39,16 +42,21 @@ class DatabaseHandler():
         Session = sessionmaker(bind=engine)
         self.session = Session()
 
+
     def __create_connection_string(self, database_config):
         connection_string = database_config['engine'] + "://"
         if database_config['username'] and database_config['password']:
             connection_string += ':'.join([database_config['username'], database_config['password']])
+
         if database_config['host']:
             connection_string += '@' + database_config['host']
+
         if database_config['port']:
             connection_string += ':' + database_config['port']
+
         if database_config['db_name']:
             connection_string += '/' + database_config['db_name']
+
         return connection_string
 
     def get_transactions(self, filter_args={}):

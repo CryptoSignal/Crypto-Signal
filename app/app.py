@@ -3,9 +3,12 @@
 Main
 """
 
+import asyncio
+
 import logs
 import conf
 import structlog
+
 from behaviour import Behaviour
 
 def main():
@@ -19,9 +22,20 @@ def main():
     behaviour_manager = Behaviour(config)
     behaviour = behaviour_manager.get_behaviour(settings['selected_task'])
 
-    behaviour.run(
-        settings['market_pairs'],
-        settings['update_interval'])
+
+    # set up async
+    loop = asyncio.get_event_loop()
+
+    task = asyncio.ensure_future(
+        behaviour.run(
+            settings['market_pairs'],
+            settings['update_interval']
+        )
+    )
+
+    loop.run_until_complete(task)
+    loop.close()
+
 
 if __name__ == "__main__":
     main()
