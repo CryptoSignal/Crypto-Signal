@@ -1,6 +1,6 @@
 # Crypto Signals
 
-Crypto Signals is automates your crpyto currency Technical Analysis (TA) and trading.
+Crypto Signals is a command line tool that automates your crypto currency Technical Analysis (TA) and trading.
 
 Track over 500 coins across Bittrex, Bitfinex, GDAX, Gemini and more!
 
@@ -26,7 +26,6 @@ You can build on top of this tool and implement algorithm trading and some machi
 
 Coming Soon:
 * Automtated buying/selling
-* Bollinger Band
 * Web Client :)
 
 
