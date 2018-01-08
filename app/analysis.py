@@ -10,7 +10,8 @@ from strategies.breakout import Breakout
 from strategies.ichimoku_cloud import IchimokuCloud
 from strategies.moving_averages import MovingAverages
 from strategies.relative_strength_index import RelativeStrengthIndex
-
+from strategies.moving_avg_convergence_divergence import MovingAvgConvDiv
+from strategies.bollinger_bands import BollingerBands
 
 class StrategyAnalyzer():
     """
@@ -31,10 +32,25 @@ class StrategyAnalyzer():
         self.ichimoku_config = self.config["ichimoku_cloud"]
 
 
+    async def analyze_macd(self, market_pair, exchange time_unit='1d'):
+        macd_analyzer = MovingAvgConvDiv()
+        historical_data = await self.exchange_interface.get_historical_data(
+            market_pair=market_pair,
+            exchange=exchange,
+            period_count=26,
+            time_unit=time_unit
+        )
+        macd_value = macd_analyzer.calculate_MACD_delta(historical_data)
+        
+        macd_data = {
+            'value': macd_value
+            }
+        
+        return macd_data
+
+
     async def analyze_breakout(self, market_pair, exchange):
-
         breakout_analyzer = Breakout()
-
         historical_data = await self.__exchange_interface.get_historical_data(
             market_pair=market_pair,
             exchange=exchange,
@@ -143,8 +159,20 @@ class StrategyAnalyzer():
         return ichimoku_data
 
 
-    async def analyze_all(self, market_pair, exchange):
-        ichimoku_data = self.analyze_ichimoku_cloud(self, market_pair, exchange)
+    def analyze_bollinger_bands(self, market_pair, period_count=21, std_dev=2., time_unit='5m'):
+        bollingers = BollingerBands()
 
-        # Moving averages and breakout both use 5 mins.
-        history = await self.__exchange_interface.get_historical_data() 
+        historical_data = self.exchange_interface.get_historical_data(
+            market_pair=market_pair,
+            period_count=period_count,
+            time_unit=time_unit
+        )
+
+        upper_band, lower_band = bollingers.get_bollinger_bands(historical_data, period=period_count, k=std_dev)
+        
+        bb_data = {
+            'upper_band': upper_band, 
+            'lower_band': lower_band
+            }
+       
+        return bb_data

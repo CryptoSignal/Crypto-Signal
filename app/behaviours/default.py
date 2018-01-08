@@ -47,6 +47,11 @@ class DefaultBehaviour():
                         market_data[exchange][market_pair]['symbol'],
                         exchange
                         )
+                    
+                    macd_data = await self.strategy_analyzer.analyze_macd(
+                        market_data[exchange][market_pair]['symbol'],
+                        exchange
+                        )
 
                 # bandaid fixes
                 except ccxt.errors.RequestTimeout:
@@ -88,13 +93,14 @@ class DefaultBehaviour():
                             )
                         )
 
-                print("{}: \tBreakout: {} \tRSI: {} \tSMA: {} \tEMA: {} \tIMA: {} \tIMB: {}".format(
+                print("{}: \tBreakout: {} \tRSI: {} \tSMA: {} \tEMA: {} \tIMA: {} \tIMB: {} \tMACD: {}".format(
                     market_pair,
                     breakout_data['value'],
                     format(rsi_data['value'], '.2f'),
                     format(ma_data['sma_value'], '.7f'),
                     format(ma_data['ema_value'], '.7f'),
                     format(ichimoku_data['span_a_value'], '.7f'),
-                    format(ichimoku_data['span_b_value'], '.7f')))
+                    format(ichimoku_data['span_b_value'], '.7f'),
+                    format(macd_value, '.7f')))
 
                 time.sleep(self.exchange_interface.exchanges[exchange].rateLimit / 1000)

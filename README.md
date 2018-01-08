@@ -1,25 +1,31 @@
 # Crypto Signals
 
-Track 250+ crypto currencies and their trading signals through Crypto signals.
+Crypto Signals is a command line tool that automates your crypto currency Technical Analysis (TA) and trading.
+
+Track over 500 coins across Bittrex, Bitfinex, GDAX, Gemini and more!
 
 Technical Analysis Automated:
 * Relative Strength Index (RSI)
 * Ichimoku Cloud (Leading Span A, Leading Span B, Conversion Line, Base Line)
 * Simple Moving Average
 * Exponential Moving Average
-* Breakouts
+* Breakouts / Pumps
+* MACD
+
+Alerts:
+* SMS via Twilio
+* Email
+* Slack
+* Telegram
 
 Features:
-* Tracking for over 250 coins on Bittrex
-* SMS alerts for coin breakouts and price changes
-* Well documented script
-* Automated Technical Analysis that's implemented from scratch for simplicity and ease of use
+* Modular code for easy trading strategy implementation
+* Easy install with Docker
 
 You can build on top of this tool and implement algorithm trading and some machine learning models to experiment with predictive analysis.
 
 Coming Soon:
-* MACD
-* Bollinger Band
+* Automtated buying/selling
 * Web Client :)
 
 
@@ -32,30 +38,14 @@ Shoutouts:
 * First make sure you have [Docker installed](https://docs.docker.com/engine/installation/)
 * Next, to create the docker image run `make build` in the root of the project directory.
 * Once built copy template.env to .env and add your API keys, at a minimum read-only Bittrex keys are required.
-* Make sure to also update the market\_pairs environment or app.py variable with comma seperated market pair values that match Bittrex's format (i.e. BTC-ETH)
+* Make sure to also update the symbol\_pairs you'd like to monitor within app/default-config.json, following the symbol pair format of base\_currency/quote\_currency (i.e. BTC/ETH)
 
 ## How to run
 In the root directory run `docker-compose run app` or `make run` if you don't have docker-compose.
 
 # How to use (Local)
 To install the dependencies for this project, run "pip install -r requirements.txt" in the app directory.
-Add a secrets.json file to the app directory of your project.
-The contents of the file should mirror the following:
-
-```json
-{
-    "exchanges": {
-        "bittrex": {
-            "required": {
-                "key": "BITTREX_API_KEY",
-                "secret": "BITTREX_SECRET"
-            }
-        }
-    }
-}
-```
-
-For other available options see the app/default-config.json directory.
+You can add a secrets.json file to the app directory of your project to customize the configuration, the defaults are in app/default-config.json.
 
 ## How to run
 Navigate to the app directory in your terminal and run with "python app.py"
