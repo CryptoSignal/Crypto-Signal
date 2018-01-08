@@ -106,3 +106,6 @@ class ExchangeInterface():
                     market_pair]
 
         return symbol_markets
+
+    async def get_order_book(self, market_pair, exchange):
+        return await self.exchanges[exchange].fetch_order_book(market_pair)

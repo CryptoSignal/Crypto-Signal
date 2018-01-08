@@ -91,10 +91,10 @@
       "trade_parameters": {
         "mode": "simulate",
         "buy": {
-          "btc_amount": 0,
+          "btc_amount": 1,
+          "btc_trade_limit": 0.1,
           "rsi_threshold": 75,
           "daily_volume_threshold": 0,
-          "min_unit_rice": 0,
           "max_open_trades": 0
         },
         "sell": {
