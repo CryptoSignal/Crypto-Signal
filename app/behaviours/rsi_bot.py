@@ -81,6 +81,7 @@ class RSIBot():
         }
         self.db_handler.create_transaction(purchase_payload)
 
+
     async def sell(self, market_pair, exchange):
         (base_symbol, quote_symbol) = market_pair.split('/')
         query_payload = {
@@ -111,10 +112,6 @@ class RSIBot():
         }
 
         self.db_handler.update_transaction(transaction, sale_payload)
-
-        transactions = self.db_handler.read_transactions({'is_open': False})
-        for row in transactions:
-            print(row)
 
 
     def get_holdings(self):
