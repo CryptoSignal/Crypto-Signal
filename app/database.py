@@ -96,17 +96,14 @@ class DatabaseHandler():
             self.logger.error("Failed to create transaction record!", create_args=create_args)
             self.session.rollback()
         return create_success
-    
-    def update_transaction(self, filter_args={}, update_args={}):
+
+    def update_transaction(self, transaction, update_args={}):
         update_success = True
         try:
-            transaction = self.read_transactions(filter_args)[0]
-            transaction.update(**update_args)
+            self.session.query(Transaction).filter_by(id=transaction.id).update(update_args)
             self.session.commit()
         except SQLAlchemyError:
             update_success = False
-            self.logger.error("Failed to update transaction record!",
-                update_args=update_args,
-                filter_args=filter_args)
+            self.logger.error("Failed to update transaction record!", update_args=update_args)
             self.session.rollback()
         return update_success

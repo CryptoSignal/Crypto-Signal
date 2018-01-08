@@ -54,8 +54,11 @@ class RSIBot():
 
 
     async def buy(self, market_pair, exchange):
+        (base_symbol, quote_symbol) = market_pair.split('/')
         order_book = await self.exchange_interface.get_order_book(market_pair, exchange)
         ask = order_book['asks'][0][0] if order_book['asks'] else None
+        if not ask:
+            return
 
         funds = self.behaviour_config['trade_parameters']['buy']['btc_amount']
         purchase_limit = self.behaviour_config['trade_parameters']['buy']['btc_trade_limit']
@@ -68,8 +71,7 @@ class RSIBot():
             # Do live trading stuff here
             print('Nothing to do yet')
 
-        (base_symbol, quote_symbol) = market_pair.split('/')
-        transaction_payload = {
+        purchase_payload = {
             'exchange': exchange,
             'base_symbol': base_symbol,
             'quote_symbol': quote_symbol,
@@ -77,11 +79,40 @@ class RSIBot():
             'purchase_quote_value': purchase_quote_amount,
             'purchase_total': purchase_total_price
         }
-        self.db_handler.create_transaction(transaction_payload)
+        self.db_handler.create_transaction(purchase_payload)
 
     async def sell(self, market_pair, exchange):
-        #self.db_handler.update_transaction()
-        transactions = self.db_handler.read_transactions({'is_open': True})
+        (base_symbol, quote_symbol) = market_pair.split('/')
+        query_payload = {
+            'base_symbol': base_symbol,
+            'quote_symbol': quote_symbol,
+            'exchange': exchange,
+            'is_open': True
+        }
+
+        transaction = self.db_handler.read_transactions(query_payload)[0]
+
+        order_book = await self.exchange_interface.get_order_book(market_pair, exchange)
+        bid = order_book['bids'][0][0] if order_book['bids'] else None
+        if not bid:
+            return
+
+        sale_value = bid * transaction.purchase_total
+
+        if self.behaviour_config['trade_parameters']['mode'] == 'live':
+            # Do live trading stuff here
+            print('Nothing to do yet')
+
+        sale_payload = {
+            'sale_base_value': bid,
+            'sale_quote_value': transaction.purchase_total,
+            'sale_total': sale_value,
+            'is_open': False
+        }
+
+        self.db_handler.update_transaction(transaction, sale_payload)
+
+        transactions = self.db_handler.read_transactions({'is_open': False})
         for row in transactions:
             print(row)
 
