@@ -2,43 +2,70 @@
 Collect required information from exchanges
 """
 
-import structlog
+import time
+
 import ccxt
+import structlog
 
 class ExchangeInterface():
     """
-    Collect required information from exchanges
+    Collects required information from exchanges
     """
     def __init__(self, exchange_config):
         self.logger = structlog.get_logger()
-        self.exchanges = []
+        self.exchanges = {}
+
+        # Loads the exchanges using ccxt.
         for exchange in exchange_config:
             if exchange_config[exchange]['required']['enabled']:
-                new_exchange = getattr(ccxt, exchange)()
+                new_exchange = getattr(ccxt, exchange)({
+                    "enableRateLimit": True # Enables built-in rate limiter
+                    })
+
+                # sets up api permissions for user if given
                 if new_exchange:
                     if 'key' in exchange_config[exchange]['optional']:
                         new_exchange.apiKey = exchange_config[exchange]['optional']['key']
+
                     if 'secret' in exchange_config[exchange]['optional']:
-                        new_exchange.secret = exchange_config[exchange]['optional']['secret']
+                        new_exchange.secret = exchange_config[exchange]['optional'][
+                            'secret']
+
                     if 'username' in exchange_config[exchange]['optional']:
-                        new_exchange.username = exchange_config[exchange]['optional']['username']
+                        new_exchange.username = exchange_config[exchange]['optional'][
+                            'username']
+
                     if 'password' in exchange_config[exchange]['optional']:
-                        new_exchange.password = exchange_config[exchange]['optional']['password']
-                    self.exchanges.append(new_exchange)
+                        new_exchange.password = exchange_config[exchange]['optional'][
+                            'password']
+
+                    self.exchanges[new_exchange.id] = new_exchange
+
                 else:
                     print("Unable to load exchange %s", new_exchange)
 
-    def get_historical_data(self, market_pair, period_count, time_unit):
+
+    def get_historical_data(self, market_pair, exchange, period_count, time_unit):
         """
-        Get history data
+        Gets historical data for market_pair from exchange for period_count periods of
+        interval time_unit.
+
+        Args:
+            market_pair: the market who's historical data is to be queried.
+            exchange: the exchange that holds the historical data
+            time_unit: interval between periods.
+
+        Returns:
+            Historical data from market in JSON.
         """
+
         historical_data = []
-        for exchange in self.exchanges:
-            historical_data.append(exchange.fetch_ohlcv(
-                market_pair,
-                timeframe=time_unit,
-                limit=period_count))
+        historical_data.append(self.exchanges[exchange].fetch_ohlcv(
+            market_pair,
+            timeframe=time_unit,
+            limit=period_count))
         return historical_data[0]
+
 
     def get_account_markets(self):
         """
@@ -46,8 +73,10 @@ class ExchangeInterface():
         """
         account_markets = {}
         for exchange in self.exchanges:
-            account_markets.update(exchange.fetch_balance())
+            account_markets.update(self.exchanges[exchange].fetch_balance())
+
         return account_markets
+
 
     def get_exchange_markets(self):
         """
@@ -55,17 +84,25 @@ class ExchangeInterface():
         """
         exchange_markets = {}
         for exchange in self.exchanges:
-            exchange_markets[exchange.id] = exchange.load_markets()
+            exchange_markets[exchange] = self.exchanges[exchange].load_markets()
+
         return exchange_markets
 
-    def get_symbol_markets(self, symbol_pairs):
+
+    def get_symbol_markets(self, market_pairs):
         """
         Get symbols market in each exchange
         """
         symbol_markets = {}
         for exchange in self.exchanges:
-            exchange.load_markets()
-            symbol_markets[exchange.id] = {}
-            for symbol_pair in symbol_pairs:
-                symbol_markets[exchange.id][symbol_pair] = exchange.markets[symbol_pair]
+            self.exchanges[exchange].load_markets()
+            symbol_markets[exchange] = {}
+
+            for market_pair in market_pairs:
+                symbol_markets[exchange][market_pair] = self.exchanges[exchange].markets[
+                    market_pair]
+
         return symbol_markets
+
+    def get_order_book(self, market_pair, exchange):
+        return self.exchanges[exchange].fetch_order_book(market_pair)
