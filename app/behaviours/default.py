@@ -101,6 +101,6 @@ class DefaultBehaviour():
                     format(ma_data['ema_value'], '.7f'),
                     format(ichimoku_data['span_a_value'], '.7f'),
                     format(ichimoku_data['span_b_value'], '.7f'),
-                    format(macd_value, '.7f')))
+                    format(macd_data['value'], '.7f')))
 
                 time.sleep(self.exchange_interface.exchanges[exchange].rateLimit / 1000)

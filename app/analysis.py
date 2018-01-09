@@ -32,9 +32,9 @@ class StrategyAnalyzer():
         self.ichimoku_config = self.config["ichimoku_cloud"]
 
 
-    async def analyze_macd(self, market_pair, exchange time_unit='1d'):
+    async def analyze_macd(self, market_pair, exchange, time_unit='1d'):
         macd_analyzer = MovingAvgConvDiv()
-        historical_data = await self.exchange_interface.get_historical_data(
+        historical_data = await self.__exchange_interface.get_historical_data(
             market_pair=market_pair,
             exchange=exchange,
             period_count=26,
@@ -162,7 +162,7 @@ class StrategyAnalyzer():
     def analyze_bollinger_bands(self, market_pair, period_count=21, std_dev=2., time_unit='5m'):
         bollingers = BollingerBands()
 
-        historical_data = self.exchange_interface.get_historical_data(
+        historical_data = self.__exchange_interface.get_historical_data(
             market_pair=market_pair,
             period_count=period_count,
             time_unit=time_unit
@@ -174,5 +174,5 @@ class StrategyAnalyzer():
             'upper_band': upper_band, 
             'lower_band': lower_band
             }
-       
+
         return bb_data
