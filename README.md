@@ -38,7 +38,7 @@ Shoutouts:
 * First make sure you have [Docker installed](https://docs.docker.com/engine/installation/)
 * Next, to create the docker image run `make build` in the root of the project directory.
 * Once built copy template.env to .env and add your API keys, at a minimum read-only Bittrex keys are required.
-* Make sure to also update the symbol\_pairs you'd like to monitor within app/default-config.json, following the symbol pair format of base\_currency/quote\_currency (i.e. BTC/ETH)
+* Make sure to also update the market\_pairs you'd like to monitor within app/default-config.json, following the symbol pair format of base\_currency/quote\_currency (i.e. BTC/ETH)
 
 ## How to run
 In the root directory run `docker-compose run app` or `make run` if you don't have docker-compose.
