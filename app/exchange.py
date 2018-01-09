@@ -4,11 +4,8 @@ Collect required information from exchanges
 
 import time
 
-
-import ccxt.async as ccxt
+import ccxt
 import structlog
-import asyncio
-
 
 class ExchangeInterface():
     """
@@ -48,7 +45,7 @@ class ExchangeInterface():
                     print("Unable to load exchange %s", new_exchange)
 
 
-    async def get_historical_data(self, market_pair, exchange, period_count, time_unit):
+    def get_historical_data(self, market_pair, exchange, period_count, time_unit):
         """
         Gets historical data for market_pair from exchange for period_count periods of
         interval time_unit.
@@ -63,42 +60,42 @@ class ExchangeInterface():
         """
 
         historical_data = []
-        historical_data.append(await self.exchanges[exchange].fetch_ohlcv(
+        historical_data.append(self.exchanges[exchange].fetch_ohlcv(
             market_pair,
             timeframe=time_unit,
             limit=period_count))
         return historical_data[0]
 
 
-    async def get_account_markets(self):
+    def get_account_markets(self):
         """
         Get user market balances
         """
         account_markets = {}
         for exchange in self.exchanges:
-            account_markets.update(await self.exchanges[exchange].fetch_balance())
-            
+            account_markets.update(self.exchanges[exchange].fetch_balance())
+
         return account_markets
 
 
-    async def get_exchange_markets(self):
+    def get_exchange_markets(self):
         """
         Get exchange markets
         """
         exchange_markets = {}
         for exchange in self.exchanges:
-            exchange_markets[exchange] = await self.exchanges[exchange].load_markets()
+            exchange_markets[exchange] = self.exchanges[exchange].load_markets()
 
         return exchange_markets
 
 
-    async def get_symbol_markets(self, market_pairs):
+    def get_symbol_markets(self, market_pairs):
         """
         Get symbols market in each exchange
         """
         symbol_markets = {}
         for exchange in self.exchanges:
-            await self.exchanges[exchange].load_markets()
+            self.exchanges[exchange].load_markets()
             symbol_markets[exchange] = {}
 
             for market_pair in market_pairs:
@@ -107,5 +104,5 @@ class ExchangeInterface():
 
         return symbol_markets
 
-    async def get_order_book(self, market_pair, exchange):
-        return await self.exchanges[exchange].fetch_order_book(market_pair)
+    def get_order_book(self, market_pair, exchange):
+        return self.exchanges[exchange].fetch_order_book(market_pair)

@@ -1,6 +1,4 @@
 
-import asyncio
-
 import ccxt
 import structlog
 
@@ -17,18 +15,18 @@ class RSIBot():
         self.db_handler = db_handler
 
 
-    async def run(self, market_pairs, update_interval):
+    def run(self, market_pairs, update_interval):
         if market_pairs:
-            market_data = await self.exchange_interface.get_symbol_markets(market_pairs)
+            market_data = self.exchange_interface.get_symbol_markets(market_pairs)
         else:
-            market_data = await self.exchange_interface.get_exchange_markets()
+            market_data = self.exchange_interface.get_exchange_markets()
 
         rsi_data = {}
         for exchange, markets in market_data.items():
             rsi_data[exchange] = {}
             for market_pair in markets:
                 try:
-                    rsi_data[exchange][market_pair] = await self.strategy_analyzer.analyze_rsi(
+                    rsi_data[exchange][market_pair] = self.strategy_analyzer.analyze_rsi(
                         market_data[exchange][market_pair]['symbol'],
                         exchange)
 
@@ -42,20 +40,20 @@ class RSIBot():
 
         for exchange, markets in rsi_data.items():
             for market_pair in markets:
-                await self.buy(market_pair, exchange)
-                await self.sell(market_pair, exchange)
+                self.buy(market_pair, exchange)
+                self.sell(market_pair, exchange)
                 if markets[market_pair]['is_oversold']:
                     if not market_pair in current_holdings[exchange]:
-                        await self.buy(market_pair, exchange)
+                        self.buy(market_pair, exchange)
 
                 elif markets[market_pair]['is_overbought']:
                     if market_pair in current_holdings[exchange]:
-                        await self.sell(market_pair, exchange)
+                        self.sell(market_pair, exchange)
 
 
-    async def buy(self, market_pair, exchange):
+    def buy(self, market_pair, exchange):
         (base_symbol, quote_symbol) = market_pair.split('/')
-        order_book = await self.exchange_interface.get_order_book(market_pair, exchange)
+        order_book = self.exchange_interface.get_order_book(market_pair, exchange)
         ask = order_book['asks'][0][0] if order_book['asks'] else None
         if not ask:
             return
@@ -82,7 +80,7 @@ class RSIBot():
         self.db_handler.create_transaction(purchase_payload)
 
 
-    async def sell(self, market_pair, exchange):
+    def sell(self, market_pair, exchange):
         (base_symbol, quote_symbol) = market_pair.split('/')
         query_payload = {
             'base_symbol': base_symbol,
@@ -93,7 +91,7 @@ class RSIBot():
 
         transaction = self.db_handler.read_transactions(query_payload)[0]
 
-        order_book = await self.exchange_interface.get_order_book(market_pair, exchange)
+        order_book = self.exchange_interface.get_order_book(market_pair, exchange)
         bid = order_book['bids'][0][0] if order_book['bids'] else None
         if not bid:
             return

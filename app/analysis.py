@@ -2,7 +2,7 @@
 Executes the trading strategies and analyzes the results.
 """
 
-import asyncio
+
 
 import structlog
 
@@ -32,9 +32,9 @@ class StrategyAnalyzer():
         self.ichimoku_config = self.config["ichimoku_cloud"]
 
 
-    async def analyze_macd(self, market_pair, exchange, time_unit='1d'):
+    def analyze_macd(self, market_pair, exchange, time_unit='1d'):
         macd_analyzer = MovingAvgConvDiv()
-        historical_data = await self.__exchange_interface.get_historical_data(
+        historical_data = self.__exchange_interface.get_historical_data(
             market_pair=market_pair,
             exchange=exchange,
             period_count=26,
@@ -49,9 +49,9 @@ class StrategyAnalyzer():
         return macd_data
 
 
-    async def analyze_breakout(self, market_pair, exchange):
+    def analyze_breakout(self, market_pair, exchange):
         breakout_analyzer = Breakout()
-        historical_data = await self.__exchange_interface.get_historical_data(
+        historical_data = self.__exchange_interface.get_historical_data(
             market_pair=market_pair,
             exchange=exchange,
             period_count=self.break_config['period_count'],
@@ -68,11 +68,11 @@ class StrategyAnalyzer():
         return breakout_data
 
 
-    async def analyze_rsi(self, market_pair, exchange):
+    def analyze_rsi(self, market_pair, exchange):
 
         rsi_analyzer = RelativeStrengthIndex()
 
-        historical_data = await self.__exchange_interface.get_historical_data(
+        historical_data = self.__exchange_interface.get_historical_data(
             market_pair=market_pair,
             exchange=exchange,
             period_count=self.rsi_config['period_count'],
@@ -93,13 +93,12 @@ class StrategyAnalyzer():
         return rsi_data
 
 
-    async def analyze_moving_averages(self, market_pair, exchange):
+    def analyze_moving_averages(self, market_pair, exchange):
 
         ma_analyzer = MovingAverages()
 
-
         period_count = self.ma_config["period_count"]
-        historical_data = await self.__exchange_interface.get_historical_data(
+        historical_data = self.__exchange_interface.get_historical_data(
             market_pair=market_pair,
             exchange=exchange,
             period_count=period_count,
@@ -122,7 +121,7 @@ class StrategyAnalyzer():
         return ma_data
 
 
-    async def analyze_ichimoku_cloud(self, market_pair, exchange, ichimoku_threshold=0):
+    def analyze_ichimoku_cloud(self, market_pair, exchange, ichimoku_threshold=0):
         ic_analyzer = IchimokuCloud()
 
         span_b_periods = self.ichimoku_config['span_b']['period_count']
@@ -135,7 +134,7 @@ class StrategyAnalyzer():
             conversion_line_periods
         )
 
-        history = await self.__exchange_interface.get_historical_data(
+        history = self.__exchange_interface.get_historical_data(
             market_pair=market_pair,
             exchange=exchange,
             period_count=max_period_count,

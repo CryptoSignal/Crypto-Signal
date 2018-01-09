@@ -3,8 +3,6 @@
 Main
 """
 
-import asyncio
-
 import logs
 import conf
 import structlog
@@ -25,18 +23,10 @@ def main():
 
 
     # set up async
-    loop = asyncio.get_event_loop()
-
-    task = asyncio.ensure_future(
-        behaviour.run(
-            settings['market_pairs'],
-            settings['update_interval']
-        )
+    behaviour.run(
+        settings['market_pairs'],
+        settings['update_interval']
     )
-
-    loop.run_until_complete(task)
-    loop.close()
-
 
 if __name__ == "__main__":
     main()
