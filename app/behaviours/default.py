@@ -24,35 +24,39 @@ class DefaultBehaviour():
             for market_pair in market_data[exchange]:
 
                 try:
+                    self.strategy_analyzer.prepare_historical_data(
+                        market_data[exchange][market_pair]['symbol'],
+                        exchange
+                    )
                     rsi_data = self.strategy_analyzer.analyze_rsi(
                         market_data[exchange][market_pair]['symbol'],
                         exchange
-                        )
+                    )
 
                     sma_data = self.strategy_analyzer.analyze_sma(
                         market_data[exchange][market_pair]['symbol'],
                         exchange
-                        )
+                    )
 
                     ema_data = self.strategy_analyzer.analyze_ema(
                         market_data[exchange][market_pair]['symbol'],
                         exchange
-                        )
+                    )
 
                     breakout_data = self.strategy_analyzer.analyze_breakout(
                         market_data[exchange][market_pair]['symbol'],
                         exchange
-                        )
+                    )
 
                     ichimoku_data = self.strategy_analyzer.analyze_ichimoku_cloud(
                         market_data[exchange][market_pair]['symbol'],
                         exchange
-                        )
+                    )
 
                     macd_data = self.strategy_analyzer.analyze_macd(
                         market_data[exchange][market_pair]['symbol'],
                         exchange
-                        )
+                    )
 
                 # bandaid fixes
                 except ccxt.errors.RequestTimeout:
@@ -61,27 +65,27 @@ class DefaultBehaviour():
                 if breakout_data['is_hot']:
                     self.notifier.notify_all(
                         message="{} is breaking out!".format(market_pair)
-                        )
+                    )
 
                 if rsi_data['is_cold']:
                     self.notifier.notify_all(
                         message="{} is over bought!".format(market_pair)
-                        )
+                    )
 
                 elif rsi_data['is_hot']:
                     self.notifier.notify_all(
                         message="{} is over sold!".format(market_pair)
-                        )
+                    )
 
                 if sma_data['is_hot']:
                     self.notifier.notify_all(
                         message="{} is trending well according to SMA!".format(market_pair)
-                        )
+                    )
 
                 if ema_data['is_hot']:
                     self.notifier.notify_all(
                         message="{} is trending well according to EMA!".format(market_pair)
-                        )
+                    )
 
                 if ichimoku_data['is_hot']:
                     self.notifier.notify_all(
