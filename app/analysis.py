@@ -41,11 +41,13 @@ class StrategyAnalyzer():
             time_unit=time_unit
         )
         macd_value = macd_analyzer.calculate_MACD_delta(historical_data)
-        
+
         macd_data = {
-            'value': macd_value
+            'values': (macd_value,),
+            'is_hot': False,
+            'is_cold': False
             }
-        
+
         return macd_data
 
 
@@ -61,17 +63,16 @@ class StrategyAnalyzer():
         is_breaking_out = breakout_value >= self.break_config["breakout_threshold"]
 
         breakout_data = {
-            'value': breakout_value, 
-            'is_breaking_out': is_breaking_out
+            'values': (breakout_value,),
+            'is_hot': is_breaking_out,
+            'is_cold': False
             }
 
         return breakout_data
 
 
     def analyze_rsi(self, market_pair, exchange):
-
         rsi_analyzer = RelativeStrengthIndex()
-
         historical_data = self.__exchange_interface.get_historical_data(
             market_pair=market_pair,
             exchange=exchange,
@@ -85,15 +86,15 @@ class StrategyAnalyzer():
         is_oversold = rsi_value <= self.rsi_config['oversold']
 
         rsi_data = {
-            'value': rsi_value, 
-            'is_overbought': is_overbought, 
-            'is_oversold': is_oversold
+            'values': (rsi_value,),
+            'is_cold': is_overbought,
+            'is_hot': is_oversold
             }
 
         return rsi_data
 
 
-    def analyze_moving_averages(self, market_pair, exchange):
+    def analyze_sma(self, market_pair, exchange):
 
         ma_analyzer = MovingAverages()
 
@@ -106,19 +107,40 @@ class StrategyAnalyzer():
         )
 
         sma_value = ma_analyzer.get_sma_value(period_count, historical_data)
-        ema_value = ma_analyzer.get_ema_value(period_count, historical_data)
 
         is_sma_trending = ma_analyzer.is_sma_trending(sma_value, self.ma_config["sma_threshold"])
-        is_ema_trending = ma_analyzer.is_ema_trending(ema_value, self.ma_config["ema_threshold"])
 
-        ma_data = {
-            'sma_value': sma_value, 
-            'ema_value': ema_value, 
-            'is_sma_trending': is_sma_trending, 
-            'is_ema_trending': is_ema_trending
+        sma_data = {
+            'values': (sma_value,),
+            'is_hot': is_sma_trending,
+            'is_cold': False
             }
 
-        return ma_data
+        return sma_data
+
+    def analyze_ema(self, market_pair, exchange):
+
+        ma_analyzer = MovingAverages()
+
+        period_count = self.ma_config["period_count"]
+        historical_data = self.__exchange_interface.get_historical_data(
+            market_pair=market_pair,
+            exchange=exchange,
+            period_count=period_count,
+            time_unit=self.ma_config["time_unit"]
+        )
+
+        ema_value = ma_analyzer.get_ema_value(period_count, historical_data)
+
+        is_ema_trending = ma_analyzer.is_ema_trending(ema_value, self.ma_config["ema_threshold"])
+
+        ema_data = {
+            'values': (ema_value,),
+            'is_hot': is_ema_trending,
+            'is_cold': False
+            }
+
+        return ema_data
 
 
     def analyze_ichimoku_cloud(self, market_pair, exchange, ichimoku_threshold=0):
@@ -150,9 +172,9 @@ class StrategyAnalyzer():
         is_ichimoku_trending = ic_analyzer.is_ichimoku_trending(self.ichimoku_config["ichimoku_threshold"])
 
         ichimoku_data = {
-            'span_a_value': leading_span_a, 
-            'span_b_value': leading_span_b, 
-            'is_ichimoku_trending': is_ichimoku_trending
+            'values': (leading_span_a, leading_span_b),
+            'is_hot': is_ichimoku_trending,
+            'is_cold': False
             }
         
         return ichimoku_data
@@ -168,10 +190,11 @@ class StrategyAnalyzer():
         )
 
         upper_band, lower_band = bollingers.get_bollinger_bands(historical_data, period=period_count, k=std_dev)
-        
+
         bb_data = {
-            'upper_band': upper_band, 
-            'lower_band': lower_band
+            'values': (upper_band, lower_band),
+            'is_hot': False,
+            'is_cold': False
             }
 
         return bb_data

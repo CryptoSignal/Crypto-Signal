@@ -11,15 +11,13 @@ class DefaultBehaviour():
         self.strategy_analyzer = strategy_analyzer
         self.notifier = notifier
 
-    def run(self, market_pairs, update_interval):
+    def run(self, market_pairs):
         if market_pairs:
             market_data = self.exchange_interface.get_symbol_markets(market_pairs)
         else:
             market_data = self.exchange_interface.get_exchange_markets()
 
-        while True:
-            self.test_strategies(market_data)
-            time.sleep(update_interval)
+        self.test_strategies(market_data)
 
     def test_strategies(self, market_data):
         for exchange in market_data:
@@ -31,7 +29,12 @@ class DefaultBehaviour():
                         exchange
                         )
 
-                    ma_data = self.strategy_analyzer.analyze_moving_averages(
+                    sma_data = self.strategy_analyzer.analyze_sma(
+                        market_data[exchange][market_pair]['symbol'],
+                        exchange
+                        )
+
+                    ema_data = self.strategy_analyzer.analyze_ema(
                         market_data[exchange][market_pair]['symbol'],
                         exchange
                         )
@@ -45,7 +48,7 @@ class DefaultBehaviour():
                         market_data[exchange][market_pair]['symbol'],
                         exchange
                         )
-                    
+
                     macd_data = self.strategy_analyzer.analyze_macd(
                         market_data[exchange][market_pair]['symbol'],
                         exchange
@@ -55,46 +58,43 @@ class DefaultBehaviour():
                 except ccxt.errors.RequestTimeout:
                     continue
 
-                if breakout_data['is_breaking_out']:
+                if breakout_data['is_hot']:
                     self.notifier.notify_all(
                         message="{} is breaking out!".format(market_pair)
                         )
 
-                if rsi_data['is_overbought']:
+                if rsi_data['is_cold']:
                     self.notifier.notify_all(
                         message="{} is over bought!".format(market_pair)
                         )
 
-                elif rsi_data['is_oversold']:
+                elif rsi_data['is_hot']:
                     self.notifier.notify_all(
                         message="{} is over sold!".format(market_pair)
                         )
 
-                if ma_data['is_sma_trending']:
+                if sma_data['is_hot']:
                     self.notifier.notify_all(
                         message="{} is trending well according to SMA!".format(market_pair)
                         )
 
-                if ma_data['is_ema_trending']:
+                if ema_data['is_hot']:
                     self.notifier.notify_all(
                         message="{} is trending well according to EMA!".format(market_pair)
                         )
 
-                if ichimoku_data['is_ichimoku_trending']:
+                if ichimoku_data['is_hot']:
                     self.notifier.notify_all(
                         message="{} is trending well according to Ichimoku!".format(
                             market_pair
                             )
                         )
 
-                print("{}: \tBreakout: {} \tRSI: {} \tSMA: {} \tEMA: {} \tIMA: {} \tIMB: {} \tMACD: {}".format(
+                print("{}: \tBreakout: {} \tRSI: {} \tSMA: {} \tEMA: {} \tIMC: {} \tMACD: {}".format(
                     market_pair,
-                    breakout_data['value'],
-                    format(rsi_data['value'], '.2f'),
-                    format(ma_data['sma_value'], '.7f'),
-                    format(ma_data['ema_value'], '.7f'),
-                    format(ichimoku_data['span_a_value'], '.7f'),
-                    format(ichimoku_data['span_b_value'], '.7f'),
-                    format(macd_data['value'], '.7f')))
-
-                #time.sleep(self.exchange_interface.exchanges[exchange].rateLimit / 1000)
+                    breakout_data['values'][0],
+                    format(rsi_data['values'][0], '.2f'),
+                    format(sma_data['values'][0], '.7f'),
+                    format(ema_data['values'][0], '.7f'),
+                    format(ichimoku_data['values'][0], '.7f') + "/" + format(ichimoku_data['values'][1], '.7f'),
+                    format(macd_data['values'][0], '.7f')))
