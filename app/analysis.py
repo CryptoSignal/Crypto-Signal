@@ -2,8 +2,6 @@
 Executes the trading strategies and analyzes the results.
 """
 
-
-
 import structlog
 
 from strategies.breakout import Breakout
@@ -21,157 +19,172 @@ class StrategyAnalyzer():
     Attributes:
        _exchange_interface: asynchronous interface used to communicate with exchanges. 
     """
-    def __init__(self, exchange_interface, config):
+
+    def __init__(self, exchange_interface):
         self.__exchange_interface = exchange_interface
         self.logger = structlog.get_logger()
-        self.config = config
+        self.day_historical_data = []
+        self.minute_historical_data = []
 
-        self.ma_config = self.config["moving_averages"]
-        self.break_config = self.config["breakout"]
-        self.rsi_config = self.config["rsi"]
-        self.ichimoku_config = self.config["ichimoku_cloud"]
+    def prepare_historical_data(self, market_pair, exchange):
+        self.day_historical_data = []
+        self.minute_historical_data = []
 
-
-    def analyze_macd(self, market_pair, exchange, time_unit='1d'):
-        macd_analyzer = MovingAvgConvDiv()
-        historical_data = self.__exchange_interface.get_historical_data(
+        self.day_historical_data = self.__exchange_interface.get_historical_data(
             market_pair=market_pair,
             exchange=exchange,
-            period_count=26,
-            time_unit=time_unit
+            period_count=100,
+            time_unit='1d'
         )
+
+        self.minute_historical_data = self.__exchange_interface.get_historical_data(
+            market_pair=market_pair,
+            exchange=exchange,
+            period_count=100,
+            time_unit='5m'
+        )
+
+    def analyze_macd(self, market_pair, exchange, hot_thresh=0, cold_thresh=0):
+        macd_analyzer = MovingAvgConvDiv()
+
+        period_count = 26
+
+        historical_data = self.day_historical_data[0:period_count]
+
         macd_value = macd_analyzer.calculate_MACD_delta(historical_data)
-        
+
         macd_data = {
-            'value': macd_value
-            }
-        
+            'values': (macd_value,),
+            'is_hot': False,
+            'is_cold': False
+        }
+
         return macd_data
 
 
-    def analyze_breakout(self, market_pair, exchange):
+    def analyze_breakout(self, market_pair, exchange, hot_thresh=0, cold_thresh=0):
         breakout_analyzer = Breakout()
-        historical_data = self.__exchange_interface.get_historical_data(
-            market_pair=market_pair,
-            exchange=exchange,
-            period_count=self.break_config['period_count'],
-            time_unit=self.break_config['time_unit'])
+
+        period_count = 5
+
+        historical_data = self.minute_historical_data[0:period_count]
 
         breakout_value = breakout_analyzer.get_breakout_value(historical_data)
-        is_breaking_out = breakout_value >= self.break_config["breakout_threshold"]
+        is_breaking_out = breakout_value >= hot_thresh
 
         breakout_data = {
-            'value': breakout_value, 
-            'is_breaking_out': is_breaking_out
-            }
+            'values': (breakout_value,),
+            'is_hot': is_breaking_out,
+            'is_cold': False
+        }
 
         return breakout_data
 
 
-    def analyze_rsi(self, market_pair, exchange):
-
+    def analyze_rsi(self, market_pair, exchange, hot_thresh=0, cold_thresh=0):
         rsi_analyzer = RelativeStrengthIndex()
 
-        historical_data = self.__exchange_interface.get_historical_data(
-            market_pair=market_pair,
-            exchange=exchange,
-            period_count=self.rsi_config['period_count'],
-            time_unit=self.rsi_config['time_unit']
-        )
+        period_count = 14
 
-        rsi_value = rsi_analyzer.get_rsi_value(historical_data, self.rsi_config['period_count'])
+        historical_data = self.day_historical_data[0:period_count]
 
-        is_overbought = rsi_value >= self.rsi_config['overbought']
-        is_oversold = rsi_value <= self.rsi_config['oversold']
+        rsi_value = rsi_analyzer.get_rsi_value(historical_data, period_count)
+
+        is_overbought = rsi_value >= cold_thresh
+        is_oversold = rsi_value <= hot_thresh
 
         rsi_data = {
-            'value': rsi_value, 
-            'is_overbought': is_overbought, 
-            'is_oversold': is_oversold
-            }
+            'values': (rsi_value,),
+            'is_cold': is_overbought,
+            'is_hot': is_oversold
+        }
 
         return rsi_data
 
 
-    def analyze_moving_averages(self, market_pair, exchange):
-
+    def analyze_sma(self, market_pair, exchange, hot_thresh=0, cold_thresh=0):
         ma_analyzer = MovingAverages()
 
-        period_count = self.ma_config["period_count"]
-        historical_data = self.__exchange_interface.get_historical_data(
-            market_pair=market_pair,
-            exchange=exchange,
-            period_count=period_count,
-            time_unit=self.ma_config["time_unit"]
-        )
+        period_count = 15
+
+        historical_data = self.day_historical_data[0:period_count]
 
         sma_value = ma_analyzer.get_sma_value(period_count, historical_data)
+
+        is_sma_trending = ma_analyzer.is_sma_trending(sma_value, hot_thresh)
+
+        sma_data = {
+            'values': (sma_value,),
+            'is_hot': is_sma_trending,
+            'is_cold': False
+        }
+
+        return sma_data
+
+
+    def analyze_ema(self, market_pair, exchange, hot_thresh=0, cold_thresh=0):
+        ma_analyzer = MovingAverages()
+
+        period_count = 15
+
+        historical_data = self.day_historical_data[0:period_count]
+
         ema_value = ma_analyzer.get_ema_value(period_count, historical_data)
 
-        is_sma_trending = ma_analyzer.is_sma_trending(sma_value, self.ma_config["sma_threshold"])
-        is_ema_trending = ma_analyzer.is_ema_trending(ema_value, self.ma_config["ema_threshold"])
+        is_ema_trending = ma_analyzer.is_ema_trending(ema_value, hot_thresh)
 
-        ma_data = {
-            'sma_value': sma_value, 
-            'ema_value': ema_value, 
-            'is_sma_trending': is_sma_trending, 
-            'is_ema_trending': is_ema_trending
-            }
+        ema_data = {
+            'values': (ema_value,),
+            'is_hot': is_ema_trending,
+            'is_cold': False
+        }
 
-        return ma_data
+        return ema_data
 
 
-    def analyze_ichimoku_cloud(self, market_pair, exchange, ichimoku_threshold=0):
+    def analyze_ichimoku_cloud(self, market_pair, exchange, hot_thresh=0, cold_thresh=0):
         ic_analyzer = IchimokuCloud()
 
-        span_b_periods = self.ichimoku_config['span_b']['period_count']
-        base_line_periods = self.ichimoku_config['base_line']['period_count']
-        conversion_line_periods = self.ichimoku_config['conversion_line']['period_count']
+        tenkansen_period = 9
+        kijunsen_period = 26
+        senkou_span_b_period = 52
+        chikou_span_period = 26
 
-        max_period_count = max(
-            span_b_periods,
-            base_line_periods,
-            conversion_line_periods
+        tankensen_historical_data = self.day_historical_data[0:tenkansen_period]
+        kijunsen_historical_data = self.day_historical_data[0:kijunsen_period]
+        senkou_span_b_historical_data = self.day_historical_data[0:senkou_span_b_period]
+
+        leading_span_a = ic_analyzer.get_senkou_span_a(
+            kijunsen_historical_data,
+            tankensen_historical_data
         )
 
-        history = self.__exchange_interface.get_historical_data(
-            market_pair=market_pair,
-            exchange=exchange,
-            period_count=max_period_count,
-            time_unit=self.ichimoku_config['time_unit']
-        )
-
-        base_line_data = history[0:base_line_periods]
-        conversion_line_data = history[0:conversion_line_periods]
-        span_b_data = history[0:span_b_periods]
-
-        leading_span_a = ic_analyzer.get_leading_span_a(base_line_data, conversion_line_data)
-        leading_span_b = ic_analyzer.get_leading_span_b(span_b_data)
-        is_ichimoku_trending = ic_analyzer.is_ichimoku_trending(self.ichimoku_config["ichimoku_threshold"])
+        leading_span_b = ic_analyzer.get_senkou_span_b(senkou_span_b_historical_data)
 
         ichimoku_data = {
-            'span_a_value': leading_span_a, 
-            'span_b_value': leading_span_b, 
-            'is_ichimoku_trending': is_ichimoku_trending
-            }
-        
+            'values': (leading_span_a, leading_span_b),
+            'is_hot': False,
+            'is_cold': False
+        }
+
         return ichimoku_data
 
 
-    def analyze_bollinger_bands(self, market_pair, period_count=21, std_dev=2., time_unit='5m'):
+    def analyze_bollinger_bands(self, market_pair, exchange, std_dev=2.):
         bollingers = BollingerBands()
 
-        historical_data = self.__exchange_interface.get_historical_data(
-            market_pair=market_pair,
-            period_count=period_count,
-            time_unit=time_unit
+        period_count = 21
+
+        historical_data = self.day_historical_data[0:period_count]
+
+        upper_band, lower_band = bollingers.get_bollinger_bands(
+            historical_data, period=period_count, k=std_dev
         )
 
-        upper_band, lower_band = bollingers.get_bollinger_bands(historical_data, period=period_count, k=std_dev)
-        
         bb_data = {
-            'upper_band': upper_band, 
-            'lower_band': lower_band
-            }
+            'values': (upper_band, lower_band),
+            'is_hot': False,
+            'is_cold': False
+        }
 
         return bb_data

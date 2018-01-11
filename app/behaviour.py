@@ -29,11 +29,8 @@ class Behaviour():
     def configure_default(self, behaviour_config):
         exchange_interface = ExchangeInterface(self.config.fetch_exchange_config())
 
-        strategy_analyzer = StrategyAnalyzer(
-            exchange_interface,
-            self.config.fetch_analysis_config()
-            )
-        
+        strategy_analyzer = StrategyAnalyzer(exchange_interface)
+
         notifier = Notifier(self.config.fetch_notifier_config())
 
         behaviour = DefaultBehaviour(
@@ -48,10 +45,7 @@ class Behaviour():
 
     def configure_rsi_bot(self, behaviour_config):
         exchange_interface = ExchangeInterface(self.config.fetch_exchange_config())
-        strategy_analyzer = StrategyAnalyzer(
-            exchange_interface,
-            self.config.fetch_analysis_config()
-            )
+        strategy_analyzer = StrategyAnalyzer(exchange_interface)
         notifier = Notifier(self.config.fetch_notifier_config())
         db_handler = DatabaseHandler(self.config.fetch_database_config())
 

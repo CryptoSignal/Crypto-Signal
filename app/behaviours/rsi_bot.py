@@ -15,7 +15,7 @@ class RSIBot():
         self.db_handler = db_handler
 
 
-    def run(self, market_pairs, update_interval):
+    def run(self, market_pairs):
         if market_pairs:
             market_data = self.exchange_interface.get_symbol_markets(market_pairs)
         else:
@@ -42,11 +42,11 @@ class RSIBot():
             for market_pair in markets:
                 self.buy(market_pair, exchange)
                 self.sell(market_pair, exchange)
-                if markets[market_pair]['is_oversold']:
+                if markets[market_pair]['is_hot']:
                     if not market_pair in current_holdings[exchange]:
                         self.buy(market_pair, exchange)
 
-                elif markets[market_pair]['is_overbought']:
+                elif markets[market_pair]['is_cold']:
                     if market_pair in current_holdings[exchange]:
                         self.sell(market_pair, exchange)
 
