@@ -42,7 +42,7 @@ class RelativeStrengthIndex():
         closing_prices = self.utils.get_closing_prices(historical_data)
 
         if period_count > len(closing_prices):
-            period_count = len(closing_prices) 
+            period_count = len(closing_prices)
 
         advances = []
         declines = []
@@ -55,7 +55,7 @@ class RelativeStrengthIndex():
 
             # sort
             advances.append(change) if change > 0 else declines.append(abs(change))
-    
+
         avg_gain = sum(advances) / period_count
         avg_loss = sum(declines) / period_count
 

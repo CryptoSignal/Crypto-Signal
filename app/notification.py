@@ -3,6 +3,7 @@ Handles sending notifications via the configured notifiers
 """
 
 import structlog
+
 from notifiers.twilio_client import TwilioNotifier
 from notifiers.slack_client import SlackNotifier
 from notifiers.gmail_client import GmailNotifier

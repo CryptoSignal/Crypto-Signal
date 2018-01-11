@@ -4,8 +4,8 @@ import structlog
 
 
 class RSIBot():
-    def __init__(self, behaviour_config, exchange_interface, strategy_analyzer, notifier,
-        db_handler):
+    def __init__(self, behaviour_config, exchange_interface,
+                 strategy_analyzer, notifier, db_handler):
 
         self.logger = structlog.get_logger()
         self.behaviour_config = behaviour_config
@@ -26,22 +26,34 @@ class RSIBot():
             rsi_data[exchange] = {}
             for market_pair in markets:
                 try:
+                    self.strategy_analyzer.prepare_historical_data(
+                        market_data[exchange][market_pair]['symbol'],
+                        exchange
+                    )
+
                     rsi_data[exchange][market_pair] = self.strategy_analyzer.analyze_rsi(
                         market_data[exchange][market_pair]['symbol'],
-                        exchange)
+                        exchange
+                    )
 
                 except ccxt.NetworkError:
                     self.logger.warn("Read timeout getting data for %s on %s skipping",
                         market_pair,
-                        exchange)
+                        exchange
+                    )
                     continue
 
-        current_holdings = self.get_holdings()
+        current_holdings = self.__get_holdings()
+
+        if not current_holdings:
+            self.__create_holdings(market_data)
+            current_holdings = self.__get_holdings()
+        else:
+            self.__update_holdings()
+            current_holdings = self.__get_holdings()
 
         for exchange, markets in rsi_data.items():
             for market_pair in markets:
-                self.buy(market_pair, exchange)
-                self.sell(market_pair, exchange)
                 if markets[market_pair]['is_hot']:
                     if not market_pair in current_holdings[exchange]:
                         self.buy(market_pair, exchange)
@@ -112,15 +124,46 @@ class RSIBot():
         self.db_handler.update_transaction(transaction, sale_payload)
 
 
-    def get_holdings(self):
-        transactions = self.db_handler.read_transactions({'is_open': True})
+    def __get_holdings(self):
+        holdings_table = self.db_handler.read_holdings()
         holdings = {}
 
-        for row in transactions:
+        for row in holdings_table:
             if not row.exchange in holdings:
-                holdings[row.exchange] = []
+                holdings[row.exchange] = {}
 
-            market_pair = row.base_symbol + '/' + row.quote_symbol
-            holdings[row.exchange].append(market_pair)
+            holdings[row.exchange][row.symbol] = {
+                'volume_free': row.volume_free,
+                'volume_used': row.volume_used,
+                'volume_total': row.volume_total
+            }
 
         return holdings
+
+
+    def __create_holdings(self, market_data):
+        for exchange in market_data:
+            user_account_markets = self.exchange_interface.get_account_markets(exchange)
+            for symbol in user_account_markets['free']:
+                holding_payload = {
+                    'exchange': exchange,
+                    'symbol': symbol,
+                    'volume_free': user_account_markets['free'][symbol],
+                    'volume_used': user_account_markets['used'][symbol],
+                    'volume_total': user_account_markets['total'][symbol]
+                }
+
+                self.db_handler.create_holding(holding_payload)
+
+    def __update_holdings(self):
+        holdings_table = self.db_handler.read_holdings()
+        user_account_markets = {}
+        for row in holdings_table:
+            if not row.exchange in user_account_markets:
+                user_account_markets[row.exchange] = self.exchange_interface.get_account_markets(row.exchange)
+
+            row.volume_free = user_account_markets[row.exchange]['free'][row.symbol]
+            row.volume_used = user_account_markets[row.exchange]['used'][row.symbol]
+            row.volume_total = user_account_markets[row.exchange]['total'][row.symbol]
+
+            self.db_handler.upddate_holding(row)

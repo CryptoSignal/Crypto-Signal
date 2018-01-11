@@ -1,5 +1,6 @@
 
-import datetime
+from datetime import datetime
+
 import structlog
 
 from sqlalchemy import create_engine
@@ -10,12 +11,42 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
-class Transaction(Base):
+class Holdings(Base):
+    __tablename__ = 'holdings'
+
+    id = Column(Integer, primary_key=True)
+    create_time = Column(DateTime, default=datetime.now())
+    update_time = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
+    exchange = Column(String)
+    symbol = Column(String)
+    volume_free = Column(Float)
+    volume_used = Column(Float)
+    volume_total = Column(Float)
+
+    def __repr__(self):
+        return "<Holdings(\
+            exchange='%s',\
+            create_time='%s',\
+            update_time='%s',\
+            symbol='%s',\
+            volume_free='%s',\
+            volume_used='%s',\
+            volume_total='%s')>" % (
+                self.exchange,
+                self.create_time,
+                self.update_time,
+                self.symbol,
+                self.volume_free,
+                self.volume_used,
+                self.volume_total
+            )
+
+class Transactions(Base):
     __tablename__ = 'transactions'
 
     id = Column(Integer, primary_key=True)
-    create_time = Column(DateTime, default=datetime.datetime.now())
-    update_time = Column(DateTime, default=datetime.datetime.now(), onupdate=datetime.datetime.now())
+    create_time = Column(DateTime, default=datetime.now())
+    update_time = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
     exchange = Column(String)
     base_symbol = Column(String)
     quote_symbol = Column(String)
@@ -28,7 +59,7 @@ class Transaction(Base):
     is_open = Column(Boolean, default=True)
 
     def __repr__(self):
-        return "<Transaction(\
+        return "<Transactions(\
             exchange='%s',\
             create_time='%s',\
             update_time='%s',\
@@ -52,7 +83,8 @@ class Transaction(Base):
                 self.sale_base_value,
                 self.sale_quote_value,
                 self.sale_total,
-                self.is_open)
+                self.is_open
+            )
 
 
 class DatabaseHandler():
@@ -83,13 +115,38 @@ class DatabaseHandler():
 
         return connection_string
 
+    def read_holdings(self, filter_args={}):
+        return self.session.query(Holdings).filter_by(**filter_args)
+
+    def create_holding(self, create_args={}):
+        create_success = True
+        try:
+            self.session.add(Holdings(**create_args))
+            self.session.commit()
+        except SQLAlchemyError:
+            create_success = False
+            self.logger.error("Failed to create holding record!", create_args=create_args)
+            self.session.rollback()
+        return create_success
+
+    def update_holding(self, holding, update_args={}):
+        update_success = True
+        try:
+            self.session.query(Holdings).filter_by(id=holding.id).update(update_args)
+            self.session.commit()
+        except SQLAlchemyError:
+            update_success = False
+            self.logger.error("Failed to update holding record!", update_args=update_args)
+            self.session.rollback()
+        return update_success
+
     def read_transactions(self, filter_args={}):
-        return self.session.query(Transaction).filter_by(**filter_args)
+        return self.session.query(Transactions).filter_by(**filter_args)
 
     def create_transaction(self, create_args={}):
         create_success = True
         try:
-            self.session.add(Transaction(**create_args))
+            self.session.add(Transactions(**create_args))
             self.session.commit()
         except SQLAlchemyError:
             create_success = False
@@ -100,7 +157,7 @@ class DatabaseHandler():
     def update_transaction(self, transaction, update_args={}):
         update_success = True
         try:
-            self.session.query(Transaction).filter_by(id=transaction.id).update(update_args)
+            self.session.query(Transactions).filter_by(id=transaction.id).update(update_args)
             self.session.commit()
         except SQLAlchemyError:
             update_success = False

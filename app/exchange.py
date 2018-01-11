@@ -20,7 +20,7 @@ class ExchangeInterface():
             if exchange_config[exchange]['required']['enabled']:
                 new_exchange = getattr(ccxt, exchange)({
                     "enableRateLimit": True # Enables built-in rate limiter
-                    })
+                })
 
                 # sets up api permissions for user if given
                 if new_exchange:
@@ -64,17 +64,17 @@ class ExchangeInterface():
             market_pair,
             timeframe=time_unit,
             limit=period_count))
+        time.sleep(self.exchanges[exchange].rateLimit / 1000)
         return historical_data[0]
 
 
-    def get_account_markets(self):
+    def get_account_markets(self, exchange):
         """
         Get user market balances
         """
         account_markets = {}
-        for exchange in self.exchanges:
-            account_markets.update(self.exchanges[exchange].fetch_balance())
-
+        account_markets.update(self.exchanges[exchange].fetch_balance())
+        time.sleep(self.exchanges[exchange].rateLimit / 1000)
         return account_markets
 
 
@@ -85,7 +85,7 @@ class ExchangeInterface():
         exchange_markets = {}
         for exchange in self.exchanges:
             exchange_markets[exchange] = self.exchanges[exchange].load_markets()
-
+            time.sleep(self.exchanges[exchange].rateLimit / 1000)
         return exchange_markets
 
 
@@ -101,7 +101,7 @@ class ExchangeInterface():
             for market_pair in market_pairs:
                 symbol_markets[exchange][market_pair] = self.exchanges[exchange].markets[
                     market_pair]
-
+            time.sleep(self.exchanges[exchange].rateLimit / 1000)
         return symbol_markets
 
     def get_order_book(self, market_pair, exchange):
