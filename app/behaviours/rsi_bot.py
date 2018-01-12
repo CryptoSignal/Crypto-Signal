@@ -1,7 +1,8 @@
 
+from datetime import datetime, timedelta
+
 import ccxt
 import structlog
-from datetime import datetime, timedelta
 
 class RSIBot():
     def __init__(self, behaviour_config, exchange_interface,
@@ -26,14 +27,14 @@ class RSIBot():
             rsi_data[exchange] = {}
             for market_pair in markets:
                 try:
-                    self.strategy_analyzer.prepare_historical_data(
+                    one_day_historical_data = self.strategy_analyzer.prepare_historical_data(
                         market_data[exchange][market_pair]['symbol'],
-                        exchange
+                        exchange,
+                        '1d'
                     )
 
                     rsi_data[exchange][market_pair] = self.strategy_analyzer.analyze_rsi(
-                        market_data[exchange][market_pair]['symbol'],
-                        exchange
+                        one_day_historical_data
                     )
 
                 except ccxt.NetworkError:
@@ -76,22 +77,26 @@ class RSIBot():
         for exchange, markets in rsi_data.items():
             for market_pair in markets:
                 base_symbol, quote_symbol = market_pair.split('/')
-                self.buy(base_symbol, quote_symbol, market_pair, exchange, current_holdings)
-                current_holdings = self.__get_holdings()
-                self.sell(base_symbol, quote_symbol, market_pair, exchange, current_holdings)
-                exit()
-
-
 
                 if markets[market_pair]['is_hot']:
                     if not base_symbol in current_holdings[exchange]\
                     or current_holdings[exchange][base_symbol]['volume_total'] == 0:
-                        self.buy(base_symbol, quote_symbol, market_pair, exchange, current_holdings)
+                        self.buy(
+                            base_symbol,
+                            quote_symbol,
+                            market_pair,
+                            exchange,
+                            current_holdings)
 
                 elif markets[market_pair]['is_cold']:
                     if base_symbol in current_holdings[exchange]\
                     and not current_holdings[exchange][base_symbol]['volume_free'] == 0:
-                        self.sell(base_symbol, quote_symbol, market_pair, exchange, current_holdings)
+                        self.sell(
+                            base_symbol,
+                            quote_symbol,
+                            market_pair,
+                            exchange,
+                            current_holdings)
 
 
     def buy(self, base_symbol, quote_symbol, market_pair, exchange, current_holdings):

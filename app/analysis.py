@@ -13,11 +13,11 @@ from strategies.bollinger_bands import BollingerBands
 
 class StrategyAnalyzer():
     """
-    Handles trading strategies for breakouts, rsi, moving averages, 
+    Handles trading strategies for breakouts, rsi, moving averages,
     and ichimoku clouds. All methods are asynchronous.
 
     Attributes:
-       _exchange_interface: asynchronous interface used to communicate with exchanges. 
+       _exchange_interface: asynchronous interface used to communicate with exchanges.
     """
 
     def __init__(self, exchange_interface):
@@ -26,32 +26,26 @@ class StrategyAnalyzer():
         self.day_historical_data = []
         self.minute_historical_data = []
 
-    def prepare_historical_data(self, market_pair, exchange):
-        self.day_historical_data = []
-        self.minute_historical_data = []
 
-        self.day_historical_data = self.__exchange_interface.get_historical_data(
+    def get_historical_data(self, market_pair, exchange, time_unit, period_count=100):
+        historical_data = self.__exchange_interface.get_historical_data(
             market_pair=market_pair,
             exchange=exchange,
-            period_count=100,
-            time_unit='1d'
+            period_count=period_count,
+            time_unit=time_unit
         )
 
-        self.minute_historical_data = self.__exchange_interface.get_historical_data(
-            market_pair=market_pair,
-            exchange=exchange,
-            period_count=100,
-            time_unit='5m'
-        )
+        return historical_data
 
-    def analyze_macd(self, market_pair, exchange, hot_thresh=0, cold_thresh=0):
+
+    def analyze_macd(self, historial_data, hot_thresh=0, cold_thresh=0):
         macd_analyzer = MovingAvgConvDiv()
 
         period_count = 26
 
-        historical_data = self.day_historical_data[0:period_count]
+        macd_historical_data = historial_data[0:period_count]
 
-        macd_value = macd_analyzer.calculate_MACD_delta(historical_data)
+        macd_value = macd_analyzer.calculate_MACD_delta(macd_historical_data)
 
         macd_data = {
             'values': (macd_value,),
@@ -62,14 +56,14 @@ class StrategyAnalyzer():
         return macd_data
 
 
-    def analyze_breakout(self, market_pair, exchange, hot_thresh=0, cold_thresh=0):
+    def analyze_breakout(self, historial_data, hot_thresh=0, cold_thresh=0):
         breakout_analyzer = Breakout()
 
         period_count = 5
 
-        historical_data = self.minute_historical_data[0:period_count]
+        breakout_historical_data = historial_data[0:period_count]
 
-        breakout_value = breakout_analyzer.get_breakout_value(historical_data)
+        breakout_value = breakout_analyzer.get_breakout_value(breakout_historical_data)
         is_breaking_out = breakout_value >= hot_thresh
 
         breakout_data = {
@@ -81,14 +75,14 @@ class StrategyAnalyzer():
         return breakout_data
 
 
-    def analyze_rsi(self, market_pair, exchange, hot_thresh=0, cold_thresh=0):
+    def analyze_rsi(self, historial_data, hot_thresh=0, cold_thresh=0):
         rsi_analyzer = RelativeStrengthIndex()
 
         period_count = 14
 
-        historical_data = self.day_historical_data[0:period_count]
+        rsi_historical_data = historial_data[0:period_count]
 
-        rsi_value = rsi_analyzer.get_rsi_value(historical_data, period_count)
+        rsi_value = rsi_analyzer.get_rsi_value(rsi_historical_data, period_count)
 
         is_overbought = rsi_value >= cold_thresh
         is_oversold = rsi_value <= hot_thresh
@@ -102,14 +96,14 @@ class StrategyAnalyzer():
         return rsi_data
 
 
-    def analyze_sma(self, market_pair, exchange, hot_thresh=0, cold_thresh=0):
+    def analyze_sma(self, historial_data, hot_thresh=0, cold_thresh=0):
         ma_analyzer = MovingAverages()
 
         period_count = 15
 
-        historical_data = self.day_historical_data[0:period_count]
+        sma_historical_data = historial_data[0:period_count]
 
-        sma_value = ma_analyzer.get_sma_value(period_count, historical_data)
+        sma_value = ma_analyzer.get_sma_value(period_count, sma_historical_data)
 
         is_sma_trending = ma_analyzer.is_sma_trending(sma_value, hot_thresh)
 
@@ -122,14 +116,14 @@ class StrategyAnalyzer():
         return sma_data
 
 
-    def analyze_ema(self, market_pair, exchange, hot_thresh=0, cold_thresh=0):
+    def analyze_ema(self, historial_data, hot_thresh=0, cold_thresh=0):
         ma_analyzer = MovingAverages()
 
         period_count = 15
 
-        historical_data = self.day_historical_data[0:period_count]
+        ema_historical_data = historial_data[0:period_count]
 
-        ema_value = ma_analyzer.get_ema_value(period_count, historical_data)
+        ema_value = ma_analyzer.get_ema_value(period_count, ema_historical_data)
 
         is_ema_trending = ma_analyzer.is_ema_trending(ema_value, hot_thresh)
 
@@ -142,7 +136,7 @@ class StrategyAnalyzer():
         return ema_data
 
 
-    def analyze_ichimoku_cloud(self, market_pair, exchange, hot_thresh=0, cold_thresh=0):
+    def analyze_ichimoku_cloud(self, historial_data, hot_thresh=0, cold_thresh=0):
         ic_analyzer = IchimokuCloud()
 
         tenkansen_period = 9
@@ -150,9 +144,9 @@ class StrategyAnalyzer():
         senkou_span_b_period = 52
         chikou_span_period = 26
 
-        tankensen_historical_data = self.day_historical_data[0:tenkansen_period]
-        kijunsen_historical_data = self.day_historical_data[0:kijunsen_period]
-        senkou_span_b_historical_data = self.day_historical_data[0:senkou_span_b_period]
+        tankensen_historical_data = historial_data[0:tenkansen_period]
+        kijunsen_historical_data = historial_data[0:kijunsen_period]
+        senkou_span_b_historical_data = historial_data[0:senkou_span_b_period]
 
         leading_span_a = ic_analyzer.get_senkou_span_a(
             kijunsen_historical_data,
@@ -170,15 +164,17 @@ class StrategyAnalyzer():
         return ichimoku_data
 
 
-    def analyze_bollinger_bands(self, market_pair, exchange, std_dev=2.):
+    def analyze_bollinger_bands(self, historial_data, std_dev=2.):
         bollingers = BollingerBands()
 
         period_count = 21
 
-        historical_data = self.day_historical_data[0:period_count]
+        bb_historical_data = historial_data[0:period_count]
 
         upper_band, lower_band = bollingers.get_bollinger_bands(
-            historical_data, period=period_count, k=std_dev
+            bb_historical_data,
+            period=period_count,
+            k=std_dev
         )
 
         bb_data = {
