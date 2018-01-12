@@ -58,20 +58,28 @@
   },
 
   "behaviours": {
-    "default": "",
+    "default": {
+
+    },
     "rsi_bot": {
-      "trade_parameters": {
-        "mode": "simulate",
-        "buy": {
-          "btc_amount": 1,
-          "btc_trade_limit": 0.1,
-          "rsi_threshold": 75,
-          "daily_volume_threshold": 0,
-          "max_open_trades": 0
-        },
-        "sell": {
-          "rsi_threshold": 25,
-          "profit_margin_threshold": 0
+      "mode": "simulate",
+      "open_order_max_hours": 24,
+      "buy": {
+        "rsi_threshold": 70,
+        "trade_limits": {
+          "BTC": 0.02,
+          "ETH": 0.2,
+          "LTC": 1.2,
+          "USDT": 250.0
+        }
+      },
+      "sell": {
+        "rsi_threshold": 30,
+        "trade_limits": {
+          "BTC": 0.02,
+          "ETH": 0.2,
+          "LTC": 1.2,
+          "USDT": 250.0
         }
       }
     }

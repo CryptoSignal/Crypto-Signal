@@ -50,13 +50,12 @@ class Transactions(Base):
     exchange = Column(String)
     base_symbol = Column(String)
     quote_symbol = Column(String)
-    purchase_base_value = Column(Float)
-    purchase_quote_value = Column(Float)
-    purchase_total = Column(Float)
-    sale_base_value = Column(Float, default=0)
-    sale_quote_value = Column(Float, default=0)
-    sale_total = Column(Float, default=0)
-    is_open = Column(Boolean, default=True)
+    action = Column(String)
+    base_value = Column(Float)
+    quote_value = Column(Float)
+    fee_rate = Column(Float)
+    base_volume = Column(Float)
+    quote_volume = Column(Float)
 
     def __repr__(self):
         return "<Transactions(\
@@ -65,25 +64,23 @@ class Transactions(Base):
             update_time='%s',\
             base_symbol='%s',\
             quote_symbol='%s',\
-            purchase_base_value='%s',\
-            purchase_quote_value='%s',\
-            purchase_total='%s',\
-            sale_base_value='%s',\
-            sale_quote_value='%s',\
-            sale_total='%s',\
-            is_open='%s')>" % (
+            action='%s',\
+            base_value='%s',\
+            quote_value='%s',\
+            fee_rate='%s',\
+            base_volume='%s',\
+            quote_volume='%s')>" % (
                 self.exchange,
                 self.create_time,
                 self.update_time,
                 self.base_symbol,
                 self.quote_symbol,
-                self.purchase_base_value,
-                self.purchase_quote_value,
-                self.purchase_total,
-                self.sale_base_value,
-                self.sale_quote_value,
-                self.sale_total,
-                self.is_open
+                self.action,
+                self.base_value,
+                self.quote_value,
+                self.fee_rate,
+                self.base_volume,
+                self.quote_volume
             )
 
 

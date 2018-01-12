@@ -106,3 +106,14 @@ class ExchangeInterface():
 
     def get_order_book(self, market_pair, exchange):
         return self.exchanges[exchange].fetch_order_book(market_pair)
+
+    def get_open_orders(self):
+        open_orders = {}
+        for exchange in self.exchanges:
+            open_orders[exchange] = self.exchanges[exchange].fetch_open_orders()
+            time.sleep(self.exchanges[exchange].rateLimit / 1000)
+        return open_orders
+
+    def cancel_order(self, exchange, order_id):
+        self.exchanges[exchange].cancel_order(order_id)
+        time.sleep(self.exchanges[exchange].rateLimit / 1000)
