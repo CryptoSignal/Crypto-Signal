@@ -24,13 +24,13 @@ class DefaultBehaviour():
             for market_pair in market_data[exchange]:
 
                 try:
-                    one_day_historical_data = self.strategy_analyzer.prepare_historical_data(
+                    one_day_historical_data = self.strategy_analyzer.get_historical_data(
                         market_data[exchange][market_pair]['symbol'],
                         exchange,
                         '1d'
                     )
 
-                    five_minute_historical_data = self.strategy_analyzer.prepare_historical_data(
+                    five_minute_historical_data = self.strategy_analyzer.get_historical_data(
                         market_data[exchange][market_pair]['symbol'],
                         exchange,
                         '5m'

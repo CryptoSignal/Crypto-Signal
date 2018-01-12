@@ -65,7 +65,7 @@
       "mode": "simulate",
       "open_order_max_hours": 24,
       "buy": {
-        "rsi_threshold": 70,
+        "rsi_threshold": 30,
         "trade_limits": {
           "BTC": 0.02,
           "ETH": 0.2,
@@ -74,7 +74,7 @@
         }
       },
       "sell": {
-        "rsi_threshold": 30,
+        "rsi_threshold": 70,
         "trade_limits": {
           "BTC": 0.02,
           "ETH": 0.2,

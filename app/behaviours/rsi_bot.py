@@ -23,18 +23,23 @@ class RSIBot():
             market_data = self.exchange_interface.get_exchange_markets()
 
         rsi_data = {}
+        rsi_sorted_pairs = {}
         for exchange, markets in market_data.items():
             rsi_data[exchange] = {}
+            rsi_sorted_pairs[exchange] = []
+
             for market_pair in markets:
                 try:
-                    one_day_historical_data = self.strategy_analyzer.prepare_historical_data(
+                    one_day_historical_data = self.strategy_analyzer.get_historical_data(
                         market_data[exchange][market_pair]['symbol'],
                         exchange,
                         '1d'
                     )
 
                     rsi_data[exchange][market_pair] = self.strategy_analyzer.analyze_rsi(
-                        one_day_historical_data
+                        one_day_historical_data,
+                        hot_thresh=self.behaviour_config['buy']['rsi_threshold'],
+                        cold_thresh=self.behaviour_config['sell']['rsi_threshold']
                     )
 
                 except ccxt.NetworkError:
@@ -44,6 +49,11 @@ class RSIBot():
                         exchange
                     )
                     continue
+
+            rsi_sorted_pairs[exchange] = sorted(
+                rsi_data[exchange],
+                key=lambda x: (rsi_data[exchange][x]['values'][0])
+            )
 
         open_orders = self.exchange_interface.get_open_orders()
 
@@ -75,28 +85,45 @@ class RSIBot():
                 current_holdings = self.__get_holdings()
 
         for exchange, markets in rsi_data.items():
-            for market_pair in markets:
+            for market_pair in rsi_sorted_pairs[exchange]:
                 base_symbol, quote_symbol = market_pair.split('/')
 
                 if markets[market_pair]['is_hot']:
-                    if not base_symbol in current_holdings[exchange]\
-                    or current_holdings[exchange][base_symbol]['volume_total'] == 0:
-                        self.buy(
-                            base_symbol,
-                            quote_symbol,
-                            market_pair,
-                            exchange,
-                            current_holdings)
+                    self.logger.debug(
+                        "%s is hot at %s!",
+                        market_pair,
+                        markets[market_pair]['values'][0]
+                    )
+                    if not current_holdings[exchange][quote_symbol]['volume_total'] == 0:
+                        if not base_symbol in current_holdings[exchange]\
+                        or current_holdings[exchange][base_symbol]['volume_total'] == 0:
+                            self.logger.debug("%s is not in holdings, buying!", base_symbol)
+                            self.buy(
+                                base_symbol,
+                                quote_symbol,
+                                market_pair,
+                                exchange,
+                                current_holdings)
+                            current_holdings = self.__get_holdings()
 
                 elif markets[market_pair]['is_cold']:
+                    self.logger.debug(
+                        "%s is cold at %s!",
+                        market_pair,
+                        markets[market_pair]['values'][0]
+                    )
                     if base_symbol in current_holdings[exchange]\
                     and not current_holdings[exchange][base_symbol]['volume_free'] == 0:
+                        self.logger.debug("%s is in holdings, selling!", base_symbol)
                         self.sell(
                             base_symbol,
                             quote_symbol,
                             market_pair,
                             exchange,
                             current_holdings)
+                        current_holdings = self.__get_holdings()
+
+        self.logger.debug(current_holdings)
 
 
     def buy(self, base_symbol, quote_symbol, market_pair, exchange, current_holdings):
@@ -126,8 +153,8 @@ class RSIBot():
                 }
             )
 
-            if potential_holdings:
-                base_holding = potential_holdings[0]
+            if potential_holdings.count():
+                base_holding = potential_holdings.one()
                 base_holding.volume_free = base_holding.volume_free + base_volume
                 base_holding.volume_used = base_holding.volume_used
                 base_holding.volume_total = base_holding.volume_free + base_holding.volume_used
@@ -145,13 +172,14 @@ class RSIBot():
             quote_holding = self.db_handler.read_holdings(
                 {
                     'exchange': exchange,
-                    'symbol': base_symbol
+                    'symbol': quote_symbol
                 }
-            )[0]
+            ).one()
 
             quote_holding.volume_free = quote_holding.volume_free - quote_bid
             quote_holding.volume_used = quote_holding.volume_used
             quote_holding.volume_total = quote_holding.volume_free + quote_holding.volume_used
+
             self.db_handler.update_holding(quote_holding)
 
         purchase_payload = {
@@ -196,7 +224,7 @@ class RSIBot():
                     'exchange': exchange,
                     'symbol': base_symbol
                 }
-            )[0]
+            ).one()
 
             base_holding.volume_free = base_holding.volume_free - base_bid
             base_holding.volume_used = base_holding.volume_used
@@ -206,9 +234,9 @@ class RSIBot():
             quote_holding = self.db_handler.read_holdings(
                 {
                     'exchange': exchange,
-                    'symbol': base_symbol
+                    'symbol': quote_symbol
                 }
-            )[0]
+            ).one()
 
             quote_holding.volume_free = quote_holding.volume_free + quote_volume
             quote_holding.volume_used = quote_holding.volume_used

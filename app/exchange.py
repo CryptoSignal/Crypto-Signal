@@ -117,3 +117,12 @@ class ExchangeInterface():
     def cancel_order(self, exchange, order_id):
         self.exchanges[exchange].cancel_order(order_id)
         time.sleep(self.exchanges[exchange].rateLimit / 1000)
+
+    def get_quote_symbols(self, exchange):
+        quote_symbols = []
+        for market_pair in self.exchanges[exchange].markets:
+            base_symbol, quote_symbol = market_pair.split('/')
+            if not quote_symbol in quote_symbols:
+                quote_symbols.append(quote_symbol)
+
+        return quote_symbols
