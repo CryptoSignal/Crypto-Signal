@@ -53,7 +53,6 @@ class StrategyAnalyzer():
 
 
     def analyze_macd(self, historial_data, hot_thresh=0, cold_thresh=0):
-
         dataframe = self.__convert_to_dataframe(historial_data)
         stock_dataframe = StockDataFrame.retype(dataframe)
         macd_value = stock_dataframe.get('macd').iloc[-1]
@@ -174,9 +173,7 @@ class StrategyAnalyzer():
         return ichimoku_data
 
 
-    def analyze_bollinger_bands(self, historial_data, std_dev=2.):
-        period_count = 21
-
+    def analyze_bollinger_bands(self, historial_data):
         dataframe = self.__convert_to_dataframe(historial_data)
         stock_dataframe = StockDataFrame.retype(dataframe)
         upper_band = stock_dataframe.get('boll_ub').iloc[-1]
