@@ -1,5 +1,4 @@
-"""
-Executes the trading strategies and analyzes the results.
+"""Executes the trading strategies and analyzes the results.
 """
 
 from datetime import datetime, timedelta, timezone
@@ -13,12 +12,7 @@ from strategies.breakout import Breakout
 from strategies.ichimoku_cloud import IchimokuCloud
 
 class StrategyAnalyzer():
-    """
-    Handles trading strategies for breakouts, rsi, moving averages,
-    and ichimoku clouds. All methods are asynchronous.
-
-    Attributes:
-       _exchange_interface: asynchronous interface used to communicate with exchanges.
+    """Contains all the methods required for analyzing strategies.
     """
 
     def __init__(self, exchange_interface):
@@ -27,6 +21,18 @@ class StrategyAnalyzer():
 
 
     def get_historical_data(self, market_pair, exchange, time_unit, max_days=100):
+        """Fetches the historical data
+
+        Args:
+            market_pair (str): Contains the market pair to operate on i.e. BURST/BTC
+            exchange (str): Contains the exchange to fetch the historical data from.
+            time_unit (str): A string specifying the ccxt time unit i.e. 5m or 1d.
+            max_days (int, optional): Defaults to 100. Maximum number of days to fetch data for.
+
+        Returns:
+            list: Contains a list of lists which contain timestamp, open, high, low, close, volume.
+        """
+
         # The data_start_date timestamp must be in milliseconds hence * 1000.
         data_start_date = datetime.now() - timedelta(days=max_days)
         data_start_date = data_start_date.replace(tzinfo=timezone.utc).timestamp() * 1000
@@ -41,6 +47,15 @@ class StrategyAnalyzer():
 
 
     def __convert_to_dataframe(self, historical_data):
+        """Converts historical data matrix to a pandas dataframe.
+
+        Args:
+            historical_data (list): A matrix of historical OHCLV data.
+
+        Returns:
+            pandas.DataFrame: Contains the historical data in a pandas dataframe.
+        """
+
         dataframe = pandas.DataFrame(historical_data)
         dataframe.transpose()
         dataframe.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
@@ -53,8 +68,22 @@ class StrategyAnalyzer():
 
 
     def analyze_macd(self, historial_data, hot_thresh=0, cold_thresh=0):
+        """Performs a macd analysis on the historical data
+
+        Args:
+            historial_data (list): A matrix of historical OHCLV data.
+            hot_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+                to purchase.
+            cold_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+                to sell.
+
+        Returns:
+            dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
+                indication.
+        """
+
         dataframe = self.__convert_to_dataframe(historial_data)
-        macd_value = abstract.MACD(dataframe).iloc[-1,0]
+        macd_value = abstract.MACD(dataframe).iloc[-1, 0]
         print(macd_value)
 
         macd_data = {
@@ -67,6 +96,20 @@ class StrategyAnalyzer():
 
 
     def analyze_breakout(self, historial_data, hot_thresh=0, cold_thresh=0):
+        """Performs a momentum analysis on the historical data
+
+        Args:
+            historial_data (list): A matrix of historical OHCLV data.
+            hot_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+                to purchase.
+            cold_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+                to sell.
+
+        Returns:
+            dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
+                indication.
+        """
+
         breakout_analyzer = Breakout()
 
         period_count = 5
@@ -86,6 +129,20 @@ class StrategyAnalyzer():
 
 
     def analyze_rsi(self, historial_data, hot_thresh=0, cold_thresh=0):
+        """Performs an RSI analysis on the historical data
+
+        Args:
+            historial_data (list): A matrix of historical OHCLV data.
+            hot_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+                to purchase.
+            cold_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+                to sell.
+
+        Returns:
+            dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
+                indication.
+        """
+
         period_count = 14
 
         dataframe = self.__convert_to_dataframe(historial_data)
@@ -104,6 +161,20 @@ class StrategyAnalyzer():
 
 
     def analyze_sma(self, historial_data, hot_thresh=0, cold_thresh=0):
+        """Performs a SMA analysis on the historical data
+
+        Args:
+            historial_data (list): A matrix of historical OHCLV data.
+            hot_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+                to purchase.
+            cold_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+                to sell.
+
+        Returns:
+            dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
+                indication.
+        """
+
         period_count = 15
 
         dataframe = self.__convert_to_dataframe(historial_data)
@@ -122,6 +193,20 @@ class StrategyAnalyzer():
 
 
     def analyze_ema(self, historial_data, hot_thresh=0, cold_thresh=0):
+        """Performs an EMA analysis on the historical data
+
+        Args:
+            historial_data (list): A matrix of historical OHCLV data.
+            hot_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+                to purchase.
+            cold_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+                to sell.
+
+        Returns:
+            dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
+                indication.
+        """
+
         period_count = 15
 
         dataframe = self.__convert_to_dataframe(historial_data)
@@ -140,6 +225,20 @@ class StrategyAnalyzer():
 
 
     def analyze_ichimoku_cloud(self, historial_data, hot_thresh=0, cold_thresh=0):
+        """Performs an ichimoku cloud analysis on the historical data
+
+        Args:
+            historial_data (list): A matrix of historical OHCLV data.
+            hot_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+                to purchase.
+            cold_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+                to sell.
+
+        Returns:
+            dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
+                indication.
+        """
+
         ic_analyzer = IchimokuCloud()
 
         tenkansen_period = 9
@@ -168,6 +267,16 @@ class StrategyAnalyzer():
 
 
     def analyze_bollinger_bands(self, historial_data):
+        """Performs a bollinger band analysis on the historical data
+
+        Args:
+            historial_data (list): A matrix of historical OHCLV data.
+
+        Returns:
+            dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
+                indication.
+        """
+
         dataframe = self.__convert_to_dataframe(historial_data)
         upper_band, middle_band, lower_band = abstract.BBANDS(dataframe).iloc[-1]
 
