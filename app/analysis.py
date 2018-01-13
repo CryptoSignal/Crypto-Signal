@@ -4,6 +4,8 @@ Executes the trading strategies and analyzes the results.
 
 import structlog
 
+from datetime import datetime, timedelta, timezone
+
 from strategies.breakout import Breakout
 from strategies.ichimoku_cloud import IchimokuCloud
 from strategies.moving_averages import MovingAverages
@@ -27,13 +29,22 @@ class StrategyAnalyzer():
         self.minute_historical_data = []
 
 
-    def get_historical_data(self, market_pair, exchange, time_unit, period_count=100):
+    def get_historical_data(self, market_pair, exchange, time_unit, max_days=100):
+        # The data_start_date timestamp must be in milliseconds hence * 1000.
+        data_start_date = datetime.now() - timedelta(days=max_days)
+        data_start_date = data_start_date.replace(tzinfo=timezone.utc).timestamp() * 1000
         historical_data = self.__exchange_interface.get_historical_data(
             market_pair=market_pair,
             exchange=exchange,
-            period_count=period_count,
-            time_unit=time_unit
+            time_unit=time_unit,
+            start_date=data_start_date
         )
+
+        for data_point in historical_data:
+            new_time = data_point[0] / 1000
+            the_time = datetime.fromtimestamp(
+                new_time
+            ).strftime('%c')
 
         return historical_data
 

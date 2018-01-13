@@ -45,7 +45,7 @@ class ExchangeInterface():
                     print("Unable to load exchange %s", new_exchange)
 
 
-    def get_historical_data(self, market_pair, exchange, period_count, time_unit):
+    def get_historical_data(self, market_pair, exchange, time_unit, start_date):
         """
         Gets historical data for market_pair from exchange for period_count periods of
         interval time_unit.
@@ -60,10 +60,13 @@ class ExchangeInterface():
         """
 
         historical_data = []
-        historical_data.append(self.exchanges[exchange].fetch_ohlcv(
-            market_pair,
-            timeframe=time_unit,
-            limit=period_count))
+        historical_data.append(
+            self.exchanges[exchange].fetch_ohlcv(
+                market_pair,
+                timeframe=time_unit,
+                since=start_date
+            )
+        )
         time.sleep(self.exchanges[exchange].rateLimit / 1000)
         return historical_data[0]
 
