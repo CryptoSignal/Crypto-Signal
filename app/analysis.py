@@ -40,12 +40,6 @@ class StrategyAnalyzer():
             start_date=data_start_date
         )
 
-        for data_point in historical_data:
-            new_time = data_point[0] / 1000
-            the_time = datetime.fromtimestamp(
-                new_time
-            ).strftime('%c')
-
         return historical_data
 
 
