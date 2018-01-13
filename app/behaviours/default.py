@@ -24,38 +24,40 @@ class DefaultBehaviour():
             for market_pair in market_data[exchange]:
 
                 try:
-                    self.strategy_analyzer.prepare_historical_data(
+                    one_day_historical_data = self.strategy_analyzer.get_historical_data(
                         market_data[exchange][market_pair]['symbol'],
-                        exchange
+                        exchange,
+                        '1d'
                     )
-                    rsi_data = self.strategy_analyzer.analyze_rsi(
+
+                    five_minute_historical_data = self.strategy_analyzer.get_historical_data(
                         market_data[exchange][market_pair]['symbol'],
-                        exchange
+                        exchange,
+                        '5m'
+                    )
+
+                    rsi_data = self.strategy_analyzer.analyze_rsi(
+                        one_day_historical_data
                     )
 
                     sma_data = self.strategy_analyzer.analyze_sma(
-                        market_data[exchange][market_pair]['symbol'],
-                        exchange
+                        one_day_historical_data
                     )
 
                     ema_data = self.strategy_analyzer.analyze_ema(
-                        market_data[exchange][market_pair]['symbol'],
-                        exchange
+                        one_day_historical_data
                     )
 
                     breakout_data = self.strategy_analyzer.analyze_breakout(
-                        market_data[exchange][market_pair]['symbol'],
-                        exchange
+                        five_minute_historical_data
                     )
 
                     ichimoku_data = self.strategy_analyzer.analyze_ichimoku_cloud(
-                        market_data[exchange][market_pair]['symbol'],
-                        exchange
+                        one_day_historical_data
                     )
 
                     macd_data = self.strategy_analyzer.analyze_macd(
-                        market_data[exchange][market_pair]['symbol'],
-                        exchange
+                        one_day_historical_data
                     )
 
                 # bandaid fixes

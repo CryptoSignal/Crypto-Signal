@@ -20,7 +20,7 @@ class ExchangeInterface():
             if exchange_config[exchange]['required']['enabled']:
                 new_exchange = getattr(ccxt, exchange)({
                     "enableRateLimit": True # Enables built-in rate limiter
-                    })
+                })
 
                 # sets up api permissions for user if given
                 if new_exchange:
@@ -45,7 +45,7 @@ class ExchangeInterface():
                     print("Unable to load exchange %s", new_exchange)
 
 
-    def get_historical_data(self, market_pair, exchange, period_count, time_unit):
+    def get_historical_data(self, market_pair, exchange, time_unit, start_date):
         """
         Gets historical data for market_pair from exchange for period_count periods of
         interval time_unit.
@@ -60,21 +60,24 @@ class ExchangeInterface():
         """
 
         historical_data = []
-        historical_data.append(self.exchanges[exchange].fetch_ohlcv(
-            market_pair,
-            timeframe=time_unit,
-            limit=period_count))
+        historical_data.append(
+            self.exchanges[exchange].fetch_ohlcv(
+                market_pair,
+                timeframe=time_unit,
+                since=start_date
+            )
+        )
+        time.sleep(self.exchanges[exchange].rateLimit / 1000)
         return historical_data[0]
 
 
-    def get_account_markets(self):
+    def get_account_markets(self, exchange):
         """
         Get user market balances
         """
         account_markets = {}
-        for exchange in self.exchanges:
-            account_markets.update(self.exchanges[exchange].fetch_balance())
-
+        account_markets.update(self.exchanges[exchange].fetch_balance())
+        time.sleep(self.exchanges[exchange].rateLimit / 1000)
         return account_markets
 
 
@@ -85,7 +88,7 @@ class ExchangeInterface():
         exchange_markets = {}
         for exchange in self.exchanges:
             exchange_markets[exchange] = self.exchanges[exchange].load_markets()
-
+            time.sleep(self.exchanges[exchange].rateLimit / 1000)
         return exchange_markets
 
 
@@ -101,8 +104,28 @@ class ExchangeInterface():
             for market_pair in market_pairs:
                 symbol_markets[exchange][market_pair] = self.exchanges[exchange].markets[
                     market_pair]
-
+            time.sleep(self.exchanges[exchange].rateLimit / 1000)
         return symbol_markets
 
     def get_order_book(self, market_pair, exchange):
         return self.exchanges[exchange].fetch_order_book(market_pair)
+
+    def get_open_orders(self):
+        open_orders = {}
+        for exchange in self.exchanges:
+            open_orders[exchange] = self.exchanges[exchange].fetch_open_orders()
+            time.sleep(self.exchanges[exchange].rateLimit / 1000)
+        return open_orders
+
+    def cancel_order(self, exchange, order_id):
+        self.exchanges[exchange].cancel_order(order_id)
+        time.sleep(self.exchanges[exchange].rateLimit / 1000)
+
+    def get_quote_symbols(self, exchange):
+        quote_symbols = []
+        for market_pair in self.exchanges[exchange].markets:
+            base_symbol, quote_symbol = market_pair.split('/')
+            if not quote_symbol in quote_symbols:
+                quote_symbols.append(quote_symbol)
+
+        return quote_symbols
