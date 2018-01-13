@@ -40,6 +40,7 @@ class StrategyAnalyzer():
 
         return historical_data
 
+
     def __convert_to_dataframe(self, historical_data):
         dataframe = pandas.DataFrame(historical_data)
         dataframe.transpose()
