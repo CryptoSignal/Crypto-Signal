@@ -1,19 +1,4 @@
-asn1crypto==0.22.0
-certifi==2017.7.27.1
-cffi==1.11.0
-chardet==3.0.4
-cryptography==2.0.3
-enum34==1.1.6
-idna==2.6
-ipaddress==1.0.18
-pycparser==2.18
-PyJWT==1.5.3
-pyOpenSSL==17.3.0
-pytz==2017.2
-requests==2.18.4
-six==1.11.0
 twilio==6.6.3
-urllib3==1.22
 slackclient==1.1.0
 ccxt==1.10.521
 structlog==17.2.0
@@ -21,3 +6,4 @@ python-json-logger==0.1.8
 sqlalchemy==1.2.0
 pandas==0.21.0
 stockstats==0.2.0
+TA-lib==0.4.15
