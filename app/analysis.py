@@ -2,16 +2,14 @@
 Executes the trading strategies and analyzes the results.
 """
 
-import structlog
-
 from datetime import datetime, timedelta, timezone
+
+import structlog
+import pandas
+from stockstats import StockDataFrame
 
 from strategies.breakout import Breakout
 from strategies.ichimoku_cloud import IchimokuCloud
-from strategies.moving_averages import MovingAverages
-from strategies.relative_strength_index import RelativeStrengthIndex
-from strategies.moving_avg_convergence_divergence import MovingAvgConvDiv
-from strategies.bollinger_bands import BollingerBands
 
 class StrategyAnalyzer():
     """
@@ -42,15 +40,23 @@ class StrategyAnalyzer():
 
         return historical_data
 
+    def __convert_to_dataframe(self, historical_data):
+        dataframe = pandas.DataFrame(historical_data)
+        dataframe.transpose()
+        dataframe.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
+        dataframe['datetime'] = dataframe.timestamp.apply(
+            lambda x: pandas.to_datetime(datetime.fromtimestamp(x / 1000).strftime('%c'))
+        )
+        dataframe.set_index('datetime', inplace=True, drop=True)
+        dataframe.drop('timestamp', axis=1, inplace=True)
+        return dataframe
+
 
     def analyze_macd(self, historial_data, hot_thresh=0, cold_thresh=0):
-        macd_analyzer = MovingAvgConvDiv()
 
-        period_count = 26
-
-        macd_historical_data = historial_data[0:period_count]
-
-        macd_value = macd_analyzer.calculate_MACD_delta(macd_historical_data)
+        dataframe = self.__convert_to_dataframe(historial_data)
+        stock_dataframe = StockDataFrame.retype(dataframe)
+        macd_value = stock_dataframe.get('macd').iloc[-1]
 
         macd_data = {
             'values': (macd_value,),
@@ -81,61 +87,60 @@ class StrategyAnalyzer():
 
 
     def analyze_rsi(self, historial_data, hot_thresh=0, cold_thresh=0):
-        rsi_analyzer = RelativeStrengthIndex()
-
         period_count = 14
 
-        rsi_historical_data = historial_data[0:period_count]
+        dataframe = self.__convert_to_dataframe(historial_data)
+        stock_dataframe = StockDataFrame.retype(dataframe)
+        rsi_method = 'rsi_' + str(period_count)
+        rsi_value = stock_dataframe.get(rsi_method).iloc[-1]
 
-        rsi_value = rsi_analyzer.get_rsi_value(rsi_historical_data, period_count)
-
-        is_overbought = rsi_value >= cold_thresh
-        is_oversold = rsi_value <= hot_thresh
+        is_cold = rsi_value >= cold_thresh
+        is_hot = rsi_value <= hot_thresh
 
         rsi_data = {
             'values': (rsi_value,),
-            'is_cold': is_overbought,
-            'is_hot': is_oversold
+            'is_cold': is_cold,
+            'is_hot': is_hot
         }
 
         return rsi_data
 
 
     def analyze_sma(self, historial_data, hot_thresh=0, cold_thresh=0):
-        ma_analyzer = MovingAverages()
-
         period_count = 15
 
-        sma_historical_data = historial_data[0:period_count]
+        dataframe = self.__convert_to_dataframe(historial_data)
+        stock_dataframe = StockDataFrame.retype(dataframe)
+        sma_method = 'close_' + str(period_count) + '_sma'
+        sma_value = stock_dataframe.get(sma_method).iloc[-1]
 
-        sma_value = ma_analyzer.get_sma_value(period_count, sma_historical_data)
-
-        is_sma_trending = ma_analyzer.is_sma_trending(sma_value, hot_thresh)
+        is_hot = sma_value >= hot_thresh
+        is_cold = sma_value <= cold_thresh
 
         sma_data = {
             'values': (sma_value,),
-            'is_hot': is_sma_trending,
-            'is_cold': False
+            'is_hot': is_hot,
+            'is_cold': is_cold
         }
 
         return sma_data
 
 
     def analyze_ema(self, historial_data, hot_thresh=0, cold_thresh=0):
-        ma_analyzer = MovingAverages()
-
         period_count = 15
 
-        ema_historical_data = historial_data[0:period_count]
+        dataframe = self.__convert_to_dataframe(historial_data)
+        stock_dataframe = StockDataFrame.retype(dataframe)
+        ema_method = 'close_' + str(period_count) + '_ema'
+        ema_value = stock_dataframe.get(ema_method).iloc[-1]
 
-        ema_value = ma_analyzer.get_ema_value(period_count, ema_historical_data)
-
-        is_ema_trending = ma_analyzer.is_ema_trending(ema_value, hot_thresh)
+        is_hot = ema_value >= hot_thresh
+        is_cold = ema_value <= cold_thresh
 
         ema_data = {
             'values': (ema_value,),
-            'is_hot': is_ema_trending,
-            'is_cold': False
+            'is_hot': is_hot,
+            'is_cold': is_cold
         }
 
         return ema_data
@@ -170,17 +175,12 @@ class StrategyAnalyzer():
 
 
     def analyze_bollinger_bands(self, historial_data, std_dev=2.):
-        bollingers = BollingerBands()
-
         period_count = 21
 
-        bb_historical_data = historial_data[0:period_count]
-
-        upper_band, lower_band = bollingers.get_bollinger_bands(
-            bb_historical_data,
-            period=period_count,
-            k=std_dev
-        )
+        dataframe = self.__convert_to_dataframe(historial_data)
+        stock_dataframe = StockDataFrame.retype(dataframe)
+        upper_band = stock_dataframe.get('boll_ub').iloc[-1]
+        lower_band = stock_dataframe.get('boll_lb').iloc[-1]
 
         bb_data = {
             'values': (upper_band, lower_band),
