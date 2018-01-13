@@ -41,7 +41,7 @@ Shoutouts:
 * Make sure to also update the market\_pairs you'd like to monitor within app/default-config.json, following the symbol pair format of base\_currency/quote\_currency (i.e. BTC/ETH)
 
 ## How to run
-In the root directory run `docker-compose run app` or `make run` if you don't have docker-compose.
+In the root directory run `docker-compose run app` or `make build && make run` if you don't have docker-compose.
 
 # How to use (Local)
 To install the dependencies for this project, run "pip install -r requirements.txt" in the app directory.
