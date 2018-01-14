@@ -16,6 +16,13 @@ class StrategyAnalyzer():
     """
 
     def __init__(self, exchange_interface):
+        """Initializes StrategyAnalyzer class
+
+        Args:
+            exchange_interface (ExchangeInterface): An instances of the ExchangeInterface class for
+                interacting with exchanges.
+        """
+
         self.__exchange_interface = exchange_interface
         self.logger = structlog.get_logger()
 
@@ -24,7 +31,7 @@ class StrategyAnalyzer():
         """Fetches the historical data
 
         Args:
-            market_pair (str): Contains the market pair to operate on i.e. BURST/BTC
+            market_pair (str): Contains the symbol pair to operate on i.e. BURST/BTC
             exchange (str): Contains the exchange to fetch the historical data from.
             time_unit (str): A string specifying the ccxt time unit i.e. 5m or 1d.
             max_days (int, optional): Defaults to 100. Maximum number of days to fetch data for.

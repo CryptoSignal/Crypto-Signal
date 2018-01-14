@@ -1,5 +1,4 @@
-"""
-Collect required information from exchanges
+"""Interface for performing queries against exchange API's
 """
 
 import time
@@ -8,10 +7,16 @@ import ccxt
 import structlog
 
 class ExchangeInterface():
+    """Interface for performing queries against exchange API's
     """
-    Collects required information from exchanges
-    """
+
     def __init__(self, exchange_config):
+        """Initializes ExchangeInterface class
+
+        Args:
+            exchange_config (dict): A dictionary containing configuration for the exchanges.
+        """
+
         self.logger = structlog.get_logger()
         self.exchanges = {}
 
@@ -46,17 +51,16 @@ class ExchangeInterface():
 
 
     def get_historical_data(self, market_pair, exchange, time_unit, start_date):
-        """
-        Gets historical data for market_pair from exchange for period_count periods of
-        interval time_unit.
+        """Get historical OHLCV for a symbol pair
 
         Args:
-            market_pair: the market who's historical data is to be queried.
-            exchange: the exchange that holds the historical data
-            time_unit: interval between periods.
+            market_pair (str): Contains the symbol pair to operate on i.e. BURST/BTC
+            exchange (str): Contains the exchange to fetch the historical data from.
+            time_unit (str): A string specifying the ccxt time unit i.e. 5m or 1d.
+            start_date (int): Timestamp in milliseconds.
 
         Returns:
-            Historical data from market in JSON.
+            list: Contains a list of lists which contain timestamp, open, high, low, close, volume.
         """
 
         historical_data = []
@@ -72,9 +76,15 @@ class ExchangeInterface():
 
 
     def get_account_markets(self, exchange):
+        """Get the symbol pairs listed within a users account.
+
+        Args:
+            exchange (str): Contains the exchange to fetch the data from.
+
+        Returns:
+            dict: A dictionary containing market data for the symbol pairs.
         """
-        Get user market balances
-        """
+
         account_markets = {}
         account_markets.update(self.exchanges[exchange].fetch_balance())
         time.sleep(self.exchanges[exchange].rateLimit / 1000)
@@ -82,9 +92,12 @@ class ExchangeInterface():
 
 
     def get_exchange_markets(self):
+        """Get market data for all symbol pairs listed on all configured exchanges.
+
+        Returns:
+            dict: A dictionary containing market data for all symbol pairs.
         """
-        Get exchange markets
-        """
+
         exchange_markets = {}
         for exchange in self.exchanges:
             exchange_markets[exchange] = self.exchanges[exchange].load_markets()
@@ -93,9 +106,15 @@ class ExchangeInterface():
 
 
     def get_symbol_markets(self, market_pairs):
+        """Get market data for specific symbols on all configured exchanges.
+
+        Args:
+            market_pairs (list): The symbol pairs you want to retrieve market data for.
+
+        Returns:
+            dict: A dictionary containing market data for requested symbol pairs.
         """
-        Get symbols market in each exchange
-        """
+
         symbol_markets = {}
         for exchange in self.exchanges:
             self.exchanges[exchange].load_markets()
@@ -107,10 +126,27 @@ class ExchangeInterface():
             time.sleep(self.exchanges[exchange].rateLimit / 1000)
         return symbol_markets
 
+
     def get_order_book(self, market_pair, exchange):
+        """Retrieve the order information for a particular symbol pair.
+
+        Args:
+            market_pair (str): Contains the symbol pair to operate on i.e. BURST/BTC
+            exchange (str): Contains the exchange to fetch the data from.
+
+        Returns:
+            dict: A dictionary containing bid, ask and other order information on a pair.
+        """
+
         return self.exchanges[exchange].fetch_order_book(market_pair)
 
     def get_open_orders(self):
+        """Get the users currently open orders on all configured exchanges.
+
+        Returns:
+            dict: A dictionary containing open order information.
+        """
+
         open_orders = {}
         for exchange in self.exchanges:
             open_orders[exchange] = self.exchanges[exchange].fetch_open_orders()
@@ -118,13 +154,29 @@ class ExchangeInterface():
         return open_orders
 
     def cancel_order(self, exchange, order_id):
+        """Cancels an open order on a particular exchange.
+
+        Args:
+            exchange (str): Contains the exchange to cancel the order on.
+            order_id (str): The order id you want to cancel.
+        """
+
         self.exchanges[exchange].cancel_order(order_id)
         time.sleep(self.exchanges[exchange].rateLimit / 1000)
 
     def get_quote_symbols(self, exchange):
+        """Get a list of quote symbols on an exchange.
+
+        Args:
+            exchange (str): Contains the exchange to fetch the data from.
+
+        Returns:
+            list: List of quote symbols on an exchange.
+        """
+
         quote_symbols = []
         for market_pair in self.exchanges[exchange].markets:
-            base_symbol, quote_symbol = market_pair.split('/')
+            _, quote_symbol = market_pair.split('/')
             if not quote_symbol in quote_symbols:
                 quote_symbols.append(quote_symbol)
 
