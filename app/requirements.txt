@@ -21,3 +21,5 @@ structlog==17.2.0
 python-json-logger==0.1.8
 sqlalchemy==1.2.0
 pandas==0.21.0
+flask==0.12.2
+numpy==1.13.3
