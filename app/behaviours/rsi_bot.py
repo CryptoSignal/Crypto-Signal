@@ -5,8 +5,24 @@ import ccxt
 import structlog
 
 class RSIBot():
+    """Trading bot based on the RSI indicator.
+    """
+
     def __init__(self, behaviour_config, exchange_interface,
                  strategy_analyzer, notifier, db_handler):
+        """Initialize RSIBot class.
+
+        Args:
+            behaviour_config (dict): A dictionary of configuration for this behaviour.
+            exchange_interface (ExchangeInterface): Instance of the ExchangeInterface class for
+                making exchange queries.
+            strategy_analyzer (StrategyAnalyzer): Instance of the StrategyAnalyzer class for
+                running analysis on exchange information.
+            notifier (Notifier): Instance of the notifier class for informing a user when a
+                threshold has been crossed.
+            db_handler (DatbaseHandler): Instance of the DatabaseHandler class for reading and
+                storing transaction data.
+        """
 
         self.logger = structlog.get_logger()
         self.behaviour_config = behaviour_config
@@ -17,6 +33,12 @@ class RSIBot():
 
 
     def run(self, market_pairs):
+        """The behaviour entrypoint
+
+        Args:
+            market_pairs (str): List of symbol pairs to operate on, if empty get all pairs.
+        """
+
         if market_pairs:
             market_data = self.exchange_interface.get_symbol_markets(market_pairs)
         else:
@@ -127,6 +149,16 @@ class RSIBot():
 
 
     def buy(self, base_symbol, quote_symbol, market_pair, exchange, current_holdings):
+        """Buy a base currency with a quote currency.
+
+        Args:
+            base_symbol (str): The symbol for the base currency (currency being bought).
+            quote_symbol (str): The symbol for the quote currency (currency being sold).
+            market_pair (str): Contains the symbol pair to operate on in the form of Base/Quote.
+            exchange (str): Contains the exchange the user wants to perform the trade on.
+            current_holdings (dict): A dictionary containing the users currently available funds.
+        """
+
         order_book = self.exchange_interface.get_order_book(market_pair, exchange)
         base_ask = order_book['asks'][0][0] if order_book['asks'] else None
         if not base_ask:
@@ -200,6 +232,16 @@ class RSIBot():
 
 
     def sell(self, base_symbol, quote_symbol, market_pair, exchange, current_holdings):
+        """Sell a base currency for a quote currency.
+
+        Args:
+            base_symbol (str): The symbol for the base currency (currency being sold).
+            quote_symbol (str): The symbol for the quote currency (currency being bought).
+            market_pair (str): Contains the symbol pair to operate on in the form of Base/Quote.
+            exchange (str): Contains the exchange the user wants to perform the trade on.
+            current_holdings (dict): A dictionary containing the users currently available funds.
+        """
+
         order_book = self.exchange_interface.get_order_book(market_pair, exchange)
         bid = order_book['bids'][0][0] if order_book['bids'] else None
         if not bid:
@@ -261,6 +303,12 @@ class RSIBot():
 
 
     def __get_holdings(self):
+        """Fetch the users crypto holdings from the database cache.
+
+        Returns:
+            dict: A dictionary of the users available funds.
+        """
+
         holdings_table = self.db_handler.read_holdings()
         holdings = {}
 
@@ -278,6 +326,8 @@ class RSIBot():
 
 
     def __create_holdings(self):
+        """Query the users account details to populate the crypto holdings database cache.
+        """
         for exchange in self.exchange_interface.exchanges:
             user_account_markets = self.exchange_interface.get_account_markets(exchange)
             for symbol in user_account_markets['free']:
@@ -293,6 +343,8 @@ class RSIBot():
 
 
     def __update_holdings(self):
+        """Synchronize the database cache with the crypto holdings from the users account.
+        """
         holdings_table = self.db_handler.read_holdings()
         user_account_markets = {}
         for row in holdings_table:

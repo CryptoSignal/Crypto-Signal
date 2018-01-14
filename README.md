@@ -1,5 +1,7 @@
 # Crypto Signals
 
+### Development state: alpha (There are many bugs and documentation is often lagging)
+
 Crypto Signals is a command line tool that automates your crypto currency Technical Analysis (TA) and trading.
 
 Track over 500 coins across Bittrex, Bitfinex, GDAX, Gemini and more!
