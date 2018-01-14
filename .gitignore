@@ -3,3 +3,4 @@ dev.sh
 .vscode
 app/errors.log
 .idea/
+www/static/index.js
