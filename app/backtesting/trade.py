@@ -17,7 +17,7 @@ class Trade(object):
         else:
             self.stop_loss = None
 
-        # self.output.info("Opened " + pair + " trade at " + str(self.entry_price) + ". Spent: " + str(amt_btc) + ", Amount:" + str(self.amount) + " " + pair.split('/')[0])
+        self.output.debug("Opened " + pair + " trade at " + str(self.entry_price) + ". Spent: " + str(amt_btc) + ", Amount:" + str(self.amount) + " " + pair.split('/')[0])
     
     def close(self, current_price):
         self.status = "CLOSED"
@@ -29,7 +29,7 @@ class Trade(object):
 
         message_type = "\033[92m" if profit > 0 else "\033[91m"
 
-        self.output.info(message_type + "Sold " + self.pair[:3] + " at " + str(self.exit_price) + ". Profit: " + str(profit) + ", Total BTC: " + str(btc_ended) + "\033[0m")
+        self.output.debug(message_type + "Sold " + self.pair[:3] + " at " + str(self.exit_price) + ". Profit: " + str(profit) + ", Total BTC: " + str(btc_ended) + "\033[0m")
 
         return profit, btc_ended
 
