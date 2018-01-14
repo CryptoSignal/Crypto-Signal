@@ -27,7 +27,7 @@ class Candlestick(object):
             self.close = self.current
             self.price_average = (self.high + self.low + self.close) / float(3)
 
-        self.output.log("Open: "+str(self.open)+" Close: "+str(self.close)+" High: "+str(self.high)+" Low: "+str(self.low)+" Current: "+str(self.current))
+        self.output.info("Open: "+str(self.open)+" Close: "+str(self.close)+" High: "+str(self.high)+" Low: "+str(self.low)+" Current: "+str(self.current))
 
     def is_closed(self):
         return self.close is not None

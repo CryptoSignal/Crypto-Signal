@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template
-from backtesting.backtest import backtest
+from backtesting.backtest import Backtester
 
 app = Flask(__name__, static_folder='../www/static', template_folder='../www/static/templates')
 
@@ -31,7 +31,12 @@ def backtesting():
     buy_strategy = post_data['buyStrategy']
     sell_strategy = post_data['sellStrategy']
 
-    result = backtest(coin_pair, period_length, capital, stop_loss, num_data, buy_strategy, sell_strategy, indicators)
+    # TODO: Change 'bittrex' to an arbitrary exchange passed in by query params
+    backtester = Backtester(coin_pair, period_length, 'bittrex', capital, stop_loss, num_data, buy_strategy, sell_strategy, indicators)
+    backtester.run()
+    result = backtester.get_results()
+
+    # result = backtest(coin_pair, period_length, capital, stop_loss, num_data, buy_strategy, sell_strategy, indicators)
 
     return jsonify(response=200, result=result)
 
