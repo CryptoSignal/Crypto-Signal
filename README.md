@@ -27,14 +27,9 @@ Features:
 You can build on top of this tool and implement algorithm trading and some machine learning models to experiment with predictive analysis.
 
 Coming Soon:
-* Automtated buying/selling
+* Automated buying/selling
 * Web Client :)
 
-
-Shoutouts:
-* To Bittrex for an awesome API
-* Eric Somdahl for writing the Python wrapper for the Bittrex API
-* Ryan Mullin for implementing the getHistoricalData() method on v2 of the Bittrex API
 
 # How to use (Docker)
 * First make sure you have [Docker installed](https://docs.docker.com/engine/installation/)
@@ -46,7 +41,13 @@ Shoutouts:
 In the root directory run `docker-compose run app` or `make run` if you don't have docker-compose.
 
 # How to use (Local)
-To install the dependencies for this project, run "pip install -r requirements.txt" in the app directory.
+To install the dependencies for this project, perform the following...
+- Ensure you are running python 3.6
+- install TA-lib from https://www.ta-lib.org/ for your OS.
+- `cd app`
+- `pip install numpy==1.14.0`
+- `pip install -r requirements.txt`
+
 You can add a secrets.json file to the app directory of your project to customize the configuration, the defaults are in app/default-config.json.
 
 ## How to run
