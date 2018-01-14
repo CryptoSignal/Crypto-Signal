@@ -1,5 +1,4 @@
-"""
-Configure logger
+"""Configure application logger
 """
 
 import sys
@@ -9,6 +8,15 @@ import structlog
 from pythonjsonlogger import jsonlogger
 
 def configure_logging(loglevel, log_mode):
+    """Configure the application logger
+
+    Args:
+        loglevel (str): The level of logging for the application.
+        log_mode (str): What kind of logging output to apply...
+            text: Text logging is intended for users / developers.
+            json: Json logging is intended for parsing with a log aggregation system.
+    """
+
     if not loglevel:
         loglevel = logging.WARNING
 

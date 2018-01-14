@@ -1,5 +1,4 @@
-"""
-Handles sending notifications via the configured notifiers
+"""Handles sending notifications via the configured notifiers
 """
 
 import structlog
@@ -10,10 +9,16 @@ from notifiers.gmail_client import GmailNotifier
 from notifiers.integram_client import IntegramNotifier
 
 class Notifier():
+    """Handles sending notifications via the configured notifiers
     """
-    Handles sending notifications via the configured notifiers
-    """
+
     def __init__(self, notifier_config):
+        """Initializes Notifier class
+
+        Args:
+            notifier_config (dict): A dictionary containing configuration for the notifications.
+        """
+
         self.logger = structlog.get_logger()
         self.twilio_configured = self.__validate_required_config('twilio', notifier_config)
         if self.twilio_configured:
@@ -45,47 +50,76 @@ class Notifier():
                 url=notifier_config['integram']['required']['url']
             )
 
+
     def __validate_required_config(self, notifier, notifier_config):
+        """Validate the required configuration items are present for a notifier.
+
+        Args:
+            notifier (str): The name of the notifier key in default-config.json
+            notifier_config (dict): A dictionary containing configuration for the notifications.
+
+        Returns:
+            bool: Is the notifier configured?
+        """
+
         notifier_configured = True
-        for opt, val in notifier_config[notifier]['required'].items():
+        for _, val in notifier_config[notifier]['required'].items():
             if not val:
                 notifier_configured = False
         return notifier_configured
 
+
     def notify_all(self, message):
+        """Trigger a notification for all notification options.
+
+        Args:
+            message (str): The message to send.
         """
-        Triggers the notification with all configured notifiers
-        """
+
         self.notify_slack(message)
         self.notify_twilio(message)
         self.notify_gmail(message)
         self.notify_integram(message)
 
+
     def notify_slack(self, message):
+        """Send a notification via the slack notifier
+
+        Args:
+            message (str): The message to send.
         """
-        Triggers the notification to slack
-        """
+
         if self.slack_configured:
             self.slack_client.notify(message)
 
 
     def notify_twilio(self, message):
+        """Send a notification via the twilio notifier
+
+        Args:
+            message (str): The message to send.
         """
-        Triggers the notification to slack
-        """
+
         if self.twilio_configured:
             self.twilio_client.notify(message)
 
+
     def notify_gmail(self, message):
+        """Send a notification via the gmail notifier
+
+        Args:
+            message (str): The message to send.
         """
-        Triggers the notification via email using gmail
-        """
+
         if self.gmail_configured:
             self.gmail_client.notify(message)
 
     def notify_integram(self, message):
+        """Send a notification via the integram notifier
+
+        Args:
+            message (str): The message to send.
         """
-        Triggers the notification via email using gmail
-        """
+
         if self.integram_configured:
             self.integram_client.notify(message)

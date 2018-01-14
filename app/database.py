@@ -1,3 +1,5 @@
+"""Provides some basic database functionality on which to build bots.
+"""
 
 from datetime import datetime
 
@@ -12,6 +14,9 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 class Holdings(Base):
+    """Class for use with the sqlalchemy ORM. Contains cache of user crypto holdings.
+    """
+
     __tablename__ = 'holdings'
 
     id = Column(Integer, primary_key=True)
@@ -42,6 +47,9 @@ class Holdings(Base):
             )
 
 class Transactions(Base):
+    """Class for use with the sqlalchemy ORM. Contains users transactions.
+    """
+
     __tablename__ = 'transactions'
 
     id = Column(Integer, primary_key=True)
@@ -85,7 +93,15 @@ class Transactions(Base):
 
 
 class DatabaseHandler():
+    """Class that serves as the interface for bots to use to interact with the database.
+    """
     def __init__(self, database_config):
+        """Initializes the DatabaseHandler class.
+
+        Args:
+            database_config (dict): A dictionary containing configuration for databases.
+        """
+
         connection_string = self.__create_connection_string(database_config)
         engine = create_engine(connection_string)
         Base.metadata.create_all(engine)
@@ -95,6 +111,15 @@ class DatabaseHandler():
 
 
     def __create_connection_string(self, database_config):
+        """Creates a SQL connection string depending on what is configured.
+
+        Args:
+            database_config (dict): A dictionary containing configuration for databases.
+
+        Returns:
+            str: A SQL connection string.
+        """
+
         connection_string = database_config['engine'] + "://"
         if database_config['username'] and database_config['password']:
             connection_string += ':'.join([
@@ -112,10 +137,30 @@ class DatabaseHandler():
 
         return connection_string
 
+
     def read_holdings(self, filter_args={}):
+        """Returns a query object containing the contents of the holdings table.
+
+        Args:
+            filter_args (dict): A dictionary of query filter values.
+
+        Returns:
+            sqlalchemy.Query: A sqlalchemy query object with applied filters.
+        """
+
         return self.session.query(Holdings).filter_by(**filter_args)
 
+
     def create_holding(self, create_args={}):
+        """Attempts to create a record in the holdings table.
+
+        Args:
+            create_args (dict): A dictionary of column value mappings.
+
+        Returns:
+            bool: Was the create a success?
+        """
+
         create_success = True
         try:
             self.session.add(Holdings(**create_args))
@@ -126,7 +171,18 @@ class DatabaseHandler():
             self.session.rollback()
         return create_success
 
+
     def update_holding(self, holding, update_args={}):
+        """Attempts to update a record in the holdings table.
+
+        Args:
+            holding (Holdings): An instance of the holding class to apply the update to.
+            update_args (dict): A dictionary of column value mappings.
+
+        Returns:
+            bool: Was the update a success?
+        """
+
         update_success = True
         try:
             self.session.query(Holdings).filter_by(id=holding.id).update(update_args)
@@ -137,10 +193,30 @@ class DatabaseHandler():
             self.session.rollback()
         return update_success
 
+
     def read_transactions(self, filter_args={}):
+        """Returns a query object containing the contents of the transactions table.
+
+        Args:
+            filter_args (dict): A dictionary of query filter values.
+
+        Returns:
+            sqlalchemy.Query: A sqlalchemy query object with applied filters.
+        """
+
         return self.session.query(Transactions).filter_by(**filter_args)
 
+
     def create_transaction(self, create_args={}):
+        """Attempts to create a record in the transactions table.
+
+        Args:
+            create_args (dict): A dictionary of column value mappings.
+
+        Returns:
+            bool: Was the create a success?
+        """
+
         create_success = True
         try:
             self.session.add(Transactions(**create_args))
@@ -151,7 +227,18 @@ class DatabaseHandler():
             self.session.rollback()
         return create_success
 
+
     def update_transaction(self, transaction, update_args={}):
+        """Attempts to update a record in the transactions table.
+
+        Args:
+            transaction (Transaction): An instance of the Transactions class to apply the update to.
+            update_args (dict): A dictionary of column value mappings.
+
+        Returns:
+            bool: Was the update a success?
+        """
+
         update_success = True
         try:
             self.session.query(Transactions).filter_by(id=transaction.id).update(update_args)

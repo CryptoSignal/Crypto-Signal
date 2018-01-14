@@ -1,8 +1,23 @@
-import structlog
+"""Notify a user via Gmail
+"""
+
 import smtplib
 
+import structlog
+
 class GmailNotifier:
+    """Class for handling gmail notifications
+    """
+
     def __init__(self, username, password, destination_addresses):
+        """Initialize GmailNotifier class
+
+        Args:
+            username (str): Username of the gmail account to use for sending message.
+            password (str): Password of the gmail account to use for sending message.
+            destination_addresses (list): A list of email addresses to notify.
+        """
+
         self.logger = structlog.get_logger()
         smtp_server = 'smtp.gmail.com:587'
         self.smtp_handler = smtplib.SMTP(smtp_server)
@@ -11,18 +26,15 @@ class GmailNotifier:
         self.destination_addresses = ','.join(destination_addresses)
 
     def notify(self, message):
-        """
-        Used to send an email from the account specified in the secrets.json file to the entire
-        address list specified in the secrets.json file
+        """Sends the message.
 
-        :param subject: Email subject
-        :type subject: str
-        :param message: Email content
-        :type message: str
+        Args:
+            message (str): The message to send.
 
-        :return: Errors received from the smtp server (if any)
-        :rtype : dict
+        Returns:
+            dict: A dictionary containing the result of the attempt to send the email.
         """
+
         header = 'From: %s\n' % self.username
         header += 'To: %s\n' % self.destination_addresses
         header += 'Subject: Crypto-signal alert!\n\n'
