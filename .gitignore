@@ -2,3 +2,4 @@ dev.sh
 .env
 .vscode
 app/errors.log
+.idea/
