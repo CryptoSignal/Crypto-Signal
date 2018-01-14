@@ -91,7 +91,6 @@ class StrategyAnalyzer():
 
         dataframe = self.__convert_to_dataframe(historial_data)
         macd_value = abstract.MACD(dataframe).iloc[-1, 0]
-        print(macd_value)
 
         macd_data = {
             'values': (macd_value,),
