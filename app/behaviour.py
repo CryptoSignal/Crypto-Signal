@@ -8,7 +8,8 @@ from notification import Notifier
 from analysis import StrategyAnalyzer
 from database import DatabaseHandler
 from behaviours.default import DefaultBehaviour
-from behaviours.rsi_bot import RSIBot
+from behaviours.rsi_bot import RsiBotBehaviour
+from behaviours.reporter import ReporterBehaviour
 
 
 class Behaviour():
@@ -43,6 +44,9 @@ class Behaviour():
         if selected_behaviour == 'rsi_bot':
             behaviour = self.__configure_rsi_bot(behaviour_config)
 
+        if selected_behaviour == 'reporter':
+            behaviour = self.__configure_reporter(behaviour_config)
+
         return behaviour
 
 
@@ -68,7 +72,7 @@ class Behaviour():
             exchange_interface,
             strategy_analyzer,
             notifier
-            )
+        )
 
         return behaviour
 
@@ -81,7 +85,7 @@ class Behaviour():
                 behaviour.
 
         Returns:
-            RSIBot: A class of functionality for the rsi bot behaviour.
+            RsiBotBehaviour: A class of functionality for the rsi bot behaviour.
         """
 
         exchange_interface = ExchangeInterface(self.config.get_exchange_config())
@@ -89,11 +93,36 @@ class Behaviour():
         notifier = Notifier(self.config.get_notifier_config())
         db_handler = DatabaseHandler(self.config.get_database_config())
 
-        behaviour = RSIBot(
+        behaviour = RsiBotBehaviour(
             behaviour_config,
             exchange_interface,
             strategy_analyzer,
             notifier,
-            db_handler)
+            db_handler
+        )
+
+        return behaviour
+
+    def __configure_reporter(self, behaviour_config):
+        """Configures and returns the reporter behaviour class.
+
+        Args:
+            behaviour_config (dict): A dictionary of configuration values pertaining to the
+                behaviour.
+
+        Returns:
+            ReporterBehaviour: A class of functionality for the reporter behaviour.
+        """
+
+        exchange_interface = ExchangeInterface(self.config.get_exchange_config())
+        notifier = Notifier(self.config.get_notifier_config())
+        db_handler = DatabaseHandler(self.config.get_database_config())
+
+        behaviour = ReporterBehaviour(
+            behaviour_config,
+            exchange_interface,
+            notifier,
+            db_handler
+        )
 
         return behaviour

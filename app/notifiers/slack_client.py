@@ -2,24 +2,22 @@
 """
 
 import structlog
-from slackclient import SlackClient
+import slackweb
 
 class SlackNotifier():
     """Class for handling slack notifications
     """
 
-    def __init__(self, slack_key, slack_channel):
+    def __init__(self, slack_webhook):
         """Initialize SlackNotifier class
 
         Args:
-            slack_key (str): Slack API key to allow message sending.
-            slack_channel (str): The slack channel to send the messages to.
+            slack_webhook (str): Slack web hook to allow message sending.
         """
 
         self.logger = structlog.get_logger()
         self.slack_name = "crypto-signal"
-        self.slack_channel = slack_channel
-        self.slack_client = SlackClient(slack_key)
+        self.slack_client = slackweb.Slack(url=slack_webhook)
 
 
     def notify(self, message):
@@ -29,7 +27,4 @@ class SlackNotifier():
             message (str): The message to send.
         """
 
-        self.slack_client.api_call(
-            username=self.slack_name,
-            channel=self.slack_channel,
-            text=message)
+        self.slack_client.notify(text=message)

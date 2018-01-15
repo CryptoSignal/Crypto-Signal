@@ -4,13 +4,13 @@ from datetime import datetime, timedelta
 import ccxt
 import structlog
 
-class RSIBot():
+class RsiBotBehaviour():
     """Trading bot based on the RSI indicator.
     """
 
     def __init__(self, behaviour_config, exchange_interface,
                  strategy_analyzer, notifier, db_handler):
-        """Initialize RSIBot class.
+        """Initialize RsiBotBehaviour class.
 
         Args:
             behaviour_config (dict): A dictionary of configuration for this behaviour.

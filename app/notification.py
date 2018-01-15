@@ -32,8 +32,7 @@ class Notifier():
         self.slack_configured = self.__validate_required_config('slack', notifier_config)
         if self.slack_configured:
             self.slack_client = SlackNotifier(
-                slack_key=notifier_config['slack']['required']['key'],
-                slack_channel=notifier_config['slack']['required']['channel']
+                slack_webhook=notifier_config['slack']['required']['webhook']
             )
 
         self.gmail_configured = self.__validate_required_config('gmail', notifier_config)

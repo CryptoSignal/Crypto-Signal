@@ -39,8 +39,7 @@
     },
     "slack": {
       "required": {
-        "key": "",
-        "channel": ""
+        "webhook": ""
       }
     },
     "gmail": {
@@ -58,9 +57,7 @@
   },
 
   "behaviours": {
-    "default": {
-
-    },
+    "default": {},
     "rsi_bot": {
       "mode": "simulate",
       "open_order_max_hours": 24,
@@ -82,6 +79,7 @@
           "USDT": 250.0
         }
       }
-    }
+    },
+    "reporter": {}
   }
 }
