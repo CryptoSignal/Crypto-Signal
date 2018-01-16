@@ -74,7 +74,7 @@ class StrategyAnalyzer():
         return dataframe
 
 
-    def analyze_macd(self, historial_data, hot_thresh=0, cold_thresh=0):
+    def analyze_macd(self, historial_data, hot_thresh=None, cold_thresh=None):
         """Performs a macd analysis on the historical data
 
         Args:
@@ -101,7 +101,7 @@ class StrategyAnalyzer():
         return macd_data
 
 
-    def analyze_breakout(self, historial_data, hot_thresh=0, cold_thresh=0):
+    def analyze_breakout(self, historial_data, hot_thresh=None, cold_thresh=None):
         """Performs a momentum analysis on the historical data
 
         Args:
@@ -123,18 +123,25 @@ class StrategyAnalyzer():
         breakout_historical_data = historial_data[0:period_count]
 
         breakout_value = breakout_analyzer.get_breakout_value(breakout_historical_data)
-        is_breaking_out = breakout_value >= hot_thresh
+
+        is_breaking_out = False
+        if not hot_thresh is None:
+            is_breaking_out = breakout_value >= hot_thresh
+
+        is_cooling_off = False
+        if not cold_thresh is None:
+            is_cooling_off = breakout_value <= cold_thresh
 
         breakout_data = {
             'values': (breakout_value,),
             'is_hot': is_breaking_out,
-            'is_cold': False
+            'is_cold': is_cooling_off
         }
 
         return breakout_data
 
 
-    def analyze_rsi(self, historial_data, hot_thresh=0, cold_thresh=0):
+    def analyze_rsi(self, historial_data, hot_thresh=None, cold_thresh=None):
         """Performs an RSI analysis on the historical data
 
         Args:
@@ -154,8 +161,14 @@ class StrategyAnalyzer():
         dataframe = self.__convert_to_dataframe(historial_data)
         rsi_value = abstract.RSI(dataframe, period_count).iloc[-1]
 
-        is_cold = rsi_value >= cold_thresh
-        is_hot = rsi_value <= hot_thresh
+        is_hot = False
+        if not hot_thresh is None:
+            is_hot = rsi_value <= hot_thresh
+
+        is_cold = False
+        if not cold_thresh is None:
+            is_cold = rsi_value >= cold_thresh
+
 
         rsi_data = {
             'values': (rsi_value,),
@@ -166,7 +179,7 @@ class StrategyAnalyzer():
         return rsi_data
 
 
-    def analyze_sma(self, historial_data, hot_thresh=0, cold_thresh=0):
+    def analyze_sma(self, historial_data, hot_thresh=None, cold_thresh=None):
         """Performs a SMA analysis on the historical data
 
         Args:
@@ -186,8 +199,13 @@ class StrategyAnalyzer():
         dataframe = self.__convert_to_dataframe(historial_data)
         sma_value = abstract.SMA(dataframe, period_count).iloc[-1]
 
-        is_hot = sma_value >= hot_thresh
-        is_cold = sma_value <= cold_thresh
+        is_hot = False
+        if not hot_thresh is None:
+            is_hot = sma_value >= hot_thresh
+
+        is_cold = False
+        if not cold_thresh is None:
+            is_cold = sma_value <= cold_thresh
 
         sma_data = {
             'values': (sma_value,),
@@ -198,7 +216,7 @@ class StrategyAnalyzer():
         return sma_data
 
 
-    def analyze_ema(self, historial_data, hot_thresh=0, cold_thresh=0):
+    def analyze_ema(self, historial_data, hot_thresh=None, cold_thresh=None):
         """Performs an EMA analysis on the historical data
 
         Args:
@@ -218,8 +236,13 @@ class StrategyAnalyzer():
         dataframe = self.__convert_to_dataframe(historial_data)
         ema_value = abstract.EMA(dataframe, period_count).iloc[-1]
 
-        is_hot = ema_value >= hot_thresh
-        is_cold = ema_value <= cold_thresh
+        is_hot = False
+        if not hot_thresh is None:
+            is_hot = ema_value >= hot_thresh
+
+        is_cold = False
+        if not cold_thresh is None:
+            is_cold = ema_value <= cold_thresh
 
         ema_data = {
             'values': (ema_value,),
@@ -230,7 +253,7 @@ class StrategyAnalyzer():
         return ema_data
 
 
-    def analyze_ichimoku_cloud(self, historial_data, hot_thresh=0, cold_thresh=0):
+    def analyze_ichimoku_cloud(self, historial_data, hot_thresh=None, cold_thresh=None):
         """Performs an ichimoku cloud analysis on the historical data
 
         Args:

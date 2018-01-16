@@ -66,7 +66,9 @@ class DefaultBehaviour():
                     )
 
                     rsi_data = self.strategy_analyzer.analyze_rsi(
-                        one_day_historical_data
+                        one_day_historical_data,
+                        self.behaviour_config['rsi']['hot'],
+                        self.behaviour_config['rsi']['cold']
                     )
 
                     sma_data = self.strategy_analyzer.analyze_sma(
@@ -78,7 +80,9 @@ class DefaultBehaviour():
                     )
 
                     breakout_data = self.strategy_analyzer.analyze_breakout(
-                        five_minute_historical_data
+                        five_minute_historical_data,
+                        self.behaviour_config['breakout']['hot'],
+                        self.behaviour_config['breakout']['cold']
                     )
 
                     ichimoku_data = self.strategy_analyzer.analyze_ichimoku_cloud(
@@ -101,7 +105,6 @@ class DefaultBehaviour():
                     self.notifier.notify_all(
                         message="{} is over bought!".format(market_pair)
                     )
-
                 elif rsi_data['is_hot']:
                     self.notifier.notify_all(
                         message="{} is over sold!".format(market_pair)

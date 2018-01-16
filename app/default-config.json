@@ -57,7 +57,16 @@
   },
 
   "behaviours": {
-    "default": {},
+    "default": {
+      "rsi": {
+        "hot": 30,
+        "cold": 70
+      },
+      "breakout": {
+        "hot": 0.8,
+        "cold": 0.4
+      }
+    },
     "rsi_bot": {
       "mode": "simulate",
       "open_order_max_hours": 24,
