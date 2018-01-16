@@ -154,14 +154,14 @@ class ControlPanel extends React.Component {
                               <input type="checkbox" id="ma-15-box" defaultChecked={showIndicators.movingaverage15} />
                               <label htmlFor="ma-15-box">Moving Average (15 Period)</label>
                             </p>
-                            <p>
-                              <input type="checkbox" id="macd" defaultChecked={showIndicators.macd} />
-                              <label htmlFor="macd">MACD</label>
-                            </p>
-                            <p>
-                              <input type="checkbox" id="rsi" defaultChecked={showIndicators.rsi} />
-                              <label htmlFor="rsi">Relative Strength Index</label>
-                            </p>
+                            {/*<p>*/}
+                              {/*<input type="checkbox" id="macd" defaultChecked={showIndicators.macd} />*/}
+                              {/*<label htmlFor="macd">MACD</label>*/}
+                            {/*</p>*/}
+                            {/*<p>*/}
+                              {/*<input type="checkbox" id="rsi" defaultChecked={showIndicators.rsi} />*/}
+                              {/*<label htmlFor="rsi">Relative Strength Index</label>*/}
+                            {/*</p>*/}
                           </form>;
 
        return (
