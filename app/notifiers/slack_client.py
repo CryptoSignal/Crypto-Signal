@@ -30,6 +30,7 @@ class SlackNotifier():
         """
 
         self.slack_client.api_call(
+            "chat.postMessage",
             username=self.slack_name,
             channel=self.slack_channel,
             text=message)
