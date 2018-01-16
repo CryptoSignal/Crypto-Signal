@@ -1,5 +1,5 @@
 {
-  "name": "trading-bot",
+  "name": "crypto-signal",
   "version": "1.0.0",
   "description": "Crypto Automated trading bot interface",
   "main": "static/index.js",
@@ -9,7 +9,7 @@
     "watch": "webpack --watch",
     "test": ""
   },
-  "author": "Jesse Bartola",
+  "author": "Crypto-Signal Team",
   "license": "ISC",
   "dependencies": {
     "react": "^16.2.0",
