@@ -7,14 +7,15 @@ from exchange import ExchangeInterface
 from backtesting.indicators import *
 from backtesting.candlestick import Candlestick
 
-
+"""
+A Chart class encompassing functionality for a set of historical data in a time-series domain
+"""
 class Chart(object):
-    def __init__(self, pair, period, exchange_name, exchange_config, start_time=time() - 2000000, length=9999999):
+    def __init__(self, pair, period, exchange_name, exchange_config, start_time=time() - 2000000):
 
         self.exchange_name = exchange_name
         self.pair = pair
         self.period = period
-        self.length = length
 
         self.start_time = start_time
 
@@ -23,7 +24,7 @@ class Chart(object):
         exchange = ExchangeInterface(exchange_config)
 
         # Query the data to fill our chart truncate it to 'length' elements
-        rawdata = exchange.get_historical_data(pair, exchange_name, period, start_time*1000)[:length]
+        rawdata = exchange.get_historical_data(pair, exchange_name, period, start_time*1000)
 
         for i in range(len(rawdata)):
             datum = rawdata[i]
@@ -33,16 +34,6 @@ class Chart(object):
 
     def get_points(self):
         return self.data
-
-    def get_current_price(self):
-        # If we are using bittrex, then self.connv1 will be defined (this check is pure stupidity
-        # as Bittrex removed the get_ticker API route from V2.0 -___-
-        if self.connv1:
-            current_values = self.connv1.get_ticker(self.pair)
-        else:
-            current_values = self.conn.get_ticker(self.pair)
-        last_pair_price = current_values['result']["Last"]
-        return last_pair_price
 
     '''
     Returns the indicators specified in the **kwargs dictionary as a json-serializable dictionary
@@ -79,6 +70,9 @@ class Chart(object):
 
         return response
 
+    '''
+    Plots the specified indicators on a matplotlib plot
+    '''
     def plot_indicators(self, **kwargs):
 
         # Get closing historical datapoints and plot them first
@@ -102,6 +96,9 @@ class Chart(object):
             for period in periods:
                 plt.plot(BacktestingIndicators.historical_moving_average(closings, period=period))
 
+    '''
+    Plots each buy trade as a green 'x', and each sell trade as a red 'x'
+    '''
     def plot_trades(self, buys, sells):
         for timestamp, price in buys:
             plt.plot(timestamp, price, 'gx')

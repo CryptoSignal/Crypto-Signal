@@ -79,9 +79,9 @@ class Dashboard extends React.Component {
      * @param sellStrategy: An object containing the sell strategy for this set of backtesting data
      * @param indicators: An object containig key-value pairs of indicators and their parameters.
      */
-	getBacktestingData(coinPair, timeUnit, capital, period, stopLoss, buyStrategy, sellStrategy, indicators) {
+	getBacktestingData(coinPair, timeUnit, capital, startTime, stopLoss, buyStrategy, sellStrategy, indicators) {
 	    const url = "http://localhost:5000/backtest?pair=" + coinPair + "&period=" + timeUnit + "&capital=" + capital +
-                    "&stopLoss=" + stopLoss + "&dataPoints=" + period;
+                    "&stopLoss=" + stopLoss + "&startTime=" + startTime;
 
 	    const target = document.getElementById('d3plot');
         const spinner = new Spinner(this.spinnerOpts).spin(target);

@@ -79,8 +79,9 @@ class ControlPanel extends React.Component {
                                <label className="active" htmlFor="stop-loss">Stop Loss</label>
                              </div>
                              <div className="input-field col s4">
-                               <input defaultValue="all" id="num-data" type="text" className="validate" />
-                               <label className="active" htmlFor="num-data"># Data Points</label>
+                               {/*<input defaultValue="all" id="num-data" type="text" className="validate" />*/}
+                               <input id="start-time" type="text" className="datepicker" />
+                               <label className="active" htmlFor="start-time">Start Time</label>
                              </div>
                             </div>
                            </div>;
@@ -198,6 +199,16 @@ class ControlPanel extends React.Component {
        // Activate the dropdowns when the compoment mounts
        $('select').material_select();
 
+       // Activate date picker
+       $('.datepicker').pickadate({
+           selectMonths: true,
+           selectYears: 5,
+           today: 'Today',
+           clear: 'Clear',
+           close: 'Ok',
+           closeOnSelect: true
+       });
+
        // Activate autocomplete when the component mounts (setTimeout hack)
        setTimeout(() => $('.autocomplete').autocomplete({
            data: {
@@ -223,23 +234,17 @@ class ControlPanel extends React.Component {
        const timeUnit = $('#time-unit').val();
        const capital = $('#amount-btc').val();
        const stopLoss = $('#stop-loss').val();
-       let length = $('#num-data').val();
+       let startTime = $('#start-time').val();
 
        const capitalReg = /(^[1-9][0-9]*$)|(^[0-9]*\.[0-9]*$)/;
-       const lengthReg = /(^all$)|(^[1-9][0-9]*$)/;
 
        if (!capitalReg.exec(capital)) {
            swal("Uh Oh!", "You need to enter a valid number for your starting capital.", "error");
            throw "Invalid Capital";
        }
 
-       if (length == 'all') {
-           length = 999999;
-       } else if (!lengthReg.exec(length)) {
-           swal("Uh Oh!", "You need to enter a valid integer (or \"all\") for the number of data points.", "error");
-           throw "Invalid Capital";
-       }
-
+       // Convert start time to epoch
+       startTime = new Date(startTime).getTime() / 1000;
 
        let indicators = {
            'movingaverage': []
@@ -260,7 +265,7 @@ class ControlPanel extends React.Component {
        const [buyStrategy, sellStrategy] = this.getStrategies();
 
 
-       this.props.getBacktestingData(coinPair, timeUnit, capital, length, stopLoss, buyStrategy, sellStrategy, indicators);
+       this.props.getBacktestingData(coinPair, timeUnit, capital, startTime, stopLoss, buyStrategy, sellStrategy, indicators);
    }
 
    getStrategies() {

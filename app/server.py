@@ -24,7 +24,7 @@ def backtesting():
     period_length = request.args.get('period')
     capital = float(request.args.get('capital'))
     stop_loss = float(request.args.get('stopLoss'))
-    num_data = int(request.args.get('dataPoints'))
+    start_time = int(request.args.get('startTime'))
 
     post_data = request.get_json()
     indicators = post_data['indicators']
@@ -32,7 +32,7 @@ def backtesting():
     sell_strategy = post_data['sellStrategy']
 
     # TODO: Change 'bittrex' to an arbitrary exchange passed in by query params
-    backtester = Backtester(coin_pair, period_length, 'bittrex', capital, stop_loss, num_data, buy_strategy, sell_strategy, indicators)
+    backtester = Backtester(coin_pair, period_length, 'bittrex', capital, stop_loss, start_time, buy_strategy, sell_strategy, indicators)
     backtester.run()
     result = backtester.get_results()
 
