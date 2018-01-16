@@ -51,5 +51,5 @@ Green dots represent buy points. Red dots represent sell points. The blue line i
 
 ## Coming Soon
 
-Strategy Panel, MACD plot, RSI plot
+MACD plot, RSI plot
 
