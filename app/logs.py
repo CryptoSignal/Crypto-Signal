@@ -18,7 +18,7 @@ def configure_logging(loglevel, log_mode):
     """
 
     if not loglevel:
-        loglevel = logging.WARNING
+        loglevel = logging.INFO
 
     if log_mode == 'json':
         log_formatter = jsonlogger.JsonFormatter()

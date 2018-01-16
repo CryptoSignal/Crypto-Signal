@@ -1,3 +1,7 @@
 dev.sh
 .env
 .vscode
+app/errors.log
+.idea/
+www/static/index.js
+www/node_modules/
