@@ -9,4 +9,4 @@ TA-lib==0.4.15
 tabulate==0.8.2
 psycopg2==2.7.3
 slackweb==1.0.5
-schema==0.6.5
+flask==0.12.2
