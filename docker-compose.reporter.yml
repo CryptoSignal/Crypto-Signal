@@ -14,8 +14,8 @@ services:
     env_file:
       - .env
     environment:
-      - SELECTED_TASK=rsi_bot
-      - UPDATE_INTERVAL=3600
+      - SETTINGS_SELECTED_TASK=rsi_bot
+      - SETTINGS_UPDATE_INTERVAL=3600
     depends_on:
       - db
 
@@ -26,7 +26,7 @@ services:
     env_file:
       - .env
     environment:
-      - SELECTED_TASK=reporter
-      - UPDATE_INTERVAL=86400
+      - SETTINGS_SELECTED_TASK=reporter
+      - SETTINGS_UPDATE_INTERVAL=86400
     depends_on:
       - db

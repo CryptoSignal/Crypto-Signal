@@ -15,7 +15,7 @@ def main():
     """
      # Load settings and create the config object
     config = conf.Configuration()
-    settings = config.get_settings()
+    settings = config.settings
 
     # Set up logger
     logs.configure_logging(settings['loglevel'], settings['log_mode'])

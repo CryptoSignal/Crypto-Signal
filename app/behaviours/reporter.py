@@ -31,6 +31,9 @@ class ReporterBehaviour():
 
     def run(self, market_pairs):
         """The behaviour entrypoint
+
+        Args:
+          market_pairs (list): No function yet.
         """
 
         transaction_count = self.db_handler.read_transactions().count()
@@ -63,10 +66,7 @@ class ReporterBehaviour():
 
         total_value = "I am currently holding {} in btc".format(format(total_btc_value, '.8f'))
 
+        message = transactions + "\n\n" + holdings_table + "\n\n" + total_value
 
-        print(transactions)
-        print(holdings_table)
-        print(total_value)
-        self.notifier.notify_all(transactions)
-        self.notifier.notify_all(holdings_table)
-        self.notifier.notify_all(total_value)
+        self.logger.info(message)
+        self.notifier.notify_all(message)
