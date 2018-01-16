@@ -108,6 +108,7 @@ class Dashboard extends React.Component {
                 });
             },
             error: res => {
+                document.getElementById('d3plot').innerHTML = "";
                 swal("Uh oh!", "Something went wrong: Response code " + res.status + ". Please try again.", "error");
             }
         });

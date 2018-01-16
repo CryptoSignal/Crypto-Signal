@@ -225,9 +225,21 @@ class ControlPanel extends React.Component {
        const stopLoss = $('#stop-loss').val();
        let length = $('#num-data').val();
 
+       const capitalReg = /(^[1-9][0-9]*$)|(^[0-9]*\.[0-9]*$)/;
+       const lengthReg = /(^all$)|(^[1-9][0-9]*$)/;
+
+       if (!capitalReg.exec(capital)) {
+           swal("Uh Oh!", "You need to enter a valid number for your starting capital.", "error");
+           throw "Invalid Capital";
+       }
+
        if (length == 'all') {
            length = 999999;
+       } else if (!lengthReg.exec(length)) {
+           swal("Uh Oh!", "You need to enter a valid integer (or \"all\") for the number of data points.", "error");
+           throw "Invalid Capital";
        }
+
 
        let indicators = {
            'movingaverage': []
@@ -264,7 +276,7 @@ class ControlPanel extends React.Component {
            if (isNaN(buyVal)) {
 
                if (!(buyVal in this.acceptableIndicators)) {
-                   swal("Uh oh!", "You must enter a number or one of the suggested indicators.", "error");
+                   swal("Uh oh!", "The value for your buy strategy must be a number or one of the suggested indicators.", "error");
                    throw "Incorrect value for buy field";
                }
 
@@ -280,7 +292,7 @@ class ControlPanel extends React.Component {
            if (isNaN(sellVal)) {
 
                if (!(sellVal in this.acceptableIndicators)) {
-                   swal("Uh oh!", "You must enter a number or one of the suggested indicators.", "error");
+                   swal("Uh oh!", "The value for your sell strategy must be a number or one of the suggested indicators.", "error");
                    throw "Incorrect value for sell field";
                }
 
@@ -293,6 +305,8 @@ class ControlPanel extends React.Component {
        console.log(buy_strategy, sell_strategy);
        return [buy_strategy, sell_strategy];
    }
+
+
 
    addCondition(buyOrSell) {
        // Make a deep clone of the state so it activates our component lifecycle methods
