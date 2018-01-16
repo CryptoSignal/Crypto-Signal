@@ -8,4 +8,3 @@ pandas==0.21.0
 stockstats==0.2.0
 TA-lib==0.4.15
 flask==0.12.2
-numpy==1.13.3
