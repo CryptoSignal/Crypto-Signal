@@ -89,6 +89,8 @@
         }
       }
     },
-    "reporter": {}
+    "reporter": {
+      "name": "default"
+    }
   }
 }

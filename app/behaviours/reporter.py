@@ -36,8 +36,11 @@ class ReporterBehaviour():
           market_pairs (list): No function yet.
         """
 
+        header = "====== REPORT FOR {} ======".format(self.behaviour_config['name'])
+
         transaction_count = self.db_handler.read_transactions().count()
         transactions = "I have made {} transactions since I began.".format(transaction_count)
+
         total_btc_value = 0
 
         holdings_query = self.db_handler.read_holdings()
@@ -66,7 +69,7 @@ class ReporterBehaviour():
 
         total_value = "I am currently holding {} in btc".format(format(total_btc_value, '.8f'))
 
-        message = transactions + "\n\n" + holdings_table + "\n\n" + total_value
+        message = header + "\n" + transactions + "\n\n" + holdings_table + "\n\n" + total_value
 
         self.logger.info(message)
         self.notifier.notify_all(message)
