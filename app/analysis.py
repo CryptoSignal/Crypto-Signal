@@ -79,9 +79,9 @@ class StrategyAnalyzer():
 
         Args:
             historial_data (list): A matrix of historical OHCLV data.
-            hot_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+            hot_thresh (float, optional): Defaults to None. The threshold at which this might be good
                 to purchase.
-            cold_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+            cold_thresh (float, optional): Defaults to None. The threshold at which this might be good
                 to sell.
 
         Returns:
@@ -106,9 +106,9 @@ class StrategyAnalyzer():
 
         Args:
             historial_data (list): A matrix of historical OHCLV data.
-            hot_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+            hot_thresh (float, optional): Defaults to None. The threshold at which this might be good
                 to purchase.
-            cold_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+            cold_thresh (float, optional): Defaults to None. The threshold at which this might be good
                 to sell.
 
         Returns:
@@ -146,9 +146,9 @@ class StrategyAnalyzer():
 
         Args:
             historial_data (list): A matrix of historical OHCLV data.
-            hot_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+            hot_thresh (float, optional): Defaults to None. The threshold at which this might be good
                 to purchase.
-            cold_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+            cold_thresh (float, optional): Defaults to None. The threshold at which this might be good
                 to sell.
 
         Returns:
@@ -184,9 +184,9 @@ class StrategyAnalyzer():
 
         Args:
             historial_data (list): A matrix of historical OHCLV data.
-            hot_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+            hot_thresh (float, optional): Defaults to None. The threshold at which this might be good
                 to purchase.
-            cold_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+            cold_thresh (float, optional): Defaults to None. The threshold at which this might be good
                 to sell.
 
         Returns:
@@ -221,9 +221,9 @@ class StrategyAnalyzer():
 
         Args:
             historial_data (list): A matrix of historical OHCLV data.
-            hot_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+            hot_thresh (float, optional): Defaults to None. The threshold at which this might be good
                 to purchase.
-            cold_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+            cold_thresh (float, optional): Defaults to None. The threshold at which this might be good
                 to sell.
 
         Returns:
@@ -258,9 +258,9 @@ class StrategyAnalyzer():
 
         Args:
             historial_data (list): A matrix of historical OHCLV data.
-            hot_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+            hot_thresh (float, optional): Defaults to None. The threshold at which this might be good
                 to purchase.
-            cold_thresh (float, optional): Defaults to 0. The threshold at which this might be good
+            cold_thresh (float, optional): Defaults to None. The threshold at which this might be good
                 to sell.
 
         Returns:
