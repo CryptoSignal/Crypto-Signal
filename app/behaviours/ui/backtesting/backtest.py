@@ -3,15 +3,8 @@ import matplotlib.pyplot as plt
 
 from logs import configure_logging
 from conf import Configuration
-from backtesting.chart import Chart
-from backtesting.strategy import BacktestingStrategy
-
-# Load settings and create the config object
-config = Configuration()
-settings = config.get_settings()
-
-# Set up logger
-configure_logging(settings['loglevel'], settings['log_mode'])
+from behaviours.ui.backtesting.chart import Chart
+from behaviours.ui.backtesting.strategy import BacktestingStrategy
 
 # Sample coin pairs to backtest with
 coins = ["ETH/BTC", "LTC/BTC", "XMR/BTC", "OMG/BTC", "XRP/BTC", "SC/BTC", "XEM/BTC", "DASH/BTC", "LSK/BTC",
@@ -21,9 +14,10 @@ coins = ["ETH/BTC", "LTC/BTC", "XMR/BTC", "OMG/BTC", "XRP/BTC", "SC/BTC", "XEM/B
 A Backtesting engine
 """
 class Backtester(object):
-    def __init__(self, coin_pair, period_length, exchange, capital, stop_loss, start_time, buy_strategy, sell_strategy, indicators={}):
+    def __init__(self, coin_pair, period_length, exchange_name, exchange_interface, capital, stop_loss,
+                 start_time, buy_strategy, sell_strategy, indicators={}):
 
-        self.chart = Chart(coin_pair, period_length, exchange, config.get_exchange_config(), start_time=start_time)
+        self.chart = Chart(coin_pair, period_length, exchange_name, exchange_interface, start_time=start_time)
 
         self.strategy = BacktestingStrategy(pair=coin_pair, capital=capital, buy_strategy=buy_strategy,
                                        sell_strategy=sell_strategy, trading_fee=0.0025, stop_loss=stop_loss)

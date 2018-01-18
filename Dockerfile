@@ -15,4 +15,6 @@ WORKDIR /app
 RUN pip install numpy==1.14.0
 RUN pip install -r requirements.txt
 
+EXPOSE 5000
+
 CMD ["/usr/local/bin/python","app.py"]

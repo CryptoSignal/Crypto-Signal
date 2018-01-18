@@ -67,6 +67,9 @@
         "cold": 0.4
       }
     },
+    "server": {
+
+    },
     "rsi_bot": {
       "mode": "simulate",
       "open_order_max_hours": 24,
