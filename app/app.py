@@ -34,6 +34,5 @@ def main():
             logger.info("Sleeping for %s seconds", settings['update_interval'])
             time.sleep(settings['update_interval'])
 
-
 if __name__ == "__main__":
     main()

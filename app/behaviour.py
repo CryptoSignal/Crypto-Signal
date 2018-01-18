@@ -155,3 +155,28 @@ class Behaviour(object):
             db_handler)
 
         return behaviour
+
+    def __configure_server(self, behaviour_config):
+        """Configures and returns the server (UI) behavior class.
+
+        Args:
+            behaviour_config (dict): A dictionary of configuration values pertaining to the
+                behaviour.
+
+        Returns:
+            Server: A class of functionality for the Flask server behaviour.
+        """
+
+        exchange_interface = ExchangeInterface(self.config.exchanges)
+        strategy_analyzer = StrategyAnalyzer(exchange_interface)
+        notifier = Notifier(self.config.notifiers)
+        db_handler = DatabaseHandler(self.config.database)
+
+        behaviour = ServerBehaviour(
+            behaviour_config,
+            exchange_interface,
+            strategy_analyzer,
+            notifier,
+            db_handler)
+
+        return behaviour
