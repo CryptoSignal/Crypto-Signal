@@ -7,7 +7,7 @@ from behaviours.ui.backtesting.backtest import Backtester
 """
 A server object wrapping our flask instance
 """
-class Server(object):
+class ServerBehaviour(object):
     def __init__(self, behaviour_config, exchange_interface,
                  strategy_analyzer, notifier, db_handler):
         """Initialize RSIBot class.

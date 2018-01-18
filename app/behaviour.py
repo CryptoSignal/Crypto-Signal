@@ -10,8 +10,7 @@ from database import DatabaseHandler
 from behaviours.default import DefaultBehaviour
 from behaviours.rsi_bot import RsiBotBehaviour
 from behaviours.reporter import ReporterBehaviour
-from behaviours.rsi_bot import RSIBot
-from behaviours.ui.server import Server
+from behaviours.ui.server import ServerBehaviour
 
 
 class Behaviour(object):
@@ -143,12 +142,12 @@ class Behaviour(object):
             Server: A class of functionality for the Flask server behaviour.
         """
 
-        exchange_interface = ExchangeInterface(self.config.get_exchange_config())
+        exchange_interface = ExchangeInterface(self.config.exchanges)
         strategy_analyzer = StrategyAnalyzer(exchange_interface)
-        notifier = Notifier(self.config.get_notifier_config())
-        db_handler = DatabaseHandler(self.config.get_database_config())
+        notifier = Notifier(self.config.notifiers)
+        db_handler = DatabaseHandler(self.config.database)
 
-        behaviour = Server(
+        behaviour = ServerBehaviour(
             behaviour_config,
             exchange_interface,
             strategy_analyzer,

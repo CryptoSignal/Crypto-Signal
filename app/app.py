@@ -9,7 +9,7 @@ import conf
 import structlog
 
 from behaviour import Behaviour
-from behaviours.ui.server import Server
+from behaviours.ui.server import ServerBehaviour
 
 def main():
     """Initializes the application
@@ -26,7 +26,7 @@ def main():
     behaviour_manager = Behaviour(config)
     behaviour = behaviour_manager.get_behaviour(settings['selected_task'])
 
-    if isinstance(behaviour, Server):
+    if isinstance(behaviour, ServerBehaviour):
         behaviour.run(debug=False)
     else:
         while True:
