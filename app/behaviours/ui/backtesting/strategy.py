@@ -3,9 +3,9 @@ import random
 import matplotlib.pyplot as plt
 
 import structlog
-from backtesting.trade import Trade
-from backtesting.indicators import BacktestingIndicators
-from backtesting.decision import Decision
+from behaviours.ui.backtesting.trade import Trade
+from behaviours.ui.backtesting.indicators import BacktestingIndicators
+from behaviours.ui.backtesting.decision import Decision
 
 '''
 BackTesting Strategy
