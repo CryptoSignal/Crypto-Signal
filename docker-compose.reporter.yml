@@ -15,7 +15,12 @@ services:
       - .env
     environment:
       - SETTINGS_SELECTED_TASK=rsi_bot
-      - SETTINGS_UPDATE_INTERVAL=3600
+      - SETTINGS_UPDATE_INTERVAL=43200
+      - DATABASE_ENGINE=postgresql
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - DATABASE_USERNAME=cryptosignal
+      - DATABASE_PASSWORD=cryptosignal
     depends_on:
       - db
 
@@ -27,6 +32,11 @@ services:
       - .env
     environment:
       - SETTINGS_SELECTED_TASK=reporter
-      - SETTINGS_UPDATE_INTERVAL=86400
+      - SETTINGS_UPDATE_INTERVAL=43200
+      - DATABASE_ENGINE=postgresql
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - DATABASE_USERNAME=cryptosignal
+      - DATABASE_PASSWORD=cryptosignal
     depends_on:
       - db

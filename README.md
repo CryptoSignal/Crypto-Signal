@@ -34,11 +34,11 @@ Coming Soon:
 # How to use (Docker)
 * First make sure you have [Docker installed](https://docs.docker.com/engine/installation/)
 * Next, to create the docker image run `make build` in the root of the project directory.
-* Once built copy template.env to .env and add your API keys, at a minimum read-only Bittrex keys are required.
-* Make sure to also update the market\_pairs you'd like to monitor within app/default-config.json, following the symbol pair format of base\_currency/quote\_currency (i.e. BTC/ETH)
+* Create a .env file which can be populated with settings in the format of OPTION=value which can be derived from the app/default-config.json file. For example if you want to change the how often it updates add SETTINGS\_UPDATE\_INTERVAL=600
+* For lists of values separate them with commas. For instance if you want to use specific symbol pairs they are in the format of base\_currency/quote\_currency (i.e. SETTINGS\_MARKET\_PAIRS=BTC/ETH,BTC/USDT)
 
 ## How to run
-In the root directory run `docker-compose run app` or `make build && make run` if you don't have docker-compose.
+In the root directory run `docker-compose run app` or `make build && make run --env-file=.env` if you don't have docker-compose.
 
 # How to use (Local)
 To install the dependencies for this project, perform the following...
