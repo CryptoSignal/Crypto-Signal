@@ -181,3 +181,19 @@ class ExchangeInterface():
                 quote_symbols.append(quote_symbol)
 
         return quote_symbols
+
+    def get_btc_value(self, exchange, base_symbol, volume):
+
+        btc_value = 0
+        market_pair = base_symbol + "/BTC"
+
+        try:
+            order_book = self.get_order_book(market_pair, exchange)
+            bid = order_book['bids'][0][0] if order_book['bids'] else None
+            if bid:
+                btc_value = bid * volume
+
+        except ccxt.BaseError:
+            self.logger.warn("Unable to get btc value for %s", base_symbol)
+
+        return btc_value

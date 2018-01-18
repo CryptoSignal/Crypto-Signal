@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:10.1-alpine
+    environment:
+      POSTGRES_PASSWORD: cryptosignal
+      POSTGRES_USER: cryptosignal
+
+  app:
+    image: crypto-signal
+    volumes:
+      - ./app:/app
+    env_file:
+      - .env
+    environment:
+      - SETTINGS_SELECTED_TASK=rsi_bot
+      - SETTINGS_UPDATE_INTERVAL=3600
+    depends_on:
+      - db
+
+  reporter:
+    image: crypto-signal
+    volumes:
+      - ./app:/app
+    env_file:
+      - .env
+    environment:
+      - SETTINGS_SELECTED_TASK=reporter
+      - SETTINGS_UPDATE_INTERVAL=86400
+    depends_on:
+      - db

@@ -151,7 +151,7 @@ class DatabaseHandler():
         return self.session.query(Holdings).filter_by(**filter_args)
 
 
-    def create_holding(self, create_args={}):
+    def create_holding(self, create_args):
         """Attempts to create a record in the holdings table.
 
         Args:
@@ -172,7 +172,7 @@ class DatabaseHandler():
         return create_success
 
 
-    def update_holding(self, holding, update_args={}):
+    def update_holding(self, holding, update_args=()):
         """Attempts to update a record in the holdings table.
 
         Args:
@@ -207,7 +207,7 @@ class DatabaseHandler():
         return self.session.query(Transactions).filter_by(**filter_args)
 
 
-    def create_transaction(self, create_args={}):
+    def create_transaction(self, create_args):
         """Attempts to create a record in the transactions table.
 
         Args:
@@ -228,7 +228,7 @@ class DatabaseHandler():
         return create_success
 
 
-    def update_transaction(self, transaction, update_args={}):
+    def update_transaction(self, transaction, update_args=()):
         """Attempts to update a record in the transactions table.
 
         Args:
