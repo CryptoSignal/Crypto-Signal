@@ -3,5 +3,5 @@ dev.sh
 .vscode
 app/errors.log
 .idea/
-www/static/index.js
-www/node_modules/
+app/behaviours/ui/www/static/index.js
+app/behaviours/ui/www/node_modules/

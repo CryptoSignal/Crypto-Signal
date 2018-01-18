@@ -4,16 +4,15 @@ from time import time
 import matplotlib.pyplot as plt
 
 from exchange import ExchangeInterface
-from backtesting.indicators import *
-from backtesting.candlestick import Candlestick
+from behaviours.ui.backtesting.indicators import BacktestingIndicators
+from behaviours.ui.backtesting.candlestick import Candlestick
 
 """
 A Chart class encompassing functionality for a set of historical data in a time-series domain
 """
 class Chart(object):
-    def __init__(self, pair, period, exchange_name, exchange_config, start_time=time() - 2000000):
+    def __init__(self, pair, period, exchange_name, exchange_interface, start_time=time() - 2000000):
 
-        self.exchange_name = exchange_name
         self.pair = pair
         self.period = period
 
@@ -21,10 +20,8 @@ class Chart(object):
 
         self.data = []
 
-        exchange = ExchangeInterface(exchange_config)
-
         # Query the data to fill our chart truncate it to 'length' elements
-        rawdata = exchange.get_historical_data(pair, exchange_name, period, start_time*1000)
+        rawdata = exchange_interface.get_historical_data(pair, exchange_name, period, start_time*1000)
 
         for i in range(len(rawdata)):
             datum = rawdata[i]

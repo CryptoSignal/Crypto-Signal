@@ -9,6 +9,7 @@ import conf
 import structlog
 
 from behaviour import Behaviour
+from behaviours.ui.server import Server
 
 def main():
     """Initializes the application
@@ -25,10 +26,13 @@ def main():
     behaviour_manager = Behaviour(config)
     behaviour = behaviour_manager.get_behaviour(settings['selected_task'])
 
-    while True:
-        behaviour.run(settings['market_pairs'])
-        logger.info("Sleeping for %s seconds", settings['update_interval'])
-        time.sleep(settings['update_interval'])
+    if isinstance(behaviour, Server):
+        behaviour.run(debug=False)
+    else:
+        while True:
+            behaviour.run(settings['market_pairs'])
+            logger.info("Sleeping for %s seconds", settings['update_interval'])
+            time.sleep(settings['update_interval'])
 
 
 if __name__ == "__main__":

@@ -10,9 +10,11 @@ from database import DatabaseHandler
 from behaviours.default import DefaultBehaviour
 from behaviours.rsi_bot import RsiBotBehaviour
 from behaviours.reporter import ReporterBehaviour
+from behaviours.rsi_bot import RSIBot
+from behaviours.ui.server import Server
 
 
-class Behaviour():
+class Behaviour(object):
     """A class containing all of the possible behaviours
     """
 
@@ -46,6 +48,9 @@ class Behaviour():
 
         if selected_behaviour == 'reporter':
             behaviour = self.__configure_reporter(behaviour_config)
+
+        if selected_behaviour == 'server':
+            behaviour = self.__configure_server(behaviour_config)
 
         return behaviour
 
@@ -124,5 +129,30 @@ class Behaviour():
             notifier,
             db_handler
         )
+
+        return behaviour
+
+    def __configure_server(self, behaviour_config):
+        """Configures and returns the server (UI) behavior class.
+
+        Args:
+            behaviour_config (dict): A dictionary of configuration values pertaining to the
+                behaviour.
+
+        Returns:
+            Server: A class of functionality for the Flask server behaviour.
+        """
+
+        exchange_interface = ExchangeInterface(self.config.get_exchange_config())
+        strategy_analyzer = StrategyAnalyzer(exchange_interface)
+        notifier = Notifier(self.config.get_notifier_config())
+        db_handler = DatabaseHandler(self.config.get_database_config())
+
+        behaviour = Server(
+            behaviour_config,
+            exchange_interface,
+            strategy_analyzer,
+            notifier,
+            db_handler)
 
         return behaviour

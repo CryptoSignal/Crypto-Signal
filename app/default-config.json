@@ -4,7 +4,7 @@
     "market_pairs": [],
     "loglevel": "",
     "update_interval": 300,
-    "selected_task": "default"
+    "selected_task": "server"
   },
 
   "database": {
@@ -66,6 +66,9 @@
         "hot": 0.8,
         "cold": 0.4
       }
+    },
+    "server": {
+
     },
     "rsi_bot": {
       "mode": "simulate",
