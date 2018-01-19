@@ -123,9 +123,9 @@ class Plot extends React.Component {
             .attr("stroke-width", 1.5)
             .attr("d", indicator);
 
-        const movingaverage9 = inner.append("path")
+        const sma9 = inner.append("path")
             .attr("clip-path", "url(#clipped-path)")
-            .datum(this.props.indicators.movingaverage9)
+            .datum(this.props.indicators.sma9)
             .attr("fill", "none")
             .attr("stroke", "red")
             .attr("stroke-linejoin", "round")
@@ -133,9 +133,9 @@ class Plot extends React.Component {
             .attr("stroke-width", 1.5)
             .attr("d", indicator);
 
-        const movingaverage15 = inner.append("path")
+        const sma15 = inner.append("path")
             .attr("clip-path", "url(#clipped-path)")
-            .datum(this.props.indicators.movingaverage15)
+            .datum(this.props.indicators.sma15)
             .attr("fill", "none")
             .attr("stroke", "green")
             .attr("stroke-linejoin", "round")
@@ -208,8 +208,8 @@ class Plot extends React.Component {
             // sells.attr('r', 1/scale * 4.5);
 
             closings.attr('stroke-width', 1/scale * 1.5);
-            movingaverage9.attr('stroke-width', 1/scale * 1.5);
-            movingaverage15.attr('stroke-width', 1/scale * 1.5);
+            sma9.attr('stroke-width', 1/scale * 1.5);
+            sma15.attr('stroke-width', 1/scale * 1.5);
             bollinger_upper.attr('stroke-width', 1/scale * 1.5);
             bollinger_lower.attr('stroke-width', 1/scale * 1.5);
             buys.attr('r', 1/scale * 4.5);
