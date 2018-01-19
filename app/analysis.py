@@ -275,19 +275,21 @@ class StrategyAnalyzer():
         senkou_span_b_period = 52
         chikou_span_period = 26
 
-        tankensen_historical_data = historial_data[0:tenkansen_period]
-        kijunsen_historical_data = historial_data[0:kijunsen_period]
-        senkou_span_b_historical_data = historial_data[0:senkou_span_b_period]
+        tenkansen_historical_data = historial_data[-tenkansen_period:]
+        kijunsen_historical_data = historial_data[-kijunsen_period:]
+        senkou_span_b_historical_data = historial_data[-senkou_span_b_period:]
 
+        tenkan_sen = ic_analyzer.get_tenkansen(tenkansen_historical_data)
+        kijun_sen = ic_analyzer.get_kijunsen(kijunsen_historical_data)
         leading_span_a = ic_analyzer.get_senkou_span_a(
             kijunsen_historical_data,
-            tankensen_historical_data
+            tenkansen_historical_data
         )
 
         leading_span_b = ic_analyzer.get_senkou_span_b(senkou_span_b_historical_data)
 
         ichimoku_data = {
-            'values': (leading_span_a, leading_span_b),
+            'values': (tenkan_sen, kijun_sen),
             'is_hot': False,
             'is_cold': False
         }
