@@ -15,7 +15,7 @@ class Decision(object):
                                                         'value': '...'
                                                         }
                                                     }
-    <INDICATOR_NAME> can take values such as 'currentprice', 'rsi', 'movingaverage9', or 'movingaverage15' (for now)
+    <INDICATOR_NAME> can take values such as 'currentprice', 'rsi', 'sma9', or 'sma15' (for now)
     The value for the 'comparator' key can be either 'LT', 'EQ', or 'GT'.
     The value for the 'value' key can be either a number or the name of an indicator mentioned above.
     
@@ -51,7 +51,7 @@ class Decision(object):
                                                             'value': '...'
                                                             }
                                                         }
-        <INDICATOR_NAME> can take values such as 'currentprice', 'rsi', 'movingaverage9', or 'movingaverage15' (for now)
+        <INDICATOR_NAME> can take values such as 'currentprice', 'rsi', 'sma9', or 'sma15' (for now)
         The value for the 'comparator' key can be either 'LT', 'EQ', or 'GT'.
         The value for the 'value' key can be either a number or the name of an indicator mentioned above.
         

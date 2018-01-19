@@ -14,8 +14,8 @@ class Dashboard extends React.Component {
                 bollinger_lower: [],
                 macd: [],
                 rsi: [],
-                movingaverage9: [],
-                movingaverage15: []
+                sma9: [],
+                sma15: []
             },
             closingPrices: [],
             buys: [],
@@ -27,8 +27,8 @@ class Dashboard extends React.Component {
         this.state.coinPairs = ['ETH/BTC', 'LTC/BTC', 'XRP/BTC', 'XMR/BTC', 'NXT/BTC', 'BCC/BTC'];
         this.state.timeUnits = ['1m', '5m', '30m', '1h', '1d'];
         this.state.showIndicators = {'bollinger': true,
-                                     'movingaverage9': false,
-                                     'movingaverage15': false,
+                                     'sma9': false,
+                                     'sma15': false,
                                      'macd': false,
                                      'rsi': false};
 
@@ -108,6 +108,9 @@ class Dashboard extends React.Component {
                 });
             },
             error: res => {
+
+                console.error(res);
+
                 document.getElementById('d3plot').innerHTML = "";
                 swal("Uh oh!", "Something went wrong: Response code " + res.status + ". Please try again.", "error");
             }

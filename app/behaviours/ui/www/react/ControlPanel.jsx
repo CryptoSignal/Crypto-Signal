@@ -17,8 +17,8 @@ class ControlPanel extends React.Component {
        }};
 
        this.acceptableIndicators = {"Current Price": "currentprice",
-                                    "Moving Average (9 Period)": "movingaverage9",
-                                    "Moving Average (15 Period)": "movingaverage15",
+                                    "Moving Average (9 Period)": "sma9",
+                                    "Moving Average (15 Period)": "sma15",
                                     "RSI": "rsi"};
    }
 
@@ -30,8 +30,8 @@ class ControlPanel extends React.Component {
                             <select id={id} className="indicator-dropdown">
                                <option value="" disabled defaultValue>Choose an indicator...</option>
                                  <option value="currentprice">Current Price</option>
-                                 <option value="movingaverage9">Moving Average (9 Period)</option>
-                                 <option value="movingaverage15">Moving Average (15 Period)</option>
+                                 <option value="sma9">Moving Average (9 Period)</option>
+                                 <option value="sma15">Moving Average (15 Period)</option>
                                  <option value="rsi">RSI</option>
                              </select>;
 
@@ -148,11 +148,11 @@ class ControlPanel extends React.Component {
                               <label htmlFor="bbands-box">Bollinger Bands</label>
                             </p>
                             <p>
-                              <input type="checkbox" id="ma-9-box" defaultChecked={showIndicators.movingaverage9} />
+                              <input type="checkbox" id="ma-9-box" defaultChecked={showIndicators.sma9} />
                               <label htmlFor="ma-9-box">Moving Average (9 Period)</label>
                             </p>
                             <p>
-                              <input type="checkbox" id="ma-15-box" defaultChecked={showIndicators.movingaverage15} />
+                              <input type="checkbox" id="ma-15-box" defaultChecked={showIndicators.sma15} />
                               <label htmlFor="ma-15-box">Moving Average (15 Period)</label>
                             </p>
                             {/*<p>*/}
@@ -247,7 +247,7 @@ class ControlPanel extends React.Component {
        startTime = new Date(startTime).getTime() / 1000;
 
        let indicators = {
-           'movingaverage': []
+           'sma': []
        };
 
        if ($('#bbands-box').is(':checked')) {
@@ -255,11 +255,11 @@ class ControlPanel extends React.Component {
        }
 
        if ($('#ma-9-box').is(':checked')) {
-           indicators['movingaverage'].push(9);
+           indicators['sma'].push(9);
        }
 
        if ($('#ma-15-box').is(':checked')) {
-           indicators['movingaverage'].push(15);
+           indicators['sma'].push(15);
        }
 
        const [buyStrategy, sellStrategy] = this.getStrategies();
