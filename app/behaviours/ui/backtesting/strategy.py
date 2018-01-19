@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 import structlog
 from behaviours.ui.backtesting.trade import Trade
-from behaviours.ui.backtesting.indicators import BacktestingIndicators
+from analysis import StrategyAnalyzer
 from behaviours.ui.backtesting.decision import Decision
 
 '''
@@ -18,7 +18,7 @@ class BacktestingStrategy(object):
         self.sells = []
         self.buys = []
         self.max_trades_at_once = 1
-        self.indicators = BacktestingIndicators
+        self.indicators = StrategyAnalyzer(exchange_interface=None)
         self.profit = 0
         self.pair = pair
         self.reserve = capital
@@ -35,18 +35,22 @@ class BacktestingStrategy(object):
         # Samples a random price within the range [candlestick.open, candlestick.close]
         sample_price = lambda op, close: random.uniform(min(op, close), max(op, close))
 
-        self.prices = [sample_price(candle.open, candle.close) for candle in candlesticks]
+        # The zero's are to take up space since our indicators require a full dataframe of OHLC datas
+        self.prices = [[0, 0, 0, 0, sample_price(candle.open, candle.close), 0] for candle in candlesticks]
 
-        rsi = self.indicators.historical_rsi(self.prices)
-        nine_period = self.indicators.historical_moving_average(self.prices, 9)
-        fifteen_period = self.indicators.historical_moving_average(self.prices, 15)
-        bb1, bb2 = self.indicators.historical_bollinger_bands(self.prices)
-        bb_diff = bb1 - bb2
+        rsi = self.indicators.analyze_rsi(self.prices, all_data=True)
+        nine_period = self.indicators.analyze_sma(self.prices, period_count=9, all_data=True)
+        fifteen_period = self.indicators.analyze_sma(self.prices, period_count=15, all_data=True)
+        nine_period_ema = self.indicators.analyze_ema(self.prices, period_count=9, all_data=True)
 
 
         for i in range(len(self.prices)):
 
-            decision = Decision({'currentprice': self.prices[i], 'rsi': rsi[i], 'movingaverage9': nine_period[i], 'movingaverage15': fifteen_period[i]})
+            # Get the (sampled) closing price
+            current_price = self.prices[i][4]
+
+            decision = Decision({'currentprice': current_price, 'rsi': rsi[i]["values"], 'sma9': nine_period[i]["values"],
+                                 'sma15': fifteen_period[i]["values"], 'ema9': nine_period_ema[i]["values"]})
 
             open_trades = [trade for trade in self.trades if trade.status == 'OPEN']
 
@@ -55,8 +59,8 @@ class BacktestingStrategy(object):
                 if decision.should_buy(self.buy_strategy):
                     assert self.reserve > 0
 
-                    self.buys.append((i, self.prices[i]))
-                    new_trade = Trade(self.pair, self.prices[i], self.reserve * (1 - self.trading_fee),
+                    self.buys.append((i, current_price))
+                    new_trade = Trade(self.pair, current_price, self.reserve * (1 - self.trading_fee),
                                       stop_loss=self.stop_loss)
                     self.reserve = 0
                     self.trades.append(new_trade)
@@ -65,8 +69,8 @@ class BacktestingStrategy(object):
             for trade in open_trades:
                 if decision.should_sell(self.sell_stategy):
 
-                    self.sells.append((i, self.prices[i]))
-                    profit, total = trade.close(self.prices[i])
+                    self.sells.append((i, current_price))
+                    profit, total = trade.close(current_price)
                     self.profit += profit * (1 - self.trading_fee)
                     self.reserve = total * (1 - self.trading_fee)
 
@@ -74,9 +78,9 @@ class BacktestingStrategy(object):
             for trade in self.trades:
 
                 # Check our stop losses
-                if trade.status == "OPEN" and trade.stop_loss and self.prices[i] < trade.stop_loss:
-                    profit, total = trade.close(self.prices[i])
-                    self.sells.append((i, self.prices[i]))
+                if trade.status == "OPEN" and trade.stop_loss and current_price < trade.stop_loss:
+                    profit, total = trade.close(current_price)
+                    self.sells.append((i, current_price))
                     self.profit += profit * (1 - self.trading_fee)
                     self.reserve = total * (1 - self.trading_fee)
 
