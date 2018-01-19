@@ -96,36 +96,27 @@ class DefaultBehaviour():
                 except ccxt.errors.RequestTimeout:
                     continue
 
+                message = ""
                 if breakout_data['is_hot']:
-                    self.notifier.notify_all(
-                        message="{} is breaking out!".format(market_pair)
-                    )
+                    message += "Breakout: {} is breaking out!\n".format(market_pair)
 
                 if rsi_data['is_cold']:
-                    self.notifier.notify_all(
-                        message="{} is over bought!".format(market_pair)
-                    )
+                    message += "RSI: {} is over bought!\n".format(market_pair)
+
                 elif rsi_data['is_hot']:
-                    self.notifier.notify_all(
-                        message="{} is over sold!".format(market_pair)
-                    )
+                    message += "RSI: {} is over sold!\n".format(market_pair)
 
                 if sma_data['is_hot']:
-                    self.notifier.notify_all(
-                        message="{} is trending well according to SMA!".format(market_pair)
-                    )
+                    message += "SMA: {} is trending well according to SMA!\n".format(market_pair)
 
                 if ema_data['is_hot']:
-                    self.notifier.notify_all(
-                        message="{} is trending well according to EMA!".format(market_pair)
-                    )
+                    message += "EMA: {} is trending well according to EMA!\n".format(market_pair)
 
                 if ichimoku_data['is_hot']:
-                    self.notifier.notify_all(
-                        message="{} is trending well according to Ichimoku!".format(
-                            market_pair
-                            )
-                        )
+                    message += "IMC: {} is trending well according to Ichimoku!\n".format(market_pair)
+
+                if message:
+                    self.notifier.notify_all(message)
 
                 print("{}: \tBreakout: {} \tRSI: {} \tSMA: {} \tEMA: {} \tIMC: {} \tMACD: {}".format(
                     market_pair,
