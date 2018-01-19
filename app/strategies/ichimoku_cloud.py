@@ -27,9 +27,8 @@ class IchimokuCloud():
             float: The Kijun-sen line value of ichimoku.
         """
 
-        closing_prices = self.utils.get_closing_prices(historical_data)
-        period_high = max(closing_prices)
-        period_low = min(closing_prices)
+        period_high = max(self.utils.get_high_prices(historical_data))
+        period_low = min(self.utils.get_low_prices(historical_data))
 
         return (period_high + period_low) / 2
 
@@ -44,9 +43,8 @@ class IchimokuCloud():
             float: The Tenkan-sen line value of ichimoku.
         """
 
-        closing_prices = self.utils.get_closing_prices(historical_data)
-        period_high = max(closing_prices)
-        period_low = min(closing_prices)
+        period_high = max(self.utils.get_high_prices(historical_data))
+        period_low = min(self.utils.get_low_prices(historical_data))
 
         return (period_high + period_low) / 2
 
@@ -78,8 +76,7 @@ class IchimokuCloud():
             float: The Senkou span B value of ichimoku.
         """
 
-        closing_prices = self.utils.get_closing_prices(historical_data)
-        period_high = max(closing_prices)
-        period_low = min(closing_prices)
+        period_high = max(self.utils.get_high_prices(historical_data))
+        period_low = min(self.utils.get_low_prices(historical_data))
 
         return (period_high + period_low) / 2
