@@ -18,13 +18,14 @@ class Dashboard extends React.Component {
                 sma15: []
             },
             closingPrices: [],
+            exchanges: [],
             buys: [],
             sells: [],
             profit: 0
         };
 
 
-        this.state.coinPairs = ['ETH/BTC', 'LTC/BTC', 'XRP/BTC', 'XMR/BTC', 'NXT/BTC', 'BCC/BTC'];
+        this.state.coinPairs = ['ETH/BTC', 'LTC/BTC', 'XRP/BTC'];
         this.state.timeUnits = ['1m', '5m', '30m', '1h', '1d'];
         this.state.showIndicators = {'bollinger': true,
                                      'sma9': false,
@@ -34,6 +35,8 @@ class Dashboard extends React.Component {
 
         this.getBacktestingData = this.getBacktestingData.bind(this);
         this.onIndicatorChanged = this.onIndicatorChanged.bind(this);
+        this.getExchanges = this.getExchanges.bind(this);
+        this.getMarketPairs = this.getMarketPairs.bind(this);
 
         this.spinnerOpts = {
           lines: 13, // The number of lines to draw
@@ -58,6 +61,9 @@ class Dashboard extends React.Component {
           position: 'absolute' // Element positioning
         };
 
+        setTimeout(this.getExchanges(), 1000);
+
+
 	}
 
     /** Executes when an indicator checkbox gets checked/unchecked
@@ -68,7 +74,40 @@ class Dashboard extends React.Component {
 
     }
 
-	 /** Retrieves backtesting results from the server
+    /** Retrieves the exchange names available from the cctx library
+     *
+     */
+    getExchanges() {
+        const url = "http://localhost:5000/exchanges";
+
+        $.get(url, (data, _, err) => {
+            if (err.status == 200) {
+
+                const result = data['result'];
+                this.setState({exchanges: result})
+            }
+
+        });
+    }
+
+    /** Retrieves coin pair data for a given exchange
+     *
+     * @param exchange: The name of the exchange to draw coin pairs from
+     */
+    getMarketPairs(exchange) {
+        const url = "http://localhost:5000/markets?exchange=" + exchange;
+
+        $.get(url, (data, _, err) => {
+            if (err.status == 200) {
+
+                const result = data['result'];
+                this.setState({coinPairs: result})
+            }
+
+        });
+    }
+
+    /** Retrieves backtesting results from the server
      *
      * @param coinPair: A trading pair whose historical data is to be retrieved
      * @param timeUnit: The time unit to extract from historical data (minute, hour, day, etc.)
@@ -79,9 +118,10 @@ class Dashboard extends React.Component {
      * @param sellStrategy: An object containing the sell strategy for this set of backtesting data
      * @param indicators: An object containig key-value pairs of indicators and their parameters.
      */
-	getBacktestingData(coinPair, timeUnit, capital, startTime, stopLoss, buyStrategy, sellStrategy, indicators) {
-	    const url = "http://localhost:5000/backtest?pair=" + coinPair + "&period=" + timeUnit + "&capital=" + capital +
-                    "&stopLoss=" + stopLoss + "&startTime=" + startTime;
+	getBacktestingData(exchangeName, coinPair, timeUnit, capital, startTime, stopLoss, buyStrategy, sellStrategy, indicators) {
+
+	    const url = "http://localhost:5000/backtest?exchangeName=" + exchangeName + "&pair=" + coinPair + "&period=" + timeUnit +
+                    "&capital=" + capital + "&stopLoss=" + stopLoss + "&startTime=" + startTime;
 
 	    const target = document.getElementById('d3plot');
         const spinner = new Spinner(this.spinnerOpts).spin(target);
@@ -94,18 +134,29 @@ class Dashboard extends React.Component {
             data: JSON.stringify({indicators: indicators, buyStrategy: buyStrategy, sellStrategy: sellStrategy}),
             success: data => {
 
-                console.log("Got backtesting data:", data);
+                const responseCode = data['response'];
 
-                const result = data['result'];
+                if (responseCode == 200) {
+                    console.log("Got backtesting data:", data);
 
-                this.setState({
-                    coinPairs: this.state.coinPairs,
-                    closingPrices: result['closingPrices'],
-                    buys: result['buys'],
-                    sells: result['sells'],
-                    indicators: result['indicators'],
-                    profit: result['profit']
-                });
+                    const result = data['result'];
+
+                    this.setState({
+                        coinPairs: this.state.coinPairs,
+                        closingPrices: result['closingPrices'],
+                        buys: result['buys'],
+                        sells: result['sells'],
+                        indicators: result['indicators'],
+                        profit: result['profit']
+                    });
+
+                } else {
+                    const errMsg = data['result']['message'];
+
+                    document.getElementById('d3plot').innerHTML = "";
+                    swal("Uh oh!", "Something went wrong. Response code: " + responseCode + "<br/> . <strong>Error Message:</strong> \"" + errMsg + "\"", "error");
+                }
+
             },
             error: res => {
 
@@ -121,8 +172,8 @@ class Dashboard extends React.Component {
 		return (
 			<div id="dashboard">
 			  <div className="row">
-			    <ControlPanel getBacktestingData={this.getBacktestingData} coinPairs={this.state.coinPairs} profit={this.state.profit}
-                    timeUnits={this.state.timeUnits} showIndicators={this.state.showIndicators} />
+			    <ControlPanel getBacktestingData={this.getBacktestingData} getMarketPairs={this.getMarketPairs} exchanges={this.state.exchanges}
+                              coinPairs={this.state.coinPairs} profit={this.state.profit} timeUnits={this.state.timeUnits} showIndicators={this.state.showIndicators} />
 			  </div>
 
 			  <Plot closingPrices={this.state.closingPrices} buys={this.state.buys} sells={this.state.sells}
