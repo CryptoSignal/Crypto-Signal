@@ -32,19 +32,8 @@ class ServerBehaviour(object):
         self.db_handler = db_handler
 
         self.app = Flask(__name__, static_folder='www/static', template_folder='www/static/templates')
-        self.__add_log_handler()
         self.__add_backtesting_endpoints()
 
-    def __add_log_handler(self):
-        # Add a rotating file handler to keep track of error logging
-        if self.app.debug is not True:
-            import logging
-            from logging.handlers import RotatingFileHandler
-            file_handler = RotatingFileHandler('errors.log', maxBytes=1024 * 1024 * 100, backupCount=20)
-            file_handler.setLevel(logging.ERROR)
-            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-            file_handler.setFormatter(formatter)
-            self.app.logger.addHandler(file_handler)
 
     def __add_backtesting_endpoints(self):
         index_action = lambda: render_template("index.html")
