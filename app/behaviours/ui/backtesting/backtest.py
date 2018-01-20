@@ -49,12 +49,12 @@ def main(coin):
 
     buy_strategy = {'currentprice': {
         'comparator': 'GT',
-        'value': 'movingaverage9'
+        'value': 'sma9'
     }}
 
     sell_strategy = {'currentprice': {
         'comparator': 'LT',
-        'value': 'movingaverage9'
+        'value': 'sma9'
     }}
 
     backtester = Backtester(coin, "1h", "bittrex", capital=1.0, stop_loss=0.0001, buy_strategy=buy_strategy,
@@ -62,12 +62,12 @@ def main(coin):
 
     backtester.run()
 
-    # chart.plot_indicators(bollinger=21, movingaverage=[9, 15])
+    # chart.plot_indicators(bollinger=21, sma=[9, 15])
     # chart.plot_trades(strategy.buys, strategy.sells)
     # plt.show()
 
     # closings = [[i, d.close] for i, d in enumerate(chart.get_points())]
-    # indicators = chart.get_indicators(bollinger=21, movingaverage=[9, 15])
+    # indicators = chart.get_indicators(bollinger=21, sma=[9, 15])
 
     print("Total Profit (" + coin + "): " + str(backtester.strategy.profit))
 

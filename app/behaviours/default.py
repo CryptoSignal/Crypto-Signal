@@ -67,30 +67,38 @@ class DefaultBehaviour():
 
                     rsi_data = self.strategy_analyzer.analyze_rsi(
                         one_day_historical_data,
-                        self.behaviour_config['rsi']['hot'],
-                        self.behaviour_config['rsi']['cold']
+                        hot_thresh=self.behaviour_config['rsi']['hot'],
+                        cold_thresh=self.behaviour_config['rsi']['cold']
                     )
 
                     sma_data = self.strategy_analyzer.analyze_sma(
-                        one_day_historical_data
+                        one_day_historical_data,
+                        hot_thresh=self.behaviour_config['sma']['hot'],
+                        cold_thresh=self.behaviour_config['sma']['cold']
                     )
 
                     ema_data = self.strategy_analyzer.analyze_ema(
-                        one_day_historical_data
+                        one_day_historical_data,
+                        hot_thresh=self.behaviour_config['ema']['hot'],
+                        cold_thresh=self.behaviour_config['ema']['cold']
                     )
 
                     breakout_data = self.strategy_analyzer.analyze_breakout(
                         five_minute_historical_data,
-                        self.behaviour_config['breakout']['hot'],
-                        self.behaviour_config['breakout']['cold']
+                        hot_thresh=self.behaviour_config['breakout']['hot'],
+                        cold_thresh=self.behaviour_config['breakout']['cold']
                     )
 
                     ichimoku_data = self.strategy_analyzer.analyze_ichimoku_cloud(
-                        one_day_historical_data
+                        one_day_historical_data,
+                        hot_thresh=self.behaviour_config['ichimoku']['hot'],
+                        cold_thresh=self.behaviour_config['ichimoku']['cold']
                     )
 
                     macd_data = self.strategy_analyzer.analyze_macd(
-                        one_day_historical_data
+                        one_day_historical_data,
+                        hot_thresh=self.behaviour_config['macd']['hot'],
+                        cold_thresh=self.behaviour_config['macd']['cold']
                     )
 
                 except ccxt.errors.RequestTimeout:
@@ -102,9 +110,13 @@ class DefaultBehaviour():
 
                 if rsi_data['is_cold']:
                     message += "RSI: {} is over bought!\n".format(market_pair)
-
                 elif rsi_data['is_hot']:
                     message += "RSI: {} is over sold!\n".format(market_pair)
+
+                if macd_data['is_hot']:
+                    message += "MACD: {} trend is good according to MACD!\n".format(market_pair)
+                if macd_data['is_cold']:
+                    message += "MACD: {} trend is poor according to MACD!\n".format(market_pair)
 
                 if sma_data['is_hot']:
                     message += "SMA: {} is trending well according to SMA!\n".format(market_pair)

@@ -23503,8 +23503,8 @@ var Dashboard = function (_React$Component) {
                 bollinger_lower: [],
                 macd: [],
                 rsi: [],
-                movingaverage9: [],
-                movingaverage15: []
+                sma9: [],
+                sma15: []
             },
             closingPrices: [],
             buys: [],
@@ -23515,8 +23515,8 @@ var Dashboard = function (_React$Component) {
         _this.state.coinPairs = ['ETH/BTC', 'LTC/BTC', 'XRP/BTC', 'XMR/BTC', 'NXT/BTC', 'BCC/BTC'];
         _this.state.timeUnits = ['1m', '5m', '30m', '1h', '1d'];
         _this.state.showIndicators = { 'bollinger': true,
-            'movingaverage9': false,
-            'movingaverage15': false,
+            'sma9': false,
+            'sma15': false,
             'macd': false,
             'rsi': false };
 
@@ -23603,6 +23603,9 @@ var Dashboard = function (_React$Component) {
                     });
                 },
                 error: function error(res) {
+
+                    console.error(res);
+
                     document.getElementById('d3plot').innerHTML = "";
                     swal("Uh oh!", "Something went wrong: Response code " + res.status + ". Please try again.", "error");
                 }
@@ -23939,8 +23942,8 @@ var ControlPanel = function (_React$Component) {
             } };
 
         _this.acceptableIndicators = { "Current Price": "currentprice",
-            "Moving Average (9 Period)": "movingaverage9",
-            "Moving Average (15 Period)": "movingaverage15",
+            "Moving Average (9 Period)": "sma9",
+            "Moving Average (15 Period)": "sma15",
             "RSI": "rsi" };
         return _this;
     }
@@ -23968,12 +23971,12 @@ var ControlPanel = function (_React$Component) {
                     ),
                     _react2.default.createElement(
                         "option",
-                        { value: "movingaverage9" },
+                        { value: "sma9" },
                         "Moving Average (9 Period)"
                     ),
                     _react2.default.createElement(
                         "option",
-                        { value: "movingaverage15" },
+                        { value: "sma15" },
                         "Moving Average (15 Period)"
                     ),
                     _react2.default.createElement(
@@ -24242,7 +24245,7 @@ var ControlPanel = function (_React$Component) {
                 _react2.default.createElement(
                     "p",
                     null,
-                    _react2.default.createElement("input", { type: "checkbox", id: "ma-9-box", defaultChecked: showIndicators.movingaverage9 }),
+                    _react2.default.createElement("input", { type: "checkbox", id: "ma-9-box", defaultChecked: showIndicators.sma9 }),
                     _react2.default.createElement(
                         "label",
                         { htmlFor: "ma-9-box" },
@@ -24252,7 +24255,7 @@ var ControlPanel = function (_React$Component) {
                 _react2.default.createElement(
                     "p",
                     null,
-                    _react2.default.createElement("input", { type: "checkbox", id: "ma-15-box", defaultChecked: showIndicators.movingaverage15 }),
+                    _react2.default.createElement("input", { type: "checkbox", id: "ma-15-box", defaultChecked: showIndicators.sma15 }),
                     _react2.default.createElement(
                         "label",
                         { htmlFor: "ma-15-box" },
@@ -24387,7 +24390,7 @@ var ControlPanel = function (_React$Component) {
             startTime = new Date(startTime).getTime() / 1000;
 
             var indicators = {
-                'movingaverage': []
+                'sma': []
             };
 
             if ($('#bbands-box').is(':checked')) {
@@ -24395,11 +24398,11 @@ var ControlPanel = function (_React$Component) {
             }
 
             if ($('#ma-9-box').is(':checked')) {
-                indicators['movingaverage'].push(9);
+                indicators['sma'].push(9);
             }
 
             if ($('#ma-15-box').is(':checked')) {
-                indicators['movingaverage'].push(15);
+                indicators['sma'].push(15);
             }
 
             var _getStrategies = this.getStrategies(),
@@ -24618,9 +24621,9 @@ var Plot = function (_React$Component) {
 
             var bollinger_lower = inner.append("path").attr("clip-path", "url(#clipped-path)").datum(this.props.indicators.bollinger_lower).attr("fill", "none").attr("stroke", "orange").attr("stroke-linejoin", "round").attr("stroke-linecap", "round").attr("stroke-dasharray", "5, 5").attr("stroke-width", 1.5).attr("d", indicator);
 
-            var movingaverage9 = inner.append("path").attr("clip-path", "url(#clipped-path)").datum(this.props.indicators.movingaverage9).attr("fill", "none").attr("stroke", "red").attr("stroke-linejoin", "round").attr("stroke-linecap", "round").attr("stroke-width", 1.5).attr("d", indicator);
+            var sma9 = inner.append("path").attr("clip-path", "url(#clipped-path)").datum(this.props.indicators.sma9).attr("fill", "none").attr("stroke", "red").attr("stroke-linejoin", "round").attr("stroke-linecap", "round").attr("stroke-width", 1.5).attr("d", indicator);
 
-            var movingaverage15 = inner.append("path").attr("clip-path", "url(#clipped-path)").datum(this.props.indicators.movingaverage15).attr("fill", "none").attr("stroke", "green").attr("stroke-linejoin", "round").attr("stroke-linecap", "round").attr("stroke-width", 1.5).attr("d", indicator);
+            var sma15 = inner.append("path").attr("clip-path", "url(#clipped-path)").datum(this.props.indicators.sma15).attr("fill", "none").attr("stroke", "green").attr("stroke-linejoin", "round").attr("stroke-linecap", "round").attr("stroke-width", 1.5).attr("d", indicator);
 
             /* Plot all the buys as green dots */
             var buys = inner.selectAll("scatter-buys").attr("clip-path", "url(#clipped-path)").data(this.props.buys).enter().append("svg:circle").attr("cx", function (d) {
@@ -24666,8 +24669,8 @@ var Plot = function (_React$Component) {
                 // sells.attr('r', 1/scale * 4.5);
 
                 closings.attr('stroke-width', 1 / scale * 1.5);
-                movingaverage9.attr('stroke-width', 1 / scale * 1.5);
-                movingaverage15.attr('stroke-width', 1 / scale * 1.5);
+                sma9.attr('stroke-width', 1 / scale * 1.5);
+                sma15.attr('stroke-width', 1 / scale * 1.5);
                 bollinger_upper.attr('stroke-width', 1 / scale * 1.5);
                 bollinger_lower.attr('stroke-width', 1 / scale * 1.5);
                 buys.attr('r', 1 / scale * 4.5);

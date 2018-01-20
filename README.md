@@ -62,7 +62,7 @@ A behaviour is a functionality of the program that can be modified via the "sele
 
 This is the default behaviour of the bot. By default, it polls Bittrex (or any other exchange you configured) and reports the price analysis of each coin pair available. This currently consists of six indicators: Breakout, RSI, SMA, EMA, Ichimoku Cloud, and MACD. More will be added in future versions.
 
-## RSI Bot
+## Simple Bot
 
 `"selected_task": "rsi_bot"`
 
@@ -99,7 +99,7 @@ First, clone or download the repository to your computer.
 
 First, you'll need to use webpack to bundle all of the React .jsx files on the front end. Navigate to the *app/beahviours/ui/www* directory and run `npm run build`.
 
-(Without Docker) Next, navigate to the *app/behaviours/ui* directory and run `python server.py`. 
+(Without Docker) Next, navigate to the *app/behaviours/ui* directory and run `python server.py`.
 
 (With Docker) Run `docker-compose up` in the root directory.
 
@@ -107,7 +107,7 @@ Now you're all set! Open up your favorite browser and navigate to http://localho
 
 ### How does it work?
 
-First, you'll select the coin pair you want to trade with. 
+First, you'll select the coin pair you want to trade with.
 
 "Capital" is the amount of BTC you want to start out with trading.
 
@@ -121,7 +121,7 @@ First, you'll select the coin pair you want to trade with.
 
 The middle panel on the website allows you to create customizable strategies to run over your historical data. You can choose from various indicators and select a comparision operator to compare the indicator on the left to another indicator or a number. The "value" field on the right can take either numbers (i.e. "30", "0.00034") or one of the suggested indicators from the dropdown (i.e. "RSI", "Current Price"). Any other inputs are invalid. This will be improved on in the future for better user experience.
 
-There are two buttons below the buy and sell strategy fields. Clicking on the "+" button will add another condition to your strategy. Clicking on the "-" button will remove the most recently added condition. You may add as many of these as you want. As of right now, if multiply strategy conditions are present they will be evaluated conjunctively. In other words, if your "Buy When" conditions are 
+There are two buttons below the buy and sell strategy fields. Clicking on the "+" button will add another condition to your strategy. Clicking on the "-" button will remove the most recently added condition. You may add as many of these as you want. As of right now, if multiply strategy conditions are present they will be evaluated conjunctively. In other words, if your "Buy When" conditions are
 
 ```
 RSI < 40
