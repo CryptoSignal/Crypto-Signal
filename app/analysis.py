@@ -3,7 +3,6 @@
 
 from datetime import datetime, timedelta, timezone
 
-import numpy as np
 import structlog
 import pandas
 from talib import abstract
@@ -25,24 +24,6 @@ class StrategyAnalyzer():
 
         self.__exchange_interface = exchange_interface
         self.logger = structlog.get_logger()
-
-
-    def __threshold_data_generator(self, data_value, hot_thresh, cold_thresh):
-        data_value = np.nan_to_num(data_value)
-
-        is_hot = False
-        if hot_thresh is not None:
-            is_hot = data_value <= hot_thresh
-
-        is_cold = False
-        if cold_thresh is not None:
-            is_cold = data_value >= cold_thresh
-
-        return {
-            'values': data_value,
-            'is_cold': is_cold,
-            'is_hot': is_hot
-        }
 
 
     def __convert_to_dataframe(self, historical_data):
