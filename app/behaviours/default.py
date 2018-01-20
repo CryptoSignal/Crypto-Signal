@@ -72,11 +72,15 @@ class DefaultBehaviour():
                     )
 
                     sma_data = self.strategy_analyzer.analyze_sma(
-                        one_day_historical_data
+                        one_day_historical_data,
+                        hot_thresh=self.behaviour_config['sma']['hot'],
+                        cold_thresh=self.behaviour_config['sma']['cold']
                     )
 
                     ema_data = self.strategy_analyzer.analyze_ema(
-                        one_day_historical_data
+                        one_day_historical_data,
+                        hot_thresh=self.behaviour_config['ema']['hot'],
+                        cold_thresh=self.behaviour_config['ema']['cold']
                     )
 
                     breakout_data = self.strategy_analyzer.analyze_breakout(
@@ -86,7 +90,9 @@ class DefaultBehaviour():
                     )
 
                     ichimoku_data = self.strategy_analyzer.analyze_ichimoku_cloud(
-                        one_day_historical_data
+                        one_day_historical_data,
+                        hot_thresh=self.behaviour_config['ichimoku']['hot'],
+                        cold_thresh=self.behaviour_config['ichimoku']['cold']
                     )
 
                     macd_data = self.strategy_analyzer.analyze_macd(

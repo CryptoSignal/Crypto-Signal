@@ -128,7 +128,7 @@ class StrategyAnalyzer():
                 is_cold = macd_value < cold_thresh
 
             data_point_result = {
-                'values': macd_value,
+                'values': (macd_value,),
                 'is_cold': is_cold,
                 'is_hot': is_hot
             }
@@ -147,6 +147,8 @@ class StrategyAnalyzer():
 
         Args:
             historial_data (list): A matrix of historical OHCLV data.
+            period_count (int, optional): Defaults to 5. The number of data points to consider for
+                our simple moving average.
             hot_thresh (float, optional): Defaults to None. The threshold at which this might be
                 good to purchase.
             cold_thresh (float, optional): Defaults to None. The threshold at which this might be
@@ -172,7 +174,7 @@ class StrategyAnalyzer():
             is_cold = breakout_value < cold_thresh
 
         breakout_result_data = {
-            'values': breakout_value,
+            'values': (breakout_value,),
             'is_cold': is_cold,
             'is_hot': is_hot
         }
@@ -186,6 +188,8 @@ class StrategyAnalyzer():
 
         Args:
             historial_data (list): A matrix of historical OHCLV data.
+            period_count (int, optional): Defaults to 14. The number of data points to consider for
+                our simple moving average.
             hot_thresh (float, optional): Defaults to None. The threshold at which this might be
                 good to purchase.
             cold_thresh (float, optional): Defaults to None. The threshold at which this might be
@@ -201,10 +205,6 @@ class StrategyAnalyzer():
         dataframe = self.__convert_to_dataframe(historial_data)
         rsi_values = abstract.RSI(dataframe, period_count)
 
-        print(dataframe)
-        print(rsi_values)
-        exit()
-
         rsi_result_data = []
         for rsi_value in rsi_values:
             is_hot = False
@@ -216,7 +216,7 @@ class StrategyAnalyzer():
                 is_cold = rsi_value > cold_thresh
 
             data_point_result = {
-                'values': rsi_value,
+                'values': (rsi_value,),
                 'is_cold': is_cold,
                 'is_hot': is_hot
             }
@@ -251,19 +251,23 @@ class StrategyAnalyzer():
 
         dataframe = self.__convert_to_dataframe(historial_data)
         sma_values = abstract.SMA(dataframe, period_count)
+        combined_data = pandas.concat([dataframe, sma_values], axis=1)
+        combined_data.rename(columns={0: 'sma_value'}, inplace=True)
 
         sma_result_data = []
-        for sma_value in sma_values:
+        for sma_row in combined_data.iterrows():
             is_hot = False
             if hot_thresh is not None:
-                is_hot = sma_value > hot_thresh
+                threshold = sma_row[1]['sma_value'] * hot_thresh
+                is_hot = sma_row[1]['close'] > threshold
 
             is_cold = False
             if cold_thresh is not None:
-                is_cold = sma_value < cold_thresh
+                threshold = sma_row[1]['sma_value'] * cold_thresh
+                is_cold = sma_row[1]['close'] < sma_row[1]['sma_value']
 
             data_point_result = {
-                'values': sma_value,
+                'values': (sma_row[1]['sma_value'],),
                 'is_cold': is_cold,
                 'is_hot': is_hot
             }
@@ -276,34 +280,55 @@ class StrategyAnalyzer():
             return sma_result_data[-1]
 
 
-    def analyze_ema(self, historial_data, period_count=15, hot_thresh=None, cold_thresh=None, all_data=False):
+    def analyze_ema(self, historial_data, period_count=15,
+                    hot_thresh=None, cold_thresh=None, all_data=False):
         """Performs an EMA analysis on the historical data
 
         Args:
             historial_data (list): A matrix of historical OHCLV data.
             period_count (int, optional): Defaults to 15. The number of data points to consider for
                 our exponential moving average.
-            hot_thresh (float, optional): Defaults to None. The threshold at which this might be good
-                to purchase.
-            cold_thresh (float, optional): Defaults to None. The threshold at which this might be good
-                to sell.
-            all_data (bool, optional): Defaults to False. If True, we return the EMA associated with each
-                data point in our historical dataset. Otherwise just return the last one.
+            hot_thresh (float, optional): Defaults to None. The threshold at which this might be
+                good to purchase.
+            cold_thresh (float, optional): Defaults to None. The threshold at which this might be
+                good to sell.
+            all_data (bool, optional): Defaults to False. If True, we return the EMA associated
+                with each data point in our historical dataset. Otherwise just return the last one.
 
         Returns:
             dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
                 indication.
         """
 
-        ema_data_generator = lambda ema_value: self.__threshold_data_generator(ema_value, hot_thresh=hot_thresh, cold_thresh=cold_thresh)
-
         dataframe = self.__convert_to_dataframe(historial_data)
         ema_values = abstract.EMA(dataframe, period_count)
+        combined_data = pandas.concat([dataframe, ema_values], axis=1)
+        combined_data.rename(columns={0: 'ema_value'}, inplace=True)
+
+        sma_result_data = []
+        for ema_row in combined_data.iterrows():
+            is_hot = False
+            if hot_thresh is not None:
+                threshold = ema_row[1]['ema_value'] * hot_thresh
+                is_hot = ema_row[1]['close'] > threshold
+
+            is_cold = False
+            if cold_thresh is not None:
+                threshold = ema_row[1]['ema_value'] * cold_thresh
+                is_cold = ema_row[1]['close'] < ema_row[1]['ema_value']
+
+            data_point_result = {
+                'values': (ema_row[1]['ema_value'],),
+                'is_cold': is_cold,
+                'is_hot': is_hot
+            }
+
+            sma_result_data.append(data_point_result)
 
         if all_data:
-            return [ema_data_generator(value) for value in ema_values]
+            return sma_result_data
         else:
-            return ema_data_generator(ema_values.iloc[-1])
+            return sma_result_data[-1]
 
 
     def analyze_ichimoku_cloud(self, historial_data, hot_thresh=None, cold_thresh=None):
@@ -311,10 +336,10 @@ class StrategyAnalyzer():
 
         Args:
             historial_data (list): A matrix of historical OHCLV data.
-            hot_thresh (float, optional): Defaults to None. The threshold at which this might be good
-                to purchase.
-            cold_thresh (float, optional): Defaults to None. The threshold at which this might be good
-                to sell.
+            hot_thresh (float, optional): Defaults to None. The threshold at which this might be
+                good to purchase.
+            cold_thresh (float, optional): Defaults to None. The threshold at which this might be
+                good to sell.
 
         Returns:
             dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
@@ -326,7 +351,6 @@ class StrategyAnalyzer():
         tenkansen_period = 9
         kijunsen_period = 26
         senkou_span_b_period = 52
-        chikou_span_period = 26
 
         tenkansen_historical_data = historial_data[-tenkansen_period:]
         kijunsen_historical_data = historial_data[-kijunsen_period:]
@@ -341,10 +365,20 @@ class StrategyAnalyzer():
 
         leading_span_b = ic_analyzer.get_senkou_span_b(senkou_span_b_historical_data)
 
+        is_hot = False
+        if leading_span_a > leading_span_b and hot_thresh is not None:
+            if historial_data[-1][4] > leading_span_a:
+                is_hot = True
+
+        is_cold = False
+        if leading_span_a < leading_span_b and cold_thresh is not None:
+            if historial_data[-1][4] < leading_span_b:
+                is_cold = True
+
         ichimoku_data = {
             'values': (tenkan_sen, kijun_sen),
-            'is_hot': False,
-            'is_cold': False
+            'is_hot': is_hot,
+            'is_cold': is_cold
         }
 
         return ichimoku_data
@@ -364,22 +398,23 @@ class StrategyAnalyzer():
         """
 
         dataframe = self.__convert_to_dataframe(historial_data)
-        ntn = np.nan_to_num
-
-        # bb_values[0] = upper band
-        # bb_values[1] = middle band (EMA I believe)
-        # bb_values[2] = lower band
-
-        bb_data_generator = lambda bb_values: {
-            'values': (ntn(bb_values[0]), ntn(bb_values[1]), ntn(bb_values[2])),
-            'is_hot': False,
-            'is_cold': False
-        }
-
         bollinger_data = abstract.BBANDS(dataframe)
 
+        bb_result_data = []
+        for bb_row in bollinger_data.iterrows():
+            data_point_result = {
+                'values': (
+                    bb_row[1]['upper_band'],
+                    bb_row[1]['middle_band'],
+                    bb_row[1]['lower_band']
+                ),
+                'is_hot': False,
+                'is_cold': False
+            }
+
+            bb_result_data.append(data_point_result)
+
         if all_data:
-            return [bb_data_generator((u, m, l)) for u, m, l in zip(bollinger_data['upperband'],
-                                    bollinger_data['middleband'], bollinger_data['lowerband'])]
+            return bb_result_data
         else:
-            return bb_data_generator(bollinger_data.iloc[-1])
+            return bb_result_data[-1]
