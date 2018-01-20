@@ -23507,12 +23507,13 @@ var Dashboard = function (_React$Component) {
                 sma15: []
             },
             closingPrices: [],
+            exchanges: [],
             buys: [],
             sells: [],
             profit: 0
         };
 
-        _this.state.coinPairs = ['ETH/BTC', 'LTC/BTC', 'XRP/BTC', 'XMR/BTC', 'NXT/BTC', 'BCC/BTC'];
+        _this.state.coinPairs = ['ETH/BTC', 'LTC/BTC', 'XRP/BTC'];
         _this.state.timeUnits = ['1m', '5m', '30m', '1h', '1d'];
         _this.state.showIndicators = { 'bollinger': true,
             'sma9': false,
@@ -23522,6 +23523,8 @@ var Dashboard = function (_React$Component) {
 
         _this.getBacktestingData = _this.getBacktestingData.bind(_this);
         _this.onIndicatorChanged = _this.onIndicatorChanged.bind(_this);
+        _this.getExchanges = _this.getExchanges.bind(_this);
+        _this.getMarketPairs = _this.getMarketPairs.bind(_this);
 
         _this.spinnerOpts = {
             lines: 13, // The number of lines to draw
@@ -23546,6 +23549,8 @@ var Dashboard = function (_React$Component) {
             position: 'absolute' // Element positioning
         };
 
+        setTimeout(_this.getExchanges(), 1000);
+
         return _this;
     }
 
@@ -23559,24 +23564,65 @@ var Dashboard = function (_React$Component) {
         key: 'onIndicatorChanged',
         value: function onIndicatorChanged(indicator) {}
 
+        /** Retrieves the exchange names available from the cctx library
+         *
+         */
+
+    }, {
+        key: 'getExchanges',
+        value: function getExchanges() {
+            var _this2 = this;
+
+            var url = "http://localhost:5000/exchanges";
+
+            $.get(url, function (data, _, err) {
+                if (err.status == 200) {
+
+                    var result = data['result'];
+                    _this2.setState({ exchanges: result });
+                }
+            });
+        }
+
+        /** Retrieves coin pair data for a given exchange
+         *
+         * @param exchange: The name of the exchange to draw coin pairs from
+         */
+
+    }, {
+        key: 'getMarketPairs',
+        value: function getMarketPairs(exchange) {
+            var _this3 = this;
+
+            var url = "http://localhost:5000/markets?exchange=" + exchange;
+
+            $.get(url, function (data, _, err) {
+                if (err.status == 200) {
+
+                    var result = data['result'];
+                    _this3.setState({ coinPairs: result });
+                }
+            });
+        }
+
         /** Retrieves backtesting results from the server
-           *
-           * @param coinPair: A trading pair whose historical data is to be retrieved
-           * @param timeUnit: The time unit to extract from historical data (minute, hour, day, etc.)
-           * @param capital: The amount of Bitcoin to start out with
-           * @param period: The number of time units to grab
-           * @param stopLoss: The amount of BTC below the initial buy position to set a stop loss at
-           * @param buyStrategy: An object containing the buy strategy for this set of backtesting data
-           * @param sellStrategy: An object containing the sell strategy for this set of backtesting data
-           * @param indicators: An object containig key-value pairs of indicators and their parameters.
-           */
+         *
+         * @param coinPair: A trading pair whose historical data is to be retrieved
+         * @param timeUnit: The time unit to extract from historical data (minute, hour, day, etc.)
+         * @param capital: The amount of Bitcoin to start out with
+         * @param period: The number of time units to grab
+         * @param stopLoss: The amount of BTC below the initial buy position to set a stop loss at
+         * @param buyStrategy: An object containing the buy strategy for this set of backtesting data
+         * @param sellStrategy: An object containing the sell strategy for this set of backtesting data
+         * @param indicators: An object containig key-value pairs of indicators and their parameters.
+         */
 
     }, {
         key: 'getBacktestingData',
-        value: function getBacktestingData(coinPair, timeUnit, capital, startTime, stopLoss, buyStrategy, sellStrategy, indicators) {
-            var _this2 = this;
+        value: function getBacktestingData(exchangeName, coinPair, timeUnit, capital, startTime, stopLoss, buyStrategy, sellStrategy, indicators) {
+            var _this4 = this;
 
-            var url = "http://localhost:5000/backtest?pair=" + coinPair + "&period=" + timeUnit + "&capital=" + capital + "&stopLoss=" + stopLoss + "&startTime=" + startTime;
+            var url = "http://localhost:5000/backtest?exchangeName=" + exchangeName + "&pair=" + coinPair + "&period=" + timeUnit + "&capital=" + capital + "&stopLoss=" + stopLoss + "&startTime=" + startTime;
 
             var target = document.getElementById('d3plot');
             var spinner = new _spin.Spinner(this.spinnerOpts).spin(target);
@@ -23589,18 +23635,27 @@ var Dashboard = function (_React$Component) {
                 data: JSON.stringify({ indicators: indicators, buyStrategy: buyStrategy, sellStrategy: sellStrategy }),
                 success: function success(data) {
 
-                    console.log("Got backtesting data:", data);
+                    var responseCode = data['response'];
 
-                    var result = data['result'];
+                    if (responseCode == 200) {
+                        console.log("Got backtesting data:", data);
 
-                    _this2.setState({
-                        coinPairs: _this2.state.coinPairs,
-                        closingPrices: result['closingPrices'],
-                        buys: result['buys'],
-                        sells: result['sells'],
-                        indicators: result['indicators'],
-                        profit: result['profit']
-                    });
+                        var result = data['result'];
+
+                        _this4.setState({
+                            coinPairs: _this4.state.coinPairs,
+                            closingPrices: result['closingPrices'],
+                            buys: result['buys'],
+                            sells: result['sells'],
+                            indicators: result['indicators'],
+                            profit: result['profit']
+                        });
+                    } else {
+                        var errMsg = data['result']['message'];
+
+                        document.getElementById('d3plot').innerHTML = "";
+                        swal("Uh oh!", "Something went wrong. Response code: " + responseCode + "<br/> . <strong>Error Message:</strong> \"" + errMsg + "\"", "error");
+                    }
                 },
                 error: function error(res) {
 
@@ -23620,8 +23675,8 @@ var Dashboard = function (_React$Component) {
                 _react2.default.createElement(
                     'div',
                     { className: 'row' },
-                    _react2.default.createElement(_ControlPanel2.default, { getBacktestingData: this.getBacktestingData, coinPairs: this.state.coinPairs, profit: this.state.profit,
-                        timeUnits: this.state.timeUnits, showIndicators: this.state.showIndicators })
+                    _react2.default.createElement(_ControlPanel2.default, { getBacktestingData: this.getBacktestingData, getMarketPairs: this.getMarketPairs, exchanges: this.state.exchanges,
+                        coinPairs: this.state.coinPairs, profit: this.state.profit, timeUnits: this.state.timeUnits, showIndicators: this.state.showIndicators })
                 ),
                 _react2.default.createElement(_Plot2.default, { closingPrices: this.state.closingPrices, buys: this.state.buys, sells: this.state.sells,
                     indicators: this.state.indicators, showIndicators: this.state.showIndicators })
@@ -24038,6 +24093,33 @@ var ControlPanel = function (_React$Component) {
                         { className: "input-field col s6" },
                         _react2.default.createElement(
                             "select",
+                            { id: "exchange", onChange: function onChange(evt) {
+                                    return _this2.props.getMarketPairs($('#exchange').val());
+                                } },
+                            _react2.default.createElement(
+                                "option",
+                                { value: "", disabled: true, defaultValue: true },
+                                "Pick an exchange..."
+                            ),
+                            this.props.exchanges.map(function (exc) {
+                                return _react2.default.createElement(
+                                    "option",
+                                    { key: exc, value: exc },
+                                    exc
+                                );
+                            })
+                        ),
+                        _react2.default.createElement(
+                            "label",
+                            null,
+                            "Exchange"
+                        )
+                    ),
+                    _react2.default.createElement(
+                        "div",
+                        { className: "input-field col s6" },
+                        _react2.default.createElement(
+                            "select",
                             { id: "coin-pair" },
                             _react2.default.createElement(
                                 "option",
@@ -24057,16 +24139,6 @@ var ControlPanel = function (_React$Component) {
                             null,
                             "Coin Pair"
                         )
-                    ),
-                    _react2.default.createElement(
-                        "div",
-                        { className: "input-field col s6" },
-                        _react2.default.createElement("input", { placeholder: "Eg: 0.01", id: "amount-btc", type: "text", className: "validate" }),
-                        _react2.default.createElement(
-                            "label",
-                            { className: "active", htmlFor: "amount-btc" },
-                            "Capital"
-                        )
                     )
                 ),
                 _react2.default.createElement(
@@ -24074,7 +24146,7 @@ var ControlPanel = function (_React$Component) {
                     { className: "row" },
                     _react2.default.createElement(
                         "div",
-                        { className: "input-field col s4" },
+                        { className: "input-field col s6" },
                         _react2.default.createElement(
                             "select",
                             { id: "time-unit" },
@@ -24099,22 +24171,36 @@ var ControlPanel = function (_React$Component) {
                     ),
                     _react2.default.createElement(
                         "div",
-                        { className: "input-field col s4" },
-                        _react2.default.createElement("input", { defaultValue: "0", id: "stop-loss", type: "text", className: "validate" }),
-                        _react2.default.createElement(
-                            "label",
-                            { className: "active", htmlFor: "stop-loss" },
-                            "Stop Loss"
-                        )
-                    ),
-                    _react2.default.createElement(
-                        "div",
-                        { className: "input-field col s4" },
+                        { className: "input-field col s6" },
                         _react2.default.createElement("input", { id: "start-time", type: "text", className: "datepicker" }),
                         _react2.default.createElement(
                             "label",
                             { className: "active", htmlFor: "start-time" },
                             "Start Time"
+                        )
+                    )
+                ),
+                _react2.default.createElement(
+                    "div",
+                    { className: "row" },
+                    _react2.default.createElement(
+                        "div",
+                        { className: "input-field col s6" },
+                        _react2.default.createElement("input", { placeholder: "Eg: 0.01", id: "amount-btc", type: "text", className: "validate" }),
+                        _react2.default.createElement(
+                            "label",
+                            { className: "active", htmlFor: "amount-btc" },
+                            "Capital"
+                        )
+                    ),
+                    _react2.default.createElement(
+                        "div",
+                        { className: "input-field col s6" },
+                        _react2.default.createElement("input", { defaultValue: "0", id: "stop-loss", type: "text", className: "validate" }),
+                        _react2.default.createElement(
+                            "label",
+                            { className: "active", htmlFor: "stop-loss" },
+                            "Stop Loss"
                         )
                     )
                 )
@@ -24281,7 +24367,7 @@ var ControlPanel = function (_React$Component) {
                                 { className: "row" },
                                 _react2.default.createElement(
                                     "div",
-                                    { className: "col s6 m4" },
+                                    { className: "col s12 m4" },
                                     _react2.default.createElement(
                                         "span",
                                         { className: "card-title" },
@@ -24291,7 +24377,7 @@ var ControlPanel = function (_React$Component) {
                                 ),
                                 _react2.default.createElement(
                                     "div",
-                                    { className: "col s6 m5 strategy" },
+                                    { className: "col s12 m5 strategy" },
                                     _react2.default.createElement(
                                         "span",
                                         { className: "card-title" },
@@ -24301,7 +24387,7 @@ var ControlPanel = function (_React$Component) {
                                 ),
                                 _react2.default.createElement(
                                     "div",
-                                    { className: "col s6 m3" },
+                                    { className: "col s12 m3" },
                                     _react2.default.createElement(
                                         "span",
                                         { className: "card-title" },
@@ -24334,6 +24420,9 @@ var ControlPanel = function (_React$Component) {
     }, {
         key: "setupMaterializePlugins",
         value: function setupMaterializePlugins() {
+            // Capture the outer scope
+            var that = this;
+
             // Activate the dropdowns when the compoment mounts
             $('select').material_select();
 
@@ -24358,7 +24447,15 @@ var ControlPanel = function (_React$Component) {
                     },
                     minLength: 0
                 });
-            }, 200);
+            }, 400);
+
+            // jQuery evenet handler since React doesn't fire onChange for this component,
+            // need to figure out why eventually. Unbind hack to avoid double-ly firing this handler. MESSY
+            $('#exchange').unbind();
+            $('#exchange').on('change', function () {
+                var exchange = $(this).val();
+                that.props.getMarketPairs(exchange);
+            });
         }
     }, {
         key: "componentDidMount",
@@ -24373,6 +24470,7 @@ var ControlPanel = function (_React$Component) {
     }, {
         key: "requestBacktest",
         value: function requestBacktest() {
+            var exchangeName = $('#exchange').val();
             var coinPair = $('#coin-pair').val();
             var timeUnit = $('#time-unit').val();
             var capital = $('#amount-btc').val();
@@ -24410,7 +24508,7 @@ var ControlPanel = function (_React$Component) {
                 buyStrategy = _getStrategies2[0],
                 sellStrategy = _getStrategies2[1];
 
-            this.props.getBacktestingData(coinPair, timeUnit, capital, startTime, stopLoss, buyStrategy, sellStrategy, indicators);
+            this.props.getBacktestingData(exchangeName, coinPair, timeUnit, capital, startTime, stopLoss, buyStrategy, sellStrategy, indicators);
         }
     }, {
         key: "getStrategies",
@@ -24610,7 +24708,10 @@ var Plot = function (_React$Component) {
 
             var gY = g.append("g").call(yAxis);
 
-            gY.append("text").attr("fill", "#000").attr("transform", "rotate(-90)").attr("y", 6).attr("dy", "0.71em").attr("text-anchor", "end").text("Price (BTC)");
+            var coinPair = $('#coin-pair').val();
+            var baseCoin = coinPair.substring(coinPair.length - 3);
+
+            gY.append("text").attr("fill", "#000").attr("transform", "rotate(-90)").attr("y", 6).attr("dy", "0.71em").attr("text-anchor", "end").text("Price (" + baseCoin + ")");
 
             var inner = g.append("g");
 
