@@ -26,6 +26,7 @@ class StrategyAnalyzer():
         self.__exchange_interface = exchange_interface
         self.logger = structlog.get_logger()
 
+
     def __threshold_data_generator(self, data_value, hot_thresh, cold_thresh):
         data_value = np.nan_to_num(data_value)
 
@@ -42,6 +43,7 @@ class StrategyAnalyzer():
             'is_cold': is_cold,
             'is_hot': is_hot
         }
+
 
     def __convert_to_dataframe(self, historical_data):
         """Converts historical data matrix to a pandas dataframe.
@@ -67,6 +69,7 @@ class StrategyAnalyzer():
         dataframe.drop('timestamp', axis=1, inplace=True)
 
         return dataframe
+
 
     def get_historical_data(self, market_pair, exchange, time_unit, max_days=100):
         """Fetches the historical data
@@ -99,12 +102,12 @@ class StrategyAnalyzer():
 
         Args:
             historial_data (list): A matrix of historical OHCLV data.
-            hot_thresh (float, optional): Defaults to None. The threshold at which this might be good
-                to purchase.
-            cold_thresh (float, optional): Defaults to None. The threshold at which this might be good
-                to sell.
-            all_data (bool, optional): Defaults to False. If True, we return the MACD associated with each
-                data point in our historical dataset. Otherwise just return the last one.
+            hot_thresh (float, optional): Defaults to None. The threshold at which this might be
+                good to purchase.
+            cold_thresh (float, optional): Defaults to None. The threshold at which this might be
+                good to sell.
+            all_data (bool, optional): Defaults to False. If True, we return the MACD associated
+                with each data point in our historical dataset. Otherwise just return the last one.
 
         Returns:
             dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
@@ -114,24 +117,40 @@ class StrategyAnalyzer():
         dataframe = self.__convert_to_dataframe(historial_data)
         macd_values = abstract.MACD(dataframe).iloc[:, 0]
 
+        macd_result_data = []
+        for macd_value in macd_values:
+            is_hot = False
+            if hot_thresh is not None:
+                is_hot = macd_value > hot_thresh
+
+            is_cold = False
+            if cold_thresh is not None:
+                is_cold = macd_value < cold_thresh
+
+            data_point_result = {
+                'values': macd_value,
+                'is_cold': is_cold,
+                'is_hot': is_hot
+            }
+
+            macd_result_data.append(data_point_result)
+
         if all_data:
-            return [self.__threshold_data_generator(value, hot_thresh=None, cold_thresh=None) for value in macd_values]
+            return macd_result_data
 
         else:
-            macd_lastrow = macd_values.iloc[-1]
-
-            return self.__threshold_data_generator(macd_lastrow, hot_thresh=None, cold_thresh=None)
+            return macd_result_data[-1]
 
 
-    def analyze_breakout(self, historial_data, hot_thresh=None, cold_thresh=None):
+    def analyze_breakout(self, historial_data, period_count=5, hot_thresh=None, cold_thresh=None):
         """Performs a momentum analysis on the historical data
 
         Args:
             historial_data (list): A matrix of historical OHCLV data.
-            hot_thresh (float, optional): Defaults to None. The threshold at which this might be good
-                to purchase.
-            cold_thresh (float, optional): Defaults to None. The threshold at which this might be good
-                to sell.
+            hot_thresh (float, optional): Defaults to None. The threshold at which this might be
+                good to purchase.
+            cold_thresh (float, optional): Defaults to None. The threshold at which this might be
+                good to sell.
 
         Returns:
             dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
@@ -140,73 +159,121 @@ class StrategyAnalyzer():
 
         breakout_analyzer = Breakout()
 
-        period_count = 5
-
         breakout_historical_data = historial_data[0:period_count]
 
         breakout_value = breakout_analyzer.get_breakout_value(breakout_historical_data)
 
-        return self.__threshold_data_generator(breakout_value, hot_thresh=hot_thresh, cold_thresh=cold_thresh)
+        is_hot = False
+        if hot_thresh is not None:
+            is_hot = breakout_value > hot_thresh
+
+        is_cold = False
+        if cold_thresh is not None:
+            is_cold = breakout_value < cold_thresh
+
+        breakout_result_data = {
+            'values': breakout_value,
+            'is_cold': is_cold,
+            'is_hot': is_hot
+        }
+
+        return breakout_result_data
 
 
-    def analyze_rsi(self, historial_data, hot_thresh=None, cold_thresh=None, all_data=False):
+    def analyze_rsi(self, historial_data, period_count=14,
+                    hot_thresh=None, cold_thresh=None, all_data=False):
         """Performs an RSI analysis on the historical data
 
         Args:
             historial_data (list): A matrix of historical OHCLV data.
-            hot_thresh (float, optional): Defaults to None. The threshold at which this might be good
-                to purchase.
-            cold_thresh (float, optional): Defaults to None. The threshold at which this might be good
-                to sell.
-            all_data (bool, optional): Defaults to False. If True, we return the RSI associated with each
-                data point in our historical dataset. Otherwise just return the last one.
+            hot_thresh (float, optional): Defaults to None. The threshold at which this might be
+                good to purchase.
+            cold_thresh (float, optional): Defaults to None. The threshold at which this might be
+                good to sell.
+            all_data (bool, optional): Defaults to False. If True, we return the RSI associated
+                with each data point in our historical dataset. Otherwise just return the last one.
 
         Returns:
             dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
                 indication.
         """
 
-        rsi_data_generator = lambda rsi_value: self.__threshold_data_generator(rsi_value, hot_thresh=hot_thresh, cold_thresh=cold_thresh)
-
-        period_count = 14
-
         dataframe = self.__convert_to_dataframe(historial_data)
         rsi_values = abstract.RSI(dataframe, period_count)
 
+        print(dataframe)
+        print(rsi_values)
+        exit()
+
+        rsi_result_data = []
+        for rsi_value in rsi_values:
+            is_hot = False
+            if hot_thresh is not None:
+                is_hot = rsi_value < hot_thresh
+
+            is_cold = False
+            if cold_thresh is not None:
+                is_cold = rsi_value > cold_thresh
+
+            data_point_result = {
+                'values': rsi_value,
+                'is_cold': is_cold,
+                'is_hot': is_hot
+            }
+
+            rsi_result_data.append(data_point_result)
+
         if all_data:
-            return [rsi_data_generator(value) for value in rsi_values]
+            return rsi_result_data
         else:
-            return rsi_data_generator(rsi_values.iloc[-1])
+            return rsi_result_data[-1]
 
 
-    def analyze_sma(self, historial_data, period_count=15, hot_thresh=None, cold_thresh=None, all_data=False):
+    def analyze_sma(self, historial_data, period_count=15,
+                    hot_thresh=None, cold_thresh=None, all_data=False):
         """Performs a SMA analysis on the historical data
 
         Args:
             historial_data (list): A matrix of historical OHCLV data.
             period_count (int, optional): Defaults to 15. The number of data points to consider for
                 our simple moving average.
-            hot_thresh (float, optional): Defaults to None. The threshold at which this might be good
-                to purchase.
-            cold_thresh (float, optional): Defaults to None. The threshold at which this might be good
-                to sell.
-            all_data (bool, optional): Defaults to False. If True, we return the SMA associated with each
-                data point in our historical dataset. Otherwise just return the last one.
+            hot_thresh (float, optional): Defaults to None. The threshold at which this might be
+                good to purchase.
+            cold_thresh (float, optional): Defaults to None. The threshold at which this might be
+                good to sell.
+            all_data (bool, optional): Defaults to False. If True, we return the SMA associated
+                with each data point in our historical dataset. Otherwise just return the last one.
 
         Returns:
             dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
                 indication.
         """
 
-        sma_data_generator = lambda sma_value: self.__threshold_data_generator(sma_value, hot_thresh=hot_thresh, cold_thresh=cold_thresh)
-
         dataframe = self.__convert_to_dataframe(historial_data)
         sma_values = abstract.SMA(dataframe, period_count)
 
+        sma_result_data = []
+        for sma_value in sma_values:
+            is_hot = False
+            if hot_thresh is not None:
+                is_hot = sma_value > hot_thresh
+
+            is_cold = False
+            if cold_thresh is not None:
+                is_cold = sma_value < cold_thresh
+
+            data_point_result = {
+                'values': sma_value,
+                'is_cold': is_cold,
+                'is_hot': is_hot
+            }
+
+            sma_result_data.append(data_point_result)
+
         if all_data:
-            return [sma_data_generator(value) for value in sma_values]
+            return sma_result_data
         else:
-            return sma_data_generator(sma_values.iloc[-1])
+            return sma_result_data[-1]
 
 
     def analyze_ema(self, historial_data, period_count=15, hot_thresh=None, cold_thresh=None, all_data=False):

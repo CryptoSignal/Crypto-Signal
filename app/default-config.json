@@ -65,11 +65,21 @@
       "breakout": {
         "hot": 0.8,
         "cold": 0.4
+      },
+      "macd": {
+        "hot": 0.0,
+        "cold": 0.0
+      },
+      "sma": {
+        "hot": 0,
+        "cold": 0
+      },
+      "ema": {
+        "hot": 0,
+        "cold": 0
       }
     },
-    "server": {
-
-    },
+    "server": {},
     "rsi_bot": {
       "mode": "simulate",
       "open_order_max_hours": 24,
