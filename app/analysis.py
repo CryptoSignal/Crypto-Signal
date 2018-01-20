@@ -385,9 +385,9 @@ class StrategyAnalyzer():
         for bb_row in bollinger_data.iterrows():
             data_point_result = {
                 'values': (
-                    bb_row[1]['upper_band'],
-                    bb_row[1]['middle_band'],
-                    bb_row[1]['lower_band']
+                    bb_row[1]['upperband'],
+                    bb_row[1]['middleband'],
+                    bb_row[1]['lowerband']
                 ),
                 'is_hot': False,
                 'is_cold': False
