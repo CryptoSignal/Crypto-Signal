@@ -8,7 +8,7 @@ from notification import Notifier
 from analysis import StrategyAnalyzer
 from database import DatabaseHandler
 from behaviours.default import DefaultBehaviour
-from behaviours.rsi_bot import RsiBotBehaviour
+from behaviours.simple_bot import SimpleBotBehaviour
 from behaviours.reporter import ReporterBehaviour
 from behaviours.ui.server import ServerBehaviour
 
@@ -42,8 +42,8 @@ class Behaviour(object):
         if selected_behaviour == 'default':
             behaviour = self.__configure_default(behaviour_config)
 
-        if selected_behaviour == 'rsi_bot':
-            behaviour = self.__configure_rsi_bot(behaviour_config)
+        if selected_behaviour == 'simple_bot':
+            behaviour = self.__configure_simple_bot(behaviour_config)
 
         if selected_behaviour == 'reporter':
             behaviour = self.__configure_reporter(behaviour_config)
@@ -81,7 +81,7 @@ class Behaviour(object):
         return behaviour
 
 
-    def __configure_rsi_bot(self, behaviour_config):
+    def __configure_simple_bot(self, behaviour_config):
         """Configures and returns the rsi bot behaviour class.
 
         Args:
@@ -89,7 +89,7 @@ class Behaviour(object):
                 behaviour.
 
         Returns:
-            RsiBotBehaviour: A class of functionality for the rsi bot behaviour.
+            SimpleBotBehaviour: A class of functionality for the rsi bot behaviour.
         """
 
         exchange_interface = ExchangeInterface(self.config.exchanges)
@@ -97,7 +97,7 @@ class Behaviour(object):
         notifier = Notifier(self.config.notifiers)
         db_handler = DatabaseHandler(self.config.database)
 
-        behaviour = RsiBotBehaviour(
+        behaviour = SimpleBotBehaviour(
             behaviour_config,
             exchange_interface,
             strategy_analyzer,
@@ -106,6 +106,7 @@ class Behaviour(object):
         )
 
         return behaviour
+
 
     def __configure_reporter(self, behaviour_config):
         """Configures and returns the reporter behaviour class.
@@ -131,30 +132,6 @@ class Behaviour(object):
 
         return behaviour
 
-    def __configure_server(self, behaviour_config):
-        """Configures and returns the server (UI) behavior class.
-
-        Args:
-            behaviour_config (dict): A dictionary of configuration values pertaining to the
-                behaviour.
-
-        Returns:
-            Server: A class of functionality for the Flask server behaviour.
-        """
-
-        exchange_interface = ExchangeInterface(self.config.exchanges)
-        strategy_analyzer = StrategyAnalyzer(exchange_interface)
-        notifier = Notifier(self.config.notifiers)
-        db_handler = DatabaseHandler(self.config.database)
-
-        behaviour = ServerBehaviour(
-            behaviour_config,
-            exchange_interface,
-            strategy_analyzer,
-            notifier,
-            db_handler)
-
-        return behaviour
 
     def __configure_server(self, behaviour_config):
         """Configures and returns the server (UI) behavior class.

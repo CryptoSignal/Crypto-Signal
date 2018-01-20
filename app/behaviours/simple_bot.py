@@ -1,16 +1,18 @@
+"""Simple trading bot.
+"""
 
 from datetime import datetime, timedelta
 
 import ccxt
 import structlog
 
-class RsiBotBehaviour():
-    """Trading bot based on the RSI indicator.
+class SimpleBotBehaviour():
+    """Simple trading bot.
     """
 
     def __init__(self, behaviour_config, exchange_interface,
                  strategy_analyzer, notifier, db_handler):
-        """Initialize RsiBotBehaviour class.
+        """Initialize SimpleBotBehaviour class.
 
         Args:
             behaviour_config (dict): A dictionary of configuration for this behaviour.
@@ -44,25 +46,63 @@ class RsiBotBehaviour():
         else:
             market_data = self.exchange_interface.get_exchange_markets()
 
-        rsi_data = {}
-        rsi_sorted_pairs = {}
+        analytics_data = {}
+        analytics_sorted_pairs = {}
         for exchange, markets in market_data.items():
-            rsi_data[exchange] = {}
-            rsi_sorted_pairs[exchange] = []
+            analytics_data[exchange] = {}
+            analytics_sorted_pairs[exchange] = []
 
             for market_pair in markets:
                 try:
-                    one_day_historical_data = self.strategy_analyzer.get_historical_data(
+                    historical_data = self.strategy_analyzer.get_historical_data(
                         market_data[exchange][market_pair]['symbol'],
                         exchange,
-                        '1d'
+                        self.behaviour_config['analysis_timeframe']
                     )
 
-                    rsi_data[exchange][market_pair] = self.strategy_analyzer.analyze_rsi(
-                        one_day_historical_data,
-                        hot_thresh=self.behaviour_config['buy']['rsi_threshold'],
-                        cold_thresh=self.behaviour_config['sell']['rsi_threshold']
-                    )
+                    if self.behaviour_config['strategy'] == 'rsi':
+                        analytics_data[exchange][market_pair] = self.strategy_analyzer.analyze_rsi(
+                            historical_data,
+                            period_count=self.behaviour_config['strategy_period'],
+                            hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
+                            cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+                        )
+                    elif self.behaviour_config['strategy'] == 'sma':
+                        analytics_data[exchange][market_pair] = self.strategy_analyzer.analyze_sma(
+                            historical_data,
+                            period_count=self.behaviour_config['strategy_period'],
+                            hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
+                            cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+                        )
+                    elif self.behaviour_config['strategy'] == 'ema':
+                        analytics_data[exchange][market_pair] = self.strategy_analyzer.analyze_ema(
+                            historical_data,
+                            period_count=self.behaviour_config['strategy_period'],
+                            hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
+                            cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+                        )
+                    elif self.behaviour_config['strategy'] == 'breakout':
+                        analytics_data[exchange][market_pair] = self.strategy_analyzer.analyze_breakout(
+                            historical_data,
+                            period_count=self.behaviour_config['strategy_period'],
+                            hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
+                            cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+                        )
+                    elif self.behaviour_config['strategy'] == 'ichimoku':
+                        analytics_data[exchange][market_pair] = self.strategy_analyzer.analyze_ichimoku_cloud(
+                            historical_data,
+                            hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
+                            cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+                        )
+                    elif self.behaviour_config['strategy'] == 'macd':
+                        analytics_data[exchange][market_pair] = self.strategy_analyzer.analyze_macd(
+                            historical_data,
+                            hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
+                            cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+                        )
+                    else:
+                        self.logger.error("No strategy selected, bailing out.")
+                        exit(1)
 
                 except ccxt.NetworkError:
                     self.logger.warn(
@@ -72,9 +112,9 @@ class RsiBotBehaviour():
                     )
                     continue
 
-            rsi_sorted_pairs[exchange] = sorted(
-                rsi_data[exchange],
-                key=lambda x: (rsi_data[exchange][x]['values'][0])
+            analytics_sorted_pairs[exchange] = sorted(
+                analytics_data[exchange],
+                key=lambda x: (analytics_data[exchange][x]['values'][0])
             )
 
         open_orders = self.exchange_interface.get_open_orders()
@@ -106,8 +146,8 @@ class RsiBotBehaviour():
                 self.__update_holdings()
                 current_holdings = self.__get_holdings()
 
-        for exchange, markets in rsi_data.items():
-            for market_pair in rsi_sorted_pairs[exchange]:
+        for exchange, markets in analytics_data.items():
+            for market_pair in analytics_sorted_pairs[exchange]:
                 base_symbol, quote_symbol = market_pair.split('/')
 
                 if markets[market_pair]['is_hot']:
@@ -349,7 +389,9 @@ class RsiBotBehaviour():
         user_account_markets = {}
         for row in holdings_table:
             if not row.exchange in user_account_markets:
-                user_account_markets[row.exchange] = self.exchange_interface.get_account_markets(row.exchange)
+                user_account_markets[row.exchange] = self.exchange_interface.get_account_markets(
+                    row.exchange
+                )
 
             row.volume_free = user_account_markets[row.exchange]['free'][row.symbol]
             row.volume_used = user_account_markets[row.exchange]['used'][row.symbol]

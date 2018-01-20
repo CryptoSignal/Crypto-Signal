@@ -14,7 +14,7 @@ services:
     env_file:
       - .env
     environment:
-      - SETTINGS_SELECTED_TASK=rsi_bot
+      - SETTINGS_SELECTED_TASK=simple_bot
       - SETTINGS_UPDATE_INTERVAL=43200
       - DATABASE_ENGINE=postgresql
       - DATABASE_HOST=db
