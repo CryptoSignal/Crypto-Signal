@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 import ccxt
 import structlog
+from tenacity import retry, retry_if_exception_type, stop_after_attempt
 
 class SimpleBotBehaviour():
     """Simple trading bot.
@@ -46,95 +47,26 @@ class SimpleBotBehaviour():
         else:
             market_data = self.exchange_interface.get_exchange_markets()
 
-        analytics_data = {}
-        analytics_sorted_pairs = {}
+        analyzed_data = {}
+        analyzed_sorted_pairs = {}
         for exchange, markets in market_data.items():
-            analytics_data[exchange] = {}
-            analytics_sorted_pairs[exchange] = []
+            analyzed_data[exchange] = {}
+            analyzed_sorted_pairs[exchange] = []
 
             for market_pair in markets:
-                try:
-                    historical_data = self.strategy_analyzer.get_historical_data(
-                        market_data[exchange][market_pair]['symbol'],
-                        exchange,
-                        self.behaviour_config['analysis_timeframe']
-                    )
-
-                    if self.behaviour_config['strategy'] == 'rsi':
-                        analytics_data[exchange][market_pair] = self.strategy_analyzer.analyze_rsi(
-                            historical_data,
-                            period_count=self.behaviour_config['strategy_period'],
-                            hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
-                            cold_thresh=self.behaviour_config['sell']['strategy_threshold']
-                        )
-                    elif self.behaviour_config['strategy'] == 'sma':
-                        analytics_data[exchange][market_pair] = self.strategy_analyzer.analyze_sma(
-                            historical_data,
-                            period_count=self.behaviour_config['strategy_period'],
-                            hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
-                            cold_thresh=self.behaviour_config['sell']['strategy_threshold']
-                        )
-                    elif self.behaviour_config['strategy'] == 'ema':
-                        analytics_data[exchange][market_pair] = self.strategy_analyzer.analyze_ema(
-                            historical_data,
-                            period_count=self.behaviour_config['strategy_period'],
-                            hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
-                            cold_thresh=self.behaviour_config['sell']['strategy_threshold']
-                        )
-                    elif self.behaviour_config['strategy'] == 'breakout':
-                        analytics_data[exchange][market_pair] = self.strategy_analyzer.analyze_breakout(
-                            historical_data,
-                            period_count=self.behaviour_config['strategy_period'],
-                            hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
-                            cold_thresh=self.behaviour_config['sell']['strategy_threshold']
-                        )
-                    elif self.behaviour_config['strategy'] == 'ichimoku':
-                        analytics_data[exchange][market_pair] = self.strategy_analyzer.analyze_ichimoku_cloud(
-                            historical_data,
-                            hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
-                            cold_thresh=self.behaviour_config['sell']['strategy_threshold']
-                        )
-                    elif self.behaviour_config['strategy'] == 'macd':
-                        analytics_data[exchange][market_pair] = self.strategy_analyzer.analyze_macd(
-                            historical_data,
-                            hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
-                            cold_thresh=self.behaviour_config['sell']['strategy_threshold']
-                        )
-                    else:
-                        self.logger.error("No strategy selected, bailing out.")
-                        exit(1)
-
-                except ccxt.NetworkError:
-                    self.logger.warn(
-                        "Read timeout getting data for %s on %s skipping",
-                        market_pair,
-                        exchange
-                    )
-                    continue
-
-            analytics_sorted_pairs[exchange] = sorted(
-                analytics_data[exchange],
-                key=lambda x: (analytics_data[exchange][x]['values'][0])
-            )
-
-        open_orders = self.exchange_interface.get_open_orders()
-
-        for exchange in open_orders:
-            for order in open_orders[exchange]:
-                order_time = datetime.fromtimestamp(
-                    order['timestamp']
-                ).strftime('%c')
-
-                time_to_hold = datetime.now() - timedelta(
-                    hours=self.behaviour_config['open_order_max_hours']
+                historical_data = self.__get_historical_data(
+                    market_data[exchange][market_pair]['symbol'],
+                    exchange
                 )
 
-                if self.behaviour_config['mode'] == 'live':
-                    if time_to_hold > order_time:
-                        self.exchange_interface.cancel_order(
-                            exchange,
-                            order['id']
-                        )
+                analyzed_data[exchange][market_pair] = self.__run_strategy(historical_data)
+
+            analyzed_sorted_pairs[exchange] = sorted(
+                analyzed_data[exchange],
+                key=lambda x: (analyzed_data[exchange][x]['values'][0])
+            )
+
+        self.__reconcile_open_orders()
 
         current_holdings = self.__get_holdings()
 
@@ -146,8 +78,8 @@ class SimpleBotBehaviour():
                 self.__update_holdings()
                 current_holdings = self.__get_holdings()
 
-        for exchange, markets in analytics_data.items():
-            for market_pair in analytics_sorted_pairs[exchange]:
+        for exchange, markets in analyzed_data.items():
+            for market_pair in analyzed_sorted_pairs[exchange]:
                 base_symbol, quote_symbol = market_pair.split('/')
 
                 if markets[market_pair]['is_hot']:
@@ -188,8 +120,120 @@ class SimpleBotBehaviour():
         self.logger.debug(current_holdings)
 
 
+    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
+    def __get_historical_data(self, symbol, exchange):
+        """Get the historical data for a given pair.
+
+        Decorators:
+            retry
+
+        Args:
+            symbol (str): The symbol pair that we want to get historical data for.
+            exchange (str): The exchange id of the exchange we want the historical data for.
+
+        Returns:
+            list: A matrix of historical OHLCV
+        """
+
+        historical_data = self.strategy_analyzer.get_historical_data(
+            symbol,
+            exchange,
+            self.behaviour_config['analysis_timeframe']
+        )
+
+        return historical_data
+
+
+    def __run_strategy(self, historical_data):
+        """Run the selected analyzer over the historical data
+
+        Args:
+            historical_data (list): A matrix of historical OHLCV data.
+
+        Returns:
+            dict: The analyzed results for the historical data.
+        """
+
+        if self.behaviour_config['strategy'] == 'rsi':
+            result = self.strategy_analyzer.analyze_rsi(
+                historical_data,
+                period_count=self.behaviour_config['strategy_period'],
+                hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
+                cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+            )
+        elif self.behaviour_config['strategy'] == 'sma':
+            result = self.strategy_analyzer.analyze_sma(
+                historical_data,
+                period_count=self.behaviour_config['strategy_period'],
+                hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
+                cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+            )
+        elif self.behaviour_config['strategy'] == 'ema':
+            result = self.strategy_analyzer.analyze_ema(
+                historical_data,
+                period_count=self.behaviour_config['strategy_period'],
+                hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
+                cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+            )
+        elif self.behaviour_config['strategy'] == 'breakout':
+            result = self.strategy_analyzer.analyze_breakout(
+                historical_data,
+                period_count=self.behaviour_config['strategy_period'],
+                hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
+                cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+            )
+        elif self.behaviour_config['strategy'] == 'ichimoku':
+            result = self.strategy_analyzer.analyze_ichimoku_cloud(
+                historical_data,
+                hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
+                cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+            )
+        elif self.behaviour_config['strategy'] == 'macd':
+            result = self.strategy_analyzer.analyze_macd(
+                historical_data,
+                hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
+                cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+            )
+        else:
+            self.logger.error("No strategy selected, bailing out.")
+            exit(1)
+
+        return result
+
+
+    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
+    def __reconcile_open_orders(self):
+        """Cancels any orders that have been open for too long.
+
+        Decorators:
+            retry
+        """
+        open_orders = self.exchange_interface.get_open_orders()
+
+        for exchange in open_orders:
+            for order in open_orders[exchange]:
+                order_time = datetime.fromtimestamp(
+                    order['timestamp']
+                ).strftime('%c')
+
+                time_to_hold = datetime.now() - timedelta(
+                    hours=self.behaviour_config['open_order_max_hours']
+                )
+
+                if self.behaviour_config['mode'] == 'live':
+                    if time_to_hold > order_time:
+                        self.exchange_interface.cancel_order(
+                            exchange,
+                            order['id']
+                        )
+
+
+    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def buy(self, base_symbol, quote_symbol, market_pair, exchange, current_holdings):
         """Buy a base currency with a quote currency.
+
+        Decorators:
+            retry
 
         Args:
             base_symbol (str): The symbol for the base currency (currency being bought).
@@ -271,8 +315,12 @@ class SimpleBotBehaviour():
         self.db_handler.create_transaction(purchase_payload)
 
 
+    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def sell(self, base_symbol, quote_symbol, market_pair, exchange, current_holdings):
         """Sell a base currency for a quote currency.
+
+        Decorators:
+            retry
 
         Args:
             base_symbol (str): The symbol for the base currency (currency being sold).
@@ -365,8 +413,12 @@ class SimpleBotBehaviour():
         return holdings
 
 
+    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def __create_holdings(self):
         """Query the users account details to populate the crypto holdings database cache.
+
+        Decorators:
+            retry
         """
         for exchange in self.exchange_interface.exchanges:
             user_account_markets = self.exchange_interface.get_account_markets(exchange)
@@ -382,8 +434,12 @@ class SimpleBotBehaviour():
                 self.db_handler.create_holding(holding_payload)
 
 
+    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def __update_holdings(self):
         """Synchronize the database cache with the crypto holdings from the users account.
+
+        Decorators:
+            retry
         """
         holdings_table = self.db_handler.read_holdings()
         user_account_markets = {}
@@ -398,3 +454,4 @@ class SimpleBotBehaviour():
             row.volume_total = user_account_markets[row.exchange]['total'][row.symbol]
 
             self.db_handler.update_holding(row)
+
