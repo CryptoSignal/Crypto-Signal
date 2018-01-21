@@ -80,13 +80,16 @@ class Plot extends React.Component {
         const gY = g.append("g")
             .call(yAxis);
 
+        const coinPair = $('#coin-pair').val();
+        const baseCoin = coinPair.substring(coinPair.length - 3);
+
         gY.append("text")
             .attr("fill", "#000")
             .attr("transform", "rotate(-90)")
             .attr("y", 6)
             .attr("dy", "0.71em")
             .attr("text-anchor", "end")
-            .text("Price (BTC)");
+            .text(`Price (${baseCoin})`);
 
         const inner = g.append("g");
 

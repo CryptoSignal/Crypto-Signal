@@ -21,11 +21,12 @@ class ExchangeInterface():
         self.exchanges = {}
 
         # Loads the exchanges using ccxt.
-        for exchange in exchange_config:
+        for exchange in ccxt.exchanges:
+            self.exchanges[exchange] = new_exchange = getattr(ccxt, exchange)({
+                "enableRateLimit": True # Enables built-in rate limiter
+            })
+
             if exchange_config[exchange]['required']['enabled']:
-                new_exchange = getattr(ccxt, exchange)({
-                    "enableRateLimit": True # Enables built-in rate limiter
-                })
 
                 # sets up api permissions for user if given
                 if new_exchange:
@@ -102,6 +103,20 @@ class ExchangeInterface():
         for exchange in self.exchanges:
             exchange_markets[exchange] = self.exchanges[exchange].load_markets()
             time.sleep(self.exchanges[exchange].rateLimit / 1000)
+        return exchange_markets
+
+    def get_markets_for_exchange(self, exchange):
+        """Get market data for all symbol pairs listed on the given exchange.
+
+        Args:
+            exchange (str): Contains the exchange to fetch the data from
+
+        Returns:
+            dict: A dictionary containing market data for all symbol pairs.
+        """
+
+        exchange_markets = self.exchanges[exchange].load_markets()
+
         return exchange_markets
 
 
