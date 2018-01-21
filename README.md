@@ -64,15 +64,15 @@ This is the default behaviour of the bot. By default, it polls Bittrex (or any o
 
 ## Simple Bot
 
-`"selected_task": "rsi_bot"`
+`"selected_task": "simple_bot"`
 
-TODO
+This is still in development. Do not use it.
 
 ## Reporter
 
 `"selected_task": "reporter"`
 
-TODO
+This is still in development. Do not use it.
 
 ## Server (Backtesting)
 

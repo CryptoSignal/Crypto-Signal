@@ -48,10 +48,8 @@ class SimpleBotBehaviour():
             market_data = self.exchange_interface.get_exchange_markets()
 
         analyzed_data = {}
-        analyzed_sorted_pairs = {}
         for exchange, markets in market_data.items():
             analyzed_data[exchange] = {}
-            analyzed_sorted_pairs[exchange] = []
 
             for market_pair in markets:
                 historical_data = self.__get_historical_data(
@@ -60,11 +58,6 @@ class SimpleBotBehaviour():
                 )
 
                 analyzed_data[exchange][market_pair] = self.__run_strategy(historical_data)
-
-            analyzed_sorted_pairs[exchange] = sorted(
-                analyzed_data[exchange],
-                key=lambda x: (analyzed_data[exchange][x]['values'][0])
-            )
 
         self.__reconcile_open_orders()
 
@@ -79,7 +72,7 @@ class SimpleBotBehaviour():
                 current_holdings = self.__get_holdings()
 
         for exchange, markets in analyzed_data.items():
-            for market_pair in analyzed_sorted_pairs[exchange]:
+            for market_pair in analyzed_data[exchange]:
                 base_symbol, quote_symbol = market_pair.split('/')
 
                 if markets[market_pair]['is_hot']:
@@ -420,6 +413,7 @@ class SimpleBotBehaviour():
         Decorators:
             retry
         """
+
         for exchange in self.exchange_interface.exchanges:
             user_account_markets = self.exchange_interface.get_account_markets(exchange)
             for symbol in user_account_markets['free']:
@@ -433,6 +427,20 @@ class SimpleBotBehaviour():
 
                 self.db_handler.create_holding(holding_payload)
 
+            quote_symbols = self.exchange_interface.get_quote_symbols(exchange)
+
+            for symbol in quote_symbols:
+                if symbol not in user_account_markets['free']:
+                    holding_payload = {
+                        'exchange': exchange,
+                        'symbol': symbol,
+                        'volume_free': 0,
+                        'volume_used': 0,
+                        'volume_total': 0
+                    }
+
+                self.db_handler.create_holding(holding_payload)
+
 
     @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def __update_holdings(self):
@@ -441,6 +449,7 @@ class SimpleBotBehaviour():
         Decorators:
             retry
         """
+
         holdings_table = self.db_handler.read_holdings()
         user_account_markets = {}
         for row in holdings_table:
@@ -454,4 +463,3 @@ class SimpleBotBehaviour():
             row.volume_total = user_account_markets[row.exchange]['total'][row.symbol]
 
             self.db_handler.update_holding(row)
-
