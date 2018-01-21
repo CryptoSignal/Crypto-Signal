@@ -132,9 +132,9 @@ class DefaultBehaviour():
 
                 print("{}: \tBreakout: {} \tRSI: {} \tSMA: {} \tEMA: {} \tIMC: {} \tMACD: {}".format(
                     market_pair,
-                    breakout_data['values'],
-                    format(rsi_data['values'], '.2f'),
-                    format(sma_data['values'], '.7f'),
-                    format(ema_data['values'], '.7f'),
+                    breakout_data['values'][0],
+                    format(rsi_data['values'][0], '.2f'),
+                    format(sma_data['values'][0], '.7f'),
+                    format(ema_data['values'][0], '.7f'),
                     format(ichimoku_data['values'][0], '.7f') + "/" + format(ichimoku_data['values'][1], '.7f'),
-                    format(macd_data['values'], '.7f')))
+                    format(macd_data['values'][0], '.7f')))

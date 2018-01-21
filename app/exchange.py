@@ -105,7 +105,7 @@ class ExchangeInterface():
             time.sleep(self.exchanges[exchange].rateLimit / 1000)
         return exchange_markets
 
-    def get_exchange_markets(self, exchange):
+    def get_markets_for_exchange(self, exchange):
         """Get market data for all symbol pairs listed on the given exchange.
 
         Args:

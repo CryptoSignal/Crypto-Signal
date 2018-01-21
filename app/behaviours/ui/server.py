@@ -43,7 +43,7 @@ class ServerBehaviour(object):
 
         def markets_action():
             exchange = request.args.get('exchange')
-            markets = list(self.exchange_interface.get_exchange_markets(exchange))
+            markets = list(self.exchange_interface.get_markets_for_exchange(exchange))
 
             return jsonify(response=200, result=markets)
 
