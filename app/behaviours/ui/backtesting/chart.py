@@ -37,6 +37,7 @@ class Chart(object):
     Returns the indicators specified in the **kwargs dictionary as a json-serializable dictionary
     '''
     def get_indicators(self, **kwargs):
+        import numpy as np
 
         # Indicators are hardcoded for now. Will be updated to accommodate variable-sized MA's
         response = {
@@ -54,8 +55,8 @@ class Chart(object):
             period = kwargs["bollinger"]
             assert type(period) is int
 
-            bbupper = [datum["values"][0] for datum in self.indicators.analyze_bollinger_bands(closings, all_data=True)]
-            bblower = [datum["values"][2] for datum in self.indicators.analyze_bollinger_bands(closings, all_data=True)]
+            bbupper = [np.nan_to_num(datum["values"][0]) for datum in self.indicators.analyze_bollinger_bands(closings, all_data=True)]
+            bblower = [np.nan_to_num(datum["values"][2]) for datum in self.indicators.analyze_bollinger_bands(closings, all_data=True)]
 
             response['bollinger_upper'] = bbupper
             response['bollinger_lower'] = bblower
@@ -67,7 +68,7 @@ class Chart(object):
             assert type(periods) is list
 
             for period in periods:
-                response['sma' + str(period)] = [datum["values"] for datum in self.indicators.analyze_sma(closings, period_count=period, all_data=True)]
+                response['sma' + str(period)] = [np.nan_to_num(datum["values"][0]) for datum in self.indicators.analyze_sma(closings, period_count=period, all_data=True)]
 
         return response
 
@@ -75,6 +76,7 @@ class Chart(object):
     Plots the specified indicators on a matplotlib plot
     '''
     def plot_indicators(self, **kwargs):
+        import numpy as np
 
         # Get closing historical datapoints
         closings = [[0, 0, 0, 0, x.close, 0] for x in self.data]
@@ -85,8 +87,8 @@ class Chart(object):
             period = kwargs["bollinger"]
             assert type(period) is int
 
-            bbupper = [datum["values"][0] for datum in self.indicators.analyze_bollinger_bands(closings, all_data=True)]
-            bblower = [datum["values"][2] for datum in self.indicators.analyze_bollinger_bands(closings, all_data=True)]
+            bbupper = [np.nan_to_num(datum["values"][0]) for datum in self.indicators.analyze_bollinger_bands(closings, all_data=True)]
+            bblower = [np.nan_to_num(datum["values"][2]) for datum in self.indicators.analyze_bollinger_bands(closings, all_data=True)]
             plt.plot(np.arange(period, len(closings)), bbupper[period:], 'g--')
             plt.plot(np.arange(period, len(closings)), bblower[period:], 'b--')
 
@@ -96,7 +98,7 @@ class Chart(object):
             assert type(periods) is list
 
             for period in periods:
-                plt.plot([datum["values"] for datum in self.indicators.analyze_sma(closings, period_count=period, all_data=True)])
+                plt.plot([np.nan_to_num(datum["values"][0]) for datum in self.indicators.analyze_sma(closings, period_count=period, all_data=True)])
 
     '''
     Plots each buy trade as a green 'x', and each sell trade as a red 'x'
