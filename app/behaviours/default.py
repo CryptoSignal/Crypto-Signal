@@ -134,7 +134,9 @@ class DefaultBehaviour():
                             formatted_values.append(value)
 
                     formatted_string = '/'.join(formatted_values)
-                    output += "\t{}: {} ".format(analysis, formatted_string)
+                    output += "{}: {}\t".format(analysis, formatted_string)
 
                 if message:
                     self.notifier.notify_all(message)
+
+                print(output)

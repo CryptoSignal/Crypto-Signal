@@ -7,7 +7,6 @@ import distutils.util
 from string import whitespace
 
 import ccxt # Only uses ccxt to get exchanges, never queries them.
-import structlog
 
 class Configuration():
     """Parses the various forms of configuration to create the config objects.
@@ -15,9 +14,6 @@ class Configuration():
     def __init__(self):
         """Initializes the Configuration class
         """
-
-        self.logger = structlog.get_logger()
-        self.logger.info("Loading configuration...")
 
         config = json.load(open('default-config.json'))
 

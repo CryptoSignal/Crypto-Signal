@@ -99,11 +99,11 @@
     "simple_bot": {
       "mode": "simulate",
       "open_order_max_hours": 24,
-      "analysis_timeframe": "1h",
-      "strategy": "sma",
-      "strategy_period": 9,
+      "analysis_timeframe": "1d",
+      "strategy": "rsi",
+      "strategy_period": 14,
       "buy": {
-        "strategy_threshold": 0.0,
+        "strategy_threshold": 70,
         "trade_limits": {
           "BTC": 0.02,
           "ETH": 0.2,
@@ -112,7 +112,7 @@
         }
       },
       "sell": {
-        "strategy_threshold": 0.0,
+        "strategy_threshold": 30,
         "trade_limits": {
           "BTC": 0.02,
           "ETH": 0.2,
