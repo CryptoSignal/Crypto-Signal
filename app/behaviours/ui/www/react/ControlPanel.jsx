@@ -92,7 +92,7 @@ class ControlPanel extends React.Component {
                               </div>
                               <div className="input-field col s6">
                                <input defaultValue="0" id="stop-loss" type="text" className="validate" />
-                               <label className="active" htmlFor="stop-loss">Stop Loss</label>
+                               <label className="active" htmlFor="stop-loss">Stop Loss (%)</label>
                               </div>
                             </div>
                            </div>;
@@ -260,10 +260,16 @@ class ControlPanel extends React.Component {
        let startTime = $('#start-time').val();
 
        const capitalReg = /(^[1-9][0-9]*$)|(^[0-9]*\.[0-9]*$)/;
+       const stopLossReg = /(^(100)$|(^[0-9]?[0-9](\.[0-9]+)?$))/;
 
        if (!capitalReg.exec(capital)) {
            swal("Uh Oh!", "You need to enter a valid number for your starting capital.", "error");
            throw "Invalid Capital";
+       }
+
+       if (!stopLossReg.exec(stopLoss)) {
+           swal("Uh Oh!", "You need to enter a valid percentage (0 - 100) for your stop loss.", "error");
+           throw "Invalid Stop Loss";
        }
 
        // Convert start time to epoch
