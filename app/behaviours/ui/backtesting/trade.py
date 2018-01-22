@@ -13,7 +13,7 @@ class Trade(object):
         self.uuid = uuid
 
         if stop_loss:
-            self.stop_loss = current_price - stop_loss
+            self.stop_loss = current_price * (1 - stop_loss)
         else:
             self.stop_loss = None
 
