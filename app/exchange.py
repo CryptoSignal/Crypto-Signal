@@ -24,7 +24,7 @@ class ExchangeInterface():
         for exchange in exchange_config:
             if exchange_config[exchange]['required']['enabled']:
                 new_exchange = getattr(ccxt, exchange)({
-                    "enableRateLimit": True # Enables built-in rate limiter
+                    "enableRateLimit": True
                 })
 
                 # sets up api permissions for user if given
@@ -45,9 +45,18 @@ class ExchangeInterface():
                             'password']
 
                     self.exchanges[new_exchange.id] = new_exchange
-
                 else:
-                    print("Unable to load exchange %s", new_exchange)
+                    self.logger.warn("Unable to load exchange %s", new_exchange)
+
+
+    def override_exchange_config(self):
+        """Enables all exchanges regardless of user configuration. Useful for the UI layer.
+        """
+
+        for exchange in ccxt.exchanges:
+            self.exchanges[exchange] = getattr(ccxt, exchange)({
+                "enableRateLimit": True
+            })
 
 
     def get_historical_data(self, market_pair, exchange, time_unit, start_date):
@@ -89,6 +98,20 @@ class ExchangeInterface():
         account_markets.update(self.exchanges[exchange].fetch_balance())
         time.sleep(self.exchanges[exchange].rateLimit / 1000)
         return account_markets
+
+    def get_markets_for_exchange(self, exchange):
+        """Get market data for all symbol pairs listed on the given exchange.
+
+        Args:
+            exchange (str): Contains the exchange to fetch the data from
+
+        Returns:
+            dict: A dictionary containing market data for all symbol pairs.
+        """
+
+        exchange_markets = self.exchanges[exchange].load_markets()
+
+        return exchange_markets
 
 
     def get_exchange_markets(self):
