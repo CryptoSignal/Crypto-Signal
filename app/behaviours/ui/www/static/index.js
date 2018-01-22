@@ -24200,7 +24200,7 @@ var ControlPanel = function (_React$Component) {
                         _react2.default.createElement(
                             "label",
                             { className: "active", htmlFor: "stop-loss" },
-                            "Stop Loss"
+                            "Stop Loss (%)"
                         )
                     )
                 )
@@ -24478,10 +24478,16 @@ var ControlPanel = function (_React$Component) {
             var startTime = $('#start-time').val();
 
             var capitalReg = /(^[1-9][0-9]*$)|(^[0-9]*\.[0-9]*$)/;
+            var stopLossReg = /(^(100)$|(^[0-9]?[0-9](\.[0-9]+)?$))/;
 
             if (!capitalReg.exec(capital)) {
                 swal("Uh Oh!", "You need to enter a valid number for your starting capital.", "error");
                 throw "Invalid Capital";
+            }
+
+            if (!stopLossReg.exec(stopLoss)) {
+                swal("Uh Oh!", "You need to enter a valid percentage (0 - 100) for your stop loss.", "error");
+                throw "Invalid Stop Loss";
             }
 
             // Convert start time to epoch
