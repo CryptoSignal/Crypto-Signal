@@ -42,9 +42,13 @@ class SimpleBotBehaviour():
             market_pairs (str): List of symbol pairs to operate on, if empty get all pairs.
         """
 
+        self.logger.info("Starting default behaviour...")
+
         if market_pairs:
+            self.logger.debug("Found configured symbol pairs.")
             market_data = self.exchange_interface.get_symbol_markets(market_pairs)
         else:
+            self.logger.debug("No configured symbol pairs, using all available on exchange.")
             market_data = self.exchange_interface.get_exchange_markets()
 
         analyzed_data = {}
@@ -59,8 +63,10 @@ class SimpleBotBehaviour():
 
                 analyzed_data[exchange][market_pair] = self.__run_strategy(historical_data)
 
+        self.logger.info("Reconciling open orders...")
         self.__reconcile_open_orders()
 
+        self.logger.info("Updating current holdings...")
         current_holdings = self.__get_holdings()
 
         if not current_holdings:
@@ -71,6 +77,7 @@ class SimpleBotBehaviour():
                 self.__update_holdings()
                 current_holdings = self.__get_holdings()
 
+        self.logger.info("Looking for trading opportunities...")
         for exchange, markets in analyzed_data.items():
             for market_pair in analyzed_data[exchange]:
                 base_symbol, quote_symbol = market_pair.split('/')
