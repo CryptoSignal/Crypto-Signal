@@ -101,8 +101,11 @@ class ExchangeInterface():
 
         exchange_markets = {}
         for exchange in self.exchanges:
-            exchange_markets[exchange] = self.exchanges[exchange].load_markets()
-            time.sleep(self.exchanges[exchange].rateLimit / 1000)
+            try:
+                exchange_markets[exchange] = self.exchanges[exchange].load_markets()
+                time.sleep(self.exchanges[exchange].rateLimit / 1000)
+            except Exception:
+                pass
         return exchange_markets
 
     def get_markets_for_exchange(self, exchange):
