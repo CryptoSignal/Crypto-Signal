@@ -22,22 +22,28 @@ class Decision(object):
     :returns True iff each indicator satisfies a comparision using it's 'comparator' value with its 'value' value. False otherwise
     '''
     def should_buy(self, buy_strategy):
+        from math import isnan
+
         for indicator, body in buy_strategy.items():
             comparator, value = body['comparator'], body['value']
 
             if not isinstance(value, (int, float)):
-                value = self.indicators[value]
+                value = self.indicators[value][0]
+
+                if isnan(value):
+                    # If the indicator is NaN (possibly due to insufficient data), return False
+                    return False
 
             if comparator == 'LT':
-                if self.indicators[indicator] >= value[0]:
+                if self.indicators[indicator] >= value:
                     return False
 
             elif comparator == 'EQ':
-                if self.indicators[indicator] != value[0]:
+                if self.indicators[indicator] != value:
                     return False
 
             elif comparator == 'GT':
-                if self.indicators[indicator] <= value[0]:
+                if self.indicators[indicator] <= value:
                     return False
 
         return True
@@ -57,23 +63,28 @@ class Decision(object):
         :returns True iff each indicator satisfies a comparision using it's 'comparator' value with its 'value' value. False otherwise
         '''
     def should_sell(self, sell_strategy):
-        for indicator, body in sell_strategy.items():
+        from math import isnan
 
+        for indicator, body in sell_strategy.items():
             comparator, value = body['comparator'], body['value']
 
             if not isinstance(value, (int, float)):
-                value = self.indicators[value]
+                value = self.indicators[value][0]
+
+                if isnan(value):
+                    # If the indicator is NaN (possibly due to insufficient data), return False
+                    return False
 
             if comparator == 'LT':
-                if self.indicators[indicator] >= value[0]:
+                if self.indicators[indicator] >= value:
                     return False
 
             elif comparator == 'EQ':
-                if self.indicators[indicator] != value[0]:
+                if self.indicators[indicator] != value:
                     return False
 
             elif comparator == 'GT':
-                if self.indicators[indicator] <= value[0]:
+                if self.indicators[indicator] <= value:
                     return False
 
         return True
