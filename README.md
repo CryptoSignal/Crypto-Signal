@@ -109,13 +109,13 @@ Now you're all set! Open up your favorite browser and navigate to http://localho
 
 ### How does it work?
 
-First, you'll select the coin pair you want to trade with.
+First, you'll select the exchange and coin pair you want to test your strategy over.
 
 "Capital" is the amount of BTC you want to start out with trading.
 
 "Time Unit" is the duration of each point on the time series of historical data (1m, 5m, 30m, etc.).
 
-"Stop Loss" is the amount of BTC below each buy price that you will sell your position at. The smaller the stop loss, the less your risk.
+"Stop Loss" is the percentage below each buy price that you will sell your position at. The smaller the stop loss, the less your risk.
 
 "Start Time" is the start date that your backtesting data will be grabbed from.
 
