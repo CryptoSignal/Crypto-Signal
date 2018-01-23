@@ -36,10 +36,10 @@ Coming Soon:
 * Create a .env file which can be populated with settings in the format of OPTION=value which can be derived from the app/default-config.json file. For example if you want to change the how often it updates add SETTINGS\_UPDATE\_INTERVAL=600
 * For lists of values separate them with commas. For instance if you want to use specific symbol pairs they are in the format of base\_currency/quote\_currency (i.e. SETTINGS\_MARKET\_PAIRS=BTC/ETH,BTC/USDT)
 
-## How to run
+## How to run (Docker)
 In the root directory run `docker-compose run app` or `make build && make run --env-file=.env` if you don't have docker-compose.
 
-# How to use (Local)
+# How to use (Without Docker)
 To install the dependencies for this project, perform the following...
 - Ensure you are running python 3.6
 - install TA-lib from https://www.ta-lib.org/ for your OS.
@@ -49,7 +49,7 @@ To install the dependencies for this project, perform the following...
 
 You can add a secrets.json file to the app directory of your project to customize the configuration, the defaults are in app/default-config.json.
 
-## How to run
+## How to run (Without Docker)
 Navigate to the app directory in your terminal and run with "python app.py"
 
 # Behaviours
@@ -82,7 +82,7 @@ Forked from the Cryptocurrency Trading Bot Tutorial on: https://youtube.com/cryp
 
 This behaviour runs a flask server hosting a website allowing you to test different backtesting strategies on various sets of historical data.
 
-![Alt text](/cryptobot.jpg "The dashboard")
+![Alt text](/backtesting-ui.png "Backtesting UI")
 
 ### Installation
 
@@ -90,7 +90,7 @@ First, clone or download the repository to your computer.
 
 **Front End**- Navigate to the *app/behaviours/ui/www* directory and run `npm install`. Make sure you have the latest version of node.js installed on your computer.
 
-**Back End**- (Without Docker) The server should run with both python 2.7.x and 3.x. The only dependencies are numpy and flask, so just do a quick `pip install flask`, `pip install numpy`.
+**Back End**- (Without Docker) The server should run with python 3.x. Assuming you have already installed all the dependencies, you're in the clear.
 
 (With Docker) Everything should be installed already from the dependencies if you run `make build` in the root directory of crypto-signal.
 
@@ -99,7 +99,9 @@ First, clone or download the repository to your computer.
 
 First, you'll need to use webpack to bundle all of the React .jsx files on the front end. Navigate to the *app/beahviours/ui/www* directory and run `npm run build`.
 
-(Without Docker) Next, navigate to the *app/behaviours/ui* directory and run `python server.py`.
+If you haven't already, **ensure you have changed the "selected_task" value from "default" to "server" in default-config.json.**
+
+(Without Docker) Navigate to the *app/* directory and run `python app.py`.
 
 (With Docker) Run `docker-compose up` in the root directory.
 
