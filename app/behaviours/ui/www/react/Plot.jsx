@@ -25,7 +25,9 @@ class Plot extends React.Component {
 
     /* When component is being updated, erase the previous graph and replace it with new data */
     componentDidUpdate() {
-	    $('#d3plot').html('<svg width="960" height="500"></svg>');
+        const windowWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+
+	    $('#d3plot').html(`<svg width=${windowWidth} height="500"></svg>`);
 	    this.updatePlot();
     }
 
