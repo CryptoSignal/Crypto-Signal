@@ -122,9 +122,11 @@ class StrategyAnalyzer():
 
         if all_data:
             return macd_result_data
-
         else:
-            return macd_result_data[-1]
+            if macd_result_data:
+                return macd_result_data[-1]
+            else:
+                return macd_result_data
 
 
     def analyze_breakout(self, historial_data, period_count=5, hot_thresh=None, cold_thresh=None):
@@ -217,7 +219,10 @@ class StrategyAnalyzer():
         if all_data:
             return rsi_result_data
         else:
-            return rsi_result_data[-1]
+            if rsi_result_data:
+                return rsi_result_data[-1]
+            else:
+                return rsi_result_data
 
 
     def analyze_sma(self, historial_data, period_count=15,
@@ -271,7 +276,10 @@ class StrategyAnalyzer():
         if all_data:
             return sma_result_data
         else:
-            return sma_result_data[-1]
+            if sma_result_data:
+                return sma_result_data[-1]
+            else:
+                return sma_result_data
 
 
     def analyze_ema(self, historial_data, period_count=15,
@@ -325,7 +333,10 @@ class StrategyAnalyzer():
         if all_data:
             return ema_result_data
         else:
-            return ema_result_data[-1]
+            if ema_result_data:
+                return ema_result_data[-1]
+            else:
+                return ema_result_data
 
 
     def analyze_ichimoku_cloud(self, historial_data, hot_thresh=None, cold_thresh=None):
@@ -425,4 +436,7 @@ class StrategyAnalyzer():
         if all_data:
             return bb_result_data
         else:
-            return bb_result_data[-1]
+            if bb_result_data:
+                return bb_result_data[-1]
+            else:
+                return bb_result_data

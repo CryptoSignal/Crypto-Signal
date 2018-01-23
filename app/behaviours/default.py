@@ -119,22 +119,23 @@ class DefaultBehaviour():
                 message = ""
                 output = "{}: ".format(market_pair)
                 for analysis in analyzed_data:
-                    if self.behaviour_config[analysis.lower()]['alert_enabled']:
-                        if analyzed_data[analysis]['is_hot']:
-                            message += "{}: {} is hot!\n".format(analysis, market_pair)
+                    if analyzed_data[analysis]:
+                        if self.behaviour_config[analysis.lower()]['alert_enabled']:
+                            if analyzed_data[analysis]['is_hot']:
+                                message += "{}: {} is hot!\n".format(analysis, market_pair)
 
-                        if analyzed_data[analysis]['is_cold']:
-                            message += "{}: {} is cold!\n".format(analysis, market_pair)
+                            if analyzed_data[analysis]['is_cold']:
+                                message += "{}: {} is cold!\n".format(analysis, market_pair)
 
-                    formatted_values = []
-                    for value in analyzed_data[analysis]['values']:
-                        if isinstance(value, float):
-                            formatted_values.append(format(value, '.8f'))
-                        else:
-                            formatted_values.append(value)
+                        formatted_values = []
+                        for value in analyzed_data[analysis]['values']:
+                            if isinstance(value, float):
+                                formatted_values.append(format(value, '.8f'))
+                            else:
+                                formatted_values.append(value)
 
-                    formatted_string = '/'.join(formatted_values)
-                    output += "{}: {}\t".format(analysis, formatted_string)
+                        formatted_string = '/'.join(formatted_values)
+                        output += "{}: {}\t".format(analysis, formatted_string)
 
                 if message:
                     self.notifier.notify_all(message)

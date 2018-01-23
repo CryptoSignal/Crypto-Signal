@@ -61,7 +61,9 @@ class SimpleBotBehaviour():
                     exchange
                 )
 
-                analyzed_data[exchange][market_pair] = self.__run_strategy(historical_data)
+                strategy_result = self.__run_strategy(historical_data)
+                if strategy_result:
+                    analyzed_data[exchange][market_pair] = strategy_result
 
         self.logger.info("Reconciling open orders...")
         self.__reconcile_open_orders()
