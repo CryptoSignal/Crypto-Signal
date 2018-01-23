@@ -39,15 +39,15 @@
   </div>
 
   <!-- jQuery -->
-  <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}"></script>
   <!-- Compiled and minified Materialize JavaScript -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+  <script src="{{ url_for('static', filename='js/materialize.min.js') }}"></script>
 
   <!-- Load SweetAlert2 js -->
   <script src="{{ url_for('static', filename='js/sweetalert2.min.js') }}"></script>
 
   <!-- Load d3.js Graphing Library -->
-  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="{{ url_for('static', filename='js/d3.v4.min.js') }}"></script>
 
   <!-- Main Entry Point -->
   <script src="{{ url_for('static', filename='index.js') }}" defer></script>
