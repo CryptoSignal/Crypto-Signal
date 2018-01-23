@@ -115,7 +115,7 @@ First, you'll select the exchange and coin pair you want to test your strategy o
 
 "Time Unit" is the duration of each point on the time series of historical data (1m, 5m, 30m, etc.).
 
-"Stop Loss" is the percentage below each buy price that you will sell your position at. The smaller the stop loss, the less your risk.
+"Stop Loss" is the percentage below each buy price that you will sell your position at. The smaller the stop loss, the less your risk. A value of 0 means no stop loss, i.e. you sell if and only if your sell conditions are true.
 
 "Start Time" is the start date that your backtesting data will be grabbed from.
 
