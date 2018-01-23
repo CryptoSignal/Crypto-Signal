@@ -34,6 +34,7 @@ class ServerBehaviour(object):
 
         self.app = Flask(__name__, static_folder='www/static', template_folder='www/static/templates')
         self.__add_backtesting_endpoints()
+        self.exchange_interface.override_exchange_config()
 
 
     def __add_backtesting_endpoints(self):

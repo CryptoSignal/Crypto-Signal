@@ -46,36 +46,36 @@ class Configuration():
 
     def __parse_config(self, config_fragment, base_path=""):
         for key in config_fragment:
-
-            if isinstance(config_fragment[key], str):
-                key_path = '_'.join([base_path, key.upper()])
-                config_fragment[key] = str(os.environ.get(key_path, config_fragment[key]))
-
             if isinstance(config_fragment[key], dict):
                 key_path = '_'.join([base_path, key.upper()])
                 config_fragment[key] = self.__parse_config(config_fragment[key], key_path)
 
-            if isinstance(config_fragment[key], int):
-                key_path = '_'.join([base_path, key.upper()])
-                new_value = int(os.environ.get(key_path, config_fragment[key]))
-                config_fragment[key] = new_value
-
-            if isinstance(config_fragment[key], float):
-                key_path = '_'.join([base_path, key.upper()])
-                new_value = float(os.environ.get(key_path, config_fragment[key]))
-                config_fragment[key] = new_value
-
-            if isinstance(config_fragment[key], list):
+            elif isinstance(config_fragment[key], list):
                 key_path = '_'.join([base_path, key.upper()])
                 new_value = os.environ.get(key_path, config_fragment[key])
                 if isinstance(new_value, str):
                     new_value = new_value.translate(str.maketrans('', '', whitespace)).split(",")
-
                 config_fragment[key] = new_value
 
-            if isinstance(config_fragment[key], bool):
+            elif isinstance(config_fragment[key], bool):
                 key_path = '_'.join([base_path, key.upper()])
                 new_value = os.environ.get(key_path, config_fragment[key])
-                new_value = bool(distutils.util.strtobool(new_value))
+                if isinstance(new_value, str):
+                    new_value = bool(distutils.util.strtobool(new_value))
+                config_fragment[key] = new_value
+
+            elif isinstance(config_fragment[key], str):
+                key_path = '_'.join([base_path, key.upper()])
+                config_fragment[key] = str(os.environ.get(key_path, config_fragment[key]))
+
+            elif isinstance(config_fragment[key], int):
+                key_path = '_'.join([base_path, key.upper()])
+                new_value = int(os.environ.get(key_path, config_fragment[key]))
+                config_fragment[key] = new_value
+
+            elif isinstance(config_fragment[key], float):
+                key_path = '_'.join([base_path, key.upper()])
+                new_value = float(os.environ.get(key_path, config_fragment[key]))
+                config_fragment[key] = new_value
 
         return config_fragment

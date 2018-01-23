@@ -370,8 +370,8 @@ class StrategyAnalyzer():
 
         Args:
             historial_data (list): A matrix of historical OHCLV data.
-            all_data (bool, optional): Defaults to False. If True, we return the BB's associated with each
-                data point in our historical dataset. Otherwise just return the last one.
+            all_data (bool, optional): Defaults to False. If True, we return the BB's associated
+                with each data point in our historical dataset. Otherwise just return the last one.
 
         Returns:
             dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
