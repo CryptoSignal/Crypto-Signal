@@ -38,19 +38,29 @@ class BacktestingStrategy(object):
         # The zero's are to take up space since our indicators require a full dataframe of OHLC datas
         self.prices = [[0, 0, 0, 0, sample_price(candle.open, candle.close), 0] for candle in candlesticks]
 
-        rsi = self.indicators.analyze_rsi(self.prices, all_data=True)
-        nine_period = self.indicators.analyze_sma(self.prices, period_count=9, all_data=True)
-        fifteen_period = self.indicators.analyze_sma(self.prices, period_count=15, all_data=True)
-        nine_period_ema = self.indicators.analyze_ema(self.prices, period_count=9, all_data=True)
+        # Hacky way to ensure indices match up :/
+        rsi = [None] * 14
+        nine_period = [None] * 9
+        fifteen_period = [None] * 15
+        nine_period_ema = [None] * 9
+
+        rsi.extend(self.indicators.analyze_rsi(self.prices, period_count=14, all_data=True))
+        nine_period.extend(self.indicators.analyze_sma(self.prices, period_count=9, all_data=True))
+        fifteen_period.extend(self.indicators.analyze_sma(self.prices, period_count=15, all_data=True))
+        nine_period_ema.extend(self.indicators.analyze_ema(self.prices, period_count=9, all_data=True))
 
 
         for i in range(len(self.prices)):
 
             # Get the (sampled) closing price
             current_price = self.prices[i][4]
+            current_rsi = rsi[i]["values"] if rsi[i] else None
+            current_nine_period = nine_period[i]["values"] if nine_period[i] else None
+            current_fifteen_period = fifteen_period[i]["values"] if fifteen_period[i] else None
+            current_nine_period_ema = nine_period_ema[i]["values"] if nine_period_ema[i] else None
 
-            decision = Decision({'currentprice': current_price, 'rsi': rsi[i]["values"], 'sma9': nine_period[i]["values"],
-                                 'sma15': fifteen_period[i]["values"], 'ema9': nine_period_ema[i]["values"]})
+            decision = Decision({'currentprice': current_price, 'rsi': current_rsi, 'sma9': current_nine_period,
+                                 'sma15': current_fifteen_period, 'ema9': current_nine_period_ema})
 
             open_trades = [trade for trade in self.trades if trade.status == 'OPEN']
 
