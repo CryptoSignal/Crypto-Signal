@@ -56,8 +56,8 @@ class Chart(object):
             assert type(period) is int
 
             # Offset each band by "period" data points
-            bbupper = [(i, datum["values"][0]) for i, datum in enumerate(self.indicators.analyze_bollinger_bands(closings, all_data=True))][period:]
-            bblower = [(i, datum["values"][2]) for i, datum in enumerate(self.indicators.analyze_bollinger_bands(closings, all_data=True))][period:]
+            bbupper = [(i + period, datum["values"][0]) for i, datum in enumerate(self.indicators.analyze_bollinger_bands(closings, all_data=True))]
+            bblower = [(i + period, datum["values"][2]) for i, datum in enumerate(self.indicators.analyze_bollinger_bands(closings, all_data=True))]
 
             response['bollinger_upper'] = bbupper
             response['bollinger_lower'] = bblower
@@ -70,12 +70,16 @@ class Chart(object):
 
             for period in periods:
                 # Offset each sma by "period" data points
-                response['sma' + str(period)] = [(i, datum["values"][0]) for i, datum in
-                                                 enumerate(self.indicators.analyze_sma(closings, period_count=period, all_data=True))][period:]
+                response['sma' + str(period)] = [(i + period, datum["values"][0]) for i, datum in
+                                                 enumerate(self.indicators.analyze_sma(closings, period_count=period, all_data=True))]
 
         return response
 
     '''
+    ####################################################################
+    ### THIS FUNCTION IS DEPRECATED. PLOT IS NOW DISPLAYED ON THE UI ###
+    ####################################################################
+    
     Plots the specified indicators on a matplotlib plot
     '''
     def plot_indicators(self, **kwargs):

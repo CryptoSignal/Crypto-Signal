@@ -386,7 +386,7 @@ class StrategyAnalyzer():
         """
 
         dataframe = self.__convert_to_dataframe(historial_data)
-        bollinger_data = abstract.BBANDS(dataframe)
+        bollinger_data = abstract.BBANDS(dataframe, 21)
 
         bb_result_data = []
         for bb_row in bollinger_data.iterrows():
