@@ -2,7 +2,7 @@
 """
 
 import math
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 
 import structlog
 import pandas
@@ -51,32 +51,6 @@ class StrategyAnalyzer():
         dataframe.drop('timestamp', axis=1, inplace=True)
 
         return dataframe
-
-
-    def get_historical_data(self, market_pair, exchange, time_unit, max_days=100):
-        """Fetches the historical data
-
-        Args:
-            market_pair (str): Contains the symbol pair to operate on i.e. BURST/BTC
-            exchange (str): Contains the exchange to fetch the historical data from.
-            time_unit (str): A string specifying the ccxt time unit i.e. 5m or 1d.
-            max_days (int, optional): Defaults to 100. Maximum number of days to fetch data for.
-
-        Returns:
-            list: Contains a list of lists which contain timestamp, open, high, low, close, volume.
-        """
-
-        # The data_start_date timestamp must be in milliseconds hence * 1000.
-        data_start_date = datetime.now() - timedelta(days=max_days)
-        data_start_date = int(data_start_date.replace(tzinfo=timezone.utc).timestamp() * 1000)
-        historical_data = self.__exchange_interface.get_historical_data(
-            market_pair=market_pair,
-            exchange=exchange,
-            time_unit=time_unit,
-            start_date=data_start_date
-        )
-
-        return historical_data
 
 
     def analyze_macd(self, historial_data, hot_thresh=None, cold_thresh=None, all_data=False):

@@ -3,7 +3,6 @@
 2. Notify users when a threshold is crossed.
 """
 
-import ccxt
 import structlog
 
 class DefaultBehaviour():
@@ -29,6 +28,7 @@ class DefaultBehaviour():
         self.strategy_analyzer = strategy_analyzer
         self.notifier = notifier
 
+
     def run(self, market_pairs):
         """The behaviour entrypoint
 
@@ -46,6 +46,7 @@ class DefaultBehaviour():
 
         self.__test_strategies(market_data)
 
+
     def __test_strategies(self, market_data):
         """Test the strategies and perform notifications as required
 
@@ -55,66 +56,61 @@ class DefaultBehaviour():
 
         for exchange in market_data:
             for market_pair in market_data[exchange]:
+                one_day_historical_data = self.exchange_interface.get_historical_data(
+                    market_data[exchange][market_pair]['symbol'],
+                    exchange,
+                    '1d'
+                )
 
-                try:
-                    one_day_historical_data = self.strategy_analyzer.get_historical_data(
-                        market_data[exchange][market_pair]['symbol'],
-                        exchange,
-                        '1d'
+                five_minute_historical_data = self.exchange_interface.get_historical_data(
+                    market_data[exchange][market_pair]['symbol'],
+                    exchange,
+                    '5m'
+                )
+
+                analyzed_data = {}
+
+                if self.behaviour_config['rsi']['enabled']:
+                    analyzed_data['RSI'] = self.strategy_analyzer.analyze_rsi(
+                        one_day_historical_data,
+                        hot_thresh=self.behaviour_config['rsi']['hot'],
+                        cold_thresh=self.behaviour_config['rsi']['cold']
                     )
 
-                    five_minute_historical_data = self.strategy_analyzer.get_historical_data(
-                        market_data[exchange][market_pair]['symbol'],
-                        exchange,
-                        '5m'
+                if self.behaviour_config['sma']['enabled']:
+                    analyzed_data['SMA'] = self.strategy_analyzer.analyze_sma(
+                        one_day_historical_data,
+                        hot_thresh=self.behaviour_config['sma']['hot'],
+                        cold_thresh=self.behaviour_config['sma']['cold']
                     )
 
-                    analyzed_data = {}
+                if self.behaviour_config['ema']['enabled']:
+                    analyzed_data['EMA'] = self.strategy_analyzer.analyze_ema(
+                        one_day_historical_data,
+                        hot_thresh=self.behaviour_config['ema']['hot'],
+                        cold_thresh=self.behaviour_config['ema']['cold']
+                    )
 
-                    if self.behaviour_config['rsi']['enabled']:
-                        analyzed_data['RSI'] = self.strategy_analyzer.analyze_rsi(
-                            one_day_historical_data,
-                            hot_thresh=self.behaviour_config['rsi']['hot'],
-                            cold_thresh=self.behaviour_config['rsi']['cold']
-                        )
+                if self.behaviour_config['breakout']['enabled']:
+                    analyzed_data['Breakout'] = self.strategy_analyzer.analyze_breakout(
+                        five_minute_historical_data,
+                        hot_thresh=self.behaviour_config['breakout']['hot'],
+                        cold_thresh=self.behaviour_config['breakout']['cold']
+                    )
 
-                    if self.behaviour_config['sma']['enabled']:
-                        analyzed_data['SMA'] = self.strategy_analyzer.analyze_sma(
-                            one_day_historical_data,
-                            hot_thresh=self.behaviour_config['sma']['hot'],
-                            cold_thresh=self.behaviour_config['sma']['cold']
-                        )
+                if self.behaviour_config['ichimoku']['enabled']:
+                    analyzed_data['Ichimoku'] = self.strategy_analyzer.analyze_ichimoku_cloud(
+                        one_day_historical_data,
+                        hot_thresh=self.behaviour_config['ichimoku']['hot'],
+                        cold_thresh=self.behaviour_config['ichimoku']['cold']
+                    )
 
-                    if self.behaviour_config['ema']['enabled']:
-                        analyzed_data['EMA'] = self.strategy_analyzer.analyze_ema(
-                            one_day_historical_data,
-                            hot_thresh=self.behaviour_config['ema']['hot'],
-                            cold_thresh=self.behaviour_config['ema']['cold']
-                        )
-
-                    if self.behaviour_config['breakout']['enabled']:
-                        analyzed_data['Breakout'] = self.strategy_analyzer.analyze_breakout(
-                            five_minute_historical_data,
-                            hot_thresh=self.behaviour_config['breakout']['hot'],
-                            cold_thresh=self.behaviour_config['breakout']['cold']
-                        )
-
-                    if self.behaviour_config['ichimoku']['enabled']:
-                        analyzed_data['Ichimoku'] = self.strategy_analyzer.analyze_ichimoku_cloud(
-                            one_day_historical_data,
-                            hot_thresh=self.behaviour_config['ichimoku']['hot'],
-                            cold_thresh=self.behaviour_config['ichimoku']['cold']
-                        )
-
-                    if self.behaviour_config['macd']['enabled']:
-                        analyzed_data['MACD'] = self.strategy_analyzer.analyze_macd(
-                            one_day_historical_data,
-                            hot_thresh=self.behaviour_config['macd']['hot'],
-                            cold_thresh=self.behaviour_config['macd']['cold']
-                        )
-
-                except ccxt.errors.RequestTimeout:
-                    continue
+                if self.behaviour_config['macd']['enabled']:
+                    analyzed_data['MACD'] = self.strategy_analyzer.analyze_macd(
+                        one_day_historical_data,
+                        hot_thresh=self.behaviour_config['macd']['hot'],
+                        cold_thresh=self.behaviour_config['macd']['cold']
+                    )
 
                 message = ""
                 output = "{}: ".format(market_pair)

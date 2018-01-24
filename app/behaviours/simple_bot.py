@@ -3,9 +3,7 @@
 
 from datetime import datetime, timedelta
 
-import ccxt
 import structlog
-from tenacity import retry, retry_if_exception_type, stop_after_attempt
 
 class SimpleBotBehaviour():
     """Simple trading bot.
@@ -56,9 +54,10 @@ class SimpleBotBehaviour():
             analyzed_data[exchange] = {}
 
             for market_pair in markets:
-                historical_data = self.__get_historical_data(
+                historical_data = self.exchange_interface.get_historical_data(
                     market_data[exchange][market_pair]['symbol'],
-                    exchange
+                    exchange,
+                    self.behaviour_config['analysis_timeframe']
                 )
 
                 strategy_result = self.__run_strategy(historical_data)
@@ -122,30 +121,6 @@ class SimpleBotBehaviour():
         self.logger.debug(current_holdings)
 
 
-    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
-    def __get_historical_data(self, symbol, exchange):
-        """Get the historical data for a given pair.
-
-        Decorators:
-            retry
-
-        Args:
-            symbol (str): The symbol pair that we want to get historical data for.
-            exchange (str): The exchange id of the exchange we want the historical data for.
-
-        Returns:
-            list: A matrix of historical OHLCV
-        """
-
-        historical_data = self.strategy_analyzer.get_historical_data(
-            symbol,
-            exchange,
-            self.behaviour_config['analysis_timeframe']
-        )
-
-        return historical_data
-
-
     def __run_strategy(self, historical_data):
         """Run the selected analyzer over the historical data
 
@@ -203,12 +178,8 @@ class SimpleBotBehaviour():
         return result
 
 
-    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def __reconcile_open_orders(self):
         """Cancels any orders that have been open for too long.
-
-        Decorators:
-            retry
         """
         open_orders = self.exchange_interface.get_open_orders()
 
@@ -230,12 +201,8 @@ class SimpleBotBehaviour():
                         )
 
 
-    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def buy(self, base_symbol, quote_symbol, market_pair, exchange, current_holdings):
         """Buy a base currency with a quote currency.
-
-        Decorators:
-            retry
 
         Args:
             base_symbol (str): The symbol for the base currency (currency being bought).
@@ -317,12 +284,8 @@ class SimpleBotBehaviour():
         self.db_handler.create_transaction(purchase_payload)
 
 
-    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def sell(self, base_symbol, quote_symbol, market_pair, exchange, current_holdings):
         """Sell a base currency for a quote currency.
-
-        Decorators:
-            retry
 
         Args:
             base_symbol (str): The symbol for the base currency (currency being sold).
@@ -415,12 +378,8 @@ class SimpleBotBehaviour():
         return holdings
 
 
-    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def __create_holdings(self):
         """Query the users account details to populate the crypto holdings database cache.
-
-        Decorators:
-            retry
         """
 
         for exchange in self.exchange_interface.exchanges:
@@ -451,12 +410,8 @@ class SimpleBotBehaviour():
                 self.db_handler.create_holding(holding_payload)
 
 
-    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def __update_holdings(self):
         """Synchronize the database cache with the crypto holdings from the users account.
-
-        Decorators:
-            retry
         """
 
         holdings_table = self.db_handler.read_holdings()
