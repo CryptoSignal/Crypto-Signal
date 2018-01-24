@@ -2,9 +2,11 @@
 """
 
 import time
+from datetime import datetime, timedelta, timezone
 
 import ccxt
 import structlog
+from tenacity import retry, retry_if_exception_type, stop_after_attempt
 
 class ExchangeInterface():
     """Interface for performing queries against exchange API's
@@ -59,31 +61,37 @@ class ExchangeInterface():
             })
 
 
-    def get_historical_data(self, market_pair, exchange, time_unit, start_date):
+    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
+    def get_historical_data(self, market_pair, exchange, time_unit, start_date=None, max_days=100):
         """Get historical OHLCV for a symbol pair
 
         Args:
             market_pair (str): Contains the symbol pair to operate on i.e. BURST/BTC
             exchange (str): Contains the exchange to fetch the historical data from.
             time_unit (str): A string specifying the ccxt time unit i.e. 5m or 1d.
-            start_date (int): Timestamp in milliseconds.
+            start_date (int, optional): Timestamp in milliseconds.
+            max_days (int, optional): Defaults to 100. Maximum number of days to fetch data for
+                if start date is not specified.
 
         Returns:
             list: Contains a list of lists which contain timestamp, open, high, low, close, volume.
         """
 
-        historical_data = []
-        historical_data.append(
-            self.exchanges[exchange].fetch_ohlcv(
-                market_pair,
-                timeframe=time_unit,
-                since=start_date
-            )
+        if not start_date:
+            max_days_date = datetime.now() - timedelta(days=max_days)
+            start_date = int(max_days_date.replace(tzinfo=timezone.utc).timestamp() * 1000)
+
+        historical_data = self.exchanges[exchange].fetch_ohlcv(
+            market_pair,
+            timeframe=time_unit,
+            since=start_date
         )
+
         time.sleep(self.exchanges[exchange].rateLimit / 1000)
-        return historical_data[0]
+        return historical_data
 
 
+    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def get_account_markets(self, exchange):
         """Get the symbol pairs listed within a users account.
 
@@ -99,6 +107,8 @@ class ExchangeInterface():
         time.sleep(self.exchanges[exchange].rateLimit / 1000)
         return account_markets
 
+
+    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def get_markets_for_exchange(self, exchange):
         """Get market data for all symbol pairs listed on the given exchange.
 
@@ -114,6 +124,7 @@ class ExchangeInterface():
         return exchange_markets
 
 
+    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def get_exchange_markets(self):
         """Get market data for all symbol pairs listed on all configured exchanges.
 
@@ -128,6 +139,7 @@ class ExchangeInterface():
         return exchange_markets
 
 
+    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def get_symbol_markets(self, market_pairs):
         """Get market data for specific symbols on all configured exchanges.
 
@@ -150,6 +162,7 @@ class ExchangeInterface():
         return symbol_markets
 
 
+    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def get_order_book(self, market_pair, exchange):
         """Retrieve the order information for a particular symbol pair.
 
@@ -163,6 +176,8 @@ class ExchangeInterface():
 
         return self.exchanges[exchange].fetch_order_book(market_pair)
 
+
+    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def get_open_orders(self):
         """Get the users currently open orders on all configured exchanges.
 
@@ -176,6 +191,8 @@ class ExchangeInterface():
             time.sleep(self.exchanges[exchange].rateLimit / 1000)
         return open_orders
 
+
+    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def cancel_order(self, exchange, order_id):
         """Cancels an open order on a particular exchange.
 
@@ -187,6 +204,8 @@ class ExchangeInterface():
         self.exchanges[exchange].cancel_order(order_id)
         time.sleep(self.exchanges[exchange].rateLimit / 1000)
 
+
+    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def get_quote_symbols(self, exchange):
         """Get a list of quote symbols on an exchange.
 
@@ -205,18 +224,16 @@ class ExchangeInterface():
 
         return quote_symbols
 
+
+    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def get_btc_value(self, exchange, base_symbol, volume):
 
         btc_value = 0
         market_pair = base_symbol + "/BTC"
 
-        try:
-            order_book = self.get_order_book(market_pair, exchange)
-            bid = order_book['bids'][0][0] if order_book['bids'] else None
-            if bid:
-                btc_value = bid * volume
-
-        except ccxt.BaseError:
-            self.logger.warn("Unable to get btc value for %s", base_symbol)
+        order_book = self.get_order_book(market_pair, exchange)
+        bid = order_book['bids'][0][0] if order_book['bids'] else None
+        if bid:
+            btc_value = bid * volume
 
         return btc_value

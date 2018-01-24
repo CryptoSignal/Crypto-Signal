@@ -29,6 +29,7 @@ class DefaultBehaviour():
         self.strategy_analyzer = strategy_analyzer
         self.notifier = notifier
 
+
     def run(self, market_pairs):
         """The behaviour entrypoint
 
@@ -46,6 +47,7 @@ class DefaultBehaviour():
 
         self.__test_strategies(market_data)
 
+
     def __test_strategies(self, market_data):
         """Test the strategies and perform notifications as required
 
@@ -57,13 +59,13 @@ class DefaultBehaviour():
             for market_pair in market_data[exchange]:
 
                 try:
-                    one_day_historical_data = self.strategy_analyzer.get_historical_data(
+                    one_day_historical_data = self.exchange_interface.get_historical_data(
                         market_data[exchange][market_pair]['symbol'],
                         exchange,
                         '1d'
                     )
 
-                    five_minute_historical_data = self.strategy_analyzer.get_historical_data(
+                    five_minute_historical_data = self.exchange_interface.get_historical_data(
                         market_data[exchange][market_pair]['symbol'],
                         exchange,
                         '5m'
