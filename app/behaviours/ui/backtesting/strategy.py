@@ -18,7 +18,7 @@ class BacktestingStrategy(object):
         self.sells = []
         self.buys = []
         self.max_trades_at_once = 1
-        self.indicators = StrategyAnalyzer(exchange_interface=None)
+        self.indicators = StrategyAnalyzer()
         self.profit = 0
         self.pair = pair
         self.reserve = capital

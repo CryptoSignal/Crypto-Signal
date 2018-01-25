@@ -67,7 +67,7 @@ class Behaviour(object):
 
         exchange_interface = ExchangeInterface(self.config.exchanges)
 
-        strategy_analyzer = StrategyAnalyzer(exchange_interface)
+        strategy_analyzer = StrategyAnalyzer()
 
         notifier = Notifier(self.config.notifiers)
 
@@ -93,7 +93,7 @@ class Behaviour(object):
         """
 
         exchange_interface = ExchangeInterface(self.config.exchanges)
-        strategy_analyzer = StrategyAnalyzer(exchange_interface)
+        strategy_analyzer = StrategyAnalyzer()
         notifier = Notifier(self.config.notifiers)
         db_handler = DatabaseHandler(self.config.database)
 
@@ -145,7 +145,7 @@ class Behaviour(object):
         """
 
         exchange_interface = ExchangeInterface(self.config.exchanges)
-        strategy_analyzer = StrategyAnalyzer(exchange_interface)
+        strategy_analyzer = StrategyAnalyzer()
         notifier = Notifier(self.config.notifiers)
         db_handler = DatabaseHandler(self.config.database)
 

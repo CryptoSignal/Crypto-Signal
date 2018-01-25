@@ -15,15 +15,9 @@ class StrategyAnalyzer():
     """Contains all the methods required for analyzing strategies.
     """
 
-    def __init__(self, exchange_interface):
-        """Initializes StrategyAnalyzer class
+    def __init__(self):
+        """Initializes StrategyAnalyzer class """
 
-        Args:
-            exchange_interface (ExchangeInterface): An instances of the ExchangeInterface class for
-                interacting with exchanges.
-        """
-
-        self.__exchange_interface = exchange_interface
         self.logger = structlog.get_logger()
 
 
@@ -237,7 +231,7 @@ class StrategyAnalyzer():
             is_cold = False
             if cold_thresh is not None:
                 threshold = sma_row[1]['sma_value'] * cold_thresh
-                is_cold = sma_row[1]['close'] < sma_row[1]['sma_value']
+                is_cold = sma_row[1]['close'] < threshold
 
             data_point_result = {
                 'values': (sma_row[1]['sma_value'],),
@@ -294,7 +288,7 @@ class StrategyAnalyzer():
             is_cold = False
             if cold_thresh is not None:
                 threshold = ema_row[1]['ema_value'] * cold_thresh
-                is_cold = ema_row[1]['close'] < ema_row[1]['ema_value']
+                is_cold = ema_row[1]['close'] < threshold
 
             data_point_result = {
                 'values': (ema_row[1]['ema_value'],),
@@ -372,7 +366,7 @@ class StrategyAnalyzer():
         return ichimoku_data
 
 
-    def analyze_bollinger_bands(self, historial_data, all_data=False):
+    def analyze_bollinger_bands(self, historial_data, period_count=21, all_data=False):
         """Performs a bollinger band analysis on the historical data
 
         Args:
@@ -386,7 +380,7 @@ class StrategyAnalyzer():
         """
 
         dataframe = self.__convert_to_dataframe(historial_data)
-        bollinger_data = abstract.BBANDS(dataframe, 21)
+        bollinger_data = abstract.BBANDS(dataframe, period_count)
 
         bb_result_data = []
         for bb_row in bollinger_data.iterrows():
