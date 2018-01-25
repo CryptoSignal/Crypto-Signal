@@ -15,15 +15,9 @@ class StrategyAnalyzer():
     """Contains all the methods required for analyzing strategies.
     """
 
-    def __init__(self, exchange_interface):
-        """Initializes StrategyAnalyzer class
+    def __init__(self):
+        """Initializes StrategyAnalyzer class """
 
-        Args:
-            exchange_interface (ExchangeInterface): An instances of the ExchangeInterface class for
-                interacting with exchanges.
-        """
-
-        self.__exchange_interface = exchange_interface
         self.logger = structlog.get_logger()
 
 
