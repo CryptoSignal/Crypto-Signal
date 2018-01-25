@@ -366,7 +366,7 @@ class StrategyAnalyzer():
         return ichimoku_data
 
 
-    def analyze_bollinger_bands(self, historial_data, all_data=False):
+    def analyze_bollinger_bands(self, historial_data, period_count=21, all_data=False):
         """Performs a bollinger band analysis on the historical data
 
         Args:
@@ -380,7 +380,7 @@ class StrategyAnalyzer():
         """
 
         dataframe = self.__convert_to_dataframe(historial_data)
-        bollinger_data = abstract.BBANDS(dataframe, 21)
+        bollinger_data = abstract.BBANDS(dataframe, period_count)
 
         bb_result_data = []
         for bb_row in bollinger_data.iterrows():
