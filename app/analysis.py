@@ -237,7 +237,7 @@ class StrategyAnalyzer():
             is_cold = False
             if cold_thresh is not None:
                 threshold = sma_row[1]['sma_value'] * cold_thresh
-                is_cold = sma_row[1]['close'] < sma_row[1]['sma_value']
+                is_cold = sma_row[1]['close'] < threshold
 
             data_point_result = {
                 'values': (sma_row[1]['sma_value'],),
@@ -294,7 +294,7 @@ class StrategyAnalyzer():
             is_cold = False
             if cold_thresh is not None:
                 threshold = ema_row[1]['ema_value'] * cold_thresh
-                is_cold = ema_row[1]['close'] < ema_row[1]['ema_value']
+                is_cold = ema_row[1]['close'] < threshold
 
             data_point_result = {
                 'values': (ema_row[1]['ema_value'],),
