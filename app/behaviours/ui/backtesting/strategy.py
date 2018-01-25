@@ -54,10 +54,10 @@ class BacktestingStrategy(object):
 
             # Get the (sampled) closing price
             current_price = self.prices[i][4]
-            current_rsi = rsi[i]["values"] if rsi[i] else None
-            current_nine_period = nine_period[i]["values"] if nine_period[i] else None
-            current_fifteen_period = fifteen_period[i]["values"] if fifteen_period[i] else None
-            current_nine_period_ema = nine_period_ema[i]["values"] if nine_period_ema[i] else None
+            current_rsi = rsi[i]["values"][0] if rsi[i] else None
+            current_nine_period = nine_period[i]["values"][0] if nine_period[i] else None
+            current_fifteen_period = fifteen_period[i]["values"][0] if fifteen_period[i] else None
+            current_nine_period_ema = nine_period_ema[i]["values"][0] if nine_period_ema[i] else None
 
             decision = Decision({'currentprice': current_price, 'rsi': current_rsi, 'sma9': current_nine_period,
                                  'sma15': current_fifteen_period, 'ema9': current_nine_period_ema})

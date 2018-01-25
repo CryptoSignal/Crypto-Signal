@@ -27,11 +27,11 @@ class Decision(object):
             comparator, value = body['comparator'], body['value']
 
             if not isinstance(value, (int, float)):
-                try:
-                    value = self.indicators[value][0]
-                # Exception gets thrown if we have a None value for our indicator, due to insufficient data
-                except TypeError:
-                    return False
+                value = self.indicators[value]
+
+            # Return false is indicator resolves to None due to insufficient data
+            if self.indicators[indicator] is None or value is None:
+                return False
 
             if comparator == 'LT':
                 if self.indicators[indicator] >= value:
@@ -67,11 +67,11 @@ class Decision(object):
             comparator, value = body['comparator'], body['value']
 
             if not isinstance(value, (int, float)):
-                try:
-                    value = self.indicators[value][0]
-                # Exception gets thrown if we have a None value for our indicator, due to insufficient data
-                except TypeError:
-                    return False
+                value = self.indicators[value]
+
+            # Return false is indicator resolves to None due to insufficient data
+            if self.indicators[indicator] is None or value is None:
+                return False
 
             if comparator == 'LT':
                 if self.indicators[indicator] >= value:
