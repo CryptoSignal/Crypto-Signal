@@ -17,7 +17,7 @@ class Chart(object):
         self.period = period
 
         self.start_time = start_time
-        self.indicators = StrategyAnalyzer(exchange_interface)
+        self.indicators = StrategyAnalyzer()
 
         self.data = []
 
