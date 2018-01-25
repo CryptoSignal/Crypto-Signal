@@ -71,7 +71,7 @@ class Plot extends React.Component {
         gX.append("text")
             .attr("fill", "#000")
             .attr("y", -6)
-            .attr("dx", "85em")
+            .attr("dx", width)
             .attr("text-anchor", "end")
             .text("Data Point #");
 
