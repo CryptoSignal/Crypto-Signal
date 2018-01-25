@@ -78,7 +78,7 @@ class Dashboard extends React.Component {
      *
      */
     getExchanges() {
-        const url = "http://localhost:5000/exchanges";
+        const url = window.location.origin + "/exchanges";
 
         $.get(url, (data, _, err) => {
             if (err.status == 200) {
@@ -95,7 +95,7 @@ class Dashboard extends React.Component {
      * @param exchange: The name of the exchange to draw coin pairs from
      */
     getMarketPairs(exchange) {
-        const url = "http://localhost:5000/markets?exchange=" + exchange;
+        const url = window.location.origin + "/markets?exchange=" + exchange;
 
         $.get(url, (data, _, err) => {
             if (err.status == 200) {
@@ -120,7 +120,7 @@ class Dashboard extends React.Component {
      */
 	getBacktestingData(exchangeName, coinPair, timeUnit, capital, startTime, stopLoss, buyStrategy, sellStrategy, indicators) {
 
-	    const url = "http://localhost:5000/backtest?exchangeName=" + exchangeName + "&pair=" + coinPair + "&period=" + timeUnit +
+	    const url = window.location.origin + "/backtest?exchangeName=" + exchangeName + "&pair=" + coinPair + "&period=" + timeUnit +
                     "&capital=" + capital + "&stopLoss=" + stopLoss + "&startTime=" + startTime;
 
 	    const target = document.getElementById('d3plot');
