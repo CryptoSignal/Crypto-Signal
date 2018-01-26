@@ -311,8 +311,9 @@ class SimpleBotBehaviour():
         current_symbol_holdings = current_holdings[exchange][base_symbol]
         base_bid = current_symbol_holdings['volume_free']
 
-        if base_symbol in self.behaviour_config['buy']['trade_limits']:
-            trade_limit = self.behaviour_config['buy']['trade_limits'][base_symbol]
+        if base_symbol in self.behaviour_config['sell']['trade_limits']:
+            trade_limit = self.behaviour_config['sell']['trade_limits'][base_symbol]
+
             if base_bid > trade_limit:
                 base_bid = trade_limit
 
@@ -373,8 +374,8 @@ class SimpleBotBehaviour():
         """
 
         holdings_table = self.db_handler.read_rows('holdings')
-        holdings = {}
 
+        holdings = {}
         for row in holdings_table:
             if not row.exchange in holdings:
                 holdings[row.exchange] = {}
