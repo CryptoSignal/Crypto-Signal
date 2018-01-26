@@ -38,12 +38,12 @@ class ReporterBehaviour():
 
         header = "====== REPORT FOR {} ======".format(self.behaviour_config['name'])
 
-        transaction_count = self.db_handler.read_transactions().count()
+        transaction_count = self.db_handler.read_rows('transactions').count()
         transactions = "I have made {} transactions since I began.".format(transaction_count)
 
         total_btc_value = 0
 
-        holdings_query = self.db_handler.read_holdings()
+        holdings_query = self.db_handler.read_rows('holdings')
         holdings = []
         for row in holdings_query:
             if row.volume_total > 0:
