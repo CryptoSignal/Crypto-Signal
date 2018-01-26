@@ -171,6 +171,12 @@ class SimpleBotBehaviour():
                 hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
                 cold_thresh=self.behaviour_config['sell']['strategy_threshold']
             )
+        elif self.behaviour_config['strategy'] == 'macd_sl':
+            result = self.strategy_analyzer.analyze_macd_sl(
+                historical_data,
+                hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
+                cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+            )
         else:
             self.logger.error("No strategy selected, bailing out.")
             exit(1)
