@@ -82,7 +82,7 @@ class Behaviour(object):
 
 
     def __configure_simple_bot(self, behaviour_config):
-        """Configures and returns the rsi bot behaviour class.
+        """Configures and returns the bot behaviour class.
 
         Args:
             behaviour_config (dict): A dictionary of configuration values pertaining to the
