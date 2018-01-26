@@ -91,9 +91,9 @@ class StrategyAnalyzer():
         if all_data:
             return macd_result_data
         else:
-            if macd_result_data:
+            try:
                 return macd_result_data[-1]
-            else:
+            except IndexError:
                 return macd_result_data
 
 
@@ -187,9 +187,9 @@ class StrategyAnalyzer():
         if all_data:
             return rsi_result_data
         else:
-            if rsi_result_data:
+            try:
                 return rsi_result_data[-1]
-            else:
+            except IndexError:
                 return rsi_result_data
 
 
@@ -244,9 +244,9 @@ class StrategyAnalyzer():
         if all_data:
             return sma_result_data
         else:
-            if sma_result_data:
+            try:
                 return sma_result_data[-1]
-            else:
+            except IndexError:
                 return sma_result_data
 
 
@@ -301,9 +301,9 @@ class StrategyAnalyzer():
         if all_data:
             return ema_result_data
         else:
-            if ema_result_data:
+            try:
                 return ema_result_data[-1]
-            else:
+            except IndexError:
                 return ema_result_data
 
 
@@ -404,7 +404,7 @@ class StrategyAnalyzer():
         if all_data:
             return bb_result_data
         else:
-            if bb_result_data:
+            try:
                 return bb_result_data[-1]
-            else:
+            except IndexError:
                 return bb_result_data
