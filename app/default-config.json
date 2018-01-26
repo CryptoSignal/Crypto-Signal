@@ -103,7 +103,7 @@
       "strategy": "rsi",
       "strategy_period": 14,
       "buy": {
-        "strategy_threshold": 70,
+        "strategy_threshold": 30,
         "trade_limits": {
           "BTC": 0.02,
           "ETH": 0.2,
@@ -112,7 +112,7 @@
         }
       },
       "sell": {
-        "strategy_threshold": 30,
+        "strategy_threshold": 70,
         "trade_limits": {
           "BTC": 0.02,
           "ETH": 0.2,

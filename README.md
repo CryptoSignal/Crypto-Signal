@@ -82,7 +82,7 @@ Forked from the Cryptocurrency Trading Bot Tutorial on: https://youtube.com/cryp
 
 This behaviour runs a flask server hosting a website allowing you to test different backtesting strategies on various sets of historical data.
 
-![Alt text](/backtesting-ui.png "Backtesting UI")
+![Alt text](/doc/images/backtesting-ui.png "Backtesting UI")
 
 ### Installation
 

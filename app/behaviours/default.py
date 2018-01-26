@@ -35,6 +35,7 @@ class DefaultBehaviour():
         Args:
             market_pairs (list): List of symbol pairs to operate on, if empty get all pairs.
         """
+
         self.logger.info("Starting default behaviour...")
 
         if market_pairs:
