@@ -40,7 +40,7 @@ In the root directory run `docker-compose run app` or `make build && make run --
 
 # Behaviours
 
-A behaviour is a functionality of the program that can be modified via the "selected\_task" value in `default-config.json`. It current accepts three values: 'default', 'rsi\_bot', 'reporter', and 'server'.
+A behaviour is a functionality of the program that can be modified via the "selected\_task" value in `default-config.json`. It current accepts three values: 'default', 'simple\_bot', 'reporter', and 'server'.
 
 ## Default
 
