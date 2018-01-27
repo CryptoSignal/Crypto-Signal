@@ -223,15 +223,25 @@ class SimpleBotBehaviour():
         if not base_ask:
             return
 
+        base_ask_volume = order_book['asks'][0][1]
+
         current_symbol_holdings = current_holdings[exchange][quote_symbol]
-        quote_bid = current_symbol_holdings['volume_free']
+        quote_volume = current_symbol_holdings['volume_free']
 
         if quote_symbol in self.behaviour_config['buy']['trade_limits']:
             trade_limit = self.behaviour_config['buy']['trade_limits'][quote_symbol]
-            if quote_bid > trade_limit:
-                quote_bid = trade_limit
+            if quote_volume > trade_limit:
+                quote_volume = trade_limit
 
-        base_volume = quote_bid / base_ask
+        base_volume = quote_volume / base_ask
+        rank = 1
+
+        # Go down the asks until we find an offer that will fill our order completely
+        while rank < len(order_book['asks']) and base_volume > base_ask_volume:
+            base_ask, base_ask_volume = order_book['asks'][rank]
+            base_volume = quote_volume / base_ask
+
+            rank += 1
 
         if self.behaviour_config['mode'] == 'live':
             # Do live trading stuff here
@@ -269,7 +279,7 @@ class SimpleBotBehaviour():
                 }
             ).one()
 
-            quote_holding.volume_free = quote_holding.volume_free - quote_bid
+            quote_holding.volume_free = quote_holding.volume_free - quote_volume
             quote_holding.volume_used = quote_holding.volume_used
             quote_holding.volume_total = quote_holding.volume_free + quote_holding.volume_used
 
@@ -304,20 +314,30 @@ class SimpleBotBehaviour():
         """
 
         order_book = self.exchange_interface.get_order_book(market_pair, exchange)
-        bid = order_book['bids'][0][0] if order_book['bids'] else None
-        if not bid:
+        base_bid = order_book['bids'][0][0] if order_book['bids'] else None
+        if not base_bid:
             return
 
+        base_bid_volume = order_book['bids'][0][1]
+
         current_symbol_holdings = current_holdings[exchange][base_symbol]
-        base_bid = current_symbol_holdings['volume_free']
+        base_volume = current_symbol_holdings['volume_free']
 
         if base_symbol in self.behaviour_config['sell']['trade_limits']:
             trade_limit = self.behaviour_config['sell']['trade_limits'][base_symbol]
 
-            if base_bid > trade_limit:
-                base_bid = trade_limit
+            if base_volume > trade_limit:
+                base_volume = trade_limit
 
-        quote_volume = base_bid * bid
+        quote_volume = base_bid * base_volume
+        rank = 1
+
+        # Go down the bids until we find an offer that will fill our order completely
+        while rank < len(order_book['bids']) and base_volume > base_bid_volume:
+            base_bid, base_bid_volume = order_book['bids'][rank]
+            quote_volume = base_bid * base_bid_volume
+
+            rank += 1
 
         if self.behaviour_config['mode'] == 'live':
             # Do live trading stuff here
