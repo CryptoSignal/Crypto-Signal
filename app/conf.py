@@ -70,12 +70,40 @@ class Configuration():
 
             elif isinstance(config_fragment[key], int):
                 key_path = '_'.join([base_path, key.upper()])
-                new_value = int(os.environ.get(key_path, config_fragment[key]))
+                new_value = os.environ.get(key_path, config_fragment[key])
+
+                success = False
+                try:
+                    new_value = int(new_value)
+                    success = True
+                except ValueError:
+                    pass
+
+                try:
+                    if not success:
+                        new_value = float(new_value)
+                except ValueError:
+                    pass
+
+                if not success:
+                    new_value = bool(distutils.util.strtobool(new_value))
+
                 config_fragment[key] = new_value
 
             elif isinstance(config_fragment[key], float):
                 key_path = '_'.join([base_path, key.upper()])
-                new_value = float(os.environ.get(key_path, config_fragment[key]))
+                new_value = os.environ.get(key_path, config_fragment[key])
+
+                success = False
+                try:
+                    new_value = float(new_value)
+                    success = True
+                except ValueError:
+                    pass
+
+                if not success:
+                    new_value = bool(distutils.util.strtobool(new_value))
+
                 config_fragment[key] = new_value
 
         return config_fragment
