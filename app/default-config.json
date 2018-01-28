@@ -102,6 +102,7 @@
       "analysis_timeframe": "1d",
       "strategy": "rsi",
       "strategy_period": 14,
+      "daily_trade_btc_max": 0.05,
       "buy": {
         "strategy_threshold": 30,
         "trade_limits": {

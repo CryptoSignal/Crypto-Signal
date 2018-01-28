@@ -145,3 +145,21 @@ class DatabaseHandler():
             self.logger.error("Failed to update holding record!", update_args=update_args)
             self.session.rollback()
         return update_success
+
+
+    def read_rows_after_date(self, table_name, date):
+        """Returns a query object containing the contents of the requested table.
+
+        Args:
+            table_name (str): the string representation of the database table to query.
+            filter_args (dict): A dictionary of query filter values.
+
+        Returns:
+            sqlalchemy.Query: A sqlalchemy query object with applied filters.
+        """
+
+        return self.session.query(
+            self.tables[table_name]
+        ).filter(
+            self.tables[table_name].create_time >= date
+        )

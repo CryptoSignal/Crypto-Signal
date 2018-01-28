@@ -39,4 +39,4 @@ services:
       - DATABASE_USERNAME=cryptosignal
       - DATABASE_PASSWORD=cryptosignal
     depends_on:
-      - db
+      - app

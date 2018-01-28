@@ -78,6 +78,16 @@ class SimpleBotBehaviour():
                 self.__update_holdings()
                 current_holdings = self.__get_holdings()
 
+        yesterday = datetime.now() - timedelta(days=1)
+        transactions = self.db_handler.read_rows_after_date('transactions', yesterday)
+        daily_btc_total = 0
+        for row in transactions:
+            print("Daily: " + str(daily_btc_total) + " Trade: " + str(row.btc_value))
+            daily_btc_total += row.btc_value
+            if daily_btc_total >= self.behaviour_config['daily_trade_btc_max']:
+                self.logger.info("Reached daily trade limit! Not making any more trades...")
+                return
+
         self.logger.info("Looking for trading opportunities...")
         for exchange, markets in analyzed_data.items():
             for market_pair in analyzed_data[exchange]:
@@ -275,6 +285,11 @@ class SimpleBotBehaviour():
 
             self.db_handler.update_row('holdings', quote_holding)
 
+        if quote_symbol == "BTC":
+            btc_value = quote_bid
+        else:
+            btc_value = self.exchange_interface.get_btc_value(exchange, quote_symbol, quote_bid)
+
         purchase_payload = {
             'exchange': exchange,
             'base_symbol': base_symbol,
@@ -284,7 +299,8 @@ class SimpleBotBehaviour():
             'quote_value': quote_bid,
             'fee_rate': 0,
             'base_volume': base_volume,
-            'quote_volume': quote_bid
+            'quote_volume': quote_bid,
+            'btc_value': btc_value
         }
 
         print(purchase_payload)
@@ -349,6 +365,11 @@ class SimpleBotBehaviour():
             quote_holding.volume_total = quote_holding.volume_free + quote_holding.volume_used
             self.db_handler.update_row('holdings', quote_holding)
 
+        if quote_symbol == "BTC":
+            btc_value = quote_volume
+        else:
+            btc_value = self.exchange_interface.get_btc_value(exchange, quote_symbol, quote_volume)
+
         sale_payload = {
             'exchange': exchange,
             'base_symbol': base_symbol,
@@ -358,7 +379,8 @@ class SimpleBotBehaviour():
             'quote_value': quote_volume,
             'fee_rate': 0,
             'base_volume': base_bid,
-            'quote_volume': quote_volume
+            'quote_volume': quote_volume,
+            'btc_value': btc_value
         }
 
         print(sale_payload)
