@@ -229,11 +229,19 @@ class ExchangeInterface():
     def get_btc_value(self, exchange, base_symbol, volume):
 
         btc_value = 0
-        market_pair = base_symbol + "/BTC"
+        try:
+            market_pair = base_symbol + "/BTC"
 
-        order_book = self.get_order_book(market_pair, exchange)
-        bid = order_book['bids'][0][0] if order_book['bids'] else None
-        if bid:
-            btc_value = bid * volume
+            order_book = self.get_order_book(market_pair, exchange)
+            bid = order_book['bids'][0][0] if order_book['bids'] else None
+            if bid:
+                btc_value = bid * volume
+        except ccxt.ExchangeError:
+            market_pair = "BTC/" + base_symbol
+
+            order_book = self.get_order_book(market_pair, exchange)
+            ask = order_book['asks'][0][0] if order_book['asks'] else None
+            if ask:
+                btc_value = volume / ask
 
         return btc_value
