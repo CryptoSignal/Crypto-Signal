@@ -15,7 +15,7 @@ services:
       - .env
     environment:
       - SETTINGS_SELECTED_TASK=simple_bot
-      - SETTINGS_UPDATE_INTERVAL=43200
+      - SETTINGS_UPDATE_INTERVAL=180
       - DATABASE_ENGINE=postgresql
       - DATABASE_HOST=db
       - DATABASE_PORT=5432
@@ -32,7 +32,7 @@ services:
       - .env
     environment:
       - SETTINGS_SELECTED_TASK=reporter
-      - SETTINGS_UPDATE_INTERVAL=43200
+      - SETTINGS_UPDATE_INTERVAL=120
       - DATABASE_ENGINE=postgresql
       - DATABASE_HOST=db
       - DATABASE_PORT=5432
