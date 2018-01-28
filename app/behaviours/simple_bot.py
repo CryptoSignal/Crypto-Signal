@@ -54,6 +54,10 @@ class SimpleBotBehaviour():
             analyzed_data[exchange] = {}
 
             for market_pair in markets:
+                base_symbol, quote_symbol = market_pair.split('/')
+                if quote_symbol in self.behaviour_config['ignored_quote_currencies']:
+                    continue
+
                 historical_data = self.exchange_interface.get_historical_data(
                     market_data[exchange][market_pair]['symbol'],
                     exchange,
@@ -82,7 +86,6 @@ class SimpleBotBehaviour():
         transactions = self.db_handler.read_rows_after_date('transactions', yesterday)
         daily_btc_total = 0
         for row in transactions:
-            print("Daily: " + str(daily_btc_total) + " Trade: " + str(row.btc_value))
             daily_btc_total += row.btc_value
             if daily_btc_total >= self.behaviour_config['daily_trade_btc_max']:
                 self.logger.info("Reached daily trade limit! Not making any more trades...")
