@@ -240,9 +240,18 @@ class SimpleBotBehaviour():
         quote_bid = current_symbol_holdings['volume_free']
 
         if quote_symbol in self.behaviour_config['buy']['trade_limits']:
-            trade_limit = self.behaviour_config['buy']['trade_limits'][quote_symbol]
-            if quote_bid > trade_limit:
-                quote_bid = trade_limit
+            trade_limit_lower = self.behaviour_config['buy']['trade_limits'][quote_symbol]['min']
+            trade_limit_upper = self.behaviour_config['buy']['trade_limits'][quote_symbol]['max']
+            if quote_bid < trade_limit_lower:
+                self.logger.info(
+                    "Unable to purchase %s with %s, below trade minimum",
+                    base_symbol,
+                    quote_symbol
+                )
+                return
+
+            if quote_bid > trade_limit_upper:
+                quote_bid = trade_limit_upper
 
         base_volume = quote_bid / base_ask
 
@@ -331,10 +340,18 @@ class SimpleBotBehaviour():
         base_bid = current_symbol_holdings['volume_free']
 
         if base_symbol in self.behaviour_config['sell']['trade_limits']:
-            trade_limit = self.behaviour_config['sell']['trade_limits'][base_symbol]
+            trade_limit_lower = self.behaviour_config['sell']['trade_limits'][base_symbol]['min']
+            trade_limit_upper = self.behaviour_config['sell']['trade_limits'][base_symbol]['max']
+            if base_bid < trade_limit_lower:
+                self.logger.info(
+                    "Unable to sell %s for %s, below trade minimum",
+                    base_symbol,
+                    quote_symbol
+                )
+                return
 
-            if base_bid > trade_limit:
-                base_bid = trade_limit
+            if base_bid > trade_limit_upper:
+                base_bid = trade_limit_upper
 
         quote_volume = base_bid * bid
 
