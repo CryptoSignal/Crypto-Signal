@@ -4,6 +4,7 @@
 import smtplib
 
 import structlog
+from tenacity import retry, retry_if_exception_type, stop_after_attempt
 
 class GmailNotifier:
     """Class for handling gmail notifications
@@ -19,12 +20,13 @@ class GmailNotifier:
         """
 
         self.logger = structlog.get_logger()
-        smtp_server = 'smtp.gmail.com:587'
-        self.smtp_handler = smtplib.SMTP(smtp_server)
+        self.smtp_server = 'smtp.gmail.com:587'
         self.username = username
         self.password = password
         self.destination_addresses = ','.join(destination_addresses)
 
+
+    @retry(stop=stop_after_attempt(3))
     def notify(self, message):
         """Sends the message.
 
@@ -40,8 +42,9 @@ class GmailNotifier:
         header += 'Subject: Crypto-signal alert!\n\n'
         message = header + message
 
-        self.smtp_handler.starttls()
-        self.smtp_handler.login(self.username, self.password)
-        result = self.smtp_handler.sendmail(self.username, self.destination_addresses, message)
-        self.smtp_handler.quit()
+        smtp_handler = smtplib.SMTP(self.smtp_server)
+        smtp_handler.starttls()
+        smtp_handler.login(self.username, self.password)
+        result = smtp_handler.sendmail(self.username, self.destination_addresses, message)
+        smtp_handler.quit()
         return result
