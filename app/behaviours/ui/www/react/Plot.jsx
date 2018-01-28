@@ -4,7 +4,7 @@ class Plot extends React.Component {
 	constructor(props) {
 		super(props);
 
-		this.updatePlot = this.updatePlot.bind(this);
+		this.generatePlot = this.generatePlot.bind(this);
 
 	}
 
@@ -20,7 +20,7 @@ class Plot extends React.Component {
 	}
 
 	componentDidMount() {
-	    this.updatePlot();
+	    this.generatePlot();
     }
 
     /* When component is being updated, erase the previous graph and replace it with new data */
@@ -28,32 +28,30 @@ class Plot extends React.Component {
         const windowWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
 
 	    $('#d3plot').html(`<svg width=${windowWidth} height="500"></svg>`);
-	    this.updatePlot();
+	    this.generatePlot();
     }
 
-	updatePlot() {
+	generatePlot() {
 	    const svg = d3.select("svg"),
             margin = {top: 20, right: 50, bottom: 30, left: 50},
             width = +svg.attr("width") - margin.left - margin.right,
             height = +svg.attr("height") - margin.top - margin.bottom,
             g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-            // bisectDate = d3.bisector(function(d) { return d.date; }).left,
-            // formatValue = d3.format(",.2f"),
-            // formatCurrency = function(d) { return "$" + formatValue(d); };
 
+        /* Zoom Generator Configuration */
 	    const zoom = d3.zoom()
             .scaleExtent([1, 8])
             .translateExtent([[-100, -100], [width + 90, height + 100]])
             .on("zoom", zoomed);
 
-        // const parseTime = d3.timeParse("%d-%b-%y");
-
+	    /* Scale Configurations */
         const x = d3.scaleLinear()
             .rangeRound([0, width]);
 
         const y = d3.scaleLinear()
             .rangeRound([height, 0]);
 
+        /* Line Generator */
         const line = d3.line()
             .x(d => x(d[0]))
             .y(d => y(d[1]));
@@ -64,6 +62,23 @@ class Plot extends React.Component {
         const xAxis = d3.axisBottom(x);
         const yAxis = d3.axisLeft(y);
 
+        /** Chart ClipPath Setup **/
+
+        const inner = g.append("g")
+            .attr("class", "chart")
+            .attr("clip-path", "url(#clipped-path)");
+
+        const clipped = inner.append("defs").append("clipPath")
+            .attr("id", "clipped-path");
+
+        clipped.append("rect")
+            .attr("class", "overlay")
+            .attr("width", width)
+            .attr("height", height);
+
+        /* ---------------------- */
+
+        /**   X-Axis Setup   **/
         const gX = g.append("g")
             .attr("transform", "translate(0," + height + ")")
             .call(xAxis);
@@ -75,6 +90,9 @@ class Plot extends React.Component {
             .attr("text-anchor", "end")
             .text("Data Point #");
 
+        /* ------------------ */
+
+        /**   Y-Axis Setup   **/
         const gY = g.append("g")
             .call(yAxis);
 
@@ -89,11 +107,15 @@ class Plot extends React.Component {
             .attr("text-anchor", "end")
             .text(`Price (${baseCoin})`);
 
-        const inner = g.append("g");
+        /* ------------------ */
+
+
+        /*******************
+         * Line Plot Setup *
+         *******************/
 
         /* Plot the closing prices */
         const closings = inner.append("path")
-            .attr("clip-path", "url(#clipped-path)")
             .datum(this.props.closingPrices)
             .attr("fill", "none")
             .attr("stroke", "steelblue")
@@ -102,8 +124,8 @@ class Plot extends React.Component {
             .attr("stroke-width", 1.5)
             .attr("d", line);
 
+        /* Plot the upper bollinger band */
         const bollinger_upper = inner.append("path")
-            .attr("clip-path", "url(#clipped-path)")
             .datum(this.props.indicators.bollinger_upper)
             .attr("fill", "none")
             .attr("stroke", "orange")
@@ -113,8 +135,8 @@ class Plot extends React.Component {
             .attr("stroke-width", 1.5)
             .attr("d", line);
 
+        /* Plot the lower bollinger band */
         const bollinger_lower = inner.append("path")
-            .attr("clip-path", "url(#clipped-path)")
             .datum(this.props.indicators.bollinger_lower)
             .attr("fill", "none")
             .attr("stroke", "orange")
@@ -124,8 +146,8 @@ class Plot extends React.Component {
             .attr("stroke-width", 1.5)
             .attr("d", line);
 
+        /* Plot the SMA9 */
         const sma9 = inner.append("path")
-            .attr("clip-path", "url(#clipped-path)")
             .datum(this.props.indicators.sma9)
             .attr("fill", "none")
             .attr("stroke", "red")
@@ -134,8 +156,8 @@ class Plot extends React.Component {
             .attr("stroke-width", 1.5)
             .attr("d", line);
 
+        /* Plot the SMA15 */
         const sma15 = inner.append("path")
-            .attr("clip-path", "url(#clipped-path)")
             .datum(this.props.indicators.sma15)
             .attr("fill", "none")
             .attr("stroke", "green")
@@ -146,7 +168,6 @@ class Plot extends React.Component {
 
         /* Plot all the buys as green dots */
         const buys = inner.selectAll("scatter-buys")
-            .attr("clip-path", "url(#clipped-path)")
             .data(this.props.buys)
             .enter().append("svg:circle")
             .attr("cx", d => x(d[0]))
@@ -156,7 +177,6 @@ class Plot extends React.Component {
 
         /* Plot all the sells as red dots */
         const sells = inner.selectAll("scatter-sells")
-            .attr("clip-path", "url(#clipped-path)")
             .data(this.props.sells)
             .enter().append("svg:circle")
             .attr("cx", d => x(d[0]))
@@ -164,6 +184,11 @@ class Plot extends React.Component {
             .attr("r", 4)
             .attr("fill", "red");
 
+        /* ----------------------------- */
+
+        /** This is supposed to show a modal displaying the data point value
+         *  when hovering over the graph. TODO...
+         *
         const focus = g.append("g")
             .attr("class", "focus")
             .style("display", "none");
@@ -174,47 +199,34 @@ class Plot extends React.Component {
         focus.append("text")
             .attr("x", 9)
             .attr("dy", ".35em");
+         **/
 
-        inner.append("clipPath")
-            .attr("id", "clipped-path")
-            .append("rect")
-            .attr("class", "overlay")
-            .attr("width", width)
-            .attr("height", height);
-
-        const view = g.append("rect")
+        // Create a zoomable rect overlay to capture mouse events
+        svg.append("rect")
             .attr("pointer-events", "all")
             .attr("class", "overlay")
             .attr("width", width)
             .attr("height", height)
             .call(zoom);
 
-        // svg.call(zoom);
-
         function zoomed() {
-            const scale = d3.event.transform.k;
 
-            inner.attr("transform", d3.event.transform);
+            // Rescale our plot
+            closings.attr("transform", d3.event.transform);
+            bollinger_upper.attr("transform", d3.event.transform);
+            bollinger_lower.attr("transform", d3.event.transform);
+            sma9.attr("transform", d3.event.transform);
+            sma15.attr("transform", d3.event.transform);
+
+            buys.attr("transform", d3.event.transform);
+            sells.attr("transform", d3.event.transform);
 
             const xz = d3.event.transform.rescaleX(x);
             const yz = d3.event.transform.rescaleY(y);
 
-            gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
-            gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
+            gX.call(xAxis.scale(xz));
+            gY.call(yAxis.scale(yz));
 
-            // closings.attr('d', line.x(d => xz(d[1])));
-            // bollinger_upper.attr('d', indicator.x(d => xz(d)));
-            // bollinger_lower.attr('d', indicator.x(d => xz(d)));
-            // buys.attr('r', 1/scale * 4.5);
-            // sells.attr('r', 1/scale * 4.5);
-
-            closings.attr('stroke-width', 1/scale * 1.5);
-            sma9.attr('stroke-width', 1/scale * 1.5);
-            sma15.attr('stroke-width', 1/scale * 1.5);
-            bollinger_upper.attr('stroke-width', 1/scale * 1.5);
-            bollinger_lower.attr('stroke-width', 1/scale * 1.5);
-            buys.attr('r', 1/scale * 4.5);
-            sells.attr('r', 1/scale * 4.5);
         }
     }
 }
