@@ -25,6 +25,7 @@ class Transactions(BASE):
     fee_rate = Column(Float)
     base_volume = Column(Float)
     quote_volume = Column(Float)
+    btc_value = Column(Float)
 
     def __repr__(self):
         return "<Transactions(\
@@ -38,7 +39,8 @@ class Transactions(BASE):
             quote_value='%s',\
             fee_rate='%s',\
             base_volume='%s',\
-            quote_volume='%s')>" % (
+            quote_volume='%s',\
+            btc_value='%s')>" % (
                 self.exchange,
                 self.create_time,
                 self.update_time,
@@ -49,5 +51,6 @@ class Transactions(BASE):
                 self.quote_value,
                 self.fee_rate,
                 self.base_volume,
-                self.quote_volume
+                self.quote_volume,
+                self.btc_value
             )
