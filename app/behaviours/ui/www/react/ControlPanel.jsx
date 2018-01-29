@@ -33,6 +33,7 @@ class ControlPanel extends React.Component {
                                  <option value="sma9">Moving Average (9 Period)</option>
                                  <option value="sma15">Moving Average (15 Period)</option>
                                  <option value="rsi">RSI</option>
+                                 <option value="macd">MACD</option>
                              </select>;
 
        const indicatorValue = (id) => <div>

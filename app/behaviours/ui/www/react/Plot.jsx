@@ -210,6 +210,7 @@ class Plot extends React.Component {
             .call(zoom);
 
         function zoomed() {
+            const scale = d3.event.transform.k;
 
             // Rescale our plot
             closings.attr("transform", d3.event.transform);
@@ -226,6 +227,15 @@ class Plot extends React.Component {
 
             gX.call(xAxis.scale(xz));
             gY.call(yAxis.scale(yz));
+
+            // Rescale the lines so they show proportionally to the zoom scale
+            closings.attr('stroke-width', 1/scale * 1.5);
+            sma9.attr('stroke-width', 1/scale * 1.5);
+            sma15.attr('stroke-width', 1/scale * 1.5);
+            bollinger_upper.attr('stroke-width', 1/scale * 1.5);
+            bollinger_lower.attr('stroke-width', 1/scale * 1.5);
+            buys.attr('r', 1/scale * 4.5);
+            sells.attr('r', 1/scale * 4.5);
 
         }
     }
