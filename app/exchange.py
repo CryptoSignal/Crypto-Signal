@@ -65,6 +65,9 @@ class ExchangeInterface():
     def get_historical_data(self, market_pair, exchange, time_unit, start_date=None, max_days=100):
         """Get historical OHLCV for a symbol pair
 
+        Decorators:
+            retry
+
         Args:
             market_pair (str): Contains the symbol pair to operate on i.e. BURST/BTC
             exchange (str): Contains the exchange to fetch the historical data from.
@@ -95,6 +98,9 @@ class ExchangeInterface():
     def get_account_markets(self, exchange):
         """Get the symbol pairs listed within a users account.
 
+        Decorators:
+            retry
+
         Args:
             exchange (str): Contains the exchange to fetch the data from.
 
@@ -112,6 +118,9 @@ class ExchangeInterface():
     def get_markets_for_exchange(self, exchange):
         """Get market data for all symbol pairs listed on the given exchange.
 
+        Decorators:
+            retry
+
         Args:
             exchange (str): Contains the exchange to fetch the data from
 
@@ -128,6 +137,9 @@ class ExchangeInterface():
     def get_exchange_markets(self):
         """Get market data for all symbol pairs listed on all configured exchanges.
 
+        Decorators:
+            retry
+
         Returns:
             dict: A dictionary containing market data for all symbol pairs.
         """
@@ -142,6 +154,9 @@ class ExchangeInterface():
     @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def get_symbol_markets(self, market_pairs):
         """Get market data for specific symbols on all configured exchanges.
+
+        Decorators:
+            retry
 
         Args:
             market_pairs (list): The symbol pairs you want to retrieve market data for.
@@ -166,6 +181,9 @@ class ExchangeInterface():
     def get_order_book(self, market_pair, exchange):
         """Retrieve the order information for a particular symbol pair.
 
+        Decorators:
+            retry
+
         Args:
             market_pair (str): Contains the symbol pair to operate on i.e. BURST/BTC
             exchange (str): Contains the exchange to fetch the data from.
@@ -180,6 +198,9 @@ class ExchangeInterface():
     @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def get_open_orders(self):
         """Get the users currently open orders on all configured exchanges.
+
+        Decorators:
+            retry
 
         Returns:
             dict: A dictionary containing open order information.
@@ -196,6 +217,9 @@ class ExchangeInterface():
     def cancel_order(self, exchange, order_id):
         """Cancels an open order on a particular exchange.
 
+        Decorators:
+            retry
+
         Args:
             exchange (str): Contains the exchange to cancel the order on.
             order_id (str): The order id you want to cancel.
@@ -208,6 +232,9 @@ class ExchangeInterface():
     @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def get_quote_symbols(self, exchange):
         """Get a list of quote symbols on an exchange.
+
+        Decorators:
+            retry
 
         Args:
             exchange (str): Contains the exchange to fetch the data from.
@@ -227,6 +254,19 @@ class ExchangeInterface():
 
     @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
     def get_btc_value(self, exchange, base_symbol, volume):
+        """Returns the BTC value of a symbol
+
+        Decorators:
+            retry
+
+        Args:
+            exchange (str): The name / exchange id of the exchange to query.
+            base_symbol (str): The symbol you want the BTC value of.
+            volume (float): A number indicating how much of a symbol you have.
+
+        Returns:
+            float: The BTC value of the symbol given volume.
+        """
 
         btc_value = 0
         try:
@@ -245,3 +285,25 @@ class ExchangeInterface():
                 btc_value = volume / ask
 
         return btc_value
+
+
+    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
+    def get_btc_volume(self, exchange, base_symbol):
+        """Get the volume of BTC exchange for a given symbol in a given period.
+
+        Decorators:
+            retry
+
+        Args:
+            exchange (str): The name / exchange id of the exchange to query.
+            base_symbol (str): The symbol you want the BTC volume of.
+
+        Returns:
+            float: The total volume for queried period.
+        """
+
+        market_pair = base_symbol + "/BTC"
+        ticker = self.exchanges[exchange].fetch_ticker(market_pair)
+        btc_volume = ticker['quoteVolume']
+
+        return btc_volume

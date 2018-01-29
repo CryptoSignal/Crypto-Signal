@@ -99,11 +99,12 @@
     "simple_bot": {
       "mode": "simulate",
       "open_order_max_hours": 24,
-      "analysis_timeframe": "1d",
+      "analysis_candle_period": "1d",
       "strategy": "rsi",
       "strategy_period": 14,
       "daily_trade_btc_max": 0.05,
       "ignored_quote_currencies": [],
+      "btc_volume_min": 100.0,
       "buy": {
         "strategy_threshold": 30,
         "trade_limits": {

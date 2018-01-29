@@ -61,7 +61,7 @@ class SimpleBotBehaviour():
                 historical_data = self.exchange_interface.get_historical_data(
                     market_data[exchange][market_pair]['symbol'],
                     exchange,
-                    self.behaviour_config['analysis_timeframe']
+                    self.behaviour_config['analysis_candle_period']
                 )
 
                 strategy_result = self.__run_strategy(historical_data)
@@ -230,6 +230,20 @@ class SimpleBotBehaviour():
             exchange (str): Contains the exchange the user wants to perform the trade on.
             current_holdings (dict): A dictionary containing the users currently available funds.
         """
+
+        if base_symbol != "BTC":
+            total_volume = self.exchange_interface.get_btc_volume(
+                exchange,
+                base_symbol
+            )
+
+            if self.behaviour_config['btc_volume_min'] > total_volume:
+                self.logger.info(
+                    '%s does not have minimum BTC volume of %s, not buying',
+                    base_symbol,
+                    self.behaviour_config['btc_volume_min']
+                )
+                return
 
         order_book = self.exchange_interface.get_order_book(market_pair, exchange)
         base_ask = order_book['asks'][0][0] if order_book['asks'] else None
