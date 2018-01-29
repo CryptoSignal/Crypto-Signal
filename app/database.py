@@ -163,3 +163,9 @@ class DatabaseHandler():
         ).filter(
             self.tables[table_name].create_time >= date
         )
+
+
+    def expire_cache(self):
+        """Expire database cache for session.
+        """
+        self.session.expire_all()

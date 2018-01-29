@@ -38,6 +38,7 @@ class ReporterBehaviour():
 
         header = "====== REPORT FOR {} ======".format(self.behaviour_config['name'])
 
+        self.db_handler.expire_cache()
         transaction_count = self.db_handler.read_rows('transactions').count()
         transactions = "I have made {} transactions since I began.".format(transaction_count)
 
