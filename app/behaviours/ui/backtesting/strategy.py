@@ -1,7 +1,5 @@
 import random
 
-import matplotlib.pyplot as plt
-
 import structlog
 from behaviours.ui.backtesting.trade import Trade
 from analysis import StrategyAnalyzer

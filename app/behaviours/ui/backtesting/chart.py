@@ -1,9 +1,7 @@
-import json
 from time import time
 
 import matplotlib.pyplot as plt
 
-from exchange import ExchangeInterface
 from analysis import StrategyAnalyzer
 from behaviours.ui.backtesting.candlestick import Candlestick
 
@@ -37,7 +35,6 @@ class Chart(object):
     Returns the indicators specified in the **kwargs dictionary as a json-serializable dictionary
     '''
     def get_indicators(self, **kwargs):
-        from math import isnan
 
         # Indicators are hardcoded for now. Will be updated to accommodate variable-sized MA's
         response = {

@@ -1,14 +1,5 @@
-
-import matplotlib.pyplot as plt
-
-from logs import configure_logging
-from conf import Configuration
 from behaviours.ui.backtesting.chart import Chart
 from behaviours.ui.backtesting.strategy import BacktestingStrategy
-
-# Sample coin pairs to backtest with
-coins = ["ETH/BTC", "LTC/BTC", "XMR/BTC", "OMG/BTC", "XRP/BTC", "SC/BTC", "XEM/BTC", "DASH/BTC", "LSK/BTC",
-         "GNT/BTC", "VTC/BTC", "ETC/BTC", "STRAT/BTC", "DGB/BTC"]
 
 """
 A Backtesting engine
@@ -42,36 +33,3 @@ class Backtester(object):
                   'indicators': indicators, 'profit': round(self.strategy.profit, 8)}
 
         return results
-
-
-# Sample main method
-def main(coin):
-
-    buy_strategy = {'currentprice': {
-        'comparator': 'GT',
-        'value': 'sma9'
-    }}
-
-    sell_strategy = {'currentprice': {
-        'comparator': 'LT',
-        'value': 'sma9'
-    }}
-
-    backtester = Backtester(coin, "1h", "bittrex", capital=1.0, stop_loss=0.0001, buy_strategy=buy_strategy,
-                            sell_strategy=sell_strategy)
-
-    backtester.run()
-
-    # chart.plot_indicators(bollinger=21, sma=[9, 15])
-    # chart.plot_trades(strategy.buys, strategy.sells)
-    # plt.show()
-
-    # closings = [[i, d.close] for i, d in enumerate(chart.get_points())]
-    # indicators = chart.get_indicators(bollinger=21, sma=[9, 15])
-
-    print("Total Profit (" + coin + "): " + str(backtester.strategy.profit))
-
-
-if __name__ == "__main__":
-    for coin in coins:
-        main(coin)
