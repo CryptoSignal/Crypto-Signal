@@ -19,7 +19,8 @@ class ControlPanel extends React.Component {
        this.acceptableIndicators = {"Current Price": "currentprice",
                                     "Moving Average (9 Period)": "sma9",
                                     "Moving Average (15 Period)": "sma15",
-                                    "RSI": "rsi"};
+                                    "RSI": "rsi",
+                                    "MACD": "macd"};
    }
 
    render() {
