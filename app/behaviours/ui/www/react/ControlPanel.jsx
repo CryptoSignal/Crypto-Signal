@@ -231,7 +231,8 @@ class ControlPanel extends React.Component {
                "Current Price": null,
                "Moving Average (9 Period)": null,
                "Moving Average (15 Period)": null,
-               "RSI": null
+               "RSI": null,
+               "MACD": null
            },
            minLength: 0
        }), 400);
