@@ -70,18 +70,7 @@ This behaviour runs a flask server hosting a website allowing you to test differ
 
 ![Alt text](/doc/images/backtesting-ui.png "Backtesting UI")
 
-### Installation
-
-First, clone or download the repository to your computer.
-
-**Front End**- Navigate to the *app/behaviours/ui/www* directory and run `npm install`. Make sure you have the latest version of node.js installed on your computer.
-
-**Back End**- Assuming you have already installed all the dependencies via Docker, you're in the clear.
-
-
 ### Running the Application
-
-First, you'll need to use webpack to bundle all of the React .jsx files on the front end. Navigate to the *app/beahviours/ui/www* directory and run `npm run build`.
 
 If you haven't already, **ensure you have changed the "selected_task" value from "default" to "server" in default-config.json.**
 
