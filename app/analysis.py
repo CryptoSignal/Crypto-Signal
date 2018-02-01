@@ -34,8 +34,6 @@ class StrategyAnalyzer():
         dataframe = pandas.DataFrame(historical_data)
         dataframe.transpose()
 
-        dataframe = pandas.DataFrame(historical_data)
-        dataframe.transpose()
         dataframe.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
         dataframe['datetime'] = dataframe.timestamp.apply(
             lambda x: pandas.to_datetime(datetime.fromtimestamp(x / 1000).strftime('%c'))
