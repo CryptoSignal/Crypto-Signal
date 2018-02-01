@@ -61,12 +61,39 @@ class SimpleBotBehaviour():
                 historical_data = self.exchange_interface.get_historical_data(
                     market_data[exchange][market_pair]['symbol'],
                     exchange,
-                    self.behaviour_config['analysis_candle_period']
+                    self.behaviour_config['candle_timeframe']
                 )
 
-                strategy_result = self.__run_strategy(historical_data)
-                if strategy_result:
-                    analyzed_data[exchange][market_pair] = strategy_result
+                strategy_result = {
+                    'is_hot': True,
+                    'is_cold': True,
+                    'values': {}
+                }
+
+                for indicator in self.behaviour_config['indicators']:
+                    if self.behaviour_config['indicators'][indicator]['enabled']:
+                        results = self.__run_strategy(
+                            historical_data,
+                            indicator,
+                            self.behaviour_config['indicators'][indicator]['periods'],
+                            self.behaviour_config['indicators'][indicator]['buy'],
+                            self.behaviour_config['indicators'][indicator]['sell']
+                        )
+
+                        indicator_type = self.behaviour_config['indicators'][indicator]['applies_to']
+
+                        if results:
+                            strategy_result['values'][indicator] = results['values']
+
+                            if indicator_type == "both" or indicator_type == "buy":
+                                if not results['is_hot']:
+                                    strategy_result['is_hot'] = False
+
+                            if indicator_type == "both" or indicator_type == "sell":
+                                if not results['is_cold']:
+                                    strategy_result['is_cold'] = False
+
+                analyzed_data[exchange][market_pair] = strategy_result
 
         self.logger.info("Reconciling open orders...")
         self.__reconcile_open_orders()
@@ -96,15 +123,19 @@ class SimpleBotBehaviour():
             for market_pair in analyzed_data[exchange]:
                 base_symbol, quote_symbol = market_pair.split('/')
 
+
                 if markets[market_pair]['is_hot']:
-                    self.logger.debug(
-                        "%s is hot at %s!",
-                        market_pair,
-                        markets[market_pair]['values'][0]
-                    )
-                    if not current_holdings[exchange][quote_symbol]['volume_total'] == 0:
-                        if not base_symbol in current_holdings[exchange]\
-                        or current_holdings[exchange][base_symbol]['volume_total'] == 0:
+                    self.logger.debug("%s is hot!", market_pair)
+                    for indicator in markets[market_pair]['values']:
+                        self.logger.debug(
+                            "\t%s: %s",
+                            indicator,
+                            markets[market_pair]['values'][indicator]
+                        )
+
+                    volume_total = current_holdings[exchange][quote_symbol]['volume_total']
+                    if not volume_total == 0:
+                        if not base_symbol in current_holdings[exchange] or volume_total == 0:
                             self.logger.debug("%s is not in holdings, buying!", base_symbol)
                             self.buy(
                                 base_symbol,
@@ -115,26 +146,31 @@ class SimpleBotBehaviour():
                             current_holdings = self.__get_holdings()
 
                 elif markets[market_pair]['is_cold']:
-                    self.logger.debug(
-                        "%s is cold at %s!",
-                        market_pair,
-                        markets[market_pair]['values'][0]
-                    )
-                    if base_symbol in current_holdings[exchange]\
-                    and not current_holdings[exchange][base_symbol]['volume_free'] == 0:
-                        self.logger.debug("%s is in holdings, selling!", base_symbol)
-                        self.sell(
-                            base_symbol,
-                            quote_symbol,
-                            market_pair,
-                            exchange,
-                            current_holdings)
-                        current_holdings = self.__get_holdings()
+                    self.logger.debug("%s is cold!", market_pair)
+                    for indicator in markets[market_pair]['values']:
+                        self.logger.debug(
+                            "\t%s: %s",
+                            indicator,
+                            markets[market_pair]['values'][indicator]
+                        )
+
+                    if base_symbol in current_holdings[exchange]:
+                        volume_free = current_holdings[exchange][base_symbol]['volume_free']
+                        if not volume_free == 0:
+                            self.logger.debug("%s is in holdings, selling!", base_symbol)
+                            self.sell(
+                                base_symbol,
+                                quote_symbol,
+                                market_pair,
+                                exchange,
+                                current_holdings
+                            )
+                            current_holdings = self.__get_holdings()
 
         self.logger.debug(current_holdings)
 
 
-    def __run_strategy(self, historical_data):
+    def __run_strategy(self, historical_data, strategy, periods, hot_thresh, cold_thresh):
         """Run the selected analyzer over the historical data
 
         Args:
@@ -144,55 +180,54 @@ class SimpleBotBehaviour():
             dict: The analyzed results for the historical data.
         """
 
-        if self.behaviour_config['strategy'] == 'rsi':
+        if strategy == 'rsi':
             result = self.strategy_analyzer.analyze_rsi(
                 historical_data,
-                period_count=self.behaviour_config['strategy_period'],
-                hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
-                cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+                period_count=periods,
+                hot_thresh=hot_thresh,
+                cold_thresh=cold_thresh
             )
-        elif self.behaviour_config['strategy'] == 'sma':
+        elif strategy == 'sma':
             result = self.strategy_analyzer.analyze_sma(
                 historical_data,
-                period_count=self.behaviour_config['strategy_period'],
-                hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
-                cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+                period_count=periods,
+                hot_thresh=hot_thresh,
+                cold_thresh=cold_thresh
             )
-        elif self.behaviour_config['strategy'] == 'ema':
+        elif strategy == 'ema':
             result = self.strategy_analyzer.analyze_ema(
                 historical_data,
-                period_count=self.behaviour_config['strategy_period'],
-                hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
-                cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+                period_count=periods,
+                hot_thresh=hot_thresh,
+                cold_thresh=cold_thresh
             )
-        elif self.behaviour_config['strategy'] == 'breakout':
+        elif strategy == 'breakout':
             result = self.strategy_analyzer.analyze_breakout(
                 historical_data,
-                period_count=self.behaviour_config['strategy_period'],
-                hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
-                cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+                period_count=periods,
+                hot_thresh=hot_thresh,
+                cold_thresh=cold_thresh
             )
-        elif self.behaviour_config['strategy'] == 'ichimoku':
+        elif strategy == 'ichimoku':
             result = self.strategy_analyzer.analyze_ichimoku_cloud(
                 historical_data,
-                hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
-                cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+                hot_thresh=hot_thresh,
+                cold_thresh=cold_thresh
             )
-        elif self.behaviour_config['strategy'] == 'macd':
+        elif strategy == 'macd':
             result = self.strategy_analyzer.analyze_macd(
                 historical_data,
-                hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
-                cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+                hot_thresh=hot_thresh,
+                cold_thresh=cold_thresh
             )
-        elif self.behaviour_config['strategy'] == 'macd_sl':
+        elif strategy == 'macd_sl':
             result = self.strategy_analyzer.analyze_macd_sl(
                 historical_data,
-                hot_thresh=self.behaviour_config['buy']['strategy_threshold'],
-                cold_thresh=self.behaviour_config['sell']['strategy_threshold']
+                hot_thresh=hot_thresh,
+                cold_thresh=cold_thresh
             )
         else:
-            self.logger.error("No strategy selected, bailing out.")
-            exit(1)
+            self.logger.error("%s does not match a known strategy.", strategy)
 
         return result
 
@@ -253,9 +288,9 @@ class SimpleBotBehaviour():
         current_symbol_holdings = current_holdings[exchange][quote_symbol]
         quote_bid = current_symbol_holdings['volume_free']
 
-        if quote_symbol in self.behaviour_config['buy']['trade_limits']:
-            trade_limit_lower = self.behaviour_config['buy']['trade_limits'][quote_symbol]['min']
-            trade_limit_upper = self.behaviour_config['buy']['trade_limits'][quote_symbol]['max']
+        if quote_symbol in self.behaviour_config['trade_limits']['buy']:
+            trade_limit_lower = self.behaviour_config['trade_limits']['buy'][quote_symbol]['min']
+            trade_limit_upper = self.behaviour_config['trade_limits']['buy'][quote_symbol]['max']
             if quote_bid < trade_limit_lower:
                 self.logger.info(
                     "Unable to purchase %s with %s, below trade minimum",
@@ -353,9 +388,9 @@ class SimpleBotBehaviour():
         current_symbol_holdings = current_holdings[exchange][base_symbol]
         base_bid = current_symbol_holdings['volume_free']
 
-        if base_symbol in self.behaviour_config['sell']['trade_limits']:
-            trade_limit_lower = self.behaviour_config['sell']['trade_limits'][base_symbol]['min']
-            trade_limit_upper = self.behaviour_config['sell']['trade_limits'][base_symbol]['max']
+        if base_symbol in self.behaviour_config['trade_limits']['sell']:
+            trade_limit_lower = self.behaviour_config['trade_limits']['sell'][base_symbol]['min']
+            trade_limit_upper = self.behaviour_config['trade_limits']['sell'][base_symbol]['max']
             if base_bid < trade_limit_lower:
                 self.logger.info(
                     "Unable to sell %s for %s, below trade minimum",
