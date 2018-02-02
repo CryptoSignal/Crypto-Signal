@@ -133,9 +133,10 @@ class SimpleBotBehaviour():
                             markets[market_pair]['values'][indicator]
                         )
 
-                    volume_total = current_holdings[exchange][quote_symbol]['volume_total']
-                    if not volume_total == 0:
-                        if not base_symbol in current_holdings[exchange] or volume_total == 0:
+                    quote_volume_total = current_holdings[exchange][quote_symbol]['volume_total']
+                    if not quote_volume_total == 0:
+                        base_volume_total = current_holdings[exchange][base_symbol]['volume_total']
+                        if not base_symbol in current_holdings[exchange] or base_volume_total == 0:
                             self.logger.debug("%s is not in holdings, buying!", base_symbol)
                             self.buy(
                                 base_symbol,
