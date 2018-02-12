@@ -3,27 +3,13 @@
     "log_mode": "text",
     "market_pairs": [],
     "loglevel": "",
-    "update_interval": 300,
-    "selected_task": "default"
-  },
-
-  "database": {
-    "engine": "sqlite",
-    "host": "",
-    "port": "",
-    "db_name": "",
-    "username": "",
-    "password": ""
+    "update_interval": 300
   },
 
   "exchanges": {
     "bittrex": {
       "required": {
         "enabled": true
-      },
-      "optional": {
-        "key": "",
-        "secret": ""
       }
     }
   },
@@ -56,121 +42,42 @@
     }
   },
 
-  "behaviours": {
-    "default": {
-      "rsi": {
-        "enabled": true,
-        "alert_enabled": true,
-        "hot": 30,
-        "cold": 70
-      },
-      "breakout": {
-        "enabled": true,
-        "alert_enabled": true,
-        "hot": 0.8,
-        "cold": 0.4
-      },
-      "macd": {
-        "enabled": true,
-        "alert_enabled": true,
-        "hot": 0.0,
-        "cold": 0.0
-      },
-      "sma": {
-        "enabled": true,
-        "alert_enabled": true,
-        "hot": 1.0,
-        "cold": 1.0
-      },
-      "ema": {
-        "enabled": true,
-        "alert_enabled": true,
-        "hot": 1.0,
-        "cold": 1.0
-      },
-      "ichimoku": {
-        "enabled": true,
-        "alert_enabled": true,
-        "hot": true,
-        "cold": true
-      }
+  "behaviour": {
+    "rsi": {
+      "enabled": true,
+      "alert_enabled": true,
+      "hot": 30,
+      "cold": 70
     },
-    "server": {},
-    "simple_bot": {
-      "mode": "simulate",
-      "open_order_max_hours": 24,
-      "daily_trade_btc_max": 2.00,
-      "ignored_quote_currencies": [],
-      "btc_volume_min": 100.0,
-      "candle_timeframe": "1d",
-      "indicators": {
-        "rsi": {
-          "enabled": false,
-          "applies_to": "both",
-          "periods": 14,
-          "buy": 30,
-          "sell": 70
-        },
-        "breakout": {
-          "enabled": false,
-          "applies_to": "both",
-          "periods": 5,
-          "buy": 0.8,
-          "sell": 0.4
-        },
-        "macd": {
-          "enabled": false,
-          "applies_to": "both",
-          "periods": 0,
-          "buy": 0.0,
-          "sell": 0.0
-        },
-        "macd_sl": {
-          "enabled": false,
-          "applies_to": "both",
-          "periods": 0,
-          "buy": 0.0,
-          "sell": 0.0
-        },
-        "sma": {
-          "enabled": false,
-          "applies_to": "both",
-          "periods": 15,
-          "buy": 1.0,
-          "sell": 1.0
-        },
-        "ema": {
-          "enabled": false,
-          "applies_to": "both",
-          "periods": 15,
-          "buy": 1.0,
-          "sell": 1.0
-        },
-        "ichimoku": {
-          "enabled": false,
-          "applies_to": "both",
-          "periods": 0,
-          "buy": true,
-          "sell": true
-        }
-      },
-      "trade_limits": {
-        "buy": {
-          "BTC": { "max": 0.02, "min": 0.01 },
-          "ETH": { "max": 0.2, "min": 0.1 },
-          "LTC": { "max": 1.2, "min": 0.6 },
-          "USDT": { "max": 250.0, "min": 125.0}
-        },
-        "sell": {
-          "BTC": { "max": 0.02, "min": 0.0 },
-          "ETH": { "max": 0.2, "min": 0.0 },
-          "LTC": { "max": 1.2, "min": 0.0 },
-          "USDT": { "max": 250.0, "min": 0.0}
-        }
-      }
+    "breakout": {
+      "enabled": true,
+      "alert_enabled": true,
+      "hot": 0.8,
+      "cold": 0.4
     },
-    "reporter": {
-      "name": "default"
+    "macd": {
+      "enabled": true,
+      "alert_enabled": true,
+      "hot": 0.0,
+      "cold": 0.0
+    },
+    "sma": {
+      "enabled": true,
+      "alert_enabled": true,
+      "hot": 1.0,
+      "cold": 1.0
+    },
+    "ema": {
+      "enabled": true,
+      "alert_enabled": true,
+      "hot": 1.0,
+      "cold": 1.0
+    },
+    "ichimoku": {
+      "enabled": true,
+      "alert_enabled": true,
+      "hot": true,
+      "cold": true
     }
   }
 }
