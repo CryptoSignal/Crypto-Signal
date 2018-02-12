@@ -2,13 +2,9 @@ twilio==6.6.3
 ccxt==1.10.521
 structlog==17.2.0
 python-json-logger==0.1.8
-sqlalchemy==1.2.0
 pandas==0.21.0
 stockstats==0.2.0
 TA-lib==0.4.15
 tabulate==0.8.2
-psycopg2==2.7.3
 slackweb==1.0.5
-flask==0.12.2
-matplotlib==2.1.0
 tenacity==4.8.0

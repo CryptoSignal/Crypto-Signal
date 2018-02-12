@@ -1,159 +1,149 @@
-"""Defines the application behaviours for acting on an analysi.
+""" Runs the default behaviour, which performs two functions...
+1. Output the signal information to the prompt.
+2. Notify users when a threshold is crossed.
 """
 
 import structlog
 
-from exchange import ExchangeInterface
-from notification import Notifier
-from analysis import StrategyAnalyzer
-from database import DatabaseHandler
-from behaviours.default import DefaultBehaviour
-from behaviours.simple_bot import SimpleBotBehaviour
-from behaviours.reporter import ReporterBehaviour
-from behaviours.ui.server import ServerBehaviour
-
-
-class Behaviour(object):
-    """A class containing all of the possible behaviours
+class Behaviour():
+    """Default behaviour which gives users basic trading information.
     """
 
-    def __init__(self, config):
-        """Initializes the Behaviour class
+    def __init__(self, behaviour_config, exchange_interface, strategy_analyzer, notifier):
+        """Initializes DefaultBehaviour class.
 
         Args:
-            config (dict): A dictionary of configurations.
+            behaviour_config (dict): A dictionary of configuration for this behaviour.
+            exchange_interface (ExchangeInterface): Instance of the ExchangeInterface class for
+                making exchange queries.
+            strategy_analyzer (StrategyAnalyzer): Instance of the StrategyAnalyzer class for
+                running analyzed_data on exchange information.
+            notifier (Notifier): Instance of the notifier class for informing a user when a
+                threshold has been crossed.
         """
 
-        self.config = config
+        self.logger = structlog.get_logger()
+        self.behaviour_config = behaviour_config
+        self.exchange_interface = exchange_interface
+        self.strategy_analyzer = strategy_analyzer
+        self.notifier = notifier
 
 
-    def get_behaviour(self, selected_behaviour):
-        """Returns a behaviour class depending on which behaviour you want to run.
+    def run(self, market_pairs):
+        """The behaviour entrypoint
 
         Args:
-            selected_behaviour (str): Which behaviour you want to execute.
-
-        Returns:
-            Behaviour: An instance of the behaviour class for the selected behaviour.
+            market_pairs (list): List of symbol pairs to operate on, if empty get all pairs.
         """
 
-        behaviour_config = self.config.behaviours[selected_behaviour]
+        self.logger.info("Starting default behaviour...")
 
-        if selected_behaviour == 'default':
-            behaviour = self.__configure_default(behaviour_config)
+        if market_pairs:
+            self.logger.debug("Found configured symbol pairs.")
+            market_data = self.exchange_interface.get_symbol_markets(market_pairs)
+        else:
+            self.logger.debug("No configured symbol pairs, using all available on exchange.")
+            market_data = self.exchange_interface.get_exchange_markets()
 
-        if selected_behaviour == 'simple_bot':
-            behaviour = self.__configure_simple_bot(behaviour_config)
-
-        if selected_behaviour == 'reporter':
-            behaviour = self.__configure_reporter(behaviour_config)
-
-        if selected_behaviour == 'server':
-            behaviour = self.__configure_server(behaviour_config)
-
-        return behaviour
+        self.__test_strategies(market_data)
 
 
-    def __configure_default(self, behaviour_config):
-        """Configures and returns the default behaviour class.
+    def __test_strategies(self, market_data):
+        """Test the strategies and perform notifications as required
 
         Args:
-            behaviour_config (dict): A dictionary of configuration values pertaining to the
-                behaviour.
-
-        Returns:
-            DefaultBehaviour: A class of functionality for the default behaviour.
+            market_data (dict): A dictionary containing the market data of the symbols to analyze.
         """
 
-        exchange_interface = ExchangeInterface(self.config.exchanges)
+        for exchange in market_data:
+            for market_pair in market_data[exchange]:
+                one_day_historical_data = self.exchange_interface.get_historical_data(
+                    market_data[exchange][market_pair]['symbol'],
+                    exchange,
+                    '1d'
+                )
 
-        strategy_analyzer = StrategyAnalyzer()
+                five_minute_historical_data = self.exchange_interface.get_historical_data(
+                    market_data[exchange][market_pair]['symbol'],
+                    exchange,
+                    '5m'
+                )
 
-        notifier = Notifier(self.config.notifiers)
+                analyzed_data = {}
 
-        behaviour = DefaultBehaviour(
-            behaviour_config,
-            exchange_interface,
-            strategy_analyzer,
-            notifier
-        )
+                if self.behaviour_config['rsi']['enabled']:
+                    analyzed_data['RSI'] = self.strategy_analyzer.analyze_rsi(
+                        one_day_historical_data,
+                        hot_thresh=self.behaviour_config['rsi']['hot'],
+                        cold_thresh=self.behaviour_config['rsi']['cold']
+                    )
 
-        return behaviour
+                if self.behaviour_config['sma']['enabled']:
+                    analyzed_data['SMA'] = self.strategy_analyzer.analyze_sma(
+                        one_day_historical_data,
+                        hot_thresh=self.behaviour_config['sma']['hot'],
+                        cold_thresh=self.behaviour_config['sma']['cold']
+                    )
 
+                if self.behaviour_config['ema']['enabled']:
+                    analyzed_data['EMA'] = self.strategy_analyzer.analyze_ema(
+                        one_day_historical_data,
+                        hot_thresh=self.behaviour_config['ema']['hot'],
+                        cold_thresh=self.behaviour_config['ema']['cold']
+                    )
 
-    def __configure_simple_bot(self, behaviour_config):
-        """Configures and returns the bot behaviour class.
+                if self.behaviour_config['breakout']['enabled']:
+                    analyzed_data['Breakout'] = self.strategy_analyzer.analyze_breakout(
+                        five_minute_historical_data,
+                        hot_thresh=self.behaviour_config['breakout']['hot'],
+                        cold_thresh=self.behaviour_config['breakout']['cold']
+                    )
 
-        Args:
-            behaviour_config (dict): A dictionary of configuration values pertaining to the
-                behaviour.
+                if self.behaviour_config['ichimoku']['enabled']:
+                    analyzed_data['Ichimoku'] = self.strategy_analyzer.analyze_ichimoku_cloud(
+                        one_day_historical_data,
+                        hot_thresh=self.behaviour_config['ichimoku']['hot'],
+                        cold_thresh=self.behaviour_config['ichimoku']['cold']
+                    )
 
-        Returns:
-            SimpleBotBehaviour: A class of functionality for the rsi bot behaviour.
-        """
+                if self.behaviour_config['macd']['enabled']:
+                    analyzed_data['MACD'] = self.strategy_analyzer.analyze_macd(
+                        one_day_historical_data,
+                        hot_thresh=self.behaviour_config['macd']['hot'],
+                        cold_thresh=self.behaviour_config['macd']['cold']
+                    )
 
-        exchange_interface = ExchangeInterface(self.config.exchanges)
-        strategy_analyzer = StrategyAnalyzer()
-        notifier = Notifier(self.config.notifiers)
-        db_handler = DatabaseHandler(self.config.database)
+                message = ""
+                output = "{}:\t".format(market_pair)
+                for analysis in analyzed_data:
+                    if analyzed_data[analysis]:
+                        if self.behaviour_config[analysis.lower()]['alert_enabled']:
+                            color_code = '\u001b[0m'
+                            color_reset = '\u001b[0m'
+                            if analyzed_data[analysis]['is_hot']:
+                                color_code = '\u001b[31m'
+                                message += "{}: {} is hot!\n".format(analysis, market_pair)
 
-        behaviour = SimpleBotBehaviour(
-            behaviour_config,
-            exchange_interface,
-            strategy_analyzer,
-            notifier,
-            db_handler
-        )
+                            if analyzed_data[analysis]['is_cold']:
+                                color_code = '\u001b[36m'
+                                message += "{}: {} is cold!\n".format(analysis, market_pair)
 
-        return behaviour
+                        formatted_values = []
+                        for value in analyzed_data[analysis]['values']:
+                            if isinstance(value, float):
+                                formatted_values.append(format(value, '.8f'))
+                            else:
+                                formatted_values.append(value)
 
+                        formatted_string = '/'.join(formatted_values)
+                        output += "{}{}: {}{}     ".format(
+                            color_code,
+                            analysis,
+                            formatted_string,
+                            color_reset
+                        )
 
-    def __configure_reporter(self, behaviour_config):
-        """Configures and returns the reporter behaviour class.
+                if message:
+                    self.notifier.notify_all(message)
 
-        Args:
-            behaviour_config (dict): A dictionary of configuration values pertaining to the
-                behaviour.
-
-        Returns:
-            ReporterBehaviour: A class of functionality for the reporter behaviour.
-        """
-
-        exchange_interface = ExchangeInterface(self.config.exchanges)
-        notifier = Notifier(self.config.notifiers)
-        db_handler = DatabaseHandler(self.config.database)
-
-        behaviour = ReporterBehaviour(
-            behaviour_config,
-            exchange_interface,
-            notifier,
-            db_handler
-        )
-
-        return behaviour
-
-
-    def __configure_server(self, behaviour_config):
-        """Configures and returns the server (UI) behavior class.
-
-        Args:
-            behaviour_config (dict): A dictionary of configuration values pertaining to the
-                behaviour.
-
-        Returns:
-            Server: A class of functionality for the Flask server behaviour.
-        """
-
-        exchange_interface = ExchangeInterface(self.config.exchanges)
-        strategy_analyzer = StrategyAnalyzer()
-        notifier = Notifier(self.config.notifiers)
-        db_handler = DatabaseHandler(self.config.database)
-
-        behaviour = ServerBehaviour(
-            behaviour_config,
-            exchange_interface,
-            strategy_analyzer,
-            notifier,
-            db_handler)
-
-        return behaviour
+                print(output)

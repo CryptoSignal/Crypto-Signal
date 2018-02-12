@@ -32,17 +32,14 @@ class Configuration():
         config['settings'] = self.__parse_config(config['settings'], 'SETTINGS')
         self.settings = config['settings']
 
-        config['database'] = self.__parse_config(config['database'], 'DATABASE')
-        self.database = config['database']
-
         config['exchanges'] = self.__parse_config(config['exchanges'], 'EXCHANGES')
         self.exchanges = config['exchanges']
 
         config['notifiers'] = self.__parse_config(config['notifiers'], 'NOTIFIERS')
         self.notifiers = config['notifiers']
 
-        config['behaviours'] = self.__parse_config(config['behaviours'], 'BEHAVIOURS')
-        self.behaviours = config['behaviours']
+        config['behaviour'] = self.__parse_config(config['behaviour'], 'BEHAVIOUR')
+        self.behaviour = config['behaviour']
 
     def __parse_config(self, config_fragment, base_path=""):
         for key in config_fragment:
