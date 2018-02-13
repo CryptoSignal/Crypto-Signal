@@ -8,7 +8,6 @@ import structlog
 import pandas
 from talib import abstract
 
-from strategies.breakout import Breakout
 from strategies.ichimoku_cloud import IchimokuCloud
 
 class StrategyAnalyzer():
@@ -43,6 +42,25 @@ class StrategyAnalyzer():
         dataframe.drop('timestamp', axis=1, inplace=True)
 
         return dataframe
+
+
+    def dispatcher(self):
+        """Returns a dictionary for dynamic anaylsis selector
+
+        Returns:
+            dict: A dictionary of functions to serve as a dynamic analysis selector.
+        """
+
+        dispatcher = {
+            'macd': self.analyze_macd,
+            'macd_sl': self.analyze_macd_sl,
+            'rsi': self.analyze_rsi,
+            'sma': self.analyze_sma,
+            'ema': self.analyze_ema,
+            'ichimoku': self.analyze_ichimoku_cloud
+        }
+
+        return dispatcher
 
 
     def analyze_macd(self, historial_data, hot_thresh=None, cold_thresh=None, all_data=False):
@@ -143,49 +161,6 @@ class StrategyAnalyzer():
                 return macd_result_data[-1]
             except IndexError:
                 return macd_result_data
-
-
-    def analyze_breakout(self, historial_data, period_count=5, hot_thresh=None, cold_thresh=None):
-        """Performs a momentum analysis on the historical data
-
-        Args:
-            historial_data (list): A matrix of historical OHCLV data.
-            period_count (int, optional): Defaults to 5. The number of data points to consider for
-                our simple moving average.
-            hot_thresh (float, optional): Defaults to None. The threshold at which this might be
-                good to purchase.
-            cold_thresh (float, optional): Defaults to None. The threshold at which this might be
-                good to sell.
-
-        Returns:
-            dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
-                indication.
-        """
-
-        breakout_analyzer = Breakout()
-
-        breakout_historical_data = historial_data[0:period_count]
-
-        breakout_value = breakout_analyzer.get_breakout_value(breakout_historical_data)
-
-        is_hot = False
-        if hot_thresh is not None:
-            is_hot = breakout_value > hot_thresh
-
-        is_cold = False
-        if cold_thresh is not None:
-            is_cold = breakout_value < cold_thresh
-
-        if math.isnan(breakout_value):
-            breakout_value = None
-
-        breakout_result_data = {
-            'values': (breakout_value,),
-            'is_cold': is_cold,
-            'is_hot': is_hot
-        }
-
-        return breakout_result_data
 
 
     def analyze_rsi(self, historial_data, period_count=14,

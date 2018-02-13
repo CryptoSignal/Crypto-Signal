@@ -55,63 +55,33 @@ class Behaviour():
             market_data (dict): A dictionary containing the market data of the symbols to analyze.
         """
 
+        analysis_dispatcher = self.strategy_analyzer.dispatcher()
         for exchange in market_data:
             for market_pair in market_data[exchange]:
-                one_day_historical_data = self.exchange_interface.get_historical_data(
-                    market_data[exchange][market_pair]['symbol'],
-                    exchange,
-                    '1d'
-                )
-
-                five_minute_historical_data = self.exchange_interface.get_historical_data(
-                    market_data[exchange][market_pair]['symbol'],
-                    exchange,
-                    '5m'
-                )
-
                 analyzed_data = {}
+                historical_data = {}
 
-                if self.behaviour_config['rsi']['enabled']:
-                    analyzed_data['RSI'] = self.strategy_analyzer.analyze_rsi(
-                        one_day_historical_data,
-                        hot_thresh=self.behaviour_config['rsi']['hot'],
-                        cold_thresh=self.behaviour_config['rsi']['cold']
-                    )
+                for behaviour in self.behaviour_config:
+                    if behaviour in analysis_dispatcher:
+                        behaviour_conf = self.behaviour_config[behaviour]
 
-                if self.behaviour_config['sma']['enabled']:
-                    analyzed_data['SMA'] = self.strategy_analyzer.analyze_sma(
-                        one_day_historical_data,
-                        hot_thresh=self.behaviour_config['sma']['hot'],
-                        cold_thresh=self.behaviour_config['sma']['cold']
-                    )
+                        if behaviour_conf['enabled']:
+                            candle_period = behaviour_conf['candle_period']
 
-                if self.behaviour_config['ema']['enabled']:
-                    analyzed_data['EMA'] = self.strategy_analyzer.analyze_ema(
-                        one_day_historical_data,
-                        hot_thresh=self.behaviour_config['ema']['hot'],
-                        cold_thresh=self.behaviour_config['ema']['cold']
-                    )
+                            if not candle_period in historical_data:
+                                historical_data[candle_period] = self.exchange_interface.get_historical_data(
+                                    market_data[exchange][market_pair]['symbol'],
+                                    exchange,
+                                    candle_period
+                                )
 
-                if self.behaviour_config['breakout']['enabled']:
-                    analyzed_data['Breakout'] = self.strategy_analyzer.analyze_breakout(
-                        five_minute_historical_data,
-                        hot_thresh=self.behaviour_config['breakout']['hot'],
-                        cold_thresh=self.behaviour_config['breakout']['cold']
-                    )
-
-                if self.behaviour_config['ichimoku']['enabled']:
-                    analyzed_data['Ichimoku'] = self.strategy_analyzer.analyze_ichimoku_cloud(
-                        one_day_historical_data,
-                        hot_thresh=self.behaviour_config['ichimoku']['hot'],
-                        cold_thresh=self.behaviour_config['ichimoku']['cold']
-                    )
-
-                if self.behaviour_config['macd']['enabled']:
-                    analyzed_data['MACD'] = self.strategy_analyzer.analyze_macd(
-                        one_day_historical_data,
-                        hot_thresh=self.behaviour_config['macd']['hot'],
-                        cold_thresh=self.behaviour_config['macd']['cold']
-                    )
+                            analyzed_data[behaviour] = analysis_dispatcher[behaviour](
+                                historical_data[candle_period],
+                                hot_thresh=behaviour_conf['hot'],
+                                cold_thresh=behaviour_conf['cold']
+                            )
+                    else:
+                        self.logger.warn("No such behaviour: %s, skipping.", behaviour)
 
                 message = ""
                 output = "{}:\t".format(market_pair)
