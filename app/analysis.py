@@ -229,8 +229,9 @@ class StrategyAnalyzer():
                 good to purchase.
             cold_thresh (float, optional): Defaults to None. The threshold at which this might be
                 good to sell.
-            all_data (bool, optional): Defaults to False. If True, we return the RSI associated
-                with each data point in our historical dataset. Otherwise just return the last one.
+            all_data (bool, optional): Defaults to False. If True, we return the momentum
+                associated with each data point in our historical dataset. Otherwise just return
+                the last one.
 
         Returns:
             dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
