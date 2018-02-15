@@ -59,6 +59,10 @@ class ExchangeInterface():
             max_days_date = datetime.now() - timedelta(days=max_days)
             start_date = int(max_days_date.replace(tzinfo=timezone.utc).timestamp() * 1000)
 
+        if time_unit not in self.exchanges[exchange].timeframes:
+            raise ValueError(exchange + " does not support " + time_unit + " timeframe for OHLCV data. \n" +
+                             "Possible values are: {}".format(list(self.exchanges[exchange].timeframes)))
+
         historical_data = self.exchanges[exchange].fetch_ohlcv(
             market_pair,
             timeframe=time_unit,
