@@ -43,6 +43,13 @@
   },
 
   "behaviour": {
+    "momentum": {
+      "enabled": true,
+      "alert_enabled": true,
+      "hot": 0,
+      "cold": 0,
+      "candle_period": "1d"
+    },
     "rsi": {
       "enabled": true,
       "alert_enabled": true,
