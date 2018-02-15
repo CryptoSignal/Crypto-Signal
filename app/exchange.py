@@ -70,28 +70,15 @@ class ExchangeInterface():
 
 
     @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
-    def get_markets_for_exchange(self, exchange):
-        """Get market data for all symbol pairs listed on the given exchange.
-
-        Decorators:
-            retry
-
-        Args:
-            exchange (str): Contains the exchange to fetch the data from
-
-        Returns:
-            dict: A dictionary containing market data for all symbol pairs.
-        """
-
-        exchange_markets = self.exchanges[exchange].load_markets()
-
-        return exchange_markets
-
-
-    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
-    def get_exchange_markets(self):
+    def get_exchange_markets(self, exchanges=[], markets=[]):
         """Get market data for all symbol pairs listed on all configured exchanges.
 
+        Args:
+            markets (list, optional): A list of markets to get from the exchanges. Default is all
+                markets.
+            exchanges (list, optional): A list of exchanges to collect market data from. Default is
+                all enabled exchanges.
+
         Decorators:
             retry
 
@@ -99,34 +86,25 @@ class ExchangeInterface():
             dict: A dictionary containing market data for all symbol pairs.
         """
 
+        if not exchanges:
+            exchanges = self.exchanges
+
         exchange_markets = {}
-        for exchange in self.exchanges:
+        for exchange in exchanges:
             exchange_markets[exchange] = self.exchanges[exchange].load_markets()
+
+            if markets:
+                markets_to_remove = []
+                for market in markets:
+                    if not market in exchange_markets[exchange]:
+                        self.logger.info('%s has no market %s, ignoring.', exchange, market)
+
+                for market in exchange_markets[exchange]:
+                    if not market in markets:
+                        markets_to_remove.append(market)
+
+                for market in markets_to_remove:
+                    exchange_markets[exchange].pop(market, None)
+
             time.sleep(self.exchanges[exchange].rateLimit / 1000)
         return exchange_markets
-
-
-    @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
-    def get_symbol_markets(self, market_pairs):
-        """Get market data for specific symbols on all configured exchanges.
-
-        Decorators:
-            retry
-
-        Args:
-            market_pairs (list): The symbol pairs you want to retrieve market data for.
-
-        Returns:
-            dict: A dictionary containing market data for requested symbol pairs.
-        """
-
-        symbol_markets = {}
-        for exchange in self.exchanges:
-            self.exchanges[exchange].load_markets()
-            symbol_markets[exchange] = {}
-
-            for market_pair in market_pairs:
-                symbol_markets[exchange][market_pair] = self.exchanges[exchange].markets[
-                    market_pair]
-            time.sleep(self.exchanges[exchange].rateLimit / 1000)
-        return symbol_markets

@@ -7,6 +7,3 @@ services:
       - ./app:/app
     env_file:
       - .env
-    ports:
-      - 5000:5000
-

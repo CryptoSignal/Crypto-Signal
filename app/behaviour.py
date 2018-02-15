@@ -39,11 +39,13 @@ class Behaviour():
         self.logger.info("Starting default behaviour...")
 
         if market_pairs:
-            self.logger.debug("Found configured symbol pairs.")
-            market_data = self.exchange_interface.get_symbol_markets(market_pairs)
+            self.logger.info("Found configured markets: %s", market_pairs)
         else:
-            self.logger.debug("No configured symbol pairs, using all available on exchange.")
-            market_data = self.exchange_interface.get_exchange_markets()
+            self.logger.info("No configured markets, using all available on exchange.")
+
+        market_data = self.exchange_interface.get_exchange_markets(markets=market_pairs)
+
+        self.logger.info("Using the following exchange(s): %s", list(market_data.keys()))
 
         self.__test_strategies(market_data)
 
