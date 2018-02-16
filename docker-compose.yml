@@ -6,4 +6,4 @@ services:
     volumes:
       - ./app:/app
     env_file:
-      - .env
+      - settings.env
