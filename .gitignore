@@ -1,5 +1,6 @@
 dev.sh
 .env
+settings.env
 .vscode
 app/errors.log
 .idea/

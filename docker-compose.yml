@@ -6,7 +6,7 @@ services:
     volumes:
       - ./app:/app
     env_file:
-      - .env
+      - settings.env
     ports:
       - 5000:5000
 
