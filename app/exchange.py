@@ -8,6 +8,8 @@ import ccxt
 import structlog
 from tenacity import retry, retry_if_exception_type, stop_after_attempt
 
+from timeperiods import TimePeriod
+
 class ExchangeInterface():
     """Interface for performing queries against exchange API's
     """
@@ -37,7 +39,7 @@ class ExchangeInterface():
 
 
     @retry(retry=retry_if_exception_type(ccxt.NetworkError), stop=stop_after_attempt(3))
-    def get_historical_data(self, market_pair, exchange, time_unit, start_date=None, max_days=100):
+    def get_historical_data(self, market_pair, exchange, time_unit, start_date=None, max_periods=100):
         """Get historical OHLCV for a symbol pair
 
         Decorators:
@@ -48,15 +50,15 @@ class ExchangeInterface():
             exchange (str): Contains the exchange to fetch the historical data from.
             time_unit (str): A string specifying the ccxt time unit i.e. 5m or 1d.
             start_date (int, optional): Timestamp in milliseconds.
-            max_days (int, optional): Defaults to 100. Maximum number of days to fetch data for
-                if start date is not specified.
+            max_periods (int, optional): Defaults to 100. Maximum number of time periods
+              back to fetch data for.
 
         Returns:
             list: Contains a list of lists which contain timestamp, open, high, low, close, volume.
         """
 
         if not start_date:
-            max_days_date = datetime.now() - timedelta(days=max_days)
+            max_days_date = datetime.now() - (max_periods * TimePeriod[time_unit].value)
             start_date = int(max_days_date.replace(tzinfo=timezone.utc).timestamp() * 1000)
 
         if time_unit not in self.exchanges[exchange].timeframes:
