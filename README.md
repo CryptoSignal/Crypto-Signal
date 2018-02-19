@@ -9,6 +9,7 @@ Crypto Signals is a command line tool that automates your crypto currency Techni
 Track over 500 coins across Bittrex, Bitfinex, GDAX, Gemini and more!
 
 Technical Analysis Automated:
+* Momentum
 * Relative Strength Index (RSI)
 * Ichimoku Cloud (Leading Span A, Leading Span B, Conversion Line, Base Line)
 * Simple Moving Average
