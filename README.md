@@ -2,7 +2,7 @@
 
 ### Development state: Beta (Code is stable documentation is often lagging)
 
-### Join our community [Discord](https://discordapp.com/invite/hXdCgCE) channel!
+### Join our community [Discord](https://discord.gg/MWTJVFf) channel!
 
 Crypto Signals is a command line tool that automates your crypto currency Technical Analysis (TA).
 
