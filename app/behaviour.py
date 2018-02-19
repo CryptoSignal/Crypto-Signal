@@ -71,11 +71,18 @@ class Behaviour():
                             candle_period = behaviour_conf['candle_period']
 
                             if not candle_period in historical_data:
-                                historical_data[candle_period] = self.exchange_interface.get_historical_data(
-                                    market_data[exchange][market_pair]['symbol'],
-                                    exchange,
-                                    candle_period
-                                )
+                                try:
+                                    historical_data[candle_period] = self.exchange_interface.get_historical_data(
+                                        market_data[exchange][market_pair]['symbol'],
+                                        exchange,
+                                        candle_period
+                                    )
+                                except Exception:
+                                    self.logger.info(
+                                        'Reached max retries fetching data for %s, skipping',
+                                        market_pair
+                                    )
+                                    continue
 
                             analyzed_data[behaviour] = analysis_dispatcher[behaviour](
                                 historical_data[candle_period],
