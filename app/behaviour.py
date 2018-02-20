@@ -71,6 +71,7 @@ class Behaviour():
 
                             if behaviour_conf['enabled']:
                                 candle_period = behaviour_conf['candle_period']
+                                period_count = behaviour_conf['period_count'] if 'period_count' in behaviour_conf else None
 
                                 if not candle_period in historical_data:
                                     historical_data[candle_period] = self.exchange_interface.get_historical_data(
@@ -79,11 +80,19 @@ class Behaviour():
                                         candle_period
                                     )
 
-                                analyzed_data[behaviour] = analysis_dispatcher[behaviour](
-                                    historical_data[candle_period],
-                                    hot_thresh=behaviour_conf['hot'],
-                                    cold_thresh=behaviour_conf['cold']
-                                )
+                                if period_count:
+                                    analyzed_data[behaviour] = analysis_dispatcher[behaviour](
+                                        historical_data[candle_period],
+                                        hot_thresh=behaviour_conf['hot'],
+                                        cold_thresh=behaviour_conf['cold'],
+                                        period_count=period_count
+                                    )
+                                else:
+                                    analyzed_data[behaviour] = analysis_dispatcher[behaviour](
+                                        historical_data[candle_period],
+                                        hot_thresh=behaviour_conf['hot'],
+                                        cold_thresh=behaviour_conf['cold']
+                                    )
                         else:
                             self.logger.warn("No such behaviour: %s, skipping.", behaviour)
                 except Exception:
