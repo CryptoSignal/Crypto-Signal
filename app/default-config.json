@@ -48,7 +48,7 @@
       "alert_enabled": true,
       "hot": 0,
       "cold": 0,
-      "candle_period": "1d"
+      "candle_period": "1d",
       "period_count": 10
     },
     "rsi": {
@@ -80,7 +80,7 @@
       "hot": 1.0,
       "cold": 1.0,
       "candle_period": "1d",
-      "period_count": 15
+      "period_count": 11
     },
     "ichimoku": {
       "enabled": true,
