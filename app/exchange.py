@@ -1,6 +1,7 @@
 """Interface for performing queries against exchange API's
 """
 
+import re
 import time
 from datetime import datetime, timedelta, timezone
 
@@ -57,13 +58,35 @@ class ExchangeInterface():
             list: Contains a list of lists which contain timestamp, open, high, low, close, volume.
         """
 
-        if not start_date:
-            max_days_date = datetime.now() - (max_periods * TimePeriod[time_unit].value)
-            start_date = int(max_days_date.replace(tzinfo=timezone.utc).timestamp() * 1000)
-
         if time_unit not in self.exchanges[exchange].timeframes:
-            raise ValueError(exchange + " does not support " + time_unit + " timeframe for OHLCV data. \n" +
-                             "Possible values are: {}".format(list(self.exchanges[exchange].timeframes)))
+            raise ValueError(
+                exchange + " does not support " + time_unit + " timeframe for OHLCV data. \n" +
+                "Possible values are: {}".format(list(self.exchanges[exchange].timeframes))
+            )
+
+        if not start_date:
+            timeframe_regex = re.compile('([0-9]+)([a-zA-Z])')
+            timeframe_matches = timeframe_regex.match(time_unit)
+            time_quantity = timeframe_matches.group(1)
+            time_period = timeframe_matches.group(2)
+
+            if time_period == 'm':
+                timedelta_args = { 'minutes': int(time_quantity) }
+            elif time_period == 'h':
+                timedelta_args = { 'hours': int(time_quantity) }
+            elif time_period == 'd':
+                timedelta_args = { 'days': int(time_quantity) }
+            elif time_period == 'M':
+                timedelta_args = { 'months': int(time_quantity) }
+            elif time_period == 'y':
+                timedelta_args = { 'years': int(time_quantity) }
+            else:
+                raise ValueError('unknown time unit: {}'.format(time_period))
+
+            start_date_delta = timedelta(**timedelta_args)
+
+            max_days_date = datetime.now() - (max_periods * start_date_delta)
+            start_date = int(max_days_date.replace(tzinfo=timezone.utc).timestamp() * 1000)
 
         historical_data = self.exchanges[exchange].fetch_ohlcv(
             market_pair,
