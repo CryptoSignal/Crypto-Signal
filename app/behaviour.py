@@ -59,38 +59,39 @@ class Behaviour():
 
         analysis_dispatcher = self.strategy_analyzer.dispatcher()
         for exchange in market_data:
+            self.logger.info("Beginning analysis of %s", exchange)
             for market_pair in market_data[exchange]:
                 analyzed_data = {}
                 historical_data = {}
 
-                for behaviour in self.behaviour_config:
-                    if behaviour in analysis_dispatcher:
-                        behaviour_conf = self.behaviour_config[behaviour]
+                try:
+                    for behaviour in self.behaviour_config:
+                        if behaviour in analysis_dispatcher:
+                            behaviour_conf = self.behaviour_config[behaviour]
 
-                        if behaviour_conf['enabled']:
-                            candle_period = behaviour_conf['candle_period']
+                            if behaviour_conf['enabled']:
+                                candle_period = behaviour_conf['candle_period']
 
-                            if not candle_period in historical_data:
-                                try:
+                                if not candle_period in historical_data:
                                     historical_data[candle_period] = self.exchange_interface.get_historical_data(
                                         market_data[exchange][market_pair]['symbol'],
                                         exchange,
                                         candle_period
                                     )
-                                except Exception:
-                                    self.logger.info(
-                                        'Reached max retries fetching data for %s, skipping',
-                                        market_pair
-                                    )
-                                    continue
 
-                            analyzed_data[behaviour] = analysis_dispatcher[behaviour](
-                                historical_data[candle_period],
-                                hot_thresh=behaviour_conf['hot'],
-                                cold_thresh=behaviour_conf['cold']
-                            )
-                    else:
-                        self.logger.warn("No such behaviour: %s, skipping.", behaviour)
+                                analyzed_data[behaviour] = analysis_dispatcher[behaviour](
+                                    historical_data[candle_period],
+                                    hot_thresh=behaviour_conf['hot'],
+                                    cold_thresh=behaviour_conf['cold']
+                                )
+                        else:
+                            self.logger.warn("No such behaviour: %s, skipping.", behaviour)
+                except Exception:
+                    self.logger.info(
+                        'A problem occured fetching informationg for pair %s, skipping',
+                        market_pair
+                    )
+                    continue
 
                 message = ""
                 output = "{}:\t".format(market_pair)
