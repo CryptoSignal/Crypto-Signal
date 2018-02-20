@@ -49,13 +49,15 @@
       "hot": 0,
       "cold": 0,
       "candle_period": "1d"
+      "period_count": 10
     },
     "rsi": {
       "enabled": true,
       "alert_enabled": true,
       "hot": 30,
       "cold": 70,
-      "candle_period": "1d"
+      "candle_period": "1d",
+      "period_count": 14
     },
     "macd": {
       "enabled": true,
@@ -69,14 +71,16 @@
       "alert_enabled": true,
       "hot": 1.0,
       "cold": 1.0,
-      "candle_period": "1d"
+      "candle_period": "1d",
+      "period_count": 15
     },
     "ema": {
       "enabled": true,
       "alert_enabled": true,
       "hot": 1.0,
       "cold": 1.0,
-      "candle_period": "1d"
+      "candle_period": "1d",
+      "period_count": 15
     },
     "ichimoku": {
       "enabled": true,
