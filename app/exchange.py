@@ -72,6 +72,7 @@ class ExchangeInterface():
                 'm': 'minutes',
                 'h': 'hours',
                 'd': 'days',
+                'w': 'weeks',
                 'M': 'months',
                 'y': 'years'
             }
