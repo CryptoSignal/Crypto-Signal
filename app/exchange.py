@@ -9,7 +9,6 @@ import ccxt
 import structlog
 from tenacity import retry, retry_if_exception_type, stop_after_attempt
 
-from timeperiods import TimePeriod
 
 class ExchangeInterface():
     """Interface for performing queries against exchange API's
