@@ -9,8 +9,6 @@ import ccxt
 import structlog
 from tenacity import retry, retry_if_exception_type, stop_after_attempt
 
-from timeperiods import TimePeriod
-
 class ExchangeInterface():
     """Interface for performing queries against exchange API's
     """
@@ -70,18 +68,15 @@ class ExchangeInterface():
             time_quantity = timeframe_matches.group(1)
             time_period = timeframe_matches.group(2)
 
-            if time_period == 'm':
-                timedelta_args = { 'minutes': int(time_quantity) }
-            elif time_period == 'h':
-                timedelta_args = { 'hours': int(time_quantity) }
-            elif time_period == 'd':
-                timedelta_args = { 'days': int(time_quantity) }
-            elif time_period == 'M':
-                timedelta_args = { 'months': int(time_quantity) }
-            elif time_period == 'y':
-                timedelta_args = { 'years': int(time_quantity) }
-            else:
-                raise ValueError('unknown time unit: {}'.format(time_period))
+            timedelta_values = {
+                'm': 'minutes',
+                'h': 'hours',
+                'd': 'days',
+                'M': 'months',
+                'y': 'years'
+            }
+
+            timedelta_args = { timedelta_values[time_period]: int(time_quantity) }
 
             start_date_delta = timedelta(**timedelta_args)
 
