@@ -3,7 +3,8 @@
 
 import structlog
 
-class Utils():
+
+class StrategyUtils():
     """Helper functions for the various strategies
     """
 

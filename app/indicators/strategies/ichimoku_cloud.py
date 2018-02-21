@@ -2,10 +2,10 @@
 """
 
 import structlog
-from strategies.strategy_utils import Utils
+from indicators.strategies.utils import StrategyUtils
 
 
-class IchimokuCloud():
+class IchimokuCloud(StrategyUtils):
     """Runs the ichimoku strategy over the market data
     """
 
@@ -14,7 +14,6 @@ class IchimokuCloud():
         """
 
         self.logger = structlog.get_logger()
-        self.utils = Utils()
 
 
     def get_kijunsen(self, historical_data):
@@ -27,8 +26,8 @@ class IchimokuCloud():
             float: The Kijun-sen line value of ichimoku.
         """
 
-        period_high = max(self.utils.get_high_prices(historical_data))
-        period_low = min(self.utils.get_low_prices(historical_data))
+        period_high = max(self.get_high_prices(historical_data))
+        period_low = min(self.get_low_prices(historical_data))
 
         return (period_high + period_low) / 2
 
@@ -43,8 +42,8 @@ class IchimokuCloud():
             float: The Tenkan-sen line value of ichimoku.
         """
 
-        period_high = max(self.utils.get_high_prices(historical_data))
-        period_low = min(self.utils.get_low_prices(historical_data))
+        period_high = max(self.get_high_prices(historical_data))
+        period_low = min(self.get_low_prices(historical_data))
 
         return (period_high + period_low) / 2
 
@@ -76,7 +75,7 @@ class IchimokuCloud():
             float: The Senkou span B value of ichimoku.
         """
 
-        period_high = max(self.utils.get_high_prices(historical_data))
-        period_low = min(self.utils.get_low_prices(historical_data))
+        period_high = max(self.get_high_prices(historical_data))
+        period_low = min(self.get_low_prices(historical_data))
 
         return (period_high + period_low) / 2

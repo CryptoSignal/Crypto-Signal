@@ -95,11 +95,13 @@ class Behaviour():
                                     )
                         else:
                             self.logger.warn("No such behaviour: %s, skipping.", behaviour)
-                except Exception:
+                except Exception as e:
                     self.logger.info(
                         'A problem occured fetching informationg for pair %s, skipping',
                         market_pair
                     )
+                    self.logger.debug('exception: %s', e)
+                    exit()
                     continue
 
                 message = ""
