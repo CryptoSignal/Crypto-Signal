@@ -122,17 +122,15 @@ class ExchangeInterface():
             exchange_markets[exchange] = self.exchanges[exchange].load_markets()
 
             if markets:
-                markets_to_remove = []
+                curr_markets = exchange_markets[exchange]
+
+                # Only retrieve markets the users specified
+                exchange_markets[exchange] = { key: curr_markets[key] for key in curr_markets if key in markets }
+
                 for market in markets:
-                    if not market in exchange_markets[exchange]:
+                    if market not in exchange_markets[exchange]:
                         self.logger.info('%s has no market %s, ignoring.', exchange, market)
 
-                for market in exchange_markets[exchange]:
-                    if not market in markets:
-                        markets_to_remove.append(market)
-
-                for market in markets_to_remove:
-                    exchange_markets[exchange].pop(market, None)
-
             time.sleep(self.exchanges[exchange].rateLimit / 1000)
+
         return exchange_markets

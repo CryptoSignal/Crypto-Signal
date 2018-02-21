@@ -71,16 +71,18 @@ class Behaviour():
 
                             if behaviour_conf['enabled']:
                                 candle_period = behaviour_conf['candle_period']
-                                period_count = behaviour_conf['period_count'] if 'period_count' in behaviour_conf else None
 
-                                if not candle_period in historical_data:
+                                if candle_period not in historical_data:
                                     historical_data[candle_period] = self.exchange_interface.get_historical_data(
                                         market_data[exchange][market_pair]['symbol'],
                                         exchange,
                                         candle_period
                                     )
 
-                                if period_count:
+                                # If the period is customizable for the current indicator, fetch it
+                                # from the configuration
+                                if 'period_count' in behaviour_conf:
+                                    period_count = behaviour_conf['period_count']
                                     analyzed_data[behaviour] = analysis_dispatcher[behaviour](
                                         historical_data[candle_period],
                                         hot_thresh=behaviour_conf['hot'],
@@ -93,6 +95,7 @@ class Behaviour():
                                         hot_thresh=behaviour_conf['hot'],
                                         cold_thresh=behaviour_conf['cold']
                                     )
+
                         else:
                             self.logger.warn("No such behaviour: %s, skipping.", behaviour)
                 except Exception as e:
