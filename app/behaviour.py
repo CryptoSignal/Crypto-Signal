@@ -98,12 +98,12 @@ class Behaviour():
 
                         else:
                             self.logger.warn("No such behaviour: %s, skipping.", behaviour)
-                except Exception as e:
+                except ValueError as e:
                     # If a ValueError gets raised kill the program
-                    if isinstance(e, ValueError):
-                        self.logger.info('ValueError: %s', e)
-                        exit()
+                    self.logger.info('ValueError: %s', e)
+                    exit()
 
+                except Exception:
                     self.logger.info(
                         'A problem occured fetching informationg for pair %s, skipping',
                         market_pair
