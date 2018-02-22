@@ -113,6 +113,7 @@ class Behaviour():
                 output = "{}:\t".format(market_pair)
                 for analysis in analyzed_data:
                     if analyzed_data[analysis]:
+                        color_code = ''
                         if self.behaviour_config[analysis.lower()]['alert_enabled']:
                             color_code = '\u001b[0m'
                             color_reset = '\u001b[0m'
