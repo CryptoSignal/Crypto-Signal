@@ -98,12 +98,12 @@ class Behaviour():
 
                         else:
                             self.logger.warn("No such behaviour: %s, skipping.", behaviour)
-                except Exception as e:
+                except ValueError as e:
                     # If a ValueError gets raised kill the program
-                    if isinstance(e, ValueError):
-                        self.logger.info('ValueError: %s', e)
-                        exit()
+                    self.logger.info('ValueError: %s', e)
+                    exit()
 
+                except Exception:
                     self.logger.info(
                         'A problem occured fetching informationg for pair %s, skipping',
                         market_pair
@@ -113,9 +113,9 @@ class Behaviour():
                 output = "{}:\t".format(market_pair)
                 for analysis in analyzed_data:
                     if analyzed_data[analysis]:
+                        color_code = '\u001b[0m'
+                        color_reset = '\u001b[0m'
                         if self.behaviour_config[analysis.lower()]['alert_enabled']:
-                            color_code = '\u001b[0m'
-                            color_reset = '\u001b[0m'
                             if analyzed_data[analysis]['is_hot']:
                                 color_code = '\u001b[31m'
                                 message += "{}: {} is hot!\n".format(analysis, market_pair)
