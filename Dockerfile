@@ -1,4 +1,4 @@
-FROM python:3.6
+FROM python:3.6-jessie
 
 # TA-lib is required by the python TA-lib wrapper. This provides analysis.
 RUN wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && \
