@@ -4,6 +4,7 @@
 """
 
 import structlog
+from tenacity import RetryError
 
 class Behaviour():
     """Default behaviour which gives users basic trading information.
@@ -98,14 +99,9 @@ class Behaviour():
 
                         else:
                             self.logger.warn("No such behaviour: %s, skipping.", behaviour)
-                except ValueError as e:
-                    # If a ValueError gets raised kill the program
-                    self.logger.info('ValueError: %s', e)
-                    exit()
-
-                except Exception:
+                except RetryError:
                     self.logger.info(
-                        'A problem occured fetching informationg for pair %s, skipping',
+                        'Too many retries fetching informationg for pair %s, skipping',
                         market_pair
                     )
 
