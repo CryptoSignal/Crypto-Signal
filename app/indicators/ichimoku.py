@@ -7,7 +7,7 @@ import pandas
 from talib import abstract
 
 from indicators.utils import IndicatorUtils
-from indicators.strategies.ichimoku_cloud import IchimokuCloud
+from indicators.analyzers.ichimoku_cloud import IchimokuCloud
 
 
 class Ichimoku(IndicatorUtils):
@@ -38,6 +38,7 @@ class Ichimoku(IndicatorUtils):
 
         tenkan_sen = ic_analyzer.get_tenkansen(tenkansen_historical_data)
         kijun_sen = ic_analyzer.get_kijunsen(kijunsen_historical_data)
+
         leading_span_a = ic_analyzer.get_senkou_span_a(
             kijunsen_historical_data,
             tenkansen_historical_data

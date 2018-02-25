@@ -2,7 +2,7 @@
 """
 
 import structlog
-from indicators.strategies.utils import StrategyUtils
+from indicators.analyzers.utils import StrategyUtils
 
 
 class IchimokuCloud(StrategyUtils):
@@ -25,6 +25,7 @@ class IchimokuCloud(StrategyUtils):
         Returns:
             float: The Kijun-sen line value of ichimoku.
         """
+        print('historical data: ', historical_data)
 
         period_high = max(self.get_high_prices(historical_data))
         period_low = min(self.get_low_prices(historical_data))
