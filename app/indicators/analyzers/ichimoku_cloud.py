@@ -2,7 +2,7 @@
 """
 
 import structlog
-from indicators.strategies.utils import StrategyUtils
+from indicators.analyzers.utils import StrategyUtils
 
 
 class IchimokuCloud(StrategyUtils):

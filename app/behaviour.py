@@ -3,6 +3,8 @@
 2. Notify users when a threshold is crossed.
 """
 
+import traceback
+
 import structlog
 from tenacity import RetryError
 
@@ -98,7 +100,13 @@ class Behaviour():
                                     )
 
                         else:
-                            self.logger.warn("No such behaviour: %s, skipping.", behaviour)
+                            self.logger.warn("No such behaviour %s, skipping.", behaviour)
+                except TypeError:
+                    self.logger.info(
+                        'Exchange likely provided incorrect data for pair %s, skipping',
+                        market_pair
+                    )
+                    self.logger.debug(traceback.format_exc())
                 except RetryError:
                     self.logger.info(
                         'Too many retries fetching informationg for pair %s, skipping',
