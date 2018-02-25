@@ -101,8 +101,6 @@ class Behaviour():
 
                         else:
                             self.logger.warn("No such behaviour %s, skipping.", behaviour)
-                except ValueError as e:
-                    self.logger.info(e)
                 except TypeError:
                     self.logger.info(
                         'Exchange likely provided incorrect data for pair %s, skipping',
