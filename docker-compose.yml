@@ -2,6 +2,6 @@ version: '3'
 
 services:
   app:
-    image: gcr.io/compact-factor-192404/crypto-signal:master
+    image: shadowreaver/crypto-signal:master
     env_file:
       - settings.env
