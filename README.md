@@ -33,18 +33,14 @@ You can build on top of this tool and implement algorithm trading and some machi
 The commands listed below are intended to be run in a terminal.
 
 ### Linux & OSX
-0. Clone this repository. `git clone https://github.com/AbenezerMamo/crypto-signal.git`
-
-0. Build the docker image. `make build`
+0. Clone this repository. `git clone https://github.com/CryptoSignal/crypto-signal.git`
 
 0. Create a settings.env file in the project directory. `touch settings.env`
 
 0. Run application. `docker-compose run --rm app`
 
 ### Windows
-0. Clone this repository. `git clone https://github.com/AbenezerMamo/crypto-signal.git`
-
-0. Build the docker image. `docker build -t crypto-signal:latest .`
+0. Clone this repository. `git clone https://github.com/CryptoSignal/crypto-signal.git`
 
 0. Create a settings.env file in the project directory. Create it with windows explorer or your favourite editor.
 
