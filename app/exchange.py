@@ -58,8 +58,11 @@ class ExchangeInterface():
 
         if time_unit not in self.exchanges[exchange].timeframes:
             raise ValueError(
-                exchange + " does not support " + time_unit + " timeframe for OHLCV data. \n" +
-                "Possible values are: {}".format(list(self.exchanges[exchange].timeframes))
+                "{} does not support {} timeframe for OHLCV data. Possible values are: {}".format(
+                    exchange,
+                    time_unit,
+                    list(self.exchanges[exchange].timeframes)
+                )
             )
 
         if not start_date:

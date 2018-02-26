@@ -11,7 +11,7 @@ from indicators.utils import IndicatorUtils
 
 class SMA(IndicatorUtils):
     def analyze(self, historical_data, period_count=15,
-                    hot_thresh=None, cold_thresh=None, all_data=False):
+                    hot_thresh=False, cold_thresh=False, all_data=False):
         """Performs a SMA analysis on the historical data
 
         Args:
@@ -41,12 +41,12 @@ class SMA(IndicatorUtils):
                 continue
 
             is_hot = False
-            if hot_thresh is not None:
+            if hot_thresh is not False:
                 threshold = sma_row[1]['sma_value'] * hot_thresh
                 is_hot = sma_row[1]['close'] > threshold
 
             is_cold = False
-            if cold_thresh is not None:
+            if cold_thresh is not False:
                 threshold = sma_row[1]['sma_value'] * cold_thresh
                 is_cold = sma_row[1]['close'] < threshold
 

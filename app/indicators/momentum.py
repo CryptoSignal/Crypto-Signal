@@ -11,7 +11,7 @@ from indicators.utils import IndicatorUtils
 
 class Momentum(IndicatorUtils):
     def analyze(self, historical_data, period_count=10,
-                hot_thresh=None, cold_thresh=None, all_data=False):
+                hot_thresh=False, cold_thresh=False, all_data=False):
         """Performs momentum analysis on the historical data
 
         Args:
@@ -40,11 +40,11 @@ class Momentum(IndicatorUtils):
                 continue
 
             is_hot = False
-            if hot_thresh is not None:
+            if hot_thresh is not False:
                 is_hot = mom_value > hot_thresh
 
             is_cold = False
-            if cold_thresh is not None:
+            if cold_thresh is not False:
                 is_cold = mom_value < cold_thresh
 
             data_point_result = {

@@ -10,16 +10,16 @@ from indicators.utils import IndicatorUtils
 
 
 class EMA(IndicatorUtils):
-    def analyze(self, historical_data, period_count=15, hot_thresh=None, cold_thresh=None, all_data=False):
+    def analyze(self, historical_data, period_count=15, hot_thresh=False, cold_thresh=False, all_data=False):
         """Performs an EMA analysis on the historical data
 
 		Args:
 			historical_data (list): A matrix of historical OHCLV data.
 			period_count (int, optional): Defaults to 15. The number of data points to consider for
 				our exponential moving average.
-			hot_thresh (float, optional): Defaults to None. The threshold at which this might be
+			hot_thresh (float, optional): Defaults to False. The threshold at which this might be
 				good to purchase.
-			cold_thresh (float, optional): Defaults to None. The threshold at which this might be
+			cold_thresh (float, optional): Defaults to False. The threshold at which this might be
 				good to sell.
 			all_data (bool, optional): Defaults to False. If True, we return the EMA associated
 				with each data point in our historical dataset. Otherwise just return the last one.
@@ -40,12 +40,12 @@ class EMA(IndicatorUtils):
                 continue
 
             is_hot = False
-            if hot_thresh is not None:
+            if hot_thresh is not False:
                 threshold = ema_row[1]['ema_value'] * hot_thresh
                 is_hot = ema_row[1]['close'] > threshold
 
             is_cold = False
-            if cold_thresh is not None:
+            if cold_thresh is not False:
                 threshold = ema_row[1]['ema_value'] * cold_thresh
                 is_cold = ema_row[1]['close'] < threshold
 

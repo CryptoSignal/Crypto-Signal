@@ -10,14 +10,14 @@ from indicators.utils import IndicatorUtils
 
 
 class MACD(IndicatorUtils):
-    def analyze(self, historical_data, hot_thresh=None, cold_thresh=None, all_data=False):
+    def analyze(self, historical_data, hot_thresh=False, cold_thresh=False, all_data=False):
         """Performs a macd analysis on the historical data
 
         Args:
             historical_data (list): A matrix of historical OHCLV data.
-            hot_thresh (float, optional): Defaults to None. The threshold at which this might be
+            hot_thresh (float, optional): Defaults to False. The threshold at which this might be
                 good to purchase.
-            cold_thresh (float, optional): Defaults to None. The threshold at which this might be
+            cold_thresh (float, optional): Defaults to False. The threshold at which this might be
                 good to sell.
             all_data (bool, optional): Defaults to False. If True, we return the MACD associated
                 with each data point in our historical dataset. Otherwise just return the last one.
@@ -36,11 +36,11 @@ class MACD(IndicatorUtils):
                 continue
 
             is_hot = False
-            if hot_thresh is not None:
+            if hot_thresh is not False:
                 is_hot = macd_value > hot_thresh
 
             is_cold = False
-            if cold_thresh is not None:
+            if cold_thresh is not False:
                 is_cold = macd_value < cold_thresh
 
             data_point_result = {
@@ -60,7 +60,7 @@ class MACD(IndicatorUtils):
                 return macd_result_data
 
 
-    def analyze_sl(self, historical_data, hot_thresh=None, cold_thresh=None, all_data=False):
+    def analyze_sl(self, historical_data, hot_thresh=False, cold_thresh=False, all_data=False):
         """Performs a macd analysis on the historical data using signal line for alerting
 
         Args:
@@ -86,11 +86,11 @@ class MACD(IndicatorUtils):
                 continue
 
             is_hot = False
-            if hot_thresh is not None:
+            if hot_thresh is not False:
                 is_hot = macd_row[1]['macd'] > macd_row[1]['macdsignal']
 
             is_cold = False
-            if cold_thresh is not None:
+            if cold_thresh is not False:
                 is_cold = macd_row[1]['macd'] < macd_row[1]['macdsignal']
 
             data_point_result = {

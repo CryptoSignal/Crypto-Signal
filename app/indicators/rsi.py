@@ -11,7 +11,7 @@ from indicators.utils import IndicatorUtils
 
 class RSI(IndicatorUtils):
     def analyze(self, historical_data, period_count=14,
-                hot_thresh=None, cold_thresh=None, all_data=False):
+                hot_thresh=False, cold_thresh=False, all_data=False):
         """Performs an RSI analysis on the historical data
 
         Args:
@@ -39,11 +39,11 @@ class RSI(IndicatorUtils):
                 continue
 
             is_hot = False
-            if hot_thresh is not None:
+            if hot_thresh is not False:
                 is_hot = rsi_value < hot_thresh
 
             is_cold = False
-            if cold_thresh is not None:
+            if cold_thresh is not False:
                 is_cold = rsi_value > cold_thresh
 
             data_point_result = {

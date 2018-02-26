@@ -101,9 +101,15 @@ class Behaviour():
 
                         else:
                             self.logger.warn("No such behaviour %s, skipping.", behaviour)
+                except ValueError as e:
+                    self.logger.info(e)
+                    self.logger.info(
+                        'Invalid data encountered while processing pair %s, skipping',
+                    )
+                    self.logger.debug(traceback.format_exc())
                 except TypeError:
                     self.logger.info(
-                        'Exchange likely provided incorrect data for pair %s, skipping',
+                        'Invalid data encountered while processing pair %s, skipping',
                         market_pair
                     )
                     self.logger.debug(traceback.format_exc())
