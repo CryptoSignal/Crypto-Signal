@@ -32,11 +32,11 @@ You can build on top of this tool and implement algorithm trading and some machi
 ## Installing And Running
 The commands listed below are intended to be run in a terminal.
 
-0. Clone this repository. `git clone https://github.com/CryptoSignal/crypto-signal.git`
+1. Clone this repository. `git clone https://github.com/CryptoSignal/crypto-signal.git`
 
-0. Create a settings.env file in the project directory.
+1. Create a settings.env file in the project directory.
 
-0. Run application. `docker-compose pull && docker-compose run --rm app`
+1. Run application. `docker-compose pull && docker-compose run --rm app`
 
 ### Configuring settings.env
 
