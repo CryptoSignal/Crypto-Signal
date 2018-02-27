@@ -105,6 +105,7 @@ class Behaviour():
                     self.logger.info(e)
                     self.logger.info(
                         'Invalid data encountered while processing pair %s, skipping',
+                        market_pair
                     )
                     self.logger.debug(traceback.format_exc())
                 except TypeError:

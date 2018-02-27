@@ -94,7 +94,7 @@ class ExchangeInterface():
         )
 
         if not historical_data:
-            raise ValueError('No historical data provided for dataframe conversion.')
+            raise ValueError('No historical data provided returned by exchange.')
 
         # Sort by timestamp in ascending order
         historical_data.sort(key=lambda d: d[0])
