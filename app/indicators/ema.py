@@ -10,7 +10,7 @@ from indicators.utils import IndicatorUtils
 
 
 class EMA(IndicatorUtils):
-    def analyze(self, historical_data, period_count=15, hot_thresh=False, cold_thresh=None, all_data=None):
+    def analyze(self, historical_data, period_count=15, hot_thresh=None, cold_thresh=None, all_data=None):
         """Performs an EMA analysis on the historical data
 
 		Args:

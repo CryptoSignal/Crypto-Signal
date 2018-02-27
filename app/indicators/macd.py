@@ -10,7 +10,7 @@ from indicators.utils import IndicatorUtils
 
 
 class MACD(IndicatorUtils):
-    def analyze(self, historical_data, hot_thresh=False, cold_thresh=False, all_data=False):
+    def analyze(self, historical_data, hot_thresh=None, cold_thresh=None, all_data=False):
         """Performs a macd analysis on the historical data
 
         Args:
@@ -36,11 +36,11 @@ class MACD(IndicatorUtils):
                 continue
 
             is_hot = False
-            if hot_thresh is not False:
+            if hot_thresh is not None:
                 is_hot = macd_value > hot_thresh
 
             is_cold = False
-            if cold_thresh is not False:
+            if cold_thresh is not None:
                 is_cold = macd_value < cold_thresh
 
             data_point_result = {
