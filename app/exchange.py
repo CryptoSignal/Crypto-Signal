@@ -93,10 +93,14 @@ class ExchangeInterface():
             since=start_date
         )
 
-        time.sleep(self.exchanges[exchange].rateLimit / 1000)
+        if not historical_data:
+            raise ValueError('No historical data provided for dataframe conversion.')
 
         # Sort by timestamp in ascending order
         historical_data.sort(key=lambda d: d[0])
+
+        time.sleep(self.exchanges[exchange].rateLimit / 1000)
+
         return historical_data
 
 

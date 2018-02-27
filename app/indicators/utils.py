@@ -21,9 +21,6 @@ class IndicatorUtils():
             pandas.DataFrame: Contains the historical data in a pandas dataframe.
         """
 
-        if not historical_data:
-            raise ValueError('No historical data provided for dataframe conversion.')
-
         dataframe = pandas.DataFrame(historical_data)
         dataframe.transpose()
 

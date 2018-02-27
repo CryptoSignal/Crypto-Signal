@@ -52,26 +52,36 @@ class Configuration():
                 new_value = os.environ.get(key_path, config_fragment[key])
                 if isinstance(new_value, str):
                     new_value = new_value.translate(str.maketrans('', '', whitespace)).split(",")
-                config_fragment[key] = new_value
 
             elif isinstance(config_fragment[key], bool):
                 key_path = '_'.join([base_path, key.upper()])
                 new_value = os.environ.get(key_path, config_fragment[key])
                 if isinstance(new_value, str):
                     new_value = bool(distutils.util.strtobool(new_value))
+                if new_value is '':
+                    new_value = None
                 config_fragment[key] = new_value
 
             elif isinstance(config_fragment[key], str):
                 key_path = '_'.join([base_path, key.upper()])
-                config_fragment[key] = str(os.environ.get(key_path, config_fragment[key]))
+                new_value = str(os.environ.get(key_path, config_fragment[key]))
+                if new_value.strip() is '':
+                    new_value = None
+                config_fragment[key] = new_value
 
             elif isinstance(config_fragment[key], int):
                 key_path = '_'.join([base_path, key.upper()])
                 new_value = os.environ.get(key_path, config_fragment[key])
 
-                success = True
+                success = False
+                if new_value is '':
+                    new_value = None
+                    success = True
+
                 try:
-                    new_value = int(new_value)
+                    if not success:
+                        new_value = int(new_value)
+                        success = True
                 except ValueError:
                     success = False
 
@@ -91,9 +101,16 @@ class Configuration():
                 key_path = '_'.join([base_path, key.upper()])
                 new_value = os.environ.get(key_path, config_fragment[key])
 
-                success = True
+                success = False
+                if new_value is '':
+                    new_value = None
+                    success = True
+
+
                 try:
-                    new_value = float(new_value)
+                    if not success:
+                        new_value = float(new_value)
+                        success = True
                 except ValueError:
                     success = False
                     pass

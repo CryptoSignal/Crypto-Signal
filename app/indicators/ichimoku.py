@@ -11,14 +11,14 @@ from indicators.analyzers.ichimoku_cloud import IchimokuCloud
 
 
 class Ichimoku(IndicatorUtils):
-    def analyze(self, historical_data, hot_thresh=False, cold_thresh=False):
+    def analyze(self, historical_data, hot_thresh=None, cold_thresh=None):
         """Performs an ichimoku cloud analysis on the historical data
 
         Args:
             historical_data (list): A matrix of historical OHCLV data.
-            hot_thresh (float, optional): Defaults to False. The threshold at which this might be
+            hot_thresh (float, optional): Defaults to None. The threshold at which this might be
                 good to purchase.
-            cold_thresh (float, optional): Defaults to False. The threshold at which this might be
+            cold_thresh (float, optional): Defaults to None. The threshold at which this might be
                 good to sell.
 
         Returns:
@@ -47,12 +47,12 @@ class Ichimoku(IndicatorUtils):
         leading_span_b = ic_analyzer.get_senkou_span_b(senkou_span_b_historical_data)
 
         is_hot = False
-        if leading_span_a > leading_span_b and hot_thresh is not False:
+        if leading_span_a > leading_span_b and hot_thresh is not None:
             if historical_data[-1][4] > leading_span_a:
                 is_hot = True
 
         is_cold = False
-        if leading_span_a < leading_span_b and cold_thresh is not False:
+        if leading_span_a < leading_span_b and cold_thresh is not None:
             if historical_data[-1][4] < leading_span_b:
                 is_cold = True
 

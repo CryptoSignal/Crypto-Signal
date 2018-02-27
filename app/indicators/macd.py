@@ -60,7 +60,7 @@ class MACD(IndicatorUtils):
                 return macd_result_data
 
 
-    def analyze_sl(self, historical_data, hot_thresh=False, cold_thresh=False, all_data=False):
+    def analyze_sl(self, historical_data, hot_thresh=None, cold_thresh=None, all_data=False):
         """Performs a macd analysis on the historical data using signal line for alerting
 
         Args:
@@ -86,11 +86,11 @@ class MACD(IndicatorUtils):
                 continue
 
             is_hot = False
-            if hot_thresh is not False:
+            if hot_thresh is not None:
                 is_hot = macd_row[1]['macd'] > macd_row[1]['macdsignal']
 
             is_cold = False
-            if cold_thresh is not False:
+            if cold_thresh is not None:
                 is_cold = macd_row[1]['macd'] < macd_row[1]['macdsignal']
 
             data_point_result = {
