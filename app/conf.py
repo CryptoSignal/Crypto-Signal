@@ -52,6 +52,7 @@ class Configuration():
                 new_value = os.environ.get(key_path, config_fragment[key])
                 if isinstance(new_value, str):
                     new_value = new_value.translate(str.maketrans('', '', whitespace)).split(",")
+                config_fragment[key] = new_value
 
             elif isinstance(config_fragment[key], bool):
                 key_path = '_'.join([base_path, key.upper()])
