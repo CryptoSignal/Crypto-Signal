@@ -8,6 +8,7 @@ import logs
 import conf
 import structlog
 
+from conf import Configuration
 from exchange import ExchangeInterface
 from notification import Notifier
 from analysis import StrategyAnalyzer
@@ -17,11 +18,11 @@ def main():
     """Initializes the application
     """
      # Load settings and create the config object
-    config = conf.Configuration()
+    config = Configuration()
     settings = config.settings
 
     # Set up logger
-    logs.configure_logging(settings['loglevel'], settings['log_mode'])
+    logs.configure_logging(settings['log_level'], settings['log_mode'])
     logger = structlog.get_logger()
 
     # Configure and run configured behaviour.

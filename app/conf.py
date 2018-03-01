@@ -1,124 +1,177 @@
-"""Load configuration from default-config.json or env
+"""Load configuration from environment
 """
 
 import os
-import json
 import distutils.util
 from string import whitespace
 
-import ccxt # Only uses ccxt to get exchanges, never queries them.
+import ccxt
 
 class Configuration():
-    """Parses the various forms of configuration to create the config objects.
+    """Parses the environment configuration to create the config objects.
     """
+
     def __init__(self):
         """Initializes the Configuration class
         """
 
-        config = json.load(open('default-config.json'))
+        self.settings = {
+            'log_mode': os.environ.get('SETTINGS_LOG_MODE', 'text'),
+            'log_level': os.environ.get('SETTINGS_LOG_LEVEL', 'INFO'),
+            'update_interval': int(os.environ.get('SETTINGS_UPDATE_INTERVAL', 300)),
+            'market_pairs': self._string_splitter(os.environ.get('SETTINGS_MARKET_PAIRS', None))
+        }
 
-        for exchange in ccxt.exchanges:
-            if not exchange in config['exchanges']:
-                config['exchanges'][exchange] = {
-                    'required': {
-                        'enabled': False
-                    }
+        self.notifiers = {
+            'twilio': {
+                'required': {
+                    'key': os.environ.get('NOTIFIERS_TWILIO_REQUIRED_KEY', None),
+                    'secret': os.environ.get('NOTIFIERS_TWILIO_REQUIRED_SECRET', None),
+                    'sender_number': os.environ.get('NOTIFIERS_TWILIO_REQUIRED_SENDER_NUMBER', None),
+                    'receiver_number': os.environ.get('NOTIFIERS_TWILIO_REQUIRED_RECEIVER_NUMBER', None)
                 }
+            },
 
-        user_config_file = 'config.json'
-        user_config = json.load(open(user_config_file)) if os.path.isfile(user_config_file) else {}
-        config.update(user_config)
+            'slack': {
+                'required': {
+                    'webhook': os.environ.get('NOTIFIERS_SLACK_REQUIRED_WEBHOOK', None)
+                }
+            },
 
-        config['settings'] = self.__parse_config(config['settings'], 'SETTINGS')
-        self.settings = config['settings']
+            'gmail': {
+                'required': {
+                    'username': os.environ.get('NOTIFIERS_GMAIL_REQUIRED_USERNAME', None),
+                    'password': os.environ.get('NOTIFIERS_GMAIL_REQUIRED_PASSWORD', None),
+                    'destination_emails': self._string_splitter(
+                        os.environ.get('NOTIFIERS_GMAIL_REQUIRED_DESTINATION_EMAILS', None)
+                    )
+                }
+            },
 
-        config['exchanges'] = self.__parse_config(config['exchanges'], 'EXCHANGES')
-        self.exchanges = config['exchanges']
+            'integram': {
+                'required': {
+                    'url': os.environ.get('NOTIFIERS_INTEGRAM_REQUIRED_URL', None),
+                }
+            }
+        }
 
-        config['notifiers'] = self.__parse_config(config['notifiers'], 'NOTIFIERS')
-        self.notifiers = config['notifiers']
+        self.behaviour = {
+            'momentum': {
+                'enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_MOMENTUM_ENABLED', 'True')
+                )),
+                'alert_enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_MOMENTUM_ALERT_ENABLED', 'True')
+                )),
+                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MOMENTUM_HOT', 0)),
+                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MOMENTUM_COLD', 0)),
+                'candle_period': os.environ.get('BEHAVIOUR_MOMENTUM_CANDLE_PERIOD', '1d'),
+                'period_count': int(os.environ.get('BEHAVIOUR_MOMENTUM_CANDLE_PERIOD', 10))
+            },
 
-        config['behaviour'] = self.__parse_config(config['behaviour'], 'BEHAVIOUR')
-        self.behaviour = config['behaviour']
+            'rsi': {
+                'enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_RSI_ENABLED', 'True')
+                )),
+                'alert_enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_RSI_ALERT_ENABLED', 'True')
+                )),
+                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_RSI_HOT', 30)),
+                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_RSI_COLD', 70)),
+                'candle_period': os.environ.get('BEHAVIOUR_RSI_CANDLE_PERIOD', '1d'),
+                'period_count': int(os.environ.get('BEHAVIOUR_RSI_CANDLE_PERIOD', 14))
+            },
 
-    def __parse_config(self, config_fragment, base_path=""):
-        for key in config_fragment:
-            if isinstance(config_fragment[key], dict):
-                key_path = '_'.join([base_path, key.upper()])
-                config_fragment[key] = self.__parse_config(config_fragment[key], key_path)
+            'macd': {
+                'enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_MACD_ENABLED', 'True')
+                )),
+                'alert_enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_MACD_ALERT_ENABLED', 'True')
+                )),
+                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_HOT', 0)),
+                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_COLD', 0)),
+                'candle_period': os.environ.get('BEHAVIOUR_MACD_CANDLE_PERIOD', '1d')
+            },
 
-            elif isinstance(config_fragment[key], list):
-                key_path = '_'.join([base_path, key.upper()])
-                new_value = os.environ.get(key_path, config_fragment[key])
-                if isinstance(new_value, str):
-                    new_value = new_value.translate(str.maketrans('', '', whitespace)).split(",")
-                config_fragment[key] = new_value
+            'sma': {
+                'enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_SMA_ENABLED', 'True')
+                )),
+                'alert_enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_SMA_ALERT_ENABLED', 'True')
+                )),
+                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_HOT', 1)),
+                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_COLD', 1)),
+                'candle_period': os.environ.get('BEHAVIOUR_SMA_CANDLE_PERIOD', '1d'),
+                'period_count': int(os.environ.get('BEHAVIOUR_SMA_CANDLE_PERIOD', 15))
+            },
 
-            elif isinstance(config_fragment[key], bool):
-                key_path = '_'.join([base_path, key.upper()])
-                new_value = os.environ.get(key_path, config_fragment[key])
-                if isinstance(new_value, str):
-                    new_value = bool(distutils.util.strtobool(new_value))
-                if new_value is '':
-                    new_value = None
-                config_fragment[key] = new_value
+            'ema': {
+                'enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_EMA_ENABLED', 'True')
+                )),
+                'alert_enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_EMA_ALERT_ENABLED', 'True')
+                )),
+                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_HOT', 1)),
+                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_COLD', 1)),
+                'candle_period': os.environ.get('BEHAVIOUR_EMA_CANDLE_PERIOD', '1d'),
+                'period_count': int(os.environ.get('BEHAVIOUR_EMA_CANDLE_PERIOD', 11))
+            },
 
-            elif isinstance(config_fragment[key], str):
-                key_path = '_'.join([base_path, key.upper()])
-                new_value = str(os.environ.get(key_path, config_fragment[key]))
-                if new_value.strip() is '':
-                    new_value = None
-                config_fragment[key] = new_value
+            'ichimoku': {
+                'enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_ICHIMOKU_ENABLED', 'True')
+                )),
+                'alert_enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_ICHIMOKU_ALERT_ENABLED', 'True')
+                )),
+                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_ICHIMOKU_HOT', 'True')),
+                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_ICHIMOKU_COLD', 'True')),
+                'candle_period': os.environ.get('BEHAVIOUR_ICHIMOKU_CANDLE_PERIOD', '1d')
+            },
+        }
 
-            elif isinstance(config_fragment[key], int):
-                key_path = '_'.join([base_path, key.upper()])
-                new_value = os.environ.get(key_path, config_fragment[key])
-
-                success = False
-                if new_value is '':
-                    new_value = None
-                    success = True
-
-                try:
-                    if not success:
-                        new_value = int(new_value)
-                        success = True
-                except ValueError:
-                    success = False
-
-                try:
-                    if not success:
-                        new_value = float(new_value)
-                        success = True
-                except ValueError:
-                    success = False
-
-                if not success:
-                    new_value = bool(distutils.util.strtobool(new_value))
-
-                config_fragment[key] = new_value
-
-            elif isinstance(config_fragment[key], float):
-                key_path = '_'.join([base_path, key.upper()])
-                new_value = os.environ.get(key_path, config_fragment[key])
-
-                success = False
-                if new_value is '':
-                    new_value = None
-                    success = True
+        self.exchanges = {}
+        for exchange in ccxt.exchanges:
+            exchange_var_name = 'EXCHANGES_' + exchange.upper() + '_REQUIRED_ENABLED'
+            self.exchanges[exchange] = {
+                'required': {
+                    'enabled': bool(distutils.util.strtobool(
+                        os.environ.get(exchange_var_name, 'False')
+                    )),
+                }
+            }
 
 
-                try:
-                    if not success:
-                        new_value = float(new_value)
-                        success = True
-                except ValueError:
-                    success = False
-                    pass
+    def _string_splitter(self, string):
+        """Splits a string into a list.
 
-                if not success:
-                    new_value = bool(distutils.util.strtobool(new_value))
+        Args:
+            string (str): A string that can potentially be split into a list.
 
-                config_fragment[key] = new_value
+        Returns:
+            list: A list of strings
+        """
 
-        return config_fragment
+        if string:
+            string = string.translate(str.maketrans('', '', whitespace)).split(",")
+        return string
+
+
+    def _hot_cold_typer(self, hot_cold):
+        """Attempt to infer the type of the hot or cold option.
+
+        Args:
+            hot_cold (float|string): A float, stringified float or stringified bool
+
+        Returns:
+            float|bool: Float or bool after type conversion.
+        """
+
+        try:
+            hot_cold = float(hot_cold)
+        except ValueError:
+            hot_cold = bool(distutils.util.strtobool(hot_cold))
+        return hot_cold
