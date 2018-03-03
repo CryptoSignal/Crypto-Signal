@@ -6,7 +6,9 @@
 import traceback
 
 import structlog
+from ccxt import ExchangeError
 from tenacity import RetryError
+
 
 class Behaviour():
     """Default behaviour which gives users basic trading information.
@@ -119,6 +121,12 @@ class Behaviour():
                         'Too many retries fetching informationg for pair %s, skipping',
                         market_pair
                     )
+                except ExchangeError:
+                    self.logger.info(
+                        'Exchange supplied bad data for pair %s, skipping',
+                        market_pair
+                    )
+                    self.logger.debug(traceback.format_exc())
 
                 message = ""
                 output = "{}:\t".format(market_pair)
