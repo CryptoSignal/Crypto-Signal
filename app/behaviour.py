@@ -147,6 +147,16 @@ class Behaviour():
 
 
     def __get_notifier_message(self, analyzed_data, market_pair):
+        """Creates the message to send via the configured notifier(s)
+
+        Args:
+            analyzed_data (dict): The result of the completed analysis
+            market_pair (str): The market related to the message
+
+        Returns:
+            str: Completed notifier message
+        """
+
         message = ""
         for analysis in analyzed_data:
             if analyzed_data[analysis]:
@@ -161,6 +171,16 @@ class Behaviour():
 
 
     def __get_cli_output(self, analyzed_data, market_pair):
+        """Creates the message to output to the CLI
+
+        Args:
+            analyzed_data (dict): The result of the completed analysis
+            market_pair (str): The market related to the message
+
+        Returns:
+            str: Completed cli message
+        """
+
         normal_colour = '\u001b[0m'
         hot_colour = '\u001b[31m'
         cold_colour = '\u001b[36m'
@@ -193,6 +213,16 @@ class Behaviour():
 
 
     def __get_csv_output(self, analyzed_data, market_pair):
+        """Creates the csv to output to the CLI
+
+        Args:
+            analyzed_data (dict): The result of the completed analysis
+            market_pair (str): The market related to the message
+
+        Returns:
+            str: Completed cli csv
+        """
+
         output = market_pair
         for analysis in analyzed_data:
             if analyzed_data[analysis]:
@@ -217,6 +247,16 @@ class Behaviour():
 
 
     def __get_json_output(self, analyzed_data, market_pair):
+        """Creates the JSON to output to the CLI
+
+        Args:
+            analyzed_data (dict): The result of the completed analysis
+            market_pair (str): The market related to the message
+
+        Returns:
+            str: Completed JSON message
+        """
+
         stringified_analysis = analyzed_data
         for analysis in analyzed_data:
             if analyzed_data[analysis]:
