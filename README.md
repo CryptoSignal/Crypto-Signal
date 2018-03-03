@@ -40,33 +40,7 @@ The commands listed below are intended to be run in a terminal.
 
 ### Configuring settings.env
 
-The environment variables you put into the settings.env file map to those found in [default-config.json](app/default-config.json). The way this works is that the name of the environment variables matches the path of the key in the JSON file.
-
-For example lets say you wanted to scan only the markets ETH/BTC and DOGE/BTC, the default-config.json shows an empty array that will cause it to fetch all pairs:
-```
-{
-  "settings": {
-    "market_pairs": [],
-...
-```
-
-To override this configration add the following line to settings.env `SETTINGS_MARKET_PAIRS=ETH/BTC,DOGE/BTC`.
-
-Another common setting that users often want to override is which exchange to gather data from. Consider this from the default-config.json
-```
-...
-  "exchanges": {
-    "bittrex": {
-      "required": {
-        "enabled": true
-      }
-    }
-  },
-...
-```
-Lets turn off bittrex and turn on bitfinex, to do that we would add the following as two separate lines to settings.env: `EXCHANGES_BITTREX_REQUIRED_ENABLED=false` and `EXCHANGES_BITFINEX_REQUIRED_ENABLED=true`. You can find all available exchange id's [here](https://github.com/ccxt/ccxt/wiki/Exchange-Markets).
-
-You can override any settings in the default-json.config file in the manner we have shown in the previous examples. When overriding Json arrays in settings.env they must be described as comma separated values without spaces.
+For a list of all possible options for settings.env and some example configurations look [here](docs/config.md)
 
 # FAQ
 
