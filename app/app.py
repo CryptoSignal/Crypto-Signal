@@ -38,7 +38,7 @@ def main():
     )
 
     while True:
-        behaviour.run(settings['market_pairs'])
+        behaviour.run(settings['market_pairs'], settings['output_mode'])
         logger.info("Sleeping for %s seconds", settings['update_interval'])
         time.sleep(settings['update_interval'])
 

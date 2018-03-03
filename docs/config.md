@@ -11,6 +11,11 @@ default: INFO\
 necessity: optional\
 description: Can be set to `DEBUG`, `INFO`, `WARN`, `ERROR`. Used to set the logger verbosity.
 
+*SETTINGS_OUTPUT_MODE*\
+default: cli\
+necessity: optional\
+description: Can be set to `cli`, `csv` or `json`. This will specify the output format for events emitted by the app.
+
 *SETTINGS_UPDATE_INTERVAL*\
 default: 300\
 necessity: optional\
