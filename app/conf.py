@@ -66,7 +66,7 @@ class Configuration():
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MOMENTUM_HOT', 0)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MOMENTUM_COLD', 0)),
                 'candle_period': os.environ.get('BEHAVIOUR_MOMENTUM_CANDLE_PERIOD', '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_MOMENTUM_CANDLE_PERIOD', 10))
+                'period_count': int(os.environ.get('BEHAVIOUR_MOMENTUM_PERIOD_COUNT', 10))
             },
 
             'rsi': {
@@ -79,7 +79,7 @@ class Configuration():
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_RSI_HOT', 30)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_RSI_COLD', 70)),
                 'candle_period': os.environ.get('BEHAVIOUR_RSI_CANDLE_PERIOD', '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_RSI_CANDLE_PERIOD', 14))
+                'period_count': int(os.environ.get('BEHAVIOUR_RSI_PERIOD_COUNT', 14))
             },
 
             'macd': {
@@ -104,7 +104,7 @@ class Configuration():
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_HOT', 1)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_COLD', 1)),
                 'candle_period': os.environ.get('BEHAVIOUR_SMA_CANDLE_PERIOD', '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_SMA_CANDLE_PERIOD', 15))
+                'period_count': int(os.environ.get('BEHAVIOUR_SMA_PERIOD_COUNT', 15))
             },
 
             'ema': {
@@ -117,7 +117,7 @@ class Configuration():
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_HOT', 1)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_COLD', 1)),
                 'candle_period': os.environ.get('BEHAVIOUR_EMA_CANDLE_PERIOD', '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_EMA_CANDLE_PERIOD', 11))
+                'period_count': int(os.environ.get('BEHAVIOUR_EMA_PERIOD_COUNT', 11))
             },
 
             'ichimoku': {
@@ -170,8 +170,11 @@ class Configuration():
             float|bool: Float or bool after type conversion.
         """
 
-        try:
-            hot_cold = float(hot_cold)
-        except ValueError:
-            hot_cold = bool(distutils.util.strtobool(hot_cold))
+        if not hot_cold:
+            hot_cold = None
+        else:
+            try:
+                hot_cold = float(hot_cold)
+            except ValueError:
+                hot_cold = bool(distutils.util.strtobool(hot_cold))
         return hot_cold
