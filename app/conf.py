@@ -18,6 +18,7 @@ class Configuration():
         self.settings = {
             'log_mode': os.environ.get('SETTINGS_LOG_MODE', 'text'),
             'log_level': os.environ.get('SETTINGS_LOG_LEVEL', 'INFO'),
+            'output_mode': os.environ.get('SETTINGS_OUTPUT_MODE', 'cli'),
             'update_interval': int(os.environ.get('SETTINGS_UPDATE_INTERVAL', 300)),
             'market_pairs': self._string_splitter(os.environ.get('SETTINGS_MARKET_PAIRS', None))
         }
@@ -170,7 +171,7 @@ class Configuration():
             float|bool: Float or bool after type conversion.
         """
 
-        if not hot_cold:
+        if hot_cold == '':
             hot_cold = None
         else:
             try:
