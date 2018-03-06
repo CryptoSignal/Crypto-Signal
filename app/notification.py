@@ -5,6 +5,7 @@ import structlog
 
 from notifiers.twilio_client import TwilioNotifier
 from notifiers.slack_client import SlackNotifier
+from notifiers.discord_client import DiscordNotifier
 from notifiers.gmail_client import GmailNotifier
 from notifiers.integram_client import IntegramNotifier
 
@@ -27,6 +28,14 @@ class Notifier():
                 twilio_secret=notifier_config['twilio']['required']['secret'],
                 twilio_sender_number=notifier_config['twilio']['required']['sender_number'],
                 twilio_receiver_number=notifier_config['twilio']['required']['receiver_number']
+            )
+
+        self.discord_configured = self.__validate_required_config('discord', notifier_config)
+        if self.discord_configured:
+            self.discord_client = DiscordNotifier(
+                webhook=notifier_config['discord']['required']['webhook'],
+                username=notifier_config['discord']['required']['username'],
+                avatar=notifier_config['discord']['required']['avatar']
             )
 
         self.slack_configured = self.__validate_required_config('slack', notifier_config)
@@ -76,9 +85,21 @@ class Notifier():
         """
 
         self.notify_slack(message)
+        self.notify_discord(message)
         self.notify_twilio(message)
         self.notify_gmail(message)
         self.notify_integram(message)
+
+
+    def notify_discord(self, message):
+        """Send a notification via the discord notifier
+
+        Args:
+            message (str): The message to send.
+        """
+
+        if self.discord_configured:
+            self.discord_client.notify(message)
 
 
     def notify_slack(self, message):

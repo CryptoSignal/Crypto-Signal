@@ -33,6 +33,14 @@ class Configuration():
                 }
             },
 
+            'discord': {
+                'required': {
+                    'webhook': os.environ.get('NOTIFIERS_DISCORD_REQUIRED_WEBHOOK', None),
+                    'username': os.environ.get('NOTIFIERS_DISCORD_REQUIRED_USERNAME', None),
+                    'avatar': os.environ.get('NOTIFIERS_DISCORD_REQUIRED_AVATAR', None)
+                }
+            },
+
             'slack': {
                 'required': {
                     'webhook': os.environ.get('NOTIFIERS_SLACK_REQUIRED_WEBHOOK', None)
