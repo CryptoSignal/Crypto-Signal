@@ -8,3 +8,4 @@ TA-lib==0.4.15
 tabulate==0.8.2
 slackweb==1.0.5
 tenacity==4.8.0
+discord.py==0.16.12
