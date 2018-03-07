@@ -94,6 +94,19 @@ class Configuration():
                 'period_count': int(os.environ.get('BEHAVIOUR_RSI_PERIOD_COUNT', 14))
             },
 
+            'stoch_rsi': {
+                'enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_ENABLED', 'True')
+                )),
+                'alert_enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_ALERT_ENABLED', 'True')
+                )),
+                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_HOT', 20)),
+                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_COLD', 80)),
+                'candle_period': os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_CANDLE_PERIOD', '1d'),
+                'period_count': int(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_PERIOD_COUNT', 14))
+            },
+
             'macd': {
                 'enabled': bool(distutils.util.strtobool(
                     os.environ.get('BEHAVIOUR_MACD_ENABLED', 'True')

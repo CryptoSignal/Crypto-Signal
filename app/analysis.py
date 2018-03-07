@@ -16,7 +16,6 @@ class StrategyAnalyzer():
 
     def __init__(self):
         """Initializes StrategyAnalyzer class """
-
         self.logger = structlog.get_logger()
 
 
@@ -34,7 +33,8 @@ class StrategyAnalyzer():
             'sma': sma.SMA().analyze,
             'ema': ema.EMA().analyze,
             'ichimoku': ichimoku.Ichimoku().analyze,
-            'momentum': momentum.Momentum().analyze
+            'momentum': momentum.Momentum().analyze,
+            'stoch_rsi': stoch_rsi.StochasticRSI().analyze
         }
 
         return dispatcher

@@ -107,6 +107,7 @@ Settings for the analyzers behaviour. Valid indicators to set for hte below conf
 - SMA
 - EMA
 - ICHIMOKU
+- STOCHASTIC_RSI
 
 *BEHAVIOUR_indicator_ENABLED*\
 default: True\
