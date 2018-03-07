@@ -2,7 +2,6 @@ version: '3'
 
 services:
   app:
-    # image: shadowreaver/crypto-signal:master
-    build: ./
+    image: shadowreaver/crypto-signal:master
     env_file:
       - settings.env
