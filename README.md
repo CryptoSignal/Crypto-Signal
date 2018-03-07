@@ -32,11 +32,13 @@ You can build on top of this tool and implement algorithm trading and some machi
 ## Installing And Running
 The commands listed below are intended to be run in a terminal.
 
-1. Clone this repository. `git clone https://github.com/CryptoSignal/crypto-signal.git`
+1. Install [docker CE](https://docs.docker.com/install/)
 
-1. Create a settings.env file in the project directory.
+1. Create a settings.env file in your current directory. See the Configuring settings.env section below for customizing settings.
 
-1. Run application. `docker-compose pull && docker-compose run --rm app`
+1. In a terminal run the application. `docker run --rm --env-file=settings.env shadowreaver/crypto-signal:master`.
+
+1. When you want to update the application run `docker pull shadowreaver/crypto-signal:master`
 
 ### Configuring settings.env
 
