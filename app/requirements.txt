@@ -9,3 +9,4 @@ tabulate==0.8.2
 slackweb==1.0.5
 tenacity==4.8.0
 python-telegram-bot==10.0.1
+webcord==0.2
