@@ -9,7 +9,7 @@ class DiscordNotifier():
     """Class for handling Discord notifications
     """
 
-    def __init__(self, webhook, avatar, username):
+    def __init__(self, webhook, username, avatar=None):
         """Initialize DiscordNotifier class
 
         Args:

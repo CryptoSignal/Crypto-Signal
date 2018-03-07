@@ -35,7 +35,7 @@ class Notifier():
             self.discord_client = DiscordNotifier(
                 webhook=notifier_config['discord']['required']['webhook'],
                 username=notifier_config['discord']['required']['username'],
-                avatar=notifier_config['discord']['required']['avatar']
+                avatar=notifier_config['discord']['optional']['avatar']
             )
 
         self.slack_configured = self.__validate_required_config('slack', notifier_config)
