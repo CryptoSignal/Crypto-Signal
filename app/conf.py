@@ -49,9 +49,10 @@ class Configuration():
                 }
             },
 
-            'integram': {
+            'telegram': {
                 'required': {
-                    'url': os.environ.get('NOTIFIERS_INTEGRAM_REQUIRED_URL', None),
+                    'token': os.environ.get('NOTIFIERS_TELEGRAM_REQUIRED_TOKEN', None),
+                    'chat_id': os.environ.get('NOTIFIERS_TELEGRAM_REQUIRED_CHAT_ID', None)
                 }
             }
         }

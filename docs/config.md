@@ -73,10 +73,15 @@ necessity: required for Gmail\
 description: The email addresses to receive the emails that are sent.
 
 ## Telegram
-*NOTIFIERS_INTEGRAM_REQUIRED_URL*\
+*NOTIFIERS_TELEGRAM_REQUIRED_TOKEN*\
 default: None\
-necessity: required for Gmail\
-description: Your integram webhook url for sending messages to telegram.
+necessity: required for Telegram\
+description: Your telegram bot token you can generate a token by following the instructions [here](https://core.telegram.org/bots#6-botfather)
+
+*NOTIFIERS_TELEGRAM_REQUIRED_CHAT_ID*\
+default: None\
+necessity: required for Telegram\
+description: The chat_id to send the message too. The easiest way to get get this id is probably using RawDataBot or Userinfobot.
 
 # Analyzers
 Settings for the analyzers behaviour. Valid indicators to set for hte below config options are currently

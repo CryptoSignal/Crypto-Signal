@@ -6,7 +6,9 @@ import smtplib
 import structlog
 from tenacity import retry, retry_if_exception_type, stop_after_attempt
 
-class GmailNotifier:
+from notifiers.utils import NotifierUtils
+
+class GmailNotifier(NotifierUtils):
     """Class for handling gmail notifications
     """
 

@@ -4,7 +4,9 @@
 import structlog
 import slackweb
 
-class SlackNotifier():
+from notifiers.utils import NotifierUtils
+
+class SlackNotifier(NotifierUtils):
     """Class for handling slack notifications
     """
 
@@ -27,4 +29,8 @@ class SlackNotifier():
             message (str): The message to send.
         """
 
-        self.slack_client.notify(text=message)
+        max_message_size = 4096
+        message_chunks = self.chunk_message(message=message, max_message_size=max_message_size)
+
+        for message_chunk in message_chunks:
+            self.slack_client.notify(text=message_chunk)

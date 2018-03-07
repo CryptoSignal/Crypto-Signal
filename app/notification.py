@@ -6,7 +6,7 @@ import structlog
 from notifiers.twilio_client import TwilioNotifier
 from notifiers.slack_client import SlackNotifier
 from notifiers.gmail_client import GmailNotifier
-from notifiers.integram_client import IntegramNotifier
+from notifiers.telegram_client import TelegramNotifier
 
 class Notifier():
     """Handles sending notifications via the configured notifiers
@@ -20,6 +20,9 @@ class Notifier():
         """
 
         self.logger = structlog.get_logger()
+
+        enabled_notifiers = []
+        self.logger = structlog.get_logger()
         self.twilio_configured = self.__validate_required_config('twilio', notifier_config)
         if self.twilio_configured:
             self.twilio_client = TwilioNotifier(
@@ -28,12 +31,14 @@ class Notifier():
                 twilio_sender_number=notifier_config['twilio']['required']['sender_number'],
                 twilio_receiver_number=notifier_config['twilio']['required']['receiver_number']
             )
+            enabled_notifiers.append('twilio')
 
         self.slack_configured = self.__validate_required_config('slack', notifier_config)
         if self.slack_configured:
             self.slack_client = SlackNotifier(
                 slack_webhook=notifier_config['slack']['required']['webhook']
             )
+            enabled_notifiers.append('slack')
 
         self.gmail_configured = self.__validate_required_config('gmail', notifier_config)
         if self.gmail_configured:
@@ -42,12 +47,17 @@ class Notifier():
                 password=notifier_config['gmail']['required']['password'],
                 destination_addresses=notifier_config['gmail']['required']['destination_emails']
             )
+            enabled_notifiers.append('gmail')
 
-        self.integram_configured = self.__validate_required_config('integram', notifier_config)
-        if self.integram_configured:
-            self.integram_client = IntegramNotifier(
-                url=notifier_config['integram']['required']['url']
+        self.telegram_configured = self.__validate_required_config('telegram', notifier_config)
+        if self.telegram_configured:
+            self.telegram_client = TelegramNotifier(
+                token=notifier_config['telegram']['required']['token'],
+                chat_id=notifier_config['telegram']['required']['chat_id']
             )
+            enabled_notifiers.append('telegram')
+
+        self.logger.info('enabled notifers: %s', enabled_notifiers)
 
 
     def __validate_required_config(self, notifier, notifier_config):
@@ -63,7 +73,9 @@ class Notifier():
 
         notifier_configured = True
         for _, val in notifier_config[notifier]['required'].items():
+            #print(val)
             if not val:
+                #print(val)
                 notifier_configured = False
         return notifier_configured
 
@@ -78,7 +90,7 @@ class Notifier():
         self.notify_slack(message)
         self.notify_twilio(message)
         self.notify_gmail(message)
-        self.notify_integram(message)
+        self.notify_telegram(message)
 
 
     def notify_slack(self, message):
@@ -113,12 +125,13 @@ class Notifier():
         if self.gmail_configured:
             self.gmail_client.notify(message)
 
-    def notify_integram(self, message):
-        """Send a notification via the integram notifier
+
+    def notify_telegram(self, message):
+        """Send a notification via the telegram notifier
 
         Args:
             message (str): The message to send.
         """
 
-        if self.integram_configured:
-            self.integram_client.notify(message)
+        if self.telegram_configured:
+            self.telegram_client.notify(message)
