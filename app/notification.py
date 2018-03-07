@@ -82,9 +82,7 @@ class Notifier():
 
         notifier_configured = True
         for _, val in notifier_config[notifier]['required'].items():
-            #print(val)
             if not val:
-                #print(val)
                 notifier_configured = False
         return notifier_configured
 
