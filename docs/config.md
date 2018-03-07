@@ -78,6 +78,22 @@ default: None\
 necessity: required for Gmail\
 description: Your integram webhook url for sending messages to telegram.
 
+## Discord
+*NOTIFIERS_DISCORD_REQUIRED_WEBHOOK*\
+default: None\
+necessity: required for Discord\
+description: The Discord webhook REQUIRED for sending messages.
+
+*NOTIFIERS_DISCORD_REQUIRED_USERNAME*\
+default: None\
+necessity: required for Discord\
+description: The Discord username that will be sending messages. Can be anything.
+
+*NOTIFIERS_DISCORD_OPTIONAL_AVATAR*\
+default: None\
+necessity: optional for Discord\
+description: The Discord avatar image for the username sending messages. Set to None for default pokemon.
+
 # Analyzers
 Settings for the analyzers behaviour. Valid indicators to set for hte below config options are currently
 - MOMENTUM

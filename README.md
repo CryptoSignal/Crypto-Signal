@@ -22,6 +22,7 @@ Alerts:
 * Email
 * Slack
 * Telegram
+* Discord
 
 Features:
 * Modular code for easy trading strategy implementation
