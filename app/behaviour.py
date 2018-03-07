@@ -66,6 +66,7 @@ class Behaviour():
         analysis_dispatcher = self.strategy_analyzer.dispatcher()
         for exchange in market_data:
             self.logger.info("Beginning analysis of %s", exchange)
+            message = ''
             for market_pair in market_data[exchange]:
                 analyzed_data = {}
                 historical_data = {}
@@ -129,7 +130,7 @@ class Behaviour():
                     )
                     self.logger.debug(traceback.format_exc())
 
-                message = self.__get_notifier_message(analyzed_data, market_pair)
+                message += '{}\n'.format(self.__get_notifier_message(analyzed_data, market_pair))
 
                 if output_mode == 'cli':
                     output = self.__get_cli_output(analyzed_data, market_pair)
@@ -140,10 +141,10 @@ class Behaviour():
                 else:
                     output = 'Unknown output mode!'
 
-                if message:
-                    self.notifier.notify_all(message)
-
                 print(output)
+
+            if message:
+                self.notifier.notify_all(message)
 
 
     def __get_notifier_message(self, analyzed_data, market_pair):

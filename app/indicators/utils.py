@@ -7,9 +7,12 @@ from datetime import datetime
 
 
 class IndicatorUtils():
+    """ Utilities for technical indicators
+    """
 
     def __init__(self):
         self.logger = structlog.get_logger()
+
 
     def convert_to_dataframe(self, historical_data):
         """Converts historical data matrix to a pandas dataframe.
