@@ -89,9 +89,9 @@ default: None\
 necessity: required for Discord\
 description: The Discord username that will be sending messages. Can be anything.
 
-*NOTIFIERS_DISCORD_REQUIRED_AVATAR*\
+*NOTIFIERS_DISCORD_OPTIONAL_AVATAR*\
 default: None\
-necessity: required for Discord\
+necessity: optional for Discord\
 description: The Discord avatar image for the username sending messages. Set to None for default pokemon.
 
 # Analyzers
