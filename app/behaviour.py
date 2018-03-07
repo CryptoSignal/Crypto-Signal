@@ -118,6 +118,12 @@ class Behaviour():
                         market_pair
                     )
                     self.logger.debug(traceback.format_exc())
+                except AttributeError:
+                    self.logger.info(
+                        'Something went wrong fetching data for %s, skippping',
+                        market_pair
+                    )
+                    self.logger.debug(traceback.format_exc())
                 except RetryError:
                     self.logger.info(
                         'Too many retries fetching informationg for pair %s, skipping',

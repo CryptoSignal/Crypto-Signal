@@ -2,6 +2,7 @@
 """
 
 import re
+import sys
 import time
 from datetime import datetime, timedelta, timezone
 
@@ -56,14 +57,21 @@ class ExchangeInterface():
             list: Contains a list of lists which contain timestamp, open, high, low, close, volume.
         """
 
-        if time_unit not in self.exchanges[exchange].timeframes:
-            raise ValueError(
-                "{} does not support {} timeframe for OHLCV data. Possible values are: {}".format(
-                    exchange,
-                    time_unit,
-                    list(self.exchanges[exchange].timeframes)
+        try:
+            if time_unit not in self.exchanges[exchange].timeframes:
+                raise ValueError(
+                    "{} does not support {} timeframe for OHLCV data. Possible values are: {}".format(
+                        exchange,
+                        time_unit,
+                        list(self.exchanges[exchange].timeframes)
+                    )
                 )
+        except AttributeError:
+            self.logger.info(
+                '%s interface does not support timeframe queries! We are unable to fetch data!',
+                exchange
             )
+            raise AttributeError(sys.exc_info())
 
         if not start_date:
             timeframe_regex = re.compile('([0-9]+)([a-zA-Z])')
