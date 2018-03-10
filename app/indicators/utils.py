@@ -42,8 +42,8 @@ class IndicatorUtils():
         """Performs an analysis over data produced by indicators
 
         Args:
-            indicator_data (tuple): A tuple containing indicator data points, where the first value
-                in the tuple is the one that will be added to the result data
+            indicator_data (list of tuples): A list of tuples which each contain indicator
+                data points. The first value in the tuple is the one that will be added to the result data
             is_hot (function): A function that takes in a value tuple and returns True
                 if the indicator is hot, False if the indicator is not hot
             is_cold (function): A function that takes in a value tuple and returns True
