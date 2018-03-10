@@ -31,7 +31,9 @@ class StrategyAnalyzer():
             'macd_sl': macd.MACD().analyze_sl,
             'rsi': rsi.RSI().analyze,
             'sma': sma.SMA().analyze,
+            'sma_crossover': sma.SMA().analyze_crossover,
             'ema': ema.EMA().analyze,
+            'ema_crossover': ema.EMA().analyze_crossover,
             'ichimoku': ichimoku.Ichimoku().analyze,
             'momentum': momentum.Momentum().analyze,
             'stoch_rsi': stoch_rsi.StochasticRSI().analyze
