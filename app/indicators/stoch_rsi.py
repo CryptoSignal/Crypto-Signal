@@ -34,31 +34,9 @@ class StochasticRSI(IndicatorUtils):
         dataframe = self.convert_to_dataframe(historical_data)
         rsi_values = abstract.STOCHRSI(dataframe, period_count).iloc[:, 0]
 
-        rsi_result_data = []
-        for rsi_value in rsi_values:
-            if math.isnan(rsi_value):
-                continue
+        analyzed_data = [(value,) for value in rsi_values]
 
-            is_hot = False
-            if hot_thresh is not None:
-                is_hot = rsi_value < hot_thresh
-
-            is_cold = False
-            if cold_thresh is not None:
-                is_cold = rsi_value > cold_thresh
-
-            data_point_result = {
-                'values': (rsi_value,),
-                'is_cold': is_cold,
-                'is_hot': is_hot
-            }
-
-            rsi_result_data.append(data_point_result)
-
-        if all_data:
-            return rsi_result_data
-        else:
-            try:
-                return rsi_result_data[-1]
-            except IndexError:
-                return rsi_result_data
+        return self.analyze_results(analyzed_data,
+                                    is_hot=lambda v: v < hot_thresh if hot_thresh else None,
+                                    is_cold=lambda v: v > cold_thresh if cold_thresh else None,
+                                    all_data=all_data)

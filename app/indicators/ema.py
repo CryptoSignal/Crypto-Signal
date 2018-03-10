@@ -34,33 +34,10 @@ class EMA(IndicatorUtils):
         combined_data = pandas.concat([dataframe, ema_values], axis=1)
         combined_data.rename(columns={0: 'ema_value'}, inplace=True)
 
-        ema_result_data = []
-        for ema_row in combined_data.iterrows():
-            if math.isnan(ema_row[1]['ema_value']):
-                continue
+        # List of 2-tuples containing the ema value and closing price respectively
+        analyzed_data = [(r[1]['ema_value'], r[1]['close']) for r in combined_data.iterrows()]
 
-            is_hot = False
-            if hot_thresh is not None:
-                threshold = ema_row[1]['ema_value'] * hot_thresh
-                is_hot = ema_row[1]['close'] > threshold
-
-            is_cold = False
-            if cold_thresh is not None:
-                threshold = ema_row[1]['ema_value'] * cold_thresh
-                is_cold = ema_row[1]['close'] < threshold
-
-            data_point_result = {
-                'values': (ema_row[1]['ema_value'],),
-                'is_cold': is_cold,
-                'is_hot': is_hot
-            }
-
-            ema_result_data.append(data_point_result)
-
-        if all_data:
-            return ema_result_data
-        else:
-            try:
-                return ema_result_data[-1]
-            except IndexError:
-                return ema_result_data
+        return self.analyze_results(analyzed_data,
+                                    is_hot=lambda v, c: c > v * hot_thresh if hot_thresh else False,
+                                    is_cold=lambda v, c: c < v * cold_thresh if cold_thresh else False,
+                                    all_data=all_data)

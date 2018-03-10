@@ -34,31 +34,9 @@ class Momentum(IndicatorUtils):
         dataframe = self.convert_to_dataframe(historical_data)
         mom_values = abstract.MOM(dataframe, period_count)
 
-        mom_result_data = []
-        for mom_value in mom_values:
-            if math.isnan(mom_value):
-                continue
+        analyzed_data = [(value,) for value in mom_values]
 
-            is_hot = False
-            if hot_thresh is not None:
-                is_hot = mom_value > hot_thresh
-
-            is_cold = False
-            if cold_thresh is not None:
-                is_cold = mom_value < cold_thresh
-
-            data_point_result = {
-                'values': (mom_value,),
-                'is_cold': is_cold,
-                'is_hot': is_hot
-            }
-
-            mom_result_data.append(data_point_result)
-
-        if all_data:
-            return mom_result_data
-        else:
-            try:
-                return mom_result_data[-1]
-            except IndexError:
-                return mom_result_data
+        return self.analyze_results(analyzed_data,
+                                    is_hot=lambda v: v > hot_thresh if hot_thresh else None,
+                                    is_cold=lambda v: v < cold_thresh if cold_thresh else None,
+                                    all_data=all_data)

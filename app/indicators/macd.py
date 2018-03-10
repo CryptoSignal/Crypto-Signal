@@ -80,31 +80,10 @@ class MACD(IndicatorUtils):
         dataframe = self.convert_to_dataframe(historical_data)
         macd_values = abstract.MACD(dataframe).iloc[:]
 
-        macd_result_data = []
-        for macd_row in macd_values.iterrows():
-            if math.isnan(macd_row[1]['macd']) or math.isnan(macd_row[1]['macdsignal']):
-                continue
+        # List of 2-tuples containing the ema value and closing price respectively
+        analyzed_data = [(r[1]['macd'], r[1]['macdsignal']) for r in macd_values.iterrows()]
 
-            is_hot = False
-            if hot_thresh is not None:
-                is_hot = macd_row[1]['macd'] > macd_row[1]['macdsignal']
-
-            is_cold = False
-            if cold_thresh is not None:
-                is_cold = macd_row[1]['macd'] < macd_row[1]['macdsignal']
-
-            data_point_result = {
-                'values': (macd_row[1]['macd'],),
-                'is_cold': is_cold,
-                'is_hot': is_hot
-            }
-
-            macd_result_data.append(data_point_result)
-
-        if all_data:
-            return macd_result_data
-        else:
-            try:
-                return macd_result_data[-1]
-            except IndexError:
-                return macd_result_data
+        return self.analyze_results(analyzed_data,
+                                    is_hot=lambda v, s: v > s if hot_thresh else False,
+                                    is_cold=lambda v, s: v < s if cold_thresh else False,
+                                    all_data=all_data)
