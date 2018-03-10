@@ -30,34 +30,12 @@ class MACD(IndicatorUtils):
         dataframe = self.convert_to_dataframe(historical_data)
         macd_values = abstract.MACD(dataframe).iloc[:, 0]
 
-        macd_result_data = []
-        for macd_value in macd_values:
-            if math.isnan(macd_value):
-                continue
+        analyzed_data = [(value,) for value in macd_values]
 
-            is_hot = False
-            if hot_thresh is not None:
-                is_hot = macd_value > hot_thresh
-
-            is_cold = False
-            if cold_thresh is not None:
-                is_cold = macd_value < cold_thresh
-
-            data_point_result = {
-                'values': (macd_value,),
-                'is_cold': is_cold,
-                'is_hot': is_hot
-            }
-
-            macd_result_data.append(data_point_result)
-
-        if all_data:
-            return macd_result_data
-        else:
-            try:
-                return macd_result_data[-1]
-            except IndexError:
-                return macd_result_data
+        return self.analyze_results(analyzed_data,
+                                    is_hot=lambda v: v > hot_thresh if hot_thresh else False,
+                                    is_cold=lambda v: v < cold_thresh if cold_thresh else False,
+                                    all_data=all_data)
 
 
     def analyze_sl(self, historical_data, hot_thresh=None, cold_thresh=None, all_data=False):
