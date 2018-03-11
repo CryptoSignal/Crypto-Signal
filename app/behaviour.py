@@ -179,14 +179,10 @@ class Behaviour():
             str: Completed notifier message
         """
 
-        def split_name(name):
-            import re
+        import re
 
-            try:
-                match = re.search(r'[0-9]+', name)
-                return name[: match.start()]
-            except AttributeError:
-                return name
+        def split_name(name):
+            return re.split(r'[0-9]+', name)[0]
 
         message = ""
         for analysis in analyzed_data:
