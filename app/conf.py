@@ -78,7 +78,7 @@ class Configuration():
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MOMENTUM_HOT', 0)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MOMENTUM_COLD', 0)),
                 'candle_period': os.environ.get('BEHAVIOUR_MOMENTUM_CANDLE_PERIOD', '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_MOMENTUM_PERIOD_COUNT', 10))
+                'period_count': self._string_splitter(os.environ.get('BEHAVIOUR_MOMENTUM_PERIOD_COUNT', '10'))
             },
 
             'rsi': {
@@ -91,7 +91,7 @@ class Configuration():
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_RSI_HOT', 30)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_RSI_COLD', 70)),
                 'candle_period': os.environ.get('BEHAVIOUR_RSI_CANDLE_PERIOD', '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_RSI_PERIOD_COUNT', 14))
+                'period_count': self._string_splitter(os.environ.get('BEHAVIOUR_RSI_PERIOD_COUNT', '14'))
             },
 
             'stoch_rsi': {
@@ -104,7 +104,7 @@ class Configuration():
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_HOT', 20)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_COLD', 80)),
                 'candle_period': os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_CANDLE_PERIOD', '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_PERIOD_COUNT', 14))
+                'period_count': self._string_splitter(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_PERIOD_COUNT', '14'))
             },
 
             'macd': {
@@ -129,7 +129,7 @@ class Configuration():
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_HOT', 1)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_COLD', 1)),
                 'candle_period': os.environ.get('BEHAVIOUR_SMA_CANDLE_PERIOD', '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_SMA_PERIOD_COUNT', 15))
+                'period_count': self._string_splitter(os.environ.get('BEHAVIOUR_SMA_PERIOD_COUNT', '15'))
             },
 
             'sma_crossover': {
@@ -142,7 +142,7 @@ class Configuration():
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_CROSSOVER_HOT', 'True')),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_CROSSOVER_COLD', 'True')),
                 'candle_period': os.environ.get('BEHAVIOUR_SMA_CROSSOVER_CANDLE_PERIOD', '1d'),
-                'period_count': self._string_splitter(os.environ.get('BEHAVIOUR_SMA_CROSSOVER_PERIOD_COUNT', '15,21'))
+                'period_count': self._tuple_maker(os.environ.get('BEHAVIOUR_SMA_CROSSOVER_PERIOD_COUNT', '15/21'))
             },
 
             'ema': {
@@ -155,7 +155,7 @@ class Configuration():
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_HOT', 1)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_COLD', 1)),
                 'candle_period': os.environ.get('BEHAVIOUR_EMA_CANDLE_PERIOD', '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_EMA_PERIOD_COUNT', 11))
+                'period_count': self._string_splitter(os.environ.get('BEHAVIOUR_EMA_PERIOD_COUNT', '15'))
             },
 
             'ema_crossover': {
@@ -168,7 +168,7 @@ class Configuration():
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_CROSSOVER_HOT', 'True')),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_CROSSOVER_COLD', 'True')),
                 'candle_period': os.environ.get('BEHAVIOUR_EMA_CROSSOVER_CANDLE_PERIOD', '1d'),
-                'period_count': self._string_splitter(os.environ.get('BEHAVIOUR_EMA_CROSSOVER_PERIOD_COUNT', '15,21'))
+                'period_count': self._tuple_maker(os.environ.get('BEHAVIOUR_EMA_CROSSOVER_PERIOD_COUNT', '15/21'))
             },
 
             'ichimoku': {
@@ -195,6 +195,25 @@ class Configuration():
                 }
             }
 
+    def _tuple_maker(self, string):
+        """Splits a string into an n-tuple.
+
+        Args:
+            string (str): A string that can potentially be split into a tuple.
+
+        Returns:
+            list: An n-tuple of ints if each string in the tuple is castable to int
+                  An n-tuple of strings if the each string in the tuple is uncastable to int
+        """
+
+        if isinstance(string, str):
+            strlist = string.split("/")
+            try:
+                return tuple(int(s) for s in strlist)
+            except ValueError:
+                return tuple(strlist)
+
+        return string,
 
     def _string_splitter(self, string):
         """Splits a string into a list.
