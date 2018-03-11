@@ -132,6 +132,19 @@ class Configuration():
                 'period_count': int(os.environ.get('BEHAVIOUR_SMA_PERIOD_COUNT', 15))
             },
 
+            'sma_crossover': {
+                'enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_SMA_CROSSOVER_ENABLED', 'True')
+                )),
+                'alert_enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_SMA_CROSSOVER_ALERT_ENABLED', 'True')
+                )),
+                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_CROSSOVER_HOT', 'True')),
+                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_CROSSOVER_COLD', 'True')),
+                'candle_period': os.environ.get('BEHAVIOUR_SMA_CROSSOVER_CANDLE_PERIOD', '1d'),
+                'period_count': self._string_splitter(os.environ.get('BEHAVIOUR_SMA_CROSSOVER_PERIOD_COUNT', '15,21'))
+            },
+
             'ema': {
                 'enabled': bool(distutils.util.strtobool(
                     os.environ.get('BEHAVIOUR_EMA_ENABLED', 'True')
@@ -143,6 +156,19 @@ class Configuration():
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_COLD', 1)),
                 'candle_period': os.environ.get('BEHAVIOUR_EMA_CANDLE_PERIOD', '1d'),
                 'period_count': int(os.environ.get('BEHAVIOUR_EMA_PERIOD_COUNT', 11))
+            },
+
+            'ema_crossover': {
+                'enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_EMA_CROSSOVER_ENABLED', 'True')
+                )),
+                'alert_enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_EMA_CROSSOVER_ALERT_ENABLED', 'True')
+                )),
+                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_CROSSOVER_HOT', 'True')),
+                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_CROSSOVER_COLD', 'True')),
+                'candle_period': os.environ.get('BEHAVIOUR_EMA_CROSSOVER_CANDLE_PERIOD', '1d'),
+                'period_count': self._string_splitter(os.environ.get('BEHAVIOUR_EMA_CROSSOVER_PERIOD_COUNT', '15,21'))
             },
 
             'ichimoku': {
@@ -177,11 +203,19 @@ class Configuration():
             string (str): A string that can potentially be split into a list.
 
         Returns:
-            list: A list of strings
+            list: A list of strings if the values in the list are not castable to int,
+                  A list of ints if the values in the list are castable to int
         """
 
-        if string:
-            string = string.translate(str.maketrans('', '', whitespace)).split(",")
+        if isinstance(string, str):
+            strlist = string.translate(str.maketrans('', '', whitespace)).split(",")
+
+            # Try to cast each string to an integer, or return the list if it is uncastable
+            try:
+                return [int(elem) for elem in strlist]
+            except ValueError:
+                return strlist
+
         return string
 
 
