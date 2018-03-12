@@ -136,8 +136,12 @@ description: Valid options vary by exchange, common options include 1m, 5m, 1h, 
 
 *BEHAVIOUR_indicator_PERIOD_COUNT*\
 default:\
+  SMA/EMA Crossovers: 15/21
+  Other indicators: An integer
 necessity: optional\
-description: Valid options are an integer. This is the count of candle periods to use for this analysis, lets suppose you wanted to test 15 days of EMA data, you would set the `BEHAVIOUR_indicator_CANDLE_PERIOD=1d` and then set `BEHAVIOUR_indicator_PERIOD_COUNT=15`. Which means 15 counts of 1d periods... or in other words... 15 days.
+description: Valid options are an integer or list of integers separated by commas\*. This is the count of candle periods to use for this analysis. Let's suppose you wanted to test 15 days of EMA data. You would set the `BEHAVIOUR_EMA_CANDLE_PERIOD=1d` and then set `BEHAVIOUR_EMA_PERIOD_COUNT=15`, which means 15 counts of 1d periods... or in other words... 15 days. Furthermore, you can also keep track of the same indicator with multiple period lengths. If we wanted to watch the 15, 21, and 50 day EMA simultaneously, we could set `BEHAVIOUR_EMA_PERIOD_COUNT=15,21,50`.
+
+\* When dealing with the SMA_CROSSOVER and EMA_CROSSOVER indicators, the PERIOD_COUNT setting takes two integers separated by a forward-slash. So if we wanted to know when the 15 SMA crosses over the 21 SMA, we could set `BEHAVIOUR_SMA_CROSSOVER_PERIOD_COUNT=15/21`.
 
 # Exchanges
 Settings that alter behaviour of interaction with an exchange.

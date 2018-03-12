@@ -90,12 +90,27 @@ class Behaviour():
                                 # from the configuration
                                 if 'period_count' in behaviour_conf:
                                     period_count = behaviour_conf['period_count']
-                                    analyzed_data[behaviour] = analysis_dispatcher[behaviour](
-                                        historical_data[candle_period],
-                                        hot_thresh=behaviour_conf['hot'],
-                                        cold_thresh=behaviour_conf['cold'],
-                                        period_count=period_count
-                                    )
+
+                                    # If our period_count is a list, run a separate analysis over the
+                                    # same indicator for each period provided
+                                    if isinstance(period_count, list):
+                                        for period in period_count:
+                                            analyzed_data[behaviour + str(period)] = analysis_dispatcher[behaviour](
+                                                historical_data[candle_period],
+                                                hot_thresh=behaviour_conf['hot'],
+                                                cold_thresh=behaviour_conf['cold'],
+                                                period_count=period
+                                            )
+                                    else:
+                                        # Else period_count is either an int (for a standalone indicator)
+                                        # or tuple (in the case of SMA/EMA crossovers), which means we should
+                                        # just pass the entire value into the analyzer
+                                        analyzed_data[behaviour] = analysis_dispatcher[behaviour](
+                                            historical_data[candle_period],
+                                            hot_thresh=behaviour_conf['hot'],
+                                            cold_thresh=behaviour_conf['cold'],
+                                            period_count=period_count
+                                        )
                                 else:
                                     analyzed_data[behaviour] = analysis_dispatcher[behaviour](
                                         historical_data[candle_period],
@@ -164,10 +179,15 @@ class Behaviour():
             str: Completed notifier message
         """
 
+        import re
+
+        def split_name(name):
+            return re.split(r'[0-9]+', name)[0]
+
         message = ""
         for analysis in analyzed_data:
             if analyzed_data[analysis]:
-                if self.behaviour_config[analysis.lower()]['alert_enabled']:
+                if self.behaviour_config[split_name(analysis.lower())]['alert_enabled']:
                     if analyzed_data[analysis]['is_hot']:
                         message += "{}: {} is hot!\n".format(analysis, market_pair)
 

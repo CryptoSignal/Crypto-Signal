@@ -44,7 +44,7 @@ class SMA(IndicatorUtils):
                                     all_data=all_data)
 
     def analyze_crossover(self, historical_data, hot_thresh=None, cold_thresh=None,
-                          period_count=[15, 21], all_data=False):
+                          period_count=(15, 21), all_data=False):
         """Performs a SMA crossover analysis on the historical data
 
         Args:
@@ -53,7 +53,7 @@ class SMA(IndicatorUtils):
                 good to purchase.
             cold_thresh (float, optional): Defaults to None. The threshold at which this might be
                 good to sell.
-            period_count (list of (2) ints, optional): Defaults to [15, 21]. Each number in the list
+            period_count (tuple of (2) ints, optional): Defaults to (15, 21). Each number in the tuple
                 contains the period count of an sma to be used in the crossover analysis
             all_data (bool, optional): Defaults to False. If True, we return the SMA associated
                 with each data point in our historical dataset. Otherwise just return the last one.
