@@ -76,32 +76,34 @@ class Behaviour():
                         if behaviour in analysis_dispatcher:
                             behaviour_conf = self.behaviour_config[behaviour]
 
-                            if behaviour_conf['enabled']:
-                                candle_period = behaviour_conf['candle_period']
+                            for indicator in behaviour_conf:
+                                if indicator['enabled']:
+                                    candle_period = indicator['candle_period']
 
-                                if candle_period not in historical_data:
-                                    historical_data[candle_period] = self.exchange_interface.get_historical_data(
-                                        market_data[exchange][market_pair]['symbol'],
-                                        exchange,
-                                        candle_period
-                                    )
+                                    if candle_period not in historical_data:
+                                        historical_data[candle_period] = self.exchange_interface.get_historical_data(
+                                            market_data[exchange][market_pair]['symbol'],
+                                            exchange,
+                                            candle_period
+                                        )
 
-                                # If the period is customizable for the current indicator, fetch it
-                                # from the configuration
-                                if 'period_count' in behaviour_conf:
-                                    period_count = behaviour_conf['period_count']
-                                    analyzed_data[behaviour] = analysis_dispatcher[behaviour](
-                                        historical_data[candle_period],
-                                        hot_thresh=behaviour_conf['hot'],
-                                        cold_thresh=behaviour_conf['cold'],
-                                        period_count=period_count
-                                    )
-                                else:
-                                    analyzed_data[behaviour] = analysis_dispatcher[behaviour](
-                                        historical_data[candle_period],
-                                        hot_thresh=behaviour_conf['hot'],
-                                        cold_thresh=behaviour_conf['cold']
-                                    )
+                                    # If the period is customizable for the current indicator, fetch it
+                                    # from the configuration
+                                    if 'period_count' in indicator:
+                                        period_count = indicator['period_count']
+
+                                        analyzed_data.setdefault(behaviour, []).append(analysis_dispatcher[behaviour](
+                                            historical_data[candle_period],
+                                            hot_thresh=indicator['hot'],
+                                            cold_thresh=indicator['cold'],
+                                            period_count=period_count
+                                        ))
+                                    else:
+                                        analyzed_data.setdefault(behaviour, []).append(analysis_dispatcher[behaviour](
+                                            historical_data[candle_period],
+                                            hot_thresh=indicator['hot'],
+                                            cold_thresh=indicator['cold']
+                                        ))
 
                         else:
                             self.logger.warn("No such behaviour %s, skipping.", behaviour)
@@ -120,13 +122,13 @@ class Behaviour():
                     self.logger.debug(traceback.format_exc())
                 except AttributeError:
                     self.logger.info(
-                        'Something went wrong fetching data for %s, skippping',
+                        'Something went wrong fetching data for %s, skipping',
                         market_pair
                     )
                     self.logger.debug(traceback.format_exc())
                 except RetryError:
                     self.logger.info(
-                        'Too many retries fetching informationg for pair %s, skipping',
+                        'Too many retries fetching information for pair %s, skipping',
                         market_pair
                     )
                 except ExchangeError:
@@ -164,15 +166,28 @@ class Behaviour():
             str: Completed notifier message
         """
 
+        import re
+
+        def split_name(name):
+            return re.split(r'[0-9]+', name)[0]
+
         message = ""
         for analysis in analyzed_data:
             if analyzed_data[analysis]:
-                if self.behaviour_config[analysis.lower()]['alert_enabled']:
-                    if analyzed_data[analysis]['is_hot']:
-                        message += "{}: {} is hot!\n".format(analysis, market_pair)
+                for i, indicator in enumerate(analyzed_data[analysis]):
+                    name = split_name(analysis.lower())
+                    alert_freq = self.behaviour_config[name][i]['alert_frequency']
 
-                    if analyzed_data[analysis]['is_cold']:
-                        message += "{}: {} is cold!\n".format(analysis, market_pair)
+                    if self.behaviour_config[name][i]['alert_enabled'] and alert_freq:
+                        if analyzed_data[analysis][i]['is_hot']:
+                            message += "{}: {} is hot!\n".format(analysis, market_pair)
+
+                        if analyzed_data[analysis][i]['is_cold']:
+                            message += "{}: {} is cold!\n".format(analysis, market_pair)
+
+                        # Don't send any more alerts if our alert frequency is set to "one"
+                        if alert_freq.lower() == 'once':
+                            self.behaviour_config[name][i]['alert_frequency'] = None
 
         return message
 
@@ -194,16 +209,16 @@ class Behaviour():
 
         output = "{}:\t".format(market_pair)
         for analysis in analyzed_data:
-            if analyzed_data[analysis]:
+            for i, indicator in enumerate(analyzed_data[analysis]):
                 colour_code = normal_colour
-                if analyzed_data[analysis]['is_hot']:
+                if indicator['is_hot']:
                     colour_code = hot_colour
 
-                if analyzed_data[analysis]['is_cold']:
+                if indicator['is_cold']:
                     colour_code = cold_colour
 
                 formatted_values = []
-                for value in analyzed_data[analysis]['values']:
+                for value in indicator['values']:
                     if isinstance(value, float):
                         formatted_values.append(format(value, '.8f'))
                     else:
@@ -212,7 +227,7 @@ class Behaviour():
 
                 output += "{}{}: {}{}     ".format(
                     colour_code,
-                    analysis,
+                    '{} #{}'.format(analysis, i),
                     formatted_string,
                     normal_colour
                 )
