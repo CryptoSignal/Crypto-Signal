@@ -119,7 +119,7 @@ Settings for the analyzers behaviour. The formal grammar is defined as follows:
 
 Valid settings for indicators:
 
-*BEHAVIOUR_\<indicator_name\>_NUM_INDICATORS*
+*BEHAVIOUR_\<indicator_name\>_NUM_INDICATORS*\
 default: 1\
 necessity: optional\
 description: Valid values are positive integers. This tells Crypto-Signal how many of the same indicator to keep track of.
@@ -165,7 +165,7 @@ To hammer home this unique (and perhaps arcane) method of configuration, conside
 - 9-period hourly SMA
 - SMA-Crossing between the 15 and 21 daily SMA's
 
-This is the configuration:
+This is the respective configuration for settings.env:
 
 ```
 BEHAVIOUR_RSI_NUM_INDICATORS=2
