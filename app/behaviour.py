@@ -122,13 +122,13 @@ class Behaviour():
                     self.logger.debug(traceback.format_exc())
                 except AttributeError:
                     self.logger.info(
-                        'Something went wrong fetching data for %s, skippping',
+                        'Something went wrong fetching data for %s, skipping',
                         market_pair
                     )
                     self.logger.debug(traceback.format_exc())
                 except RetryError:
                     self.logger.info(
-                        'Too many retries fetching informationg for pair %s, skipping',
+                        'Too many retries fetching information for pair %s, skipping',
                         market_pair
                     )
                 except ExchangeError:
@@ -176,14 +176,13 @@ class Behaviour():
             if analyzed_data[analysis]:
                 for i, indicator in enumerate(analyzed_data[analysis]):
                     name = split_name(analysis.lower())
-
                     alert_freq = self.behaviour_config[name][i]['alert_frequency']
 
-                    if self.behaviour_config[name][i]['alert_enabled']:
-                        if analyzed_data[analysis][i]['is_hot'] and alert_freq:
+                    if self.behaviour_config[name][i]['alert_enabled'] and alert_freq:
+                        if analyzed_data[analysis][i]['is_hot']:
                             message += "{}: {} is hot!\n".format(analysis, market_pair)
 
-                        if analyzed_data[analysis][i]['is_cold'] and alert_freq:
+                        if analyzed_data[analysis][i]['is_cold']:
                             message += "{}: {} is cold!\n".format(analysis, market_pair)
 
                         # Don't send any more alerts if our alert frequency is set to "one"
