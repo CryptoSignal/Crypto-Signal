@@ -247,16 +247,16 @@ class Behaviour():
 
         output = market_pair
         for analysis in analyzed_data:
-            if analyzed_data[analysis]:
-                output += ',' + analysis
-                if analyzed_data[analysis]['is_hot']:
+            for i, indicator in enumerate(analyzed_data[analysis]):
+                output += ',{} #{}'.format(analysis, i)
+                if indicator['is_hot']:
                     output += ',hot'
 
-                if analyzed_data[analysis]['is_cold']:
+                if indicator['is_cold']:
                     output += ',cold'
 
                 formatted_values = []
-                for value in analyzed_data[analysis]['values']:
+                for value in indicator['values']:
                     if isinstance(value, float):
                         formatted_values.append(format(value, '.8f'))
                     else:
@@ -281,9 +281,9 @@ class Behaviour():
 
         stringified_analysis = analyzed_data
         for analysis in analyzed_data:
-            if analyzed_data[analysis]:
-                stringified_analysis[analysis]['is_hot'] = str(analyzed_data[analysis]['is_hot'])
-                stringified_analysis[analysis]['is_cold'] = str(analyzed_data[analysis]['is_cold'])
+            for i, indicator in enumerate(analyzed_data[analysis]):
+                stringified_analysis[analysis][i]['is_hot'] = str(indicator['is_hot'])
+                stringified_analysis[analysis][i]['is_cold'] = str(indicator['is_cold'])
         output = {'pair': market_pair, 'analysis': analyzed_data}
         output = json.dumps(output)
         return output
