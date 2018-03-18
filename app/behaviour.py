@@ -210,6 +210,7 @@ class Behaviour():
         output = "{}:\t".format(market_pair)
         for analysis in analyzed_data:
             for i, indicator in enumerate(analyzed_data[analysis]):
+
                 colour_code = normal_colour
                 if indicator['is_hot']:
                     colour_code = hot_colour

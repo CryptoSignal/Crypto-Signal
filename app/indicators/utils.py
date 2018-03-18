@@ -76,6 +76,8 @@ class IndicatorUtils():
         if all_data:
             return result_data
         elif len(result_data) == 0:
-            return []
+            return {'values': ("Nothing",),
+                    'is_cold': False,
+                    'is_hot': False}
         else:
             return result_data[-1]

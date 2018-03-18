@@ -50,4 +50,9 @@ class BollingerIndicator(IndicatorUtils):
             try:
                 return bb_result_data[-1]
             except IndexError:
-                return bb_result_data
+                return {'values': ("Nothing",
+                                   "Nothing",
+                                   "Nothing"),
+                        'is_hot': False,
+                        'is_cold': False
+                        }
