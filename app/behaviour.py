@@ -177,15 +177,18 @@ class Behaviour():
                 for i, indicator in enumerate(analyzed_data[analysis]):
                     name = split_name(analysis.lower())
                     alert_freq = self.behaviour_config[name][i]['alert_frequency']
+                    candle_period = self.behaviour_config[name][i]['candle_period']
 
                     if self.behaviour_config[name][i]['alert_enabled'] and alert_freq:
                         if analyzed_data[analysis][i]['is_hot']:
-                            message += "{} ({}): {} is hot!\n".format(analysis,
+                            message += "{} {} ({}): {} is hot!\n".format(analysis,
+                                                                      candle_period,
                                                                       analyzed_data[analysis][i]['values'][0],
                                                                       market_pair)
 
                         if analyzed_data[analysis][i]['is_cold']:
-                            message += "{} ({}): {} is cold!\n".format(analysis,
+                            message += "{} {} ({}): {} is cold!\n".format(analysis,
+                                                                       candle_period,
                                                                        analyzed_data[analysis][i]['values'][0],
                                                                        market_pair)
 
