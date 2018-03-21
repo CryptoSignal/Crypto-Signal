@@ -94,11 +94,12 @@ class Notifier():
             message (str): The message to send.
         """
 
-        self.notify_slack(message)
-        self.notify_discord(message)
-        self.notify_twilio(message)
-        self.notify_gmail(message)
-        self.notify_telegram(message)
+        if message.strip() is not '':
+            self.notify_slack(message)
+            self.notify_discord(message)
+            self.notify_twilio(message)
+            self.notify_gmail(message)
+            self.notify_telegram(message)
 
 
     def notify_discord(self, message):
