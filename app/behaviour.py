@@ -151,7 +151,7 @@ class Behaviour():
 
                 print(output)
 
-            if message:
+            if message.strip():
                 self.notifier.notify_all(message)
 
 
