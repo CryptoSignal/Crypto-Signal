@@ -130,6 +130,21 @@ class Configuration():
                 'cold_message': str(os.environ.get('BEHAVIOUR_MACD_{}_COLD_CUSTOM_MESSAGE'.format(i), 'is cold!')),
                 'hot_message': str(os.environ.get('BEHAVIOUR_MACD_{}_HOT_CUSTOM_MESSAGE'.format(i), 'is hot!'))
             } for i in range(int(os.environ.get('BEHAVIOUR_MACD_NUM_INDICATORS', 1)))],
+            
+              'macd_sl': [{	
+                'enabled': bool(distutils.util.strtobool(	
+                    os.environ.get('BEHAVIOUR_MACD_SL_{}_ENABLED'.format(i), 'True')	
+                )),	
+                'alert_enabled': bool(distutils.util.strtobool(	
+                    os.environ.get('BEHAVIOUR_MACD_SL_{}_ALERT_ENABLED'.format(i), 'True')	
+                )),	
+                'alert_frequency': os.environ.get('BEHAVIOUR_MACD_SL_{}_ALERT_FREQUENCY'.format(i), 'always'),	
+                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_SL_{}_HOT'.format(i), 0)),	
+                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_SL_{}_COLD'.format(i), 0)),	
+                'candle_period': os.environ.get('BEHAVIOUR_MACD_SL_{}_CANDLE_PERIOD'.format(i), '1d'),
+                'cold_message': str(os.environ.get('BEHAVIOUR_MACD_SL_{}_COLD_CUSTOM_MESSAGE'.format(i), 'is cold!')),
+                'hot_message': str(os.environ.get('BEHAVIOUR_MACD_SL_{}_HOT_CUSTOM_MESSAGE'.format(i), 'is hot!'))	
+            } for i in range(int(os.environ.get('BEHAVIOUR_MACD_SL_NUM_INDICATORS', 1)))],	
 
             'sma': [{
                 'enabled': bool(distutils.util.strtobool(
