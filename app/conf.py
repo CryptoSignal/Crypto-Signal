@@ -79,7 +79,9 @@ class Configuration():
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MOMENTUM_{}_HOT'.format(i), 0)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MOMENTUM_{}_COLD'.format(i), 0)),
                 'candle_period': os.environ.get('BEHAVIOUR_MOMENTUM_{}_CANDLE_PERIOD'.format(i), '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_MOMENTUM_{}_PERIOD_COUNT'.format(i), 10))
+                'period_count': int(os.environ.get('BEHAVIOUR_MOMENTUM_{}_PERIOD_COUNT'.format(i), 10)),
+                'cold_message': str(os.environ.get('BEHAVIOUR_MOMENTUM_{}_COLD_CUSTOM_MESSAGE'.format(i), 'is cold!')),
+                'hot_message': str(os.environ.get('BEHAVIOUR_MOMENTUM_{}_HOT_CUSTOM_MESSAGE'.format(i), 'is hot!'))
             } for i in range(int(os.environ.get('BEHAVIOUR_MOMENTUM_NUM_INDICATORS', 1)))],
 
             'rsi': [{
@@ -93,7 +95,9 @@ class Configuration():
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_RSI_{}_HOT'.format(i), 30)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_RSI_{}_COLD'.format(i), 70)),
                 'candle_period': os.environ.get('BEHAVIOUR_RSI_{}_CANDLE_PERIOD'.format(i), '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_RSI_{}_PERIOD_COUNT'.format(i), 14))
+                'period_count': int(os.environ.get('BEHAVIOUR_RSI_{}_PERIOD_COUNT'.format(i), 14)),
+                'cold_message': str(os.environ.get('BEHAVIOUR_RSI_{}_COLD_CUSTOM_MESSAGE'.format(i), 'is cold!')),
+                'hot_message': str(os.environ.get('BEHAVIOUR_RSI_{}_HOT_CUSTOM_MESSAGE'.format(i), 'is hot!'))
             } for i in range(int(os.environ.get('BEHAVIOUR_RSI_NUM_INDICATORS', 1)))],
 
             'stoch_rsi': [{
@@ -107,7 +111,9 @@ class Configuration():
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_HOT'.format(i), 20)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_COLD'.format(i), 80)),
                 'candle_period': os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_CANDLE_PERIOD'.format(i), '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_PERIOD_COUNT'.format(i), 14))
+                'period_count': int(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_PERIOD_COUNT'.format(i), 14)),
+                'cold_message': str(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_COLD_CUSTOM_MESSAGE'.format(i), 'is cold!')),
+                'hot_message': str(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_HOT_CUSTOM_MESSAGE'.format(i), 'is hot!'))
             } for i in range(int(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_NUM_INDICATORS', 1)))],
 
             'macd': [{
@@ -120,21 +126,25 @@ class Configuration():
                 'alert_frequency': os.environ.get('BEHAVIOUR_MACD_{}_ALERT_FREQUENCY'.format(i), 'always'),
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_{}_HOT'.format(i), 0)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_{}_COLD'.format(i), 0)),
-                'candle_period': os.environ.get('BEHAVIOUR_MACD_{}_CANDLE_PERIOD'.format(i), '1d')
+                'candle_period': os.environ.get('BEHAVIOUR_MACD_{}_CANDLE_PERIOD'.format(i), '1d'),
+                'cold_message': str(os.environ.get('BEHAVIOUR_MACD_{}_COLD_CUSTOM_MESSAGE'.format(i), 'is cold!')),
+                'hot_message': str(os.environ.get('BEHAVIOUR_MACD_{}_HOT_CUSTOM_MESSAGE'.format(i), 'is hot!'))
             } for i in range(int(os.environ.get('BEHAVIOUR_MACD_NUM_INDICATORS', 1)))],
-
-            'macd_sl': [{
-                'enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_MACD_SL_{}_ENABLED'.format(i), 'True')
-                )),
-                'alert_enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_MACD_SL_{}_ALERT_ENABLED'.format(i), 'True')
-                )),
-                'alert_frequency': os.environ.get('BEHAVIOUR_MACD_SL_{}_ALERT_FREQUENCY'.format(i), 'always'),
-                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_SL_{}_HOT'.format(i), 0)),
-                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_SL_{}_COLD'.format(i), 0)),
-                'candle_period': os.environ.get('BEHAVIOUR_MACD_SL_{}_CANDLE_PERIOD'.format(i), '1d')
-            } for i in range(int(os.environ.get('BEHAVIOUR_MACD_SL_NUM_INDICATORS', 1)))],
+            
+              'macd_sl': [{	
+                'enabled': bool(distutils.util.strtobool(	
+                    os.environ.get('BEHAVIOUR_MACD_SL_{}_ENABLED'.format(i), 'True')	
+                )),	
+                'alert_enabled': bool(distutils.util.strtobool(	
+                    os.environ.get('BEHAVIOUR_MACD_SL_{}_ALERT_ENABLED'.format(i), 'True')	
+                )),	
+                'alert_frequency': os.environ.get('BEHAVIOUR_MACD_SL_{}_ALERT_FREQUENCY'.format(i), 'always'),	
+                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_SL_{}_HOT'.format(i), 0)),	
+                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_SL_{}_COLD'.format(i), 0)),	
+                'candle_period': os.environ.get('BEHAVIOUR_MACD_SL_{}_CANDLE_PERIOD'.format(i), '1d'),
+                'cold_message': str(os.environ.get('BEHAVIOUR_MACD_SL_{}_COLD_CUSTOM_MESSAGE'.format(i), 'is cold!')),
+                'hot_message': str(os.environ.get('BEHAVIOUR_MACD_SL_{}_HOT_CUSTOM_MESSAGE'.format(i), 'is hot!'))	
+            } for i in range(int(os.environ.get('BEHAVIOUR_MACD_SL_NUM_INDICATORS', 1)))],	
 
             'sma': [{
                 'enabled': bool(distutils.util.strtobool(
@@ -147,7 +157,9 @@ class Configuration():
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_{}_HOT'.format(i), 1)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_{}_COLD'.format(i), 1)),
                 'candle_period': os.environ.get('BEHAVIOUR_SMA_{}_CANDLE_PERIOD'.format(i), '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_SMA_{}_PERIOD_COUNT'.format(i), 15))
+                'period_count': int(os.environ.get('BEHAVIOUR_SMA_{}_PERIOD_COUNT'.format(i), 15)),
+                'cold_message': str(os.environ.get('BEHAVIOUR_SMA_{}_COLD_CUSTOM_MESSAGE'.format(i), 'is cold!')),
+                'hot_message': str(os.environ.get('BEHAVIOUR_SMA_{}_HOT_CUSTOM_MESSAGE'.format(i), 'is hot!'))
             } for i in range(int(os.environ.get('BEHAVIOUR_SMA_NUM_INDICATORS', 1)))],
 
             'sma_crossover': [{
@@ -161,6 +173,8 @@ class Configuration():
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_HOT'.format(i), 'True')),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_COLD'.format(i), 'True')),
                 'candle_period': os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_CANDLE_PERIOD'.format(i), '1d'),
+                'cold_message': str(os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_COLD_CUSTOM_MESSAGE'.format(i), 'is cold!')),
+                'hot_message': str(os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_HOT_CUSTOM_MESSAGE'.format(i), 'is hot!')),
                 'period_count': self._tuple_maker(
                     os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_PERIOD_COUNT'.format(i), '15/21')
                 )
@@ -177,7 +191,9 @@ class Configuration():
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_{}_HOT'.format(i), 1)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_{}_COLD'.format(i), 1)),
                 'candle_period': os.environ.get('BEHAVIOUR_EMA_{}_CANDLE_PERIOD'.format(i), '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_EMA_{}_PERIOD_COUNT'.format(i), 15))
+                'period_count': int(os.environ.get('BEHAVIOUR_EMA_{}_PERIOD_COUNT'.format(i), 15)),
+                'hot_message': os.environ.get('BEHAVIOUR_EMA_{}_HOT_CUSTOM_MESSAGE'.format(i), 'is hot!'),
+                'cold_message': os.environ.get('BEHAVIOUR_EMA_{}_COLD_CUSTOM_MESSAGE'.format(i), 'is cold!')
             } for i in range(int(os.environ.get('BEHAVIOUR_EMA_NUM_INDICATORS', 1)))],
 
             'ema_crossover': [{
@@ -191,6 +207,8 @@ class Configuration():
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_CROSSOVER_{}_HOT'.format(i), 'True')),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_CROSSOVER_{}_COLD'.format(i), 'True')),
                 'candle_period': os.environ.get('BEHAVIOUR_EMA_CROSSOVER_{}_CANDLE_PERIOD'.format(i), '1d'),
+                'cold_message': str(os.environ.get('BEHAVIOUR_EMA_CROSSOVER_{}_COLD_CUSTOM_MESSAGE'.format(i), 'is cold!')),
+                'hot_message': str(os.environ.get('BEHAVIOUR_EMA_CROSSOVER_{}_HOT_CUSTOM_MESSAGE'.format(i), 'is hot!')),
                 'period_count': self._tuple_maker(
                     os.environ.get('BEHAVIOUR_EMA_CROSSOVER_{}_PERIOD_COUNT'.format(i), '15/21')
                 )
@@ -206,7 +224,9 @@ class Configuration():
                 'alert_frequency': os.environ.get('BEHAVIOUR_ICHIMOKU_{}_ALERT_FREQUENCY'.format(i), 'always'),
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_ICHIMOKU_{}_HOT'.format(i), 'True')),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_ICHIMOKU_{}_COLD'.format(i), 'True')),
-                'candle_period': os.environ.get('BEHAVIOUR_ICHIMOKU_{}_CANDLE_PERIOD'.format(i), '1d')
+                'candle_period': os.environ.get('BEHAVIOUR_ICHIMOKU_{}_CANDLE_PERIOD'.format(i), '1d'),
+                'cold_message': str(os.environ.get('BEHAVIOUR_ICHIMOKU_{}_COLD_CUSTOM_MESSAGE'.format(i), 'is cold!')),
+                'hot_message': str(os.environ.get('BEHAVIOUR_ICHIMOKU_{}_HOT_CUSTOM_MESSAGE'.format(i), 'is hot!'))
             } for i in range(int(os.environ.get('BEHAVIOUR_ICHIMOKU_NUM_INDICATORS', 1)))],
         }
 

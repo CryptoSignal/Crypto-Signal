@@ -181,16 +181,16 @@ class Behaviour():
 
                     if self.behaviour_config[name][i]['alert_enabled'] and alert_freq:
                         if analyzed_data[analysis][i]['is_hot']:
-                            message += "{} {} ({}): {} is hot!\n".format(analysis,
+                            message += "{} {} ({}): {} {}\n".format(analysis,
                                                                       candle_period,
                                                                       analyzed_data[analysis][i]['values'][0],
-                                                                      market_pair)
-
+                                                                      market_pair,(self.behaviour_config[name][i]['hot_message']))
+                                                                                          
                         if analyzed_data[analysis][i]['is_cold']:
-                            message += "{} {} ({}): {} is cold!\n".format(analysis,
-                                                                       candle_period,
-                                                                       analyzed_data[analysis][i]['values'][0],
-                                                                       market_pair)
+                            message += "{} {} ({}): {} {}\n".format(analysis,
+                                                                      candle_period,
+                                                                      analyzed_data[analysis][i]['values'][0],
+                                                                      market_pair,(self.behaviour_config[name][i]['cold_message']))
 
                         # Don't send any more alerts if our alert frequency is set to "one"
                         if alert_freq.lower() == 'once':
