@@ -19,7 +19,7 @@ description: Can be set to `cli`, `csv` or `json`. This will specify the output 
 *SETTINGS_UPDATE_INTERVAL*\
 default: 300\
 necessity: optional\
-description: This option controls how frequently to rescan the exchange information.
+description: This option controls how frequently to rescan the exchange information (in seconds).
 
 *SETTINGS_MARKET_PAIRS*\
 default: None\
