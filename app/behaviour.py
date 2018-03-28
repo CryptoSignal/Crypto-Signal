@@ -53,10 +53,10 @@ class Behaviour():
 
         self.logger.info("Using the following exchange(s): %s", list(market_data.keys()))
 
-        self.__test_strategies(market_data, output_mode)
+        self._test_strategies(market_data, output_mode)
 
 
-    def __test_strategies(self, market_data, output_mode):
+    def _test_strategies(self, market_data, output_mode):
         """Test the strategies and perform notifications as required
 
         Args:
@@ -138,14 +138,14 @@ class Behaviour():
                     )
                     self.logger.debug(traceback.format_exc())
 
-                message += '{}\n'.format(self.__get_notifier_message(analyzed_data, market_pair))
+                message += '{}\n'.format(self._get_notifier_message(analyzed_data, market_pair))
 
                 if output_mode == 'cli':
-                    output = self.__get_cli_output(analyzed_data, market_pair)
+                    output = self._get_cli_output(analyzed_data, market_pair)
                 elif output_mode == 'csv':
-                    output = self.__get_csv_output(analyzed_data, market_pair)
+                    output = self._get_csv_output(analyzed_data, market_pair)
                 elif output_mode == 'json':
-                    output = self.__get_json_output(analyzed_data, market_pair)
+                    output = self._get_json_output(analyzed_data, market_pair)
                 else:
                     output = 'Unknown output mode!'
 
@@ -155,7 +155,7 @@ class Behaviour():
                 self.notifier.notify_all(message)
 
 
-    def __get_notifier_message(self, analyzed_data, market_pair):
+    def _get_notifier_message(self, analyzed_data, market_pair):
         """Creates the message to send via the configured notifier(s)
 
         Args:
@@ -174,23 +174,27 @@ class Behaviour():
         message = ""
         for analysis in analyzed_data:
             if analyzed_data[analysis]:
-                for i, indicator in enumerate(analyzed_data[analysis]):
+                for i, _ in enumerate(analyzed_data[analysis]):
                     name = split_name(analysis.lower())
                     alert_freq = self.behaviour_config[name][i]['alert_frequency']
                     candle_period = self.behaviour_config[name][i]['candle_period']
 
                     if self.behaviour_config[name][i]['alert_enabled'] and alert_freq:
                         if analyzed_data[analysis][i]['is_hot']:
-                            message += "{} {} ({}): {} is hot!\n".format(analysis,
-                                                                      candle_period,
-                                                                      analyzed_data[analysis][i]['values'][0],
-                                                                      market_pair)
+                            message += "{} {} ({}): {} is hot!\n".format(
+                                analysis,
+                                candle_period,
+                                analyzed_data[analysis][i]['values'][0],
+                                market_pair
+                            )
 
                         if analyzed_data[analysis][i]['is_cold']:
-                            message += "{} {} ({}): {} is cold!\n".format(analysis,
-                                                                       candle_period,
-                                                                       analyzed_data[analysis][i]['values'][0],
-                                                                       market_pair)
+                            message += "{} {} ({}): {} is cold!\n".format(
+                                analysis,
+                                candle_period,
+                                analyzed_data[analysis][i]['values'][0],
+                                market_pair
+                            )
 
                         # Don't send any more alerts if our alert frequency is set to "one"
                         if alert_freq.lower() == 'once':
@@ -199,7 +203,7 @@ class Behaviour():
         return message
 
 
-    def __get_cli_output(self, analyzed_data, market_pair):
+    def _get_cli_output(self, analyzed_data, market_pair):
         """Creates the message to output to the CLI
 
         Args:
@@ -242,7 +246,7 @@ class Behaviour():
         return output
 
 
-    def __get_csv_output(self, analyzed_data, market_pair):
+    def _get_csv_output(self, analyzed_data, market_pair):
         """Creates the csv to output to the CLI
 
         Args:
@@ -276,7 +280,7 @@ class Behaviour():
 
 
 
-    def __get_json_output(self, analyzed_data, market_pair):
+    def _get_json_output(self, analyzed_data, market_pair):
         """Creates the JSON to output to the CLI
 
         Args:

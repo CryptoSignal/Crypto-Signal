@@ -24,7 +24,7 @@ class Notifier():
 
         enabled_notifiers = []
         self.logger = structlog.get_logger()
-        self.twilio_configured = self.__validate_required_config('twilio', notifier_config)
+        self.twilio_configured = self._validate_required_config('twilio', notifier_config)
         if self.twilio_configured:
             self.twilio_client = TwilioNotifier(
                 twilio_key=notifier_config['twilio']['required']['key'],
@@ -34,7 +34,7 @@ class Notifier():
             )
             enabled_notifiers.append('twilio')
 
-        self.discord_configured = self.__validate_required_config('discord', notifier_config)
+        self.discord_configured = self._validate_required_config('discord', notifier_config)
         if self.discord_configured:
             self.discord_client = DiscordNotifier(
                 webhook=notifier_config['discord']['required']['webhook'],
@@ -42,14 +42,14 @@ class Notifier():
                 avatar=notifier_config['discord']['optional']['avatar']
             )
 
-        self.slack_configured = self.__validate_required_config('slack', notifier_config)
+        self.slack_configured = self._validate_required_config('slack', notifier_config)
         if self.slack_configured:
             self.slack_client = SlackNotifier(
                 slack_webhook=notifier_config['slack']['required']['webhook']
             )
             enabled_notifiers.append('slack')
 
-        self.gmail_configured = self.__validate_required_config('gmail', notifier_config)
+        self.gmail_configured = self._validate_required_config('gmail', notifier_config)
         if self.gmail_configured:
             self.gmail_client = GmailNotifier(
                 username=notifier_config['gmail']['required']['username'],
@@ -58,7 +58,7 @@ class Notifier():
             )
             enabled_notifiers.append('gmail')
 
-        self.telegram_configured = self.__validate_required_config('telegram', notifier_config)
+        self.telegram_configured = self._validate_required_config('telegram', notifier_config)
         if self.telegram_configured:
             self.telegram_client = TelegramNotifier(
                 token=notifier_config['telegram']['required']['token'],
@@ -69,7 +69,7 @@ class Notifier():
         self.logger.info('enabled notifers: %s', enabled_notifiers)
 
 
-    def __validate_required_config(self, notifier, notifier_config):
+    def _validate_required_config(self, notifier, notifier_config):
         """Validate the required configuration items are present for a notifier.
 
         Args:
