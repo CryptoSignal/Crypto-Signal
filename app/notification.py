@@ -221,7 +221,7 @@ class Notifier():
                                 last_status = str()
 
                             if last_status != status:
-                                self.last_analysis[exchange][market][analyzer][index]['status'] = status
+                                new_analysis[exchange][market][analyzer][index]['status'] = status
                                 new_message += message_template.render(
                                     exchange=exchange,
                                     market=market,
@@ -234,6 +234,9 @@ class Notifier():
                                     status=status,
                                     user_config=indicator['config']
                                 )
+
+        # Merge changes from new analysis into last analysis
+        self.last_analysis = {**self.last_analysis, **new_analysis}
         return new_message
 
 
