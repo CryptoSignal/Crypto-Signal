@@ -2,6 +2,7 @@
 """
 
 import structlog
+from jinja2 import Template
 
 from notifiers.twilio_client import TwilioNotifier
 from notifiers.slack_client import SlackNotifier
@@ -69,6 +70,75 @@ class Notifier():
         self.logger.info('enabled notifers: %s', enabled_notifiers)
 
 
+    def notify_all(self, new_analysis):
+        """Trigger a notification for all notification options.
+
+        Args:
+            new_analysis (dict): The new_analysis to send.
+        """
+
+        self.notify_slack(new_analysis)
+        self.notify_discord(new_analysis)
+        self.notify_twilio(new_analysis)
+        self.notify_gmail(new_analysis)
+        self.notify_telegram(new_analysis)
+
+
+    def notify_discord(self, new_analysis):
+        """Send a notification via the discord notifier
+
+        Args:
+            new_analysis (dict): The new_analysis to send.
+        """
+
+        if self.discord_configured:
+            self.discord_client.notify(new_analysis)
+
+
+    def notify_slack(self, new_analysis):
+        """Send a notification via the slack notifier
+
+        Args:
+            new_analysis (dict): The new_analysis to send.
+        """
+
+        if self.slack_configured:
+            self.slack_client.notify(new_analysis)
+
+
+    def notify_twilio(self, new_analysis):
+        """Send a notification via the twilio notifier
+
+        Args:
+            new_analysis (dict): The new_analysis to send.
+        """
+
+        if self.twilio_configured:
+            self.twilio_client.notify(new_analysis)
+
+
+    def notify_gmail(self, new_analysis):
+        """Send a notification via the gmail notifier
+
+        Args:
+            new_analysis (dict): The new_analysis to send.
+        """
+
+        if self.gmail_configured:
+            self.gmail_client.notify(new_analysis)
+
+
+    def notify_telegram(self, new_analysis):
+        """Send a notification via the telegram notifier
+
+        Args:
+            new_analysis (dict): The new_analysis to send.
+        """
+
+        if self.telegram_configured:
+            self.telegram_client.notify(new_analysis)
+
+
     def _validate_required_config(self, notifier, notifier_config):
         """Validate the required configuration items are present for a notifier.
 
@@ -87,70 +157,33 @@ class Notifier():
         return notifier_configured
 
 
-    def notify_all(self, message):
-        """Trigger a notification for all notification options.
+    def _message_templater(self, new_analysis, template):
+        message_template = Template(template)
+        new_message = str()
+        for exchange in new_analysis:
+            for market in new_analysis[exchange]:
+                for analyzer in new_analysis[exchange][market]:
+                    for index, indicator in enumerate(new_analysis[exchange][market][analyzer]):
+                        string_values = indicator['values'].join('/')
 
-        Args:
-            message (str): The message to send.
-        """
+                        status = 'No status!'
+                        if indicator['is_hot']:
+                            status = 'hot'
+                        if indicator['is_cold']:
+                            status = 'cold'
 
-        self.notify_slack(message)
-        self.notify_discord(message)
-        self.notify_twilio(message)
-        self.notify_gmail(message)
-        self.notify_telegram(message)
+                        new_message += message_template.render(
+                            exchange=exchange,
+                            market=market,
+                            analyzer=analyzer,
+                            analyzer_number=index,
+                            raw_values=indicator['values'],
+                            raw_hot_value=indicator['is_hot'],
+                            raw_cold_value=indicator['is_cold'],
+                            string_values=string_values,
+                            status=status
+                        )
 
-
-    def notify_discord(self, message):
-        """Send a notification via the discord notifier
-
-        Args:
-            message (str): The message to send.
-        """
-
-        if self.discord_configured:
-            self.discord_client.notify(message)
-
-
-    def notify_slack(self, message):
-        """Send a notification via the slack notifier
-
-        Args:
-            message (str): The message to send.
-        """
-
-        if self.slack_configured:
-            self.slack_client.notify(message)
+        return new_message
 
 
-    def notify_twilio(self, message):
-        """Send a notification via the twilio notifier
-
-        Args:
-            message (str): The message to send.
-        """
-
-        if self.twilio_configured:
-            self.twilio_client.notify(message)
-
-
-    def notify_gmail(self, message):
-        """Send a notification via the gmail notifier
-
-        Args:
-            message (str): The message to send.
-        """
-
-        if self.gmail_configured:
-            self.gmail_client.notify(message)
-
-
-    def notify_telegram(self, message):
-        """Send a notification via the telegram notifier
-
-        Args:
-            message (str): The message to send.
-        """
-
-        if self.telegram_configured:
-            self.telegram_client.notify(message)

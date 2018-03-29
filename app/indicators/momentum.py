@@ -36,7 +36,9 @@ class Momentum(IndicatorUtils):
 
         analyzed_data = [(value,) for value in mom_values]
 
-        return self.analyze_results(analyzed_data,
-                                    is_hot=lambda v: v > hot_thresh if hot_thresh else False,
-                                    is_cold=lambda v: v < cold_thresh if cold_thresh else False,
-                                    all_data=all_data)
+        return self.analyze_results(
+            analyzed_data,
+            is_hot=lambda v: v > hot_thresh if hot_thresh else False,
+            is_cold=lambda v: v < cold_thresh if cold_thresh else False,
+            all_data=all_data
+        )
