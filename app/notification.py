@@ -22,6 +22,7 @@ class Notifier():
         """
 
         self.logger = structlog.get_logger()
+        self.notifier_config = notifier_config
 
         enabled_notifiers = []
         self.logger = structlog.get_logger()
@@ -92,7 +93,11 @@ class Notifier():
         """
 
         if self.discord_configured:
-            self.discord_client.notify(new_analysis)
+            message = self._message_templater(
+                new_analysis,
+                self.notifier_config['discord']['optional']['template']
+            )
+            self.discord_client.notify(message)
 
 
     def notify_slack(self, new_analysis):
@@ -103,7 +108,11 @@ class Notifier():
         """
 
         if self.slack_configured:
-            self.slack_client.notify(new_analysis)
+            message = self._message_templater(
+                new_analysis,
+                self.notifier_config['slack']['optional']['template']
+            )
+            self.slack_client.notify(message)
 
 
     def notify_twilio(self, new_analysis):
@@ -114,7 +123,11 @@ class Notifier():
         """
 
         if self.twilio_configured:
-            self.twilio_client.notify(new_analysis)
+            message = self._message_templater(
+                new_analysis,
+                self.notifier_config['twilio']['optional']['template']
+            )
+            self.twilio_client.notify(message)
 
 
     def notify_gmail(self, new_analysis):
@@ -125,7 +138,11 @@ class Notifier():
         """
 
         if self.gmail_configured:
-            self.gmail_client.notify(new_analysis)
+            message = self._message_templater(
+                new_analysis,
+                self.notifier_config['gmail']['optional']['template']
+            )
+            self.gmail_client.notify(message)
 
 
     def notify_telegram(self, new_analysis):
@@ -136,7 +153,11 @@ class Notifier():
         """
 
         if self.telegram_configured:
-            self.telegram_client.notify(new_analysis)
+            message = self._message_templater(
+                new_analysis,
+                self.notifier_config['telegram']['optional']['template']
+            )
+            self.telegram_client.notify(message)
 
 
     def _validate_required_config(self, notifier, notifier_config):
@@ -158,32 +179,49 @@ class Notifier():
 
 
     def _message_templater(self, new_analysis, template):
+        """Creates a message from a user defined template
+
+        Args:
+            new_analysis (dict): A dictionary of data related to the analysis to send a message about.
+            template (str): A Jinja formatted message template.
+
+        Returns:
+            str: The templated messages for the notifier.
+        """
+
         message_template = Template(template)
         new_message = str()
         for exchange in new_analysis:
             for market in new_analysis[exchange]:
                 for analyzer in new_analysis[exchange][market]:
                     for index, indicator in enumerate(new_analysis[exchange][market][analyzer]):
-                        string_values = indicator['values'].join('/')
+                        formatted_values = []
+                        for value in indicator['result']['values']:
+                            if isinstance(value, float):
+                                formatted_values.append(format(value, '.8f'))
+                            else:
+                                formatted_values.append(value)
+                        formatted_string = '/'.join(formatted_values)
 
-                        status = 'No status!'
-                        if indicator['is_hot']:
+                        status = 'neutral'
+                        if indicator['result']['is_hot']:
                             status = 'hot'
-                        if indicator['is_cold']:
+                        elif indicator['result']['is_cold']:
                             status = 'cold'
 
-                        new_message += message_template.render(
-                            exchange=exchange,
-                            market=market,
-                            analyzer=analyzer,
-                            analyzer_number=index,
-                            raw_values=indicator['values'],
-                            raw_hot_value=indicator['is_hot'],
-                            raw_cold_value=indicator['is_cold'],
-                            string_values=string_values,
-                            status=status
-                        )
-
+                        if indicator['result']['is_hot'] or indicator['result']['is_cold']:
+                            new_message += message_template.render(
+                                exchange=exchange,
+                                market=market,
+                                analyzer=analyzer,
+                                analyzer_number=index,
+                                raw_values=indicator['result']['values'],
+                                raw_hot_value=indicator['result']['is_hot'],
+                                raw_cold_value=indicator['result']['is_cold'],
+                                string_values=formatted_string,
+                                status=status,
+                                user_config=indicator['config']
+                            )
         return new_message
 
 

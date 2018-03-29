@@ -97,27 +97,21 @@ class Behaviour():
                                             candle_period
                                         )
 
-                                    # If the period is customizable for the current indicator, fetch it
-                                    # from the configuration
-                                    if 'period_count' in indicator_conf:
-                                        period_count = indicator_conf['period_count']
+                                    analysis_args = {
+                                        'historical_data': historical_data[candle_period],
+                                        'hot_thresh': indicator_conf['hot'],
+                                        'cold_thresh': indicator_conf['cold']
+                                    }
 
-                                        new_result[exchange][market_pair][analyzer].append(
-                                            analysis_dispatcher[analyzer](
-                                                historical_data[candle_period],
-                                                hot_thresh=indicator_conf['hot'],
-                                                cold_thresh=indicator_conf['cold'],
-                                                period_count=period_count
-                                            )
-                                        )
-                                    else:
-                                        new_result[exchange][market_pair][analyzer].append(
-                                            analysis_dispatcher[analyzer](
-                                                historical_data[candle_period],
-                                                hot_thresh=indicator_conf['hot'],
-                                                cold_thresh=indicator_conf['cold']
-                                            )
-                                        )
+                                    # If the period is customizable for the current indicator,
+                                    # fetch it from the configuration
+                                    if 'period_count' in indicator_conf:
+                                        analysis_args['period_count'] = indicator_conf['period_count']
+
+                                    new_result[exchange][market_pair][analyzer].append({
+                                        'result': analysis_dispatcher[analyzer](**analysis_args),
+                                        'config': indicator_conf
+                                    })
                                 except ValueError as e:
                                     self.logger.info(e)
                                     self.logger.info(
@@ -151,8 +145,6 @@ class Behaviour():
                     else:
                         self.logger.warn("No such analyzer %s, skipping.", analyzer)
 
-                #message += '{}\n'.format(self._get_notifier_message(analyzed_data, market_pair))
-
                 if output_mode == 'cli':
                     output = self._get_cli_output(new_result[exchange])
                 elif output_mode == 'csv':
@@ -164,58 +156,7 @@ class Behaviour():
 
                 print(output)
 
-            #if message.strip():
-            #    self.notifier.notify_all(message)
-
         return new_result
-
-
-    def _get_notifier_message(self, analyzed_data, market_pair):
-        """Creates the message to send via the configured notifier(s)
-
-        Args:
-            analyzed_data (dict): The result of the completed analysis
-            market_pair (str): The market related to the message
-
-        Returns:
-            str: Completed notifier message
-        """
-
-        import re
-
-        def split_name(name):
-            return re.split(r'[0-9]+', name)[0]
-
-        message = ""
-        for analysis in analyzed_data:
-            if analyzed_data[analysis]:
-                for i, _ in enumerate(analyzed_data[analysis]):
-                    name = split_name(analysis.lower())
-                    alert_freq = self.behaviour_config[name][i]['alert_frequency']
-                    candle_period = self.behaviour_config[name][i]['candle_period']
-
-                    if self.behaviour_config[name][i]['alert_enabled'] and alert_freq:
-                        if analyzed_data[analysis][i]['is_hot']:
-                            message += "{} {} ({}): {} is hot!\n".format(
-                                analysis,
-                                candle_period,
-                                analyzed_data[analysis][i]['values'][0],
-                                market_pair
-                            )
-
-                        if analyzed_data[analysis][i]['is_cold']:
-                            message += "{} {} ({}): {} is cold!\n".format(
-                                analysis,
-                                candle_period,
-                                analyzed_data[analysis][i]['values'][0],
-                                market_pair
-                            )
-
-                        # Don't send any more alerts if our alert frequency is set to "one"
-                        if alert_freq.lower() == 'once':
-                            self.behaviour_config[name][i]['alert_frequency'] = None
-
-        return message
 
 
     def _get_cli_output(self, analyzed_data):
@@ -237,14 +178,14 @@ class Behaviour():
             for analysis in analyzed_data[market_pair]:
                 for i, indicator in enumerate(analyzed_data[market_pair][analysis]):
                     colour_code = normal_colour
-                    if indicator['is_hot']:
+                    if indicator['result']['is_hot']:
                         colour_code = hot_colour
 
-                    if indicator['is_cold']:
+                    if indicator['result']['is_cold']:
                         colour_code = cold_colour
 
                     formatted_values = []
-                    for value in indicator['values']:
+                    for value in indicator['result']['values']:
                         if isinstance(value, float):
                             formatted_values.append(format(value, '.8f'))
                         else:
@@ -274,14 +215,14 @@ class Behaviour():
             for analysis in analyzed_data[market_pair]:
                 for i, indicator in enumerate(analyzed_data[market_pair][analysis]):
                     output += ',{} #{}'.format(analysis, i)
-                    if indicator['is_hot']:
+                    if indicator['result']['is_hot']:
                         output += ',hot'
 
-                    if indicator['is_cold']:
+                    if indicator['result']['is_cold']:
                         output += ',cold'
 
                     formatted_values = []
-                    for value in indicator['values']:
+                    for value in indicator['result']['values']:
                         if isinstance(value, float):
                             formatted_values.append(format(value, '.8f'))
                         else:
@@ -307,8 +248,13 @@ class Behaviour():
         for market_pair in analyzed_data:
             for analysis in analyzed_data[market_pair]:
                 for i, indicator in enumerate(analyzed_data[market_pair][analysis]):
-                    stringified_analysis[analysis][i]['is_hot'] = str(indicator['is_hot'])
-                    stringified_analysis[analysis][i]['is_cold'] = str(indicator['is_cold'])
+                    stringified_analysis[analysis][i]['result']['is_hot'] = str(
+                        indicator['result']['is_hot']
+                    )
+
+                    stringified_analysis[analysis][i]['result']['is_cold'] = str(
+                        indicator['result']['is_cold']
+                    )
             output = {'pair': market_pair, 'analysis': analyzed_data}
             output = json.dumps(output)
         return output
