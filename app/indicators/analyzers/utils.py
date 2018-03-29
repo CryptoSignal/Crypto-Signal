@@ -24,7 +24,7 @@ class StrategyUtils():
                 list: A list of high prices extracted from the OHLCV data
             """
 
-            high_prices = []
+            high_prices = list()
             for data_point in historical_data:
                 high_prices.append(data_point[2])
 
@@ -40,7 +40,7 @@ class StrategyUtils():
                 list: A list of low prices extracted from the OHLCV data
             """
 
-            low_prices = []
+            low_prices = list()
             for data_point in historical_data:
                 low_prices.append(data_point[3])
 
@@ -56,7 +56,7 @@ class StrategyUtils():
             list: A list of closing prices extracted from the OHLCV data
         """
 
-        closing_prices = []
+        closing_prices = list()
         for data_point in historical_data:
             closing_prices.append(data_point[4])
 

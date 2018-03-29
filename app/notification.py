@@ -23,8 +23,9 @@ class Notifier():
 
         self.logger = structlog.get_logger()
         self.notifier_config = notifier_config
+        self.last_analysis = dict()
 
-        enabled_notifiers = []
+        enabled_notifiers = list()
         self.logger = structlog.get_logger()
         self.twilio_configured = self._validate_required_config('twilio', notifier_config)
         if self.twilio_configured:
@@ -142,7 +143,8 @@ class Notifier():
                 new_analysis,
                 self.notifier_config['gmail']['optional']['template']
             )
-            self.gmail_client.notify(message)
+            if message.strip():
+                self.gmail_client.notify(message)
 
 
     def notify_telegram(self, new_analysis):
@@ -189,13 +191,16 @@ class Notifier():
             str: The templated messages for the notifier.
         """
 
+        if not self.last_analysis:
+            self.last_analysis = new_analysis
+
         message_template = Template(template)
         new_message = str()
         for exchange in new_analysis:
             for market in new_analysis[exchange]:
                 for analyzer in new_analysis[exchange][market]:
                     for index, indicator in enumerate(new_analysis[exchange][market][analyzer]):
-                        formatted_values = []
+                        formatted_values = list()
                         for value in indicator['result']['values']:
                             if isinstance(value, float):
                                 formatted_values.append(format(value, '.8f'))
@@ -210,18 +215,25 @@ class Notifier():
                             status = 'cold'
 
                         if indicator['result']['is_hot'] or indicator['result']['is_cold']:
-                            new_message += message_template.render(
-                                exchange=exchange,
-                                market=market,
-                                analyzer=analyzer,
-                                analyzer_number=index,
-                                raw_values=indicator['result']['values'],
-                                raw_hot_value=indicator['result']['is_hot'],
-                                raw_cold_value=indicator['result']['is_cold'],
-                                string_values=formatted_string,
-                                status=status,
-                                user_config=indicator['config']
-                            )
+                            try:
+                                last_status = self.last_analysis[exchange][market][analyzer][index]['status']
+                            except:
+                                last_status = str()
+
+                            if last_status != status:
+                                self.last_analysis[exchange][market][analyzer][index]['status'] = status
+                                new_message += message_template.render(
+                                    exchange=exchange,
+                                    market=market,
+                                    analyzer=analyzer,
+                                    analyzer_number=index,
+                                    raw_values=indicator['result']['values'],
+                                    raw_hot_value=indicator['result']['is_hot'],
+                                    raw_cold_value=indicator['result']['is_cold'],
+                                    string_values=formatted_string,
+                                    status=status,
+                                    user_config=indicator['config']
+                                )
         return new_message
 
 

@@ -56,7 +56,7 @@ class IndicatorUtils():
                 indication.
         """
 
-        result_data = []
+        result_data = list()
 
         for value_tup in indicator_data:
             if any(math.isnan(value) for value in value_tup):
@@ -78,7 +78,7 @@ class IndicatorUtils():
 
         elif len(result_data) == 0:
             null_result = {
-                'values': (None,),
+                'values': ('None',),
                 'is_cold': False,
                 'is_hot': False
             }

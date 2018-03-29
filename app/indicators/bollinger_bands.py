@@ -25,7 +25,7 @@ class BollingerIndicator(IndicatorUtils):
         dataframe = self.convert_to_dataframe(historical_data)
         bollinger_data = abstract.BBANDS(dataframe, period_count)
 
-        bb_result_data = []
+        bb_result_data = list()
         for bb_row in bollinger_data.iterrows():
             if math.isnan(bb_row[1]['upperband']) or \
                 math.isnan(bb_row[1]['middleband']) or \
@@ -51,7 +51,7 @@ class BollingerIndicator(IndicatorUtils):
                 return bb_result_data[-1]
             except IndexError:
                 null_result = {
-                    'values': (None, None, None),
+                    'values': ('None', 'None', 'None'),
                     'is_hot': False,
                     'is_cold': False
                 }

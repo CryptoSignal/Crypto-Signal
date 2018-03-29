@@ -33,7 +33,7 @@ class Behaviour():
         self.exchange_interface = exchange_interface
         self.strategy_analyzer = strategy_analyzer
         self.notifier = notifier
-        self.last_result = {}
+        self.last_result = dict()
 
 
     def run(self, market_pairs, output_mode):
@@ -67,20 +67,20 @@ class Behaviour():
         """
 
         analysis_dispatcher = self.strategy_analyzer.dispatcher()
-        new_result = {}
+        new_result = dict()
         for exchange in market_data:
             if exchange not in new_result:
-                new_result[exchange] = {}
+                new_result[exchange] = dict()
             self.logger.info("Beginning analysis of %s", exchange)
 
             for market_pair in market_data[exchange]:
                 if market_pair not in new_result[exchange]:
-                    new_result[exchange][market_pair] = {}
-                historical_data = {}
+                    new_result[exchange][market_pair] = dict()
+                historical_data = dict()
 
                 for analyzer in self.behaviour_config:
                     if analyzer not in new_result[exchange][market_pair]:
-                        new_result[exchange][market_pair][analyzer] = []
+                        new_result[exchange][market_pair][analyzer] = list()
 
                     if analyzer in analysis_dispatcher:
                         behaviour_conf = self.behaviour_config[analyzer]
@@ -184,7 +184,7 @@ class Behaviour():
                     if indicator['result']['is_cold']:
                         colour_code = cold_colour
 
-                    formatted_values = []
+                    formatted_values = list()
                     for value in indicator['result']['values']:
                         if isinstance(value, float):
                             formatted_values.append(format(value, '.8f'))
@@ -221,7 +221,7 @@ class Behaviour():
                     if indicator['result']['is_cold']:
                         output += ',cold'
 
-                    formatted_values = []
+                    formatted_values = list()
                     for value in indicator['result']['values']:
                         if isinstance(value, float):
                             formatted_values.append(format(value, '.8f'))

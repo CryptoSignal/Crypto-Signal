@@ -22,7 +22,7 @@ class ExchangeInterface():
         """
 
         self.logger = structlog.get_logger()
-        self.exchanges = {}
+        self.exchanges = dict()
 
         # Loads the exchanges using ccxt.
         for exchange in exchange_config:
@@ -132,7 +132,7 @@ class ExchangeInterface():
         if not exchanges:
             exchanges = self.exchanges
 
-        exchange_markets = {}
+        exchange_markets = dict()
         for exchange in exchanges:
             exchange_markets[exchange] = self.exchanges[exchange].load_markets()
 

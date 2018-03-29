@@ -50,11 +50,21 @@ default: None\
 necessity: required for Twilio\
 description: The receiving phone number (your phone number) for receiving the message.
 
+*NOTIFIERS_TWILIO_OPTIONAL_TEMPLATE*\
+default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}\
+necessity: optional\
+description: See the notifier templating section.
+
 ## Slack
 *NOTIFIERS_SLACK_REQUIRED_WEBHOOK*\
 default: None\
 necessity: required for Slack\
 description: The Slack webhook required for sending messages.
+
+*NOTIFIERS_SLACK_OPTIONAL_TEMPLATE*\
+default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}\
+necessity: optional\
+description: See the notifier templating section.
 
 ## Gmail
 *NOTIFIERS_GMAIL_REQUIRED_USERNAME*\
@@ -72,6 +82,11 @@ default: None\
 necessity: required for Gmail\
 description: The email addresses to receive the emails that are sent.
 
+*NOTIFIERS_GMAIL_OPTIONAL_TEMPLATE*\
+default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}\
+necessity: optional\
+description: See the notifier templating section.
+
 ## Telegram
 *NOTIFIERS_TELEGRAM_REQUIRED_TOKEN*\
 default: None\
@@ -82,6 +97,11 @@ description: Your telegram bot token you can generate a token by following the i
 default: None\
 necessity: required for Telegram\
 description: The chat_id to send the message too. The easiest way to get get this id is probably using RawDataBot or Userinfobot.
+
+*NOTIFIERS_TELEGRAM_OPTIONAL_TEMPLATE*\
+default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}\
+necessity: optional\
+description: See the notifier templating section.
 
 ## Discord
 *NOTIFIERS_DISCORD_REQUIRED_WEBHOOK*\
@@ -99,6 +119,14 @@ default: None\
 necessity: optional for Discord\
 description: The Discord avatar image for the username sending messages. Set to None for default pokemon.
 
+*NOTIFIERS_DISCORD_OPTIONAL_TEMPLATE*\
+default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}\
+necessity: optional\
+description: See the notifier templating section.
+
+# Notifier Templating
+
+
 # Analyzers
 Settings for the analyzers behaviour. The formal grammar is defined as follows:
 ```
@@ -113,7 +141,7 @@ Settings for the analyzers behaviour. The formal grammar is defined as follows:
                     EMA_CROSSOVER |
                     ICHIMOKU |
                     STOCHASTIC_RSI
-                      
+
 <indicator_index> := {0, 1, 2, ...}
 ```
 
