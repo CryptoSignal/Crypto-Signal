@@ -227,12 +227,9 @@ class Notifier():
                                     market=market,
                                     analyzer=analyzer,
                                     analyzer_number=index,
-                                    raw_values=indicator['result']['values'],
-                                    raw_hot_value=indicator['result']['is_hot'],
-                                    raw_cold_value=indicator['result']['is_cold'],
-                                    string_values=formatted_string,
                                     status=status,
-                                    user_config=indicator['config']
+                                    string_values=formatted_string,
+                                    raw_indicator=indicator
                                 )
 
         # Merge changes from new analysis into last analysis
