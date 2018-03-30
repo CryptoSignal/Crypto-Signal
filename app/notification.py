@@ -220,7 +220,12 @@ class Notifier():
                             except:
                                 last_status = str()
 
-                            if last_status != status:
+                            should_alert = True
+                            if indicator['config']['alert_frequency'] == 'once':
+                                if last_status == status:
+                                    should_alert = False
+
+                            if should_alert:
                                 new_analysis[exchange][market][analyzer][index]['status'] = status
                                 new_message += message_template.render(
                                     exchange=exchange,

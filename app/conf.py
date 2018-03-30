@@ -103,6 +103,7 @@ class Configuration():
                 'alert_enabled': bool(distutils.util.strtobool(
                     os.environ.get('BEHAVIOUR_MOMENTUM_{}_ALERT_ENABLED'.format(i), 'True')
                 )),
+                'alert_frequency': os.environ.get('BEHAVIOUR_MOMENTUM_{}_ALERT_FREQUENCY'.format(i), 'always'),
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MOMENTUM_{}_HOT'.format(i), 0)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MOMENTUM_{}_COLD'.format(i), 0)),
                 'candle_period': os.environ.get('BEHAVIOUR_MOMENTUM_{}_CANDLE_PERIOD'.format(i), '1d'),
@@ -116,6 +117,7 @@ class Configuration():
                 'alert_enabled': bool(distutils.util.strtobool(
                     os.environ.get('BEHAVIOUR_RSI_{}_ALERT_ENABLED'.format(i), 'True')
                 )),
+                'alert_frequency': os.environ.get('BEHAVIOUR_RSI_{}_ALERT_FREQUENCY'.format(i), 'always'),
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_RSI_{}_HOT'.format(i), 30)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_RSI_{}_COLD'.format(i), 70)),
                 'candle_period': os.environ.get('BEHAVIOUR_RSI_{}_CANDLE_PERIOD'.format(i), '1d'),
@@ -129,6 +131,7 @@ class Configuration():
                 'alert_enabled': bool(distutils.util.strtobool(
                     os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_ALERT_ENABLED'.format(i), 'True')
                 )),
+                'alert_frequency': os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_ALERT_FREQUENCY'.format(i), 'always'),
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_HOT'.format(i), 20)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_COLD'.format(i), 80)),
                 'candle_period': os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_CANDLE_PERIOD'.format(i), '1d'),
@@ -142,6 +145,7 @@ class Configuration():
                 'alert_enabled': bool(distutils.util.strtobool(
                     os.environ.get('BEHAVIOUR_MACD_{}_ALERT_ENABLED'.format(i), 'True')
                 )),
+                'alert_frequency': os.environ.get('BEHAVIOUR_MACD_{}_ALERT_FREQUENCY'.format(i), 'always'),
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_{}_HOT'.format(i), 0)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_{}_COLD'.format(i), 0)),
                 'candle_period': os.environ.get('BEHAVIOUR_MACD_{}_CANDLE_PERIOD'.format(i), '1d')
@@ -154,6 +158,7 @@ class Configuration():
                 'alert_enabled': bool(distutils.util.strtobool(
                     os.environ.get('BEHAVIOUR_MACD_SL_{}_ALERT_ENABLED'.format(i), 'True')
                 )),
+                'alert_frequency': os.environ.get('BEHAVIOUR_MACD_SL_{}_ALERT_FREQUENCY'.format(i), 'always'),
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_SL_{}_HOT'.format(i), 0)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_SL_{}_COLD'.format(i), 0)),
                 'candle_period': os.environ.get('BEHAVIOUR_MACD_SL_{}_CANDLE_PERIOD'.format(i), '1d')
@@ -166,6 +171,7 @@ class Configuration():
                 'alert_enabled': bool(distutils.util.strtobool(
                     os.environ.get('BEHAVIOUR_SMA_{}_ALERT_ENABLED'.format(i), 'True')
                 )),
+                'alert_frequency': os.environ.get('BEHAVIOUR_SMA_{}_ALERT_FREQUENCY'.format(i), 'always'),
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_{}_HOT'.format(i), 1)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_{}_COLD'.format(i), 1)),
                 'candle_period': os.environ.get('BEHAVIOUR_SMA_{}_CANDLE_PERIOD'.format(i), '1d'),
@@ -179,6 +185,7 @@ class Configuration():
                 'alert_enabled': bool(distutils.util.strtobool(
                     os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_ALERT_ENABLED'.format(i), 'True')
                 )),
+                'alert_frequency': os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_ALERT_FREQUENCY'.format(i), 'always'),
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_HOT'.format(i), 'True')),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_COLD'.format(i), 'True')),
                 'candle_period': os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_CANDLE_PERIOD'.format(i), '1d'),
@@ -194,6 +201,7 @@ class Configuration():
                 'alert_enabled': bool(distutils.util.strtobool(
                     os.environ.get('BEHAVIOUR_EMA_{}_ALERT_ENABLED'.format(i), 'True')
                 )),
+                'alert_frequency': os.environ.get('BEHAVIOUR_EMA_{}_ALERT_FREQUENCY'.format(i), 'always'),
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_{}_HOT'.format(i), 1)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_{}_COLD'.format(i), 1)),
                 'candle_period': os.environ.get('BEHAVIOUR_EMA_{}_CANDLE_PERIOD'.format(i), '1d'),
@@ -207,6 +215,7 @@ class Configuration():
                 'alert_enabled': bool(distutils.util.strtobool(
                     os.environ.get('BEHAVIOUR_EMA_CROSSOVER_{}_ALERT_ENABLED'.format(i), 'True')
                 )),
+                'alert_frequency': os.environ.get('BEHAVIOUR_EMA_CROSSOVER_{}_ALERT_FREQUENCY'.format(i), 'always'),
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_CROSSOVER_{}_HOT'.format(i), 'True')),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_CROSSOVER_{}_COLD'.format(i), 'True')),
                 'candle_period': os.environ.get('BEHAVIOUR_EMA_CROSSOVER_{}_CANDLE_PERIOD'.format(i), '1d'),
@@ -222,6 +231,7 @@ class Configuration():
                 'alert_enabled': bool(distutils.util.strtobool(
                     os.environ.get('BEHAVIOUR_ICHIMOKU_{}_ALERT_ENABLED'.format(i), 'True')
                 )),
+                'alert_frequency': os.environ.get('BEHAVIOUR_ICHIMOKU_{}_ALERT_FREQUENCY'.format(i), 'always'),
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_ICHIMOKU_{}_HOT'.format(i), 'True')),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_ICHIMOKU_{}_COLD'.format(i), 'True')),
                 'candle_period': os.environ.get('BEHAVIOUR_ICHIMOKU_{}_CANDLE_PERIOD'.format(i), '1d')
