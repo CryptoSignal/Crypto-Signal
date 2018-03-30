@@ -38,10 +38,12 @@ class SMA(IndicatorUtils):
         # List of 2-tuples containing the ema value and closing price respectively
         analyzed_data = [(r[1]['sma_value'], r[1]['close']) for r in combined_data.iterrows()]
 
-        return self.analyze_results(analyzed_data,
-                                    is_hot=lambda v, c: c > v * hot_thresh if hot_thresh else False,
-                                    is_cold=lambda v, c: c < v * cold_thresh if cold_thresh else False,
-                                    all_data=all_data)
+        return self.analyze_results(
+            analyzed_data,
+            is_hot=lambda v, c: c > v * hot_thresh if hot_thresh else False,
+            is_cold=lambda v, c: c < v * cold_thresh if cold_thresh else False,
+            all_data=all_data
+        )
 
     def analyze_crossover(self, historical_data, hot_thresh=None, cold_thresh=None,
                           period_count=(15, 21), all_data=False):
@@ -73,18 +75,26 @@ class SMA(IndicatorUtils):
 
         # List of 4-tuples containing: (old_sma_one, old_sma_two, current_sma_one, current_sma_two)
 
-        analyzed_data = [(math.nan, math.nan, rows[1][1]['sma_value_one'], rows[1][1]['sma_value_two'])]
+        analyzed_data = [
+            (math.nan, math.nan, rows[1][1]['sma_value_one'], rows[1][1]['sma_value_two'])
+        ]
 
         # We keep track of the old values as to assign a "hot" value when the first sma crosses over
         # the second one, and assign a "cold" value when the second sma crosses over the first
 
         for i in range(1, len(rows)):
-            analyzed_data.append((analyzed_data[i-1][2],
-                                  analyzed_data[i-1][3],
-                                  rows[i][1]['sma_value_one'],
-                                  rows[i][1]['sma_value_two']))
+            analyzed_data.append(
+                (
+                    analyzed_data[i-1][2],
+                    analyzed_data[i-1][3],
+                    rows[i][1]['sma_value_one'],
+                    rows[i][1]['sma_value_two']
+                )
+            )
 
-        return self.analyze_results(analyzed_data,
-                                    is_hot=lambda o1, o2, c1, c2: o1 < o2 and c1 > c2 if hot_thresh else False,
-                                    is_cold=lambda o1, o2, c1, c2: o1 > o2 and c1 < c2 if cold_thresh else False,
-                                    all_data=all_data)
+        return self.analyze_results(
+            analyzed_data,
+            is_hot=lambda o1, o2, c1, c2: o1 < o2 and c1 > c2 if hot_thresh else False,
+            is_cold=lambda o1, o2, c1, c2: o1 > o2 and c1 < c2 if cold_thresh else False,
+            all_data=all_data
+        )

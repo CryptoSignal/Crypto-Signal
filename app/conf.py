@@ -30,6 +30,12 @@ class Configuration():
                     'secret': os.environ.get('NOTIFIERS_TWILIO_REQUIRED_SECRET', None),
                     'sender_number': os.environ.get('NOTIFIERS_TWILIO_REQUIRED_SENDER_NUMBER', None),
                     'receiver_number': os.environ.get('NOTIFIERS_TWILIO_REQUIRED_RECEIVER_NUMBER', None)
+                },
+                'optional': {
+                    'template': os.environ.get(
+                        'NOTIFIERS_TWILIO_OPTIONAL_TEMPLATE',
+                        "{{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}"
+                    )
                 }
             },
 
@@ -39,13 +45,23 @@ class Configuration():
                     'username': os.environ.get('NOTIFIERS_DISCORD_REQUIRED_USERNAME', None)
                 },
                 'optional':{
-                    'avatar': os.environ.get('NOTIFIERS_DISCORD_OPTIONAL_AVATAR', None)
+                    'avatar': os.environ.get('NOTIFIERS_DISCORD_OPTIONAL_AVATAR', None),
+                    'template': os.environ.get(
+                        'NOTIFIERS_DISCORD_OPTIONAL_TEMPLATE',
+                        "{{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}"
+                    )
                 }
             },
 
             'slack': {
                 'required': {
                     'webhook': os.environ.get('NOTIFIERS_SLACK_REQUIRED_WEBHOOK', None)
+                },
+                'optional': {
+                    'template': os.environ.get(
+                        'NOTIFIERS_SLACK_OPTIONAL_TEMPLATE',
+                        "{{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}"
+                    )
                 }
             },
 
@@ -56,6 +72,12 @@ class Configuration():
                     'destination_emails': self._string_splitter(
                         os.environ.get('NOTIFIERS_GMAIL_REQUIRED_DESTINATION_EMAILS', None)
                     )
+                },
+                'optional': {
+                    'template': os.environ.get(
+                        'NOTIFIERS_GMAIL_OPTIONAL_TEMPLATE',
+                        "{{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}"
+                    )
                 }
             },
 
@@ -63,6 +85,12 @@ class Configuration():
                 'required': {
                     'token': os.environ.get('NOTIFIERS_TELEGRAM_REQUIRED_TOKEN', None),
                     'chat_id': os.environ.get('NOTIFIERS_TELEGRAM_REQUIRED_CHAT_ID', None)
+                },
+                'optional': {
+                    'template': os.environ.get(
+                        'NOTIFIERS_TELEGRAM_OPTIONAL_TEMPLATE',
+                        "{{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}"
+                    )
                 }
             }
         }
@@ -210,7 +238,7 @@ class Configuration():
             } for i in range(int(os.environ.get('BEHAVIOUR_ICHIMOKU_NUM_INDICATORS', 1)))],
         }
 
-        self.exchanges = {}
+        self.exchanges = dict()
         for exchange in ccxt.exchanges:
             exchange_var_name = 'EXCHANGES_' + exchange.upper() + '_REQUIRED_ENABLED'
             self.exchanges[exchange] = {

@@ -50,11 +50,21 @@ default: None\
 necessity: required for Twilio\
 description: The receiving phone number (your phone number) for receiving the message.
 
+*NOTIFIERS_TWILIO_OPTIONAL_TEMPLATE*\
+default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}\
+necessity: optional\
+description: See the notifier templating section.
+
 ## Slack
 *NOTIFIERS_SLACK_REQUIRED_WEBHOOK*\
 default: None\
 necessity: required for Slack\
 description: The Slack webhook required for sending messages.
+
+*NOTIFIERS_SLACK_OPTIONAL_TEMPLATE*\
+default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}\
+necessity: optional\
+description: See the notifier templating section.
 
 ## Gmail
 *NOTIFIERS_GMAIL_REQUIRED_USERNAME*\
@@ -72,6 +82,11 @@ default: None\
 necessity: required for Gmail\
 description: The email addresses to receive the emails that are sent.
 
+*NOTIFIERS_GMAIL_OPTIONAL_TEMPLATE*\
+default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}\
+necessity: optional\
+description: See the notifier templating section.
+
 ## Telegram
 *NOTIFIERS_TELEGRAM_REQUIRED_TOKEN*\
 default: None\
@@ -82,6 +97,11 @@ description: Your telegram bot token you can generate a token by following the i
 default: None\
 necessity: required for Telegram\
 description: The chat_id to send the message too. The easiest way to get get this id is probably using RawDataBot or Userinfobot.
+
+*NOTIFIERS_TELEGRAM_OPTIONAL_TEMPLATE*\
+default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}\
+necessity: optional\
+description: See the notifier templating section.
 
 ## Discord
 *NOTIFIERS_DISCORD_REQUIRED_WEBHOOK*\
@@ -99,6 +119,39 @@ default: None\
 necessity: optional for Discord\
 description: The Discord avatar image for the username sending messages. Set to None for default pokemon.
 
+*NOTIFIERS_DISCORD_OPTIONAL_TEMPLATE*\
+default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}\
+necessity: optional\
+description: See the notifier templating section.
+
+# Notifier Templating
+The notifier templates are built with a templating language called [Jinja2](http://jinja.pocoo.org/docs/2.10/templates/) and anything that is a valid Jinja message is valid for crypto-signal. The options available are as follows:
+
+- exchange - The name of the exchange for the indicator.
+- market - The name of the market for the indicator.
+- analyzer - The name of the analyzer used for this indicator.
+- analyzer_number - Which configured instance of the analyzer this indicator applies too.
+- status - Whether the indicator is hot, cold or neutral.
+- string_values - A pre-formatted string representation of the indicator values.
+- raw_indicator.result.values - The raw tuple of values from the indicator.
+- raw_indicator.result.is_hot - The raw boolean value of if the indicator is hot.
+- raw_indicator.result.is_cold - The raw boolean value of if the indicator is cold.
+- raw_indicator.config.enabled - The raw config item of if this indicator is enabled. If you receive a message with a value other than True something has gone horribly wrong.
+- raw_indicator.config.alert_enabled - The raw config item of if this indicator alert is enabled. If you receive a message with a value other than True something has gone horribly wrong.
+- raw_indicator.config.alert_frequency - The raw config item of whether this alert is always sent or if it is only sent once per status change.
+- raw_indicator.config.hot - The raw config item of what the configured hot threshold is.
+- raw_indicator.config.cold - The raw config item of what the configured cold threshold is.
+- raw_indicator.config.candle_period - The raw config item of what time period of candles to gather.
+- raw_indicator.config.period_count - The raw config item of how many candles to gather.
+
+As an example of how to use it, lets say you want to write a custom message for discord... it would end up looking something like...
+
+```
+NOTIFIERS_DISCORD_OPTIONAL_TEMPLATE="[{{raw_indicator.config.candle_period}}] {{market}} on {{exchange}} is {{status}}"
+```
+
+The result of the above custom template would generate a message that looks like: [1h] BURST/BTC on bittrex is hot.
+
 # Analyzers
 Settings for the analyzers behaviour. The formal grammar is defined as follows:
 ```
@@ -113,7 +166,7 @@ Settings for the analyzers behaviour. The formal grammar is defined as follows:
                     EMA_CROSSOVER |
                     ICHIMOKU |
                     STOCHASTIC_RSI
-                      
+
 <indicator_index> := {0, 1, 2, ...}
 ```
 

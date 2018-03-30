@@ -32,10 +32,12 @@ class MACD(IndicatorUtils):
 
         analyzed_data = [(value,) for value in macd_values]
 
-        return self.analyze_results(analyzed_data,
-                                    is_hot=lambda v: v > hot_thresh if hot_thresh else False,
-                                    is_cold=lambda v: v < cold_thresh if cold_thresh else False,
-                                    all_data=all_data)
+        return self.analyze_results(
+            analyzed_data,
+            is_hot=lambda v: v > hot_thresh if hot_thresh else False,
+            is_cold=lambda v: v < cold_thresh if cold_thresh else False,
+            all_data=all_data
+        )
 
 
     def analyze_sl(self, historical_data, hot_thresh=None, cold_thresh=None, all_data=False):
@@ -61,7 +63,9 @@ class MACD(IndicatorUtils):
         # List of 2-tuples containing the ema value and closing price respectively
         analyzed_data = [(r[1]['macdsignal'], r[1]['macd']) for r in macd_values.iterrows()]
 
-        return self.analyze_results(analyzed_data,
-                                    is_hot=lambda s, v: s < v if hot_thresh else False,
-                                    is_cold=lambda s, v: s > v if cold_thresh else False,
-                                    all_data=all_data)
+        return self.analyze_results(
+            analyzed_data,
+            is_hot=lambda s, v: s < v if hot_thresh else False,
+            is_cold=lambda s, v: s > v if cold_thresh else False,
+            all_data=all_data
+        )
