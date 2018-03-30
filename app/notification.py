@@ -225,6 +225,9 @@ class Notifier():
                                 if last_status == status:
                                     should_alert = False
 
+                            if not indicator['config']['alert_enabled']:
+                                should_alert = False
+
                             if should_alert:
                                 new_analysis[exchange][market][analyzer][index]['status'] = status
                                 new_message += message_template.render(
