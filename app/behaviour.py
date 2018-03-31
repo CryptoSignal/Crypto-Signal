@@ -146,11 +146,11 @@ class Behaviour():
                         self.logger.warn("No such analyzer %s, skipping.", analyzer)
 
                 if output_mode == 'cli':
-                    output = self._get_cli_output(new_result[exchange])
+                    output = self._get_cli_output(new_result[exchange][market_pair], market_pair)
                 elif output_mode == 'csv':
-                    output = self._get_csv_output(new_result[exchange])
+                    output = self._get_csv_output(new_result[exchange][market_pair], market_pair)
                 elif output_mode == 'json':
-                    output = self._get_json_output(new_result[exchange])
+                    output = self._get_json_output(new_result[exchange][market_pair], market_pair)
                 else:
                     output = 'Unknown output mode!'
 
@@ -159,7 +159,7 @@ class Behaviour():
         return new_result
 
 
-    def _get_cli_output(self, analyzed_data):
+    def _get_cli_output(self, analyzed_data, market_pair):
         """Creates the message to output to the CLI
 
         Args:
@@ -173,35 +173,34 @@ class Behaviour():
         hot_colour = '\u001b[31m'
         cold_colour = '\u001b[36m'
 
-        for market_pair in analyzed_data:
-            output = "{}:\t".format(market_pair)
-            for analysis in analyzed_data[market_pair]:
-                for i, indicator in enumerate(analyzed_data[market_pair][analysis]):
-                    colour_code = normal_colour
-                    if indicator['result']['is_hot']:
-                        colour_code = hot_colour
+        output = "{}:\t".format(market_pair)
+        for analysis in analyzed_data:
+            for i, indicator in enumerate(analyzed_data[analysis]):
+                colour_code = normal_colour
+                if indicator['result']['is_hot']:
+                    colour_code = hot_colour
 
-                    if indicator['result']['is_cold']:
-                        colour_code = cold_colour
+                if indicator['result']['is_cold']:
+                    colour_code = cold_colour
 
-                    formatted_values = list()
-                    for value in indicator['result']['values']:
-                        if isinstance(value, float):
-                            formatted_values.append(format(value, '.8f'))
-                        else:
-                            formatted_values.append(value)
-                    formatted_string = '/'.join(formatted_values)
+                formatted_values = list()
+                for value in indicator['result']['values']:
+                    if isinstance(value, float):
+                        formatted_values.append(format(value, '.8f'))
+                    else:
+                        formatted_values.append(value)
+                formatted_string = '/'.join(formatted_values)
 
-                    output += "{}{}: {}{}     ".format(
-                        colour_code,
-                        '{} #{}'.format(analysis, i),
-                        formatted_string,
-                        normal_colour
-                    )
+                output += "{}{}: {}{}     ".format(
+                    colour_code,
+                    '{} #{}'.format(analysis, i),
+                    formatted_string,
+                    normal_colour
+                )
         return output
 
 
-    def _get_csv_output(self, analyzed_data):
+    def _get_csv_output(self, analyzed_data, market_pair):
         """Creates the csv to output to the CLI
 
         Args:
@@ -210,31 +209,30 @@ class Behaviour():
         Returns:
             str: Completed cli csv
         """
-        for market_pair in analyzed_data:
-            output = market_pair
-            for analysis in analyzed_data[market_pair]:
-                for i, indicator in enumerate(analyzed_data[market_pair][analysis]):
-                    output += ',{} #{}'.format(analysis, i)
-                    if indicator['result']['is_hot']:
-                        output += ',hot'
 
-                    if indicator['result']['is_cold']:
-                        output += ',cold'
+        output = market_pair
+        for analysis in analyzed_data:
+            for i, indicator in enumerate(analyzed_data[analysis]):
+                output += ',{} #{}'.format(analysis, i)
+                if indicator['result']['is_hot']:
+                    output += ',hot'
 
-                    formatted_values = list()
-                    for value in indicator['result']['values']:
-                        if isinstance(value, float):
-                            formatted_values.append(format(value, '.8f'))
-                        else:
-                            formatted_values.append(value)
-                    formatted_string = '/'.join(formatted_values)
+                if indicator['result']['is_cold']:
+                    output += ',cold'
 
-                    output += ',' + formatted_string
+                formatted_values = list()
+                for value in indicator['result']['values']:
+                    if isinstance(value, float):
+                        formatted_values.append(format(value, '.8f'))
+                    else:
+                        formatted_values.append(value)
+                formatted_string = '/'.join(formatted_values)
+
+                output += ',' + formatted_string
         return output
 
 
-
-    def _get_json_output(self, analyzed_data):
+    def _get_json_output(self, analyzed_data, market_pair):
         """Creates the JSON to output to the CLI
 
         Args:
@@ -244,17 +242,6 @@ class Behaviour():
             str: Completed JSON message
         """
 
-        stringified_analysis = analyzed_data
-        for market_pair in analyzed_data:
-            for analysis in analyzed_data[market_pair]:
-                for i, indicator in enumerate(analyzed_data[market_pair][analysis]):
-                    stringified_analysis[analysis][i]['result']['is_hot'] = str(
-                        indicator['result']['is_hot']
-                    )
-
-                    stringified_analysis[analysis][i]['result']['is_cold'] = str(
-                        indicator['result']['is_cold']
-                    )
-            output = {'pair': market_pair, 'analysis': analyzed_data}
-            output = json.dumps(output)
+        output = {'pair': market_pair, 'analysis': analyzed_data}
+        output = json.dumps(output)
         return output

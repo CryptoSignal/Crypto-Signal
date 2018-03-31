@@ -38,6 +38,7 @@ class IndicatorUtils():
 
         return dataframe
 
+
     def analyze_results(self, indicator_data, is_hot, is_cold, all_data=False):
         """Performs an analysis over data produced by indicators
 
@@ -67,8 +68,8 @@ class IndicatorUtils():
 
             data_point_result = {
                 'values': (value_tup[0],),
-                'is_cold': cold,
-                'is_hot': hot
+                'is_cold': bool(cold),
+                'is_hot': bool(hot)
             }
 
             result_data.append(data_point_result)
