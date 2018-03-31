@@ -10,7 +10,7 @@ from indicators.utils import IndicatorUtils
 
 
 class MFI(IndicatorUtils):
-    def analyze(self, historical_data, period_count=10,
+    def analyze(self, historical_data, period_count=14,
                 hot_thresh=None, cold_thresh=None, all_data=False):
 
         dataframe = self.convert_to_dataframe(historical_data)
