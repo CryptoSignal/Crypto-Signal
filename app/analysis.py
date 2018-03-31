@@ -36,6 +36,7 @@ class StrategyAnalyzer():
             'ema_crossover': ema.EMA().analyze_crossover,
             'ichimoku': ichimoku.Ichimoku().analyze,
             'momentum': momentum.Momentum().analyze,
+            'mfi': mfi.MFI().analyze,
             'stoch_rsi': stoch_rsi.StochasticRSI().analyze
         }
 
