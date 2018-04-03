@@ -76,7 +76,6 @@ class IndicatorUtils():
 
         if all_data:
             return result_data
-
         elif len(result_data) == 0:
             null_result = {
                 'values': ('None',),
