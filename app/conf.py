@@ -146,8 +146,8 @@ class Configuration():
                     os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_ALERT_ENABLED'.format(i), 'True')
                 )),
                 'alert_frequency': os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_ALERT_FREQUENCY'.format(i), 'always'),
-                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_HOT'.format(i), 0.2)),
-                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_COLD'.format(i), 0.8)),
+                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_HOT'.format(i), 20)),
+                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_COLD'.format(i), 80)),
                 'candle_period': os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_CANDLE_PERIOD'.format(i), '1d'),
                 'period_count': int(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_PERIOD_COUNT'.format(i), 14))
             } for i in range(int(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_NUM_INDICATORS', 1)))],

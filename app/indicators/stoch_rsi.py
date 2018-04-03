@@ -42,7 +42,7 @@ class StochasticRSI(IndicatorUtils):
             last_index = index + 1
             rsi_min = rsi_values.iloc[start_index:last_index].min()
             rsi_max = rsi_values.iloc[start_index:last_index].max()
-            stoch_rsi = (rsi_values[index] - rsi_min) / (rsi_max - rsi_min)
+            stoch_rsi = (100 * ((rsi_values[index] - rsi_min) / (rsi_max - rsi_min)))
             analyzed_data.append((stoch_rsi,))
 
         return self.analyze_results(
