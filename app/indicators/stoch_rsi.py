@@ -32,9 +32,18 @@ class StochasticRSI(IndicatorUtils):
         """
 
         dataframe = self.convert_to_dataframe(historical_data)
-        rsi_values = abstract.STOCHRSI(dataframe, period_count).iloc[:, 0]
+        rsi_period_count = period_count * 2
+        rsi_values = abstract.RSI(dataframe, rsi_period_count)
+        rsi_values = rsi_values[pandas.notnull(rsi_values)]
 
-        analyzed_data = [(value,) for value in rsi_values]
+        analyzed_data = list()
+        for index in range(period_count, rsi_values.shape[0]):
+            start_index = index - period_count
+            last_index = index + 1
+            rsi_min = rsi_values.iloc[start_index:last_index].min()
+            rsi_max = rsi_values.iloc[start_index:last_index].max()
+            stoch_rsi = (100 * ((rsi_values[index] - rsi_min) / (rsi_max - rsi_min)))
+            analyzed_data.append((stoch_rsi,))
 
         return self.analyze_results(
             analyzed_data,
