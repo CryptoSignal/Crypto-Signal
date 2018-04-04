@@ -238,6 +238,20 @@ class Configuration():
                 )
             } for i in range(int(os.environ.get('BEHAVIOUR_EMA_CROSSOVER_NUM_INDICATORS', 1)))],
 
+            'vwap': [{
+                'enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_VWAP_{}_ENABLED'.format(i), 'True')
+                )),
+                'alert_enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_VWAP_{}_ALERT_ENABLED'.format(i), 'True')
+                )),
+                'alert_frequency': os.environ.get('BEHAVIOUR_VWAP_{}_ALERT_FREQUENCY'.format(i), 'always'),
+                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_VWAP_{}_HOT'.format(i), 1)),
+                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_VWAP_{}_COLD'.format(i), 1)),
+                'candle_period': os.environ.get('BEHAVIOUR_VWAP_{}_CANDLE_PERIOD'.format(i), '1d'),
+                'period_count': int(os.environ.get('BEHAVIOUR_VWAP_{}_PERIOD_COUNT'.format(i), 15))
+            } for i in range(int(os.environ.get('BEHAVIOUR_VWAP_NUM_INDICATORS', 1)))],
+
             'ichimoku': [{
                 'enabled': bool(distutils.util.strtobool(
                     os.environ.get('BEHAVIOUR_ICHIMOKU_{}_ENABLED'.format(i), 'True')

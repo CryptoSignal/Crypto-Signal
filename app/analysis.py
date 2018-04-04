@@ -37,6 +37,7 @@ class StrategyAnalyzer():
             'ichimoku': ichimoku.Ichimoku().analyze,
             'momentum': momentum.Momentum().analyze,
             'mfi': mfi.MFI().analyze,
+            'vwap': vwap.VWAP().analyze,
             'stoch_rsi': stoch_rsi.StochasticRSI().analyze
         }
 
