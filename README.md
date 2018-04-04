@@ -16,6 +16,8 @@ Technical Analysis Automated:
 * Exponential Moving Average
 * Breakouts / Pumps
 * MACD
+* MFI
+* VWAP
 
 Alerts:
 * SMS via Twilio
