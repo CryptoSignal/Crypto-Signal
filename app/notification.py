@@ -98,7 +98,8 @@ class Notifier():
                 new_analysis,
                 self.notifier_config['discord']['optional']['template']
             )
-            self.discord_client.notify(message)
+            if message.strip():
+                self.discord_client.notify(message)
 
 
     def notify_slack(self, new_analysis):
@@ -113,7 +114,8 @@ class Notifier():
                 new_analysis,
                 self.notifier_config['slack']['optional']['template']
             )
-            self.slack_client.notify(message)
+            if message.strip():
+                self.slack_client.notify(message)
 
 
     def notify_twilio(self, new_analysis):
@@ -128,7 +130,8 @@ class Notifier():
                 new_analysis,
                 self.notifier_config['twilio']['optional']['template']
             )
-            self.twilio_client.notify(message)
+            if message.strip():
+                self.twilio_client.notify(message)
 
 
     def notify_gmail(self, new_analysis):
@@ -159,7 +162,8 @@ class Notifier():
                 new_analysis,
                 self.notifier_config['telegram']['optional']['template']
             )
-            self.telegram_client.notify(message)
+            if message.strip():
+                self.telegram_client.notify(message)
 
 
     def _validate_required_config(self, notifier, notifier_config):
