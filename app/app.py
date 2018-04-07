@@ -31,7 +31,7 @@ def main():
     notifier = Notifier(config.notifiers)
 
     behaviour = Behaviour(
-        config.behaviour,
+        config,
         exchange_interface,
         strategy_analyzer,
         notifier

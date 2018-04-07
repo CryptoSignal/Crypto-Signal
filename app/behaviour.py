@@ -15,11 +15,11 @@ class Behaviour():
     """Default analyzer which gives users basic trading information.
     """
 
-    def __init__(self, behaviour_config, exchange_interface, strategy_analyzer, notifier):
+    def __init__(self, config, exchange_interface, strategy_analyzer, notifier):
         """Initializes DefaultBehaviour class.
 
         Args:
-            behaviour_config (dict): A dictionary of configuration for this analyzer.
+            indicator_conf (dict): A dictionary of configuration for this analyzer.
             exchange_interface (ExchangeInterface): Instance of the ExchangeInterface class for
                 making exchange queries.
             strategy_analyzer (StrategyAnalyzer): Instance of the StrategyAnalyzer class for
@@ -29,7 +29,7 @@ class Behaviour():
         """
 
         self.logger = structlog.get_logger()
-        self.behaviour_config = behaviour_config
+        self.indicator_conf = config.indicators
         self.exchange_interface = exchange_interface
         self.strategy_analyzer = strategy_analyzer
         self.notifier = notifier
@@ -66,7 +66,7 @@ class Behaviour():
             market_data (dict): A dictionary containing the market data of the symbols to analyze.
         """
 
-        analysis_dispatcher = self.strategy_analyzer.dispatcher()
+        analysis_dispatcher = self.strategy_analyzer.analysis_dispatcher()
         new_result = dict()
         for exchange in market_data:
             if exchange not in new_result:
@@ -78,12 +78,12 @@ class Behaviour():
                     new_result[exchange][market_pair] = dict()
                 historical_data = dict()
 
-                for analyzer in self.behaviour_config:
-                    if analyzer not in new_result[exchange][market_pair]:
-                        new_result[exchange][market_pair][analyzer] = list()
+                for indicator in self.indicator_conf:
+                    if indicator not in new_result[exchange][market_pair]:
+                        new_result[exchange][market_pair][indicator] = list()
 
-                    if analyzer in analysis_dispatcher:
-                        behaviour_conf = self.behaviour_config[analyzer]
+                    if indicator in analysis_dispatcher:
+                        behaviour_conf = self.indicator_conf[indicator]
 
                         for indicator_conf in behaviour_conf:
                             if indicator_conf['enabled']:
@@ -108,8 +108,8 @@ class Behaviour():
                                     if 'period_count' in indicator_conf:
                                         analysis_args['period_count'] = indicator_conf['period_count']
 
-                                    new_result[exchange][market_pair][analyzer].append({
-                                        'result': analysis_dispatcher[analyzer](**analysis_args),
+                                    new_result[exchange][market_pair][indicator].append({
+                                        'result': analysis_dispatcher[indicator](**analysis_args),
                                         'config': indicator_conf
                                     })
                                 except ValueError as e:
@@ -143,7 +143,7 @@ class Behaviour():
                                     )
                                     self.logger.debug(traceback.format_exc())
                     else:
-                        self.logger.warn("No such analyzer %s, skipping.", analyzer)
+                        self.logger.warn("No such indicator %s, skipping.", indicator)
 
                 if output_mode == 'cli':
                     output = self._get_cli_output(new_result[exchange][market_pair], market_pair)

@@ -6,18 +6,20 @@ import math
 import pandas
 from talib import abstract
 
-from indicators.utils import IndicatorUtils
+from analyzers.utils import IndicatorUtils
 
 
 class Momentum(IndicatorUtils):
     def analyze(self, historical_data, period_count=10,
-                hot_thresh=None, cold_thresh=None, all_data=False):
+                signal='momentum', hot_thresh=None, cold_thresh=None):
         """Performs momentum analysis on the historical data
 
         Args:
             historical_data (list): A matrix of historical OHCLV data.
             period_count (int, optional): Defaults to 10. The number of data points to consider for
                 our simple moving average.
+            signal (string, optional): Defaults to momentum. The indicator line to check hot/cold
+                against.
             hot_thresh (float, optional): Defaults to None. The threshold at which this might be
                 good to purchase.
             cold_thresh (float, optional): Defaults to None. The threshold at which this might be
@@ -32,13 +34,12 @@ class Momentum(IndicatorUtils):
         """
 
         dataframe = self.convert_to_dataframe(historical_data)
-        mom_values = abstract.MOM(dataframe, period_count)
+        mom_values = abstract.MOM(dataframe, period_count).to_frame()
+        mom_values.dropna(how='all', inplace=True)
+        mom_values.rename(columns={mom_values.columns[0]: 'momentum'}, inplace=True)
 
-        analyzed_data = [(value,) for value in mom_values]
+        if mom_values[signal].shape[0]:
+            mom_values['is_hot'] = mom_values[signal] > hot_thresh
+            mom_values['is_cold'] = mom_values[signal] < cold_thresh
 
-        return self.analyze_results(
-            analyzed_data,
-            is_hot=lambda v: v > hot_thresh if hot_thresh else False,
-            is_cold=lambda v: v < cold_thresh if cold_thresh else False,
-            all_data=all_data
-        )
+        return mom_values

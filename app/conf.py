@@ -95,7 +95,7 @@ class Configuration():
             }
         }
 
-        self.behaviour = {
+        self.indicators = {
             'momentum': [{
                 'enabled': bool(distutils.util.strtobool(
                     os.environ.get('BEHAVIOUR_MOMENTUM_{}_ENABLED'.format(i), 'True')
@@ -165,18 +165,34 @@ class Configuration():
                 'candle_period': os.environ.get('BEHAVIOUR_MACD_{}_CANDLE_PERIOD'.format(i), '1d')
             } for i in range(int(os.environ.get('BEHAVIOUR_MACD_NUM_INDICATORS', 1)))],
 
-            'macd_sl': [{
+            'ichimoku': [{
                 'enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_MACD_SL_{}_ENABLED'.format(i), 'True')
+                    os.environ.get('BEHAVIOUR_ICHIMOKU_{}_ENABLED'.format(i), 'True')
                 )),
                 'alert_enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_MACD_SL_{}_ALERT_ENABLED'.format(i), 'True')
+                    os.environ.get('BEHAVIOUR_ICHIMOKU_{}_ALERT_ENABLED'.format(i), 'True')
                 )),
-                'alert_frequency': os.environ.get('BEHAVIOUR_MACD_SL_{}_ALERT_FREQUENCY'.format(i), 'always'),
-                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_SL_{}_HOT'.format(i), 0)),
-                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_SL_{}_COLD'.format(i), 0)),
-                'candle_period': os.environ.get('BEHAVIOUR_MACD_SL_{}_CANDLE_PERIOD'.format(i), '1d')
-            } for i in range(int(os.environ.get('BEHAVIOUR_MACD_SL_NUM_INDICATORS', 1)))],
+                'alert_frequency': os.environ.get('BEHAVIOUR_ICHIMOKU_{}_ALERT_FREQUENCY'.format(i), 'always'),
+                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_ICHIMOKU_{}_HOT'.format(i), 'True')),
+                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_ICHIMOKU_{}_COLD'.format(i), 'True')),
+                'candle_period': os.environ.get('BEHAVIOUR_ICHIMOKU_{}_CANDLE_PERIOD'.format(i), '1d')
+            } for i in range(int(os.environ.get('BEHAVIOUR_ICHIMOKU_NUM_INDICATORS', 1)))],
+        }
+
+        self.informants = {
+            'vwap': [{
+                'enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_VWAP_{}_ENABLED'.format(i), 'True')
+                )),
+                'alert_enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_VWAP_{}_ALERT_ENABLED'.format(i), 'True')
+                )),
+                'alert_frequency': os.environ.get('BEHAVIOUR_VWAP_{}_ALERT_FREQUENCY'.format(i), 'always'),
+                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_VWAP_{}_HOT'.format(i), 1)),
+                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_VWAP_{}_COLD'.format(i), 1)),
+                'candle_period': os.environ.get('BEHAVIOUR_VWAP_{}_CANDLE_PERIOD'.format(i), '1d'),
+                'period_count': int(os.environ.get('BEHAVIOUR_VWAP_{}_PERIOD_COUNT'.format(i), 15))
+            } for i in range(int(os.environ.get('BEHAVIOUR_VWAP_NUM_INDICATORS', 1)))],
 
             'sma': [{
                 'enabled': bool(distutils.util.strtobool(
@@ -192,22 +208,6 @@ class Configuration():
                 'period_count': int(os.environ.get('BEHAVIOUR_SMA_{}_PERIOD_COUNT'.format(i), 15))
             } for i in range(int(os.environ.get('BEHAVIOUR_SMA_NUM_INDICATORS', 1)))],
 
-            'sma_crossover': [{
-                'enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_ENABLED'.format(i), 'True')
-                )),
-                'alert_enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_ALERT_ENABLED'.format(i), 'True')
-                )),
-                'alert_frequency': os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_ALERT_FREQUENCY'.format(i), 'always'),
-                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_HOT'.format(i), 'True')),
-                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_COLD'.format(i), 'True')),
-                'candle_period': os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_CANDLE_PERIOD'.format(i), '1d'),
-                'period_count': self._tuple_maker(
-                    os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_PERIOD_COUNT'.format(i), '15/21')
-                )
-            } for i in range(int(os.environ.get('BEHAVIOUR_SMA_CROSSOVER_NUM_INDICATORS', 1)))],
-
             'ema': [{
                 'enabled': bool(distutils.util.strtobool(
                     os.environ.get('BEHAVIOUR_EMA_{}_ENABLED'.format(i), 'True')
@@ -222,6 +222,9 @@ class Configuration():
                 'period_count': int(os.environ.get('BEHAVIOUR_EMA_{}_PERIOD_COUNT'.format(i), 15))
             } for i in range(int(os.environ.get('BEHAVIOUR_EMA_NUM_INDICATORS', 1)))],
 
+        }
+
+        self.crossovers = {
             'ema_crossover': [{
                 'enabled': bool(distutils.util.strtobool(
                     os.environ.get('BEHAVIOUR_EMA_CROSSOVER_{}_ENABLED'.format(i), 'True')
@@ -238,32 +241,21 @@ class Configuration():
                 )
             } for i in range(int(os.environ.get('BEHAVIOUR_EMA_CROSSOVER_NUM_INDICATORS', 1)))],
 
-            'vwap': [{
+            'sma_crossover': [{
                 'enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_VWAP_{}_ENABLED'.format(i), 'True')
+                    os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_ENABLED'.format(i), 'True')
                 )),
                 'alert_enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_VWAP_{}_ALERT_ENABLED'.format(i), 'True')
+                    os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_ALERT_ENABLED'.format(i), 'True')
                 )),
-                'alert_frequency': os.environ.get('BEHAVIOUR_VWAP_{}_ALERT_FREQUENCY'.format(i), 'always'),
-                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_VWAP_{}_HOT'.format(i), 1)),
-                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_VWAP_{}_COLD'.format(i), 1)),
-                'candle_period': os.environ.get('BEHAVIOUR_VWAP_{}_CANDLE_PERIOD'.format(i), '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_VWAP_{}_PERIOD_COUNT'.format(i), 15))
-            } for i in range(int(os.environ.get('BEHAVIOUR_VWAP_NUM_INDICATORS', 1)))],
-
-            'ichimoku': [{
-                'enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_ICHIMOKU_{}_ENABLED'.format(i), 'True')
-                )),
-                'alert_enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_ICHIMOKU_{}_ALERT_ENABLED'.format(i), 'True')
-                )),
-                'alert_frequency': os.environ.get('BEHAVIOUR_ICHIMOKU_{}_ALERT_FREQUENCY'.format(i), 'always'),
-                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_ICHIMOKU_{}_HOT'.format(i), 'True')),
-                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_ICHIMOKU_{}_COLD'.format(i), 'True')),
-                'candle_period': os.environ.get('BEHAVIOUR_ICHIMOKU_{}_CANDLE_PERIOD'.format(i), '1d')
-            } for i in range(int(os.environ.get('BEHAVIOUR_ICHIMOKU_NUM_INDICATORS', 1)))],
+                'alert_frequency': os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_ALERT_FREQUENCY'.format(i), 'always'),
+                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_HOT'.format(i), 'True')),
+                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_COLD'.format(i), 'True')),
+                'candle_period': os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_CANDLE_PERIOD'.format(i), '1d'),
+                'period_count': self._tuple_maker(
+                    os.environ.get('BEHAVIOUR_SMA_CROSSOVER_{}_PERIOD_COUNT'.format(i), '15/21')
+                )
+            } for i in range(int(os.environ.get('BEHAVIOUR_SMA_CROSSOVER_NUM_INDICATORS', 1)))]
         }
 
         self.exchanges = dict()
