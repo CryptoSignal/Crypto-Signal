@@ -24,7 +24,7 @@ class EMA(IndicatorUtils):
 		"""
 
         dataframe = self.convert_to_dataframe(historical_data)
-        ema_values = abstract.EMA(dataframe, period_count)
+        ema_values = abstract.EMA(dataframe, period_count).to_frame()
         ema_values.dropna(how='all', inplace=True)
 
         return ema_values

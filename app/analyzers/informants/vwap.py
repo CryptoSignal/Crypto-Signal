@@ -3,7 +3,7 @@
 
 import math
 
-import numpy as np
+import numpy
 import pandas
 from talib import abstract
 
@@ -26,15 +26,23 @@ class VWAP(IndicatorUtils):
 
         dataframe = self.convert_to_dataframe(historical_data)
 
-        dataframe['vwap'] = np.cumsum(dataframe.volume*(dataframe.high+dataframe.low)/2) / np.cumsum(dataframe.volume)
+        vwap_values = pandas.DataFrame(numpy.nan, index=dataframe.index, columns=['vwap'])
 
-        analyzed_data = [(r[1]['vwap'], 0) for r in dataframe.iterrows()]
+        for index in range(period_count, vwap_values.shape[0]):
+            start_index = index - period_count
+            last_index = index + 1
 
-        return self.analyze_results(
-            analyzed_data,
-            is_hot=lambda v, c: c > v * hot_thresh if hot_thresh else False,
-            is_cold=lambda v, c: c < v * cold_thresh if cold_thresh else False,
-            all_data=all_data
-        )
+            total_volume = dataframe['volume'].iloc[start_index:last_index].sum()
+            total_high = dataframe['high'].iloc[start_index:last_index].sum()
+            total_low = dataframe['low'].iloc[start_index:last_index].sum()
+
+            total_average_price = total_volume * (total_high + total_low) / 2
+
+            vwap = total_average_price / total_volume
+            vwap_values['vwap'][last_index-1] = vwap
+
+        vwap_values.dropna(how='all', inplace=True)
+
+        return vwap_values
 
 

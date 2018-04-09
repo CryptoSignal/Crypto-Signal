@@ -3,6 +3,7 @@
 
 import math
 
+import numpy
 import pandas
 from talib import abstract
 
@@ -11,7 +12,7 @@ from analyzers.utils import IndicatorUtils
 
 class StochasticRSI(IndicatorUtils):
     def analyze(self, historical_data, period_count=14,
-                hot_thresh=None, cold_thresh=None, all_data=False):
+                signal='stoch_rsi', hot_thresh=None, cold_thresh=None):
         """Performs a Stochastic RSI analysis on the historical data
 
         Args:
@@ -33,21 +34,23 @@ class StochasticRSI(IndicatorUtils):
 
         dataframe = self.convert_to_dataframe(historical_data)
         rsi_period_count = period_count * 2
-        rsi_values = abstract.RSI(dataframe, rsi_period_count)
+        rsi_values = abstract.RSI(dataframe, rsi_period_count).to_frame()
         rsi_values.dropna(how='all', inplace=True)
+        rsi_values.rename(columns={0: 'rsi'}, inplace=True)
 
-        analyzed_data = list()
+        rsi_values = rsi_values.assign(stoch_rsi=numpy.nan)
         for index in range(period_count, rsi_values.shape[0]):
             start_index = index - period_count
             last_index = index + 1
-            rsi_min = rsi_values.iloc[start_index:last_index].min()
-            rsi_max = rsi_values.iloc[start_index:last_index].max()
-            stoch_rsi = (100 * ((rsi_values[index] - rsi_min) / (rsi_max - rsi_min)))
-            analyzed_data.append((stoch_rsi,))
+            rsi_min = rsi_values['rsi'].iloc[start_index:last_index].min()
+            rsi_max = rsi_values['rsi'].iloc[start_index:last_index].max()
+            stoch_rsi = (100 * ((rsi_values['rsi'][index] - rsi_min) / (rsi_max - rsi_min)))
+            rsi_values['stoch_rsi'][last_index-1] = stoch_rsi
 
-        return self.analyze_results(
-            analyzed_data,
-            is_hot=lambda v: v < hot_thresh if hot_thresh else False,
-            is_cold=lambda v: v > cold_thresh if cold_thresh else False,
-            all_data=all_data
-        )
+        rsi_values.dropna(how='any', inplace=True)
+
+        if rsi_values[signal].shape[0]:
+            rsi_values['is_hot'] = rsi_values[signal] < hot_thresh
+            rsi_values['is_cold'] = rsi_values[signal] > cold_thresh
+
+        return rsi_values
