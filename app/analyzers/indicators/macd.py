@@ -10,12 +10,12 @@ from analyzers.utils import IndicatorUtils
 
 
 class MACD(IndicatorUtils):
-    def analyze(self, historical_data, signal='macd', hot_thresh=None, cold_thresh=None):
+    def analyze(self, historical_data, signal=['macd'], hot_thresh=None, cold_thresh=None):
         """Performs a macd analysis on the historical data
 
         Args:
             historical_data (list): A matrix of historical OHCLV data.
-            signal (string, optional): Defaults to macd. The indicator line to check hot/cold
+            signal (list, optional): Defaults to macd. The indicator line to check hot/cold
                 against.
             hot_thresh (float, optional): Defaults to None. The threshold at which this might be
                 good to purchase.
@@ -33,8 +33,8 @@ class MACD(IndicatorUtils):
         macd_values = abstract.MACD(dataframe).iloc[:]
         macd_values.dropna(how='all', inplace=True)
 
-        if macd_values[signal].shape[0]:
-            macd_values['is_hot'] = macd_values[signal] > hot_thresh
-            macd_values['is_cold'] = macd_values[signal] < cold_thresh
+        if macd_values[signal[0]].shape[0]:
+            macd_values['is_hot'] = macd_values[signal[0]] > hot_thresh
+            macd_values['is_cold'] = macd_values[signal[0]] < cold_thresh
 
         return macd_values

@@ -8,7 +8,7 @@ from talib import abstract
 from analyzers.utils import IndicatorUtils
 
 
-class BollingerIndicator(IndicatorUtils):
+class Bollinger(IndicatorUtils):
     def analyze(self, historical_data, period_count=21):
         """Performs a bollinger band analysis on the historical data
 

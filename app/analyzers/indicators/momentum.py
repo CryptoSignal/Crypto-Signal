@@ -11,7 +11,7 @@ from analyzers.utils import IndicatorUtils
 
 class Momentum(IndicatorUtils):
     def analyze(self, historical_data, period_count=10,
-                signal='momentum', hot_thresh=None, cold_thresh=None):
+                signal=['momentum'], hot_thresh=None, cold_thresh=None):
         """Performs momentum analysis on the historical data
 
         Args:
@@ -38,8 +38,8 @@ class Momentum(IndicatorUtils):
         mom_values.dropna(how='all', inplace=True)
         mom_values.rename(columns={mom_values.columns[0]: 'momentum'}, inplace=True)
 
-        if mom_values[signal].shape[0]:
-            mom_values['is_hot'] = mom_values[signal] > hot_thresh
-            mom_values['is_cold'] = mom_values[signal] < cold_thresh
+        if mom_values[signal[0]].shape[0]:
+            mom_values['is_hot'] = mom_values[signal[0]] > hot_thresh
+            mom_values['is_cold'] = mom_values[signal[0]] < cold_thresh
 
         return mom_values

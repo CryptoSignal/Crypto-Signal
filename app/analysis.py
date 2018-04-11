@@ -30,7 +30,6 @@ class StrategyAnalyzer():
         dispatcher = {
             'macd': macd.MACD().analyze,
             'rsi': rsi.RSI().analyze,
-            'ichimoku': ichimoku.Ichimoku().analyze,
             'momentum': momentum.Momentum().analyze,
             'mfi': mfi.MFI().analyze,
             'stoch_rsi': stoch_rsi.StochasticRSI().analyze
@@ -49,7 +48,9 @@ class StrategyAnalyzer():
         dispatcher = {
             'sma': sma.SMA().analyze,
             'ema': ema.EMA().analyze,
-            'vwap': vwap.VWAP().analyze
+            'ichimoku': ichimoku.Ichimoku().analyze,
+            'vwap': vwap.VWAP().analyze,
+            'bollinger_bands': bollinger_bands.Bollinger().analyze
         }
 
         return dispatcher

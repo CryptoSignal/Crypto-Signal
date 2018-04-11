@@ -104,6 +104,7 @@ class Configuration():
                     os.environ.get('BEHAVIOUR_MOMENTUM_{}_ALERT_ENABLED'.format(i), 'True')
                 )),
                 'alert_frequency': os.environ.get('BEHAVIOUR_MOMENTUM_{}_ALERT_FREQUENCY'.format(i), 'always'),
+                'signal': self._string_splitter(os.environ.get('BEHAVIOUR_MOMENTUM_{}_SIGNAL'.format(i), 'momentum')),
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MOMENTUM_{}_HOT'.format(i), 0)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MOMENTUM_{}_COLD'.format(i), 0)),
                 'candle_period': os.environ.get('BEHAVIOUR_MOMENTUM_{}_CANDLE_PERIOD'.format(i), '1d'),
@@ -118,6 +119,7 @@ class Configuration():
                     os.environ.get('BEHAVIOUR_MFI_{}_ALERT_ENABLED'.format(i), 'True')
                 )),
                 'alert_frequency': os.environ.get('BEHAVIOUR_MFI_{}_ALERT_FREQUENCY'.format(i), 'always'),
+                'signal': self._string_splitter(os.environ.get('BEHAVIOUR_MOMENTUM_{}_SIGNAL'.format(i), 'mfi')),
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MFI_{}_HOT'.format(i), 0)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MFI_{}_COLD'.format(i), 0)),
                 'candle_period': os.environ.get('BEHAVIOUR_MFI_{}_CANDLE_PERIOD'.format(i), '1d'),
@@ -132,6 +134,7 @@ class Configuration():
                     os.environ.get('BEHAVIOUR_RSI_{}_ALERT_ENABLED'.format(i), 'True')
                 )),
                 'alert_frequency': os.environ.get('BEHAVIOUR_RSI_{}_ALERT_FREQUENCY'.format(i), 'always'),
+                'signal': self._string_splitter(os.environ.get('BEHAVIOUR_MOMENTUM_{}_SIGNAL'.format(i), 'rsi')),
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_RSI_{}_HOT'.format(i), 30)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_RSI_{}_COLD'.format(i), 70)),
                 'candle_period': os.environ.get('BEHAVIOUR_RSI_{}_CANDLE_PERIOD'.format(i), '1d'),
@@ -146,6 +149,7 @@ class Configuration():
                     os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_ALERT_ENABLED'.format(i), 'True')
                 )),
                 'alert_frequency': os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_ALERT_FREQUENCY'.format(i), 'always'),
+                'signal': self._string_splitter(os.environ.get('BEHAVIOUR_MOMENTUM_{}_SIGNAL'.format(i), 'stoch_rsi')),
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_HOT'.format(i), 20)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_COLD'.format(i), 80)),
                 'candle_period': os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_{}_CANDLE_PERIOD'.format(i), '1d'),
@@ -160,23 +164,11 @@ class Configuration():
                     os.environ.get('BEHAVIOUR_MACD_{}_ALERT_ENABLED'.format(i), 'True')
                 )),
                 'alert_frequency': os.environ.get('BEHAVIOUR_MACD_{}_ALERT_FREQUENCY'.format(i), 'always'),
+                'signal': self._string_splitter(os.environ.get('BEHAVIOUR_MOMENTUM_{}_SIGNAL'.format(i), 'macd')),
                 'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_{}_HOT'.format(i), 0)),
                 'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_{}_COLD'.format(i), 0)),
                 'candle_period': os.environ.get('BEHAVIOUR_MACD_{}_CANDLE_PERIOD'.format(i), '1d')
-            } for i in range(int(os.environ.get('BEHAVIOUR_MACD_NUM_INDICATORS', 1)))],
-
-            'ichimoku': [{
-                'enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_ICHIMOKU_{}_ENABLED'.format(i), 'True')
-                )),
-                'alert_enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_ICHIMOKU_{}_ALERT_ENABLED'.format(i), 'True')
-                )),
-                'alert_frequency': os.environ.get('BEHAVIOUR_ICHIMOKU_{}_ALERT_FREQUENCY'.format(i), 'always'),
-                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_ICHIMOKU_{}_HOT'.format(i), 'True')),
-                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_ICHIMOKU_{}_COLD'.format(i), 'True')),
-                'candle_period': os.environ.get('BEHAVIOUR_ICHIMOKU_{}_CANDLE_PERIOD'.format(i), '1d')
-            } for i in range(int(os.environ.get('BEHAVIOUR_ICHIMOKU_NUM_INDICATORS', 1)))],
+            } for i in range(int(os.environ.get('BEHAVIOUR_MACD_NUM_INDICATORS', 1)))]
         }
 
         self.informants = {
@@ -221,6 +213,19 @@ class Configuration():
                 'candle_period': os.environ.get('BEHAVIOUR_EMA_{}_CANDLE_PERIOD'.format(i), '1d'),
                 'period_count': int(os.environ.get('BEHAVIOUR_EMA_{}_PERIOD_COUNT'.format(i), 15))
             } for i in range(int(os.environ.get('BEHAVIOUR_EMA_NUM_INDICATORS', 1)))],
+
+            'ichimoku': [{
+                'enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_ICHIMOKU_{}_ENABLED'.format(i), 'True')
+                )),
+                'alert_enabled': bool(distutils.util.strtobool(
+                    os.environ.get('BEHAVIOUR_ICHIMOKU_{}_ALERT_ENABLED'.format(i), 'True')
+                )),
+                'alert_frequency': os.environ.get('BEHAVIOUR_ICHIMOKU_{}_ALERT_FREQUENCY'.format(i), 'always'),
+                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_ICHIMOKU_{}_HOT'.format(i), 'True')),
+                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_ICHIMOKU_{}_COLD'.format(i), 'True')),
+                'candle_period': os.environ.get('BEHAVIOUR_ICHIMOKU_{}_CANDLE_PERIOD'.format(i), '1d')
+            } for i in range(int(os.environ.get('BEHAVIOUR_ICHIMOKU_NUM_INDICATORS', 1)))]
 
         }
 

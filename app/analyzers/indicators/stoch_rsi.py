@@ -12,7 +12,7 @@ from analyzers.utils import IndicatorUtils
 
 class StochasticRSI(IndicatorUtils):
     def analyze(self, historical_data, period_count=14,
-                signal='stoch_rsi', hot_thresh=None, cold_thresh=None):
+                signal=['stoch_rsi'], hot_thresh=None, cold_thresh=None):
         """Performs a Stochastic RSI analysis on the historical data
 
         Args:
@@ -49,8 +49,8 @@ class StochasticRSI(IndicatorUtils):
 
         rsi_values.dropna(how='any', inplace=True)
 
-        if rsi_values[signal].shape[0]:
-            rsi_values['is_hot'] = rsi_values[signal] < hot_thresh
-            rsi_values['is_cold'] = rsi_values[signal] > cold_thresh
+        if rsi_values[signal[0]].shape[0]:
+            rsi_values['is_hot'] = rsi_values[signal[0]] < hot_thresh
+            rsi_values['is_cold'] = rsi_values[signal[0]] > cold_thresh
 
         return rsi_values
