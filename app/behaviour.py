@@ -72,8 +72,6 @@ class Behaviour():
             market_data (dict): A dictionary containing the market data of the symbols to analyze.
         """
 
-        informant_dispatcher = self.strategy_analyzer.informant_dispatcher()
-
         new_result = dict()
         for exchange in market_data:
             self.logger.info("Beginning analysis of %s", exchange)
@@ -202,7 +200,7 @@ class Behaviour():
                     colour_code = cold_colour
 
                 formatted_values = list()
-                for signal in self.indicator_conf[indicator][i]['signal']:
+                for signal in analysis['config']['signal']:
                     value = analysis['result'].iloc[-1][signal]
                     if isinstance(value, float):
                         formatted_values.append(format(value, '.8f'))
@@ -229,25 +227,24 @@ class Behaviour():
             str: Completed cli csv
         """
 
-        output = market_pair
-        for analysis in results:
-            for i, indicator in enumerate(results[analysis]):
-                output += ',{} #{}'.format(analysis, i)
-                if indicator['result']['is_hot']:
-                    output += ',hot'
-
-                if indicator['result']['is_cold']:
-                    output += ',cold'
-
-                formatted_values = list()
-                for value in indicator['result']['values']:
+        output = str()
+        for indicator in results['indicators']:
+            for i, analysis in enumerate(results['indicators'][indicator]):
+                for signal in analysis['config']['signal']:
+                    value = analysis['result'].iloc[-1][signal]
                     if isinstance(value, float):
-                        formatted_values.append(format(value, '.8f'))
-                    else:
-                        formatted_values.append(value)
-                formatted_string = '/'.join(formatted_values)
+                        value = format(value, '.8f')
 
-                output += ',' + formatted_string
+                    new_output = ','.join([
+                        market_pair,
+                        indicator,
+                        str(i),
+                        value,
+                        str(analysis['result'].iloc[-1]['is_hot']),
+                        str(analysis['result'].iloc[-1]['is_cold'])
+                    ])
+
+                    output += '\n{}'.format(new_output)
         return output
 
 
