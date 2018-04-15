@@ -202,50 +202,50 @@ class Notifier():
         new_message = str()
         for exchange in new_analysis:
             for market in new_analysis[exchange]:
-                for analyzer in new_analysis[exchange][market]:
-                    for index, indicator in enumerate(new_analysis[exchange][market][analyzer]):
-                        formatted_values = list()
-                        for value in indicator['result']['values']:
-                            if isinstance(value, float):
-                                formatted_values.append(format(value, '.8f'))
-                            else:
-                                formatted_values.append(value)
-                        formatted_string = '/'.join(formatted_values)
+                for indicator in new_analysis[exchange][market]['indicators']:
+                    for index, analysis in enumerate(new_analysis[exchange][market]['indicators'][indicator]):
+                        values = dict()
+                        for signal in analysis['config']['signal']:
+                            latest_result = analysis['result'].iloc[-1]
+
+                            values[signal] = analysis['result'].iloc[-1][signal]
+                            if isinstance(values[signal], float):
+                                values[signal] = format(values[signal], '.8f')
 
                         status = 'neutral'
-                        if indicator['result']['is_hot']:
+                        if latest_result['is_hot']:
                             status = 'hot'
-                        elif indicator['result']['is_cold']:
+                        elif latest_result['is_cold']:
                             status = 'cold'
 
-                        if indicator['result']['is_hot'] or indicator['result']['is_cold']:
+                        if latest_result['is_hot'] or latest_result['is_cold']:
                             try:
-                                last_status = self.last_analysis[exchange][market][analyzer][index]['status']
+                                last_status = self.last_analysis[exchange][market]['indicators'][indicator][index]['status']
                             except:
                                 last_status = str()
 
                             should_alert = True
-                            if indicator['config']['alert_frequency'] == 'once':
+                            if analysis['config']['alert_frequency'] == 'once':
                                 if last_status == status:
                                     should_alert = False
 
-                            if not indicator['config']['alert_enabled']:
+                            if not analysis['config']['alert_enabled']:
                                 should_alert = False
 
                             if should_alert:
-                                new_analysis[exchange][market][analyzer][index]['status'] = status
+                                new_analysis[exchange][market]['indicators'][indicator][index]['status'] = status
                                 new_message += message_template.render(
+                                    values=values,
                                     exchange=exchange,
                                     market=market,
-                                    analyzer=analyzer,
-                                    analyzer_number=index,
+                                    indicator=indicator,
+                                    indicator_number=index,
+                                    analysis=analysis,
                                     status=status,
-                                    string_values=formatted_string,
+                                    last_status=last_status,
                                     raw_indicator=indicator
                                 )
 
         # Merge changes from new analysis into last analysis
         self.last_analysis = {**self.last_analysis, **new_analysis}
         return new_message
-
-
