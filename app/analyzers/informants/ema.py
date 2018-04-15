@@ -26,5 +26,6 @@ class EMA(IndicatorUtils):
         dataframe = self.convert_to_dataframe(historical_data)
         ema_values = abstract.EMA(dataframe, period_count).to_frame()
         ema_values.dropna(how='all', inplace=True)
+        ema_values.rename(columns={0: 'ema'}, inplace=True)
 
         return ema_values

@@ -83,7 +83,13 @@ class Behaviour():
                     new_result[exchange][market_pair] = dict()
 
                 new_result[exchange][market_pair]['indicators'] = self._get_indicator_results(
-                    exchange, market_pair
+                    exchange,
+                    market_pair
+                )
+
+                new_result[exchange][market_pair]['informants'] = self._get_informant_results(
+                    exchange,
+                    market_pair
                 )
 
                 if output_mode in self.output:
@@ -95,12 +101,12 @@ class Behaviour():
 
 
     def _get_indicator_results(self, exchange, market_pair):
-        analysis_dispatcher = self.strategy_analyzer.analysis_dispatcher()
+        indicator_dispatcher = self.strategy_analyzer.indicator_dispatcher()
         results = { indicator: list() for indicator in self.indicator_conf.keys() }
         historical_data_cache = dict()
 
         for indicator in self.indicator_conf:
-            if indicator not in analysis_dispatcher:
+            if indicator not in indicator_dispatcher:
                 self.logger.warn("No such indicator %s, skipping.", indicator)
                 continue
 
@@ -111,65 +117,123 @@ class Behaviour():
                     self.logger.debug("%s is disabled, skipping.", indicator)
                     continue
 
-                try:
-                    if candle_period not in historical_data_cache:
-                        historical_data_cache[candle_period] = self.exchange_interface.get_historical_data(
-                            market_pair,
-                            exchange,
-                            candle_period
-                        )
-                except RetryError:
-                    self.logger.error(
-                        'Too many retries fetching information for pair %s, skipping',
-                        market_pair
+                if candle_period not in historical_data_cache:
+                    historical_data_cache[candle_period] = self._get_historical_data(
+                        market_pair,
+                        exchange,
+                        candle_period
                     )
-                    continue
-                except ExchangeError:
-                    self.logger.error(
-                        'Exchange supplied bad data for pair %s, skipping',
-                        market_pair
-                    )
-                    continue
-                except ValueError as e:
-                    self.logger.error(e)
-                    self.logger.error(
-                        'Invalid data encountered while processing pair %s, skipping',
-                        market_pair
-                    )
-                    self.logger.debug(traceback.format_exc())
-                    continue
-                except AttributeError:
-                    self.logger.error(
-                        'Something went wrong fetching data for %s, skipping',
-                        market_pair
-                    )
-                    self.logger.debug(traceback.format_exc())
-                    continue
 
-                analysis_args = {
-                    'historical_data': historical_data_cache[candle_period],
-                    'signal': indicator_conf['signal'],
-                    'hot_thresh': indicator_conf['hot'],
-                    'cold_thresh': indicator_conf['cold']
-                }
+                if historical_data_cache[candle_period]:
+                    analysis_args = {
+                        'historical_data': historical_data_cache[candle_period],
+                        'signal': indicator_conf['signal'],
+                        'hot_thresh': indicator_conf['hot'],
+                        'cold_thresh': indicator_conf['cold']
+                    }
 
-                if 'period_count' in indicator_conf:
-                    analysis_args['period_count'] = indicator_conf['period_count']
+                    if 'period_count' in indicator_conf:
+                        analysis_args['period_count'] = indicator_conf['period_count']
 
-                try:
                     results[indicator].append({
-                        'result': analysis_dispatcher[indicator](**analysis_args),
+                        'result': self._get_analysis_result(
+                            indicator_dispatcher,
+                            indicator,
+                            analysis_args,
+                            market_pair
+                        ),
                         'config': indicator_conf
                     })
-                except TypeError:
-                    self.logger.info(
-                        'Invalid type encountered while processing pair %s for indicator %s, skipping',
-                        market_pair,
-                        indicator
-                    )
-                    self.logger.debug(traceback.format_exc())
+        return results
+
+
+    def _get_informant_results(self, exchange, market_pair):
+        informant_dispatcher = self.strategy_analyzer.informant_dispatcher()
+        results = { informant: list() for informant in self.informant_conf.keys() }
+        historical_data_cache = dict()
+
+        for informant in self.informant_conf:
+            if informant not in informant_dispatcher:
+                self.logger.warn("No such informant %s, skipping.", informant)
+                continue
+
+            for informant_conf in self.informant_conf[informant]:
+                if informant_conf['enabled']:
+                    candle_period = informant_conf['candle_period']
+                else:
+                    self.logger.debug("%s is disabled, skipping.", informant)
                     continue
 
+                if candle_period not in historical_data_cache:
+                    historical_data_cache[candle_period] = self._get_historical_data(
+                        market_pair,
+                        exchange,
+                        candle_period
+                    )
+
+                if historical_data_cache[candle_period]:
+                    analysis_args = {
+                        'historical_data': historical_data_cache[candle_period]
+                    }
+
+                    if 'period_count' in informant_conf:
+                        analysis_args['period_count'] = informant_conf['period_count']
+
+                    results[informant].append({
+                        'result': self._get_analysis_result(
+                            informant_dispatcher,
+                            informant,
+                            analysis_args,
+                            market_pair
+                        ),
+                        'config': informant_conf
+                    })
+        return results
+
+
+    def _get_historical_data(self, market_pair, exchange, candle_period):
+        try:
+            historical_data = self.exchange_interface.get_historical_data(
+                market_pair,
+                exchange,
+                candle_period
+            )
+        except RetryError:
+            self.logger.error(
+                'Too many retries fetching information for pair %s, skipping',
+                market_pair
+            )
+        except ExchangeError:
+            self.logger.error(
+                'Exchange supplied bad data for pair %s, skipping',
+                market_pair
+            )
+        except ValueError as e:
+            self.logger.error(e)
+            self.logger.error(
+                'Invalid data encountered while processing pair %s, skipping',
+                market_pair
+            )
+            self.logger.debug(traceback.format_exc())
+        except AttributeError:
+            self.logger.error(
+                'Something went wrong fetching data for %s, skipping',
+                market_pair
+            )
+            self.logger.debug(traceback.format_exc())
+        return historical_data
+
+
+    def _get_analysis_result(self, dispatcher, indicator, dispatcher_args, market_pair):
+        try:
+            results = dispatcher[indicator](**dispatcher_args)
+        except TypeError:
+            self.logger.info(
+                'Invalid type encountered while processing pair %s for indicator %s, skipping',
+                market_pair,
+                indicator
+            )
+            self.logger.debug(traceback.format_exc())
         return results
 
 
@@ -214,6 +278,24 @@ class Behaviour():
                     formatted_string,
                     normal_colour
                 )
+
+        output += "\ninformants:\t"
+        for informant in results['informants']:
+            for i, analysis in enumerate(results['informants'][informant]):
+                formatted_values = list()
+                for signal in analysis['config']['signal']:
+                    value = analysis['result'].iloc[-1][signal]
+                    if isinstance(value, float):
+                        formatted_values.append(format(value, '.8f'))
+                    else:
+                        formatted_values.append(value)
+                    formatted_string = '/'.join(formatted_values)
+
+                output += "{}: {} \t".format(
+                    '{} #{}'.format(informant, i),
+                    formatted_string
+                )
+        output += "\n"
         return output
 
 

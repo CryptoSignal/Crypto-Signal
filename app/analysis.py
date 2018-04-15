@@ -20,7 +20,7 @@ class StrategyAnalyzer():
         self.logger = structlog.get_logger()
 
 
-    def analysis_dispatcher(self):
+    def indicator_dispatcher(self):
         """Returns a dictionary for dynamic anaylsis selector
 
         Returns:
