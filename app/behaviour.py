@@ -93,10 +93,15 @@ class Behaviour():
                 )
 
                 if output_mode in self.output:
-                    print(self.output[output_mode](new_result[exchange][market_pair], market_pair))
+                    print(
+                        self.output[output_mode](new_result[exchange][market_pair], market_pair),
+                        end=''
+                    )
                 else:
                     self.logger.warn()
 
+        # Print an empty line when complete
+        print()
         return new_result
 
 
@@ -252,7 +257,7 @@ class Behaviour():
         cold_colour = '\u001b[36m'
 
         output = "{}:\t\n".format(market_pair)
-        output += "indicators:\t"
+        output += 'indicators:\t'
         for indicator in results['indicators']:
             for i, analysis in enumerate(results['indicators'][indicator]):
                 colour_code = normal_colour
@@ -279,7 +284,7 @@ class Behaviour():
                     normal_colour
                 )
 
-        output += "\ninformants:\t"
+        output += '\ninformants:\t'
         for informant in results['informants']:
             for i, analysis in enumerate(results['informants'][informant]):
                 formatted_values = list()
@@ -295,7 +300,7 @@ class Behaviour():
                     '{} #{}'.format(informant, i),
                     formatted_string
                 )
-        output += "\n"
+        output += '\n\n'
         return output
 
 
@@ -310,23 +315,33 @@ class Behaviour():
         """
 
         output = str()
-        for indicator in results['indicators']:
-            for i, analysis in enumerate(results['indicators'][indicator]):
-                for signal in analysis['config']['signal']:
-                    value = analysis['result'].iloc[-1][signal]
-                    if isinstance(value, float):
-                        value = format(value, '.8f')
+        for indicator_type in results:
+            for indicator in results[indicator_type]:
+                for i, analysis in enumerate(results[indicator_type][indicator]):
+                    for signal in analysis['config']['signal']:
+                        value = analysis['result'].iloc[-1][signal]
+                        if isinstance(value, float):
+                            value = format(value, '.8f')
 
-                    new_output = ','.join([
-                        market_pair,
-                        indicator,
-                        str(i),
-                        value,
-                        str(analysis['result'].iloc[-1]['is_hot']),
-                        str(analysis['result'].iloc[-1]['is_cold'])
-                    ])
+                        is_hot = str()
+                        if 'is_hot' in analysis['result'].iloc[-1]:
+                            is_hot = str(analysis['result'].iloc[-1]['is_hot'])
 
-                    output += '\n{}'.format(new_output)
+                        is_cold = str()
+                        if 'is_cold' in analysis['result'].iloc[-1]:
+                            is_cold = str(analysis['result'].iloc[-1]['is_cold'])
+
+                        new_output = ','.join([
+                            market_pair,
+                            indicator,
+                            str(i),
+                            value,
+                            is_hot,
+                            is_cold
+                        ])
+
+                        output += '\n{}'.format(new_output)
+
         return output
 
 
@@ -341,10 +356,12 @@ class Behaviour():
         """
 
         result_list = list()
-        for indicator in results['indicators']:
-            for analysis in results['indicators'][indicator]:
-                result_list.append(analysis['result'].to_dict(orient='records')[-1])
+        for indicator_type in results:
+            for indicator in results[indicator_type]:
+                for analysis in results[indicator_type][indicator]:
+                    result_list.append(analysis['result'].to_dict(orient='records')[-1])
 
-        output = {'pair': market_pair, 'indicators': result_list}
+        output = {'pair': market_pair, indicator_type: result_list}
         output = json.dumps(output)
+        output += '\n'
         return output

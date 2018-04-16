@@ -261,6 +261,7 @@ class Configuration():
                 }
             }
 
+
     def _tuple_maker(self, string):
         """Splits a string into an n-tuple.
 
@@ -280,6 +281,7 @@ class Configuration():
                 return tuple(strlist)
 
         return string,
+
 
     def _string_splitter(self, string):
         """Splits a string into a list.
