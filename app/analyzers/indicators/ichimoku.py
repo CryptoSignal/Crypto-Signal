@@ -11,7 +11,7 @@ from analyzers.utils import IndicatorUtils
 
 
 class Ichimoku(IndicatorUtils):
-    def analyze(self, historical_data):
+    def analyze(self, historical_data, signal=['leading_span_a', 'leading_span_b'], hot_thresh=None, cold_thresh=None):
         """Performs an ichimoku cloud analysis on the historical data
 
         Args:
@@ -74,5 +74,20 @@ class Ichimoku(IndicatorUtils):
         ) / 2
 
         ichimoku_values.dropna(how='any', inplace=True)
+        ichimoku_df_size = ichimoku_values.shape[0]
+
+        ichimoku_values['is_hot'] = False
+        ichimoku_values['is_cold'] = False
+
+        for index in range(0, ichimoku_df_size):
+            span_hot = ichimoku_values['leading_span_a'][index] > ichimoku_values['leading_span_b'][index]
+            close_hot = dataframe['close'][index] > ichimoku_values['leading_span_a'][index]
+            if hot_thresh:
+                ichimoku_values.at[ichimoku_values.index[index], 'is_hot'] = span_hot and close_hot
+
+            span_cold = ichimoku_values['leading_span_a'][index] < ichimoku_values['leading_span_b'][index]
+            close_cold = dataframe['close'][index] < ichimoku_values['leading_span_a'][index]
+            if cold_thresh:
+                ichimoku_values.at[ichimoku_values.index[index], 'is_cold'] = span_cold and close_cold
 
         return ichimoku_values

@@ -10,20 +10,20 @@ import structlog
 from ccxt import ExchangeError
 from tenacity import RetryError
 
+from analysis import StrategyAnalyzer
+from outputs import Output
 
 class Behaviour():
     """Default analyzer which gives users basic trading information.
     """
 
-    def __init__(self, config, exchange_interface, strategy_analyzer, notifier):
+    def __init__(self, config, exchange_interface, notifier):
         """Initializes DefaultBehaviour class.
 
         Args:
             indicator_conf (dict): A dictionary of configuration for this analyzer.
             exchange_interface (ExchangeInterface): Instance of the ExchangeInterface class for
                 making exchange queries.
-            strategy_analyzer (StrategyAnalyzer): Instance of the StrategyAnalyzer class for
-                running analyzed_data on exchange information.
             notifier (Notifier): Instance of the notifier class for informing a user when a
                 threshold has been crossed.
         """
@@ -31,15 +31,13 @@ class Behaviour():
         self.logger = structlog.get_logger()
         self.indicator_conf = config.indicators
         self.informant_conf = config.informants
+        self.crossover_conf = config.crossovers
         self.exchange_interface = exchange_interface
-        self.strategy_analyzer = strategy_analyzer
+        self.strategy_analyzer = StrategyAnalyzer()
         self.notifier = notifier
 
-        self.output = {
-            'cli': self._get_cli_output,
-            'csv': self._get_csv_output,
-            'json': self._get_json_output
-        }
+        output_interface = Output()
+        self.output = output_interface.dispatcher
 
 
     def run(self, market_pairs, output_mode):
@@ -90,6 +88,10 @@ class Behaviour():
                 new_result[exchange][market_pair]['informants'] = self._get_informant_results(
                     exchange,
                     market_pair
+                )
+
+                new_result[exchange][market_pair]['crossovers'] = self._get_crossover_results(
+                    new_result[exchange][market_pair]
                 )
 
                 if output_mode in self.output:
@@ -196,7 +198,39 @@ class Behaviour():
         return results
 
 
+    def _get_crossover_results(self, new_result):
+        crossover_dispatcher = self.strategy_analyzer.crossover_dispatcher()
+        results = { crossover: list() for crossover in self.crossover_conf.keys() }
+
+        for crossover in self.crossover_conf:
+            if crossover not in crossover_dispatcher:
+                self.logger.warn("No such crossover %s, skipping.", crossover)
+                continue
+
+            for crossover_conf in self.crossover_conf[crossover]:
+                if not crossover_conf['enabled']:
+                    self.logger.debug("%s is disabled, skipping.", crossover)
+                    continue
+
+                key_indicator = new_result[crossover_conf['key_indicator_type']][crossover_conf['key_indicator']][crossover_conf['key_indicator_index']]
+                crossed_indicator = new_result[crossover_conf['crossed_indicator_type']][crossover_conf['crossed_indicator']][crossover_conf['crossed_indicator_index']]
+
+                dispatcher_args = {
+                    'key_indicator': key_indicator['result'],
+                    'key_signal': crossover_conf['key_signal'],
+                    'crossed_indicator': crossed_indicator['result'],
+                    'crossed_signal': crossover_conf['crossed_signal']
+                }
+
+                results[crossover].append({
+                    'result': crossover_dispatcher[crossover](**dispatcher_args),
+                    'config': crossover_conf
+                })
+        return results
+
+
     def _get_historical_data(self, market_pair, exchange, candle_period):
+        historical_data = list()
         try:
             historical_data = self.exchange_interface.get_historical_data(
                 market_pair,
@@ -238,130 +272,6 @@ class Behaviour():
                 market_pair,
                 indicator
             )
-            self.logger.debug(traceback.format_exc())
+            self.logger.info(traceback.format_exc())
+            results = str()
         return results
-
-
-    def _get_cli_output(self, results, market_pair):
-        """Creates the message to output to the CLI
-
-        Args:
-            results (dict): The result of the completed analysis
-
-        Returns:
-            str: Completed cli message
-        """
-
-        normal_colour = '\u001b[0m'
-        hot_colour = '\u001b[31m'
-        cold_colour = '\u001b[36m'
-
-        output = "{}:\t\n".format(market_pair)
-        output += 'indicators:\t'
-        for indicator in results['indicators']:
-            for i, analysis in enumerate(results['indicators'][indicator]):
-                colour_code = normal_colour
-
-                if analysis['result'].iloc[-1]['is_hot']:
-                    colour_code = hot_colour
-
-                if analysis['result'].iloc[-1]['is_cold']:
-                    colour_code = cold_colour
-
-                formatted_values = list()
-                for signal in analysis['config']['signal']:
-                    value = analysis['result'].iloc[-1][signal]
-                    if isinstance(value, float):
-                        formatted_values.append(format(value, '.8f'))
-                    else:
-                        formatted_values.append(value)
-                    formatted_string = '/'.join(formatted_values)
-
-                output += "{}{}: {}{} \t".format(
-                    colour_code,
-                    '{} #{}'.format(indicator, i),
-                    formatted_string,
-                    normal_colour
-                )
-
-        output += '\ninformants:\t'
-        for informant in results['informants']:
-            for i, analysis in enumerate(results['informants'][informant]):
-                formatted_values = list()
-                for signal in analysis['config']['signal']:
-                    value = analysis['result'].iloc[-1][signal]
-                    if isinstance(value, float):
-                        formatted_values.append(format(value, '.8f'))
-                    else:
-                        formatted_values.append(value)
-                    formatted_string = '/'.join(formatted_values)
-
-                output += "{}: {} \t".format(
-                    '{} #{}'.format(informant, i),
-                    formatted_string
-                )
-        output += '\n\n'
-        return output
-
-
-    def _get_csv_output(self, results, market_pair):
-        """Creates the csv to output to the CLI
-
-        Args:
-            results (dict): The result of the completed analysis
-
-        Returns:
-            str: Completed cli csv
-        """
-
-        output = str()
-        for indicator_type in results:
-            for indicator in results[indicator_type]:
-                for i, analysis in enumerate(results[indicator_type][indicator]):
-                    for signal in analysis['config']['signal']:
-                        value = analysis['result'].iloc[-1][signal]
-                        if isinstance(value, float):
-                            value = format(value, '.8f')
-
-                        is_hot = str()
-                        if 'is_hot' in analysis['result'].iloc[-1]:
-                            is_hot = str(analysis['result'].iloc[-1]['is_hot'])
-
-                        is_cold = str()
-                        if 'is_cold' in analysis['result'].iloc[-1]:
-                            is_cold = str(analysis['result'].iloc[-1]['is_cold'])
-
-                        new_output = ','.join([
-                            market_pair,
-                            indicator,
-                            str(i),
-                            value,
-                            is_hot,
-                            is_cold
-                        ])
-
-                        output += '\n{}'.format(new_output)
-
-        return output
-
-
-    def _get_json_output(self, results, market_pair):
-        """Creates the JSON to output to the CLI
-
-        Args:
-            results (dict): The result of the completed analysis
-
-        Returns:
-            str: Completed JSON message
-        """
-
-        result_list = list()
-        for indicator_type in results:
-            for indicator in results[indicator_type]:
-                for analysis in results[indicator_type][indicator]:
-                    result_list.append(analysis['result'].to_dict(orient='records')[-1])
-
-        output = {'pair': market_pair, indicator_type: result_list}
-        output = json.dumps(output)
-        output += '\n'
-        return output

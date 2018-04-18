@@ -1,4 +1,5 @@
 __all__ = [
+    'ichimoku',
     'macd',
     'momentum',
     'rsi',

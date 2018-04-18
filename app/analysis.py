@@ -10,6 +10,7 @@ from talib import abstract
 
 from analyzers.indicators import *
 from analyzers.informants import *
+from analyzers import *
 
 class StrategyAnalyzer():
     """Contains all the methods required for analyzing strategies.
@@ -28,6 +29,7 @@ class StrategyAnalyzer():
         """
 
         dispatcher = {
+            'ichimoku': ichimoku.Ichimoku().analyze,
             'macd': macd.MACD().analyze,
             'rsi': rsi.RSI().analyze,
             'momentum': momentum.Momentum().analyze,
@@ -48,9 +50,17 @@ class StrategyAnalyzer():
         dispatcher = {
             'sma': sma.SMA().analyze,
             'ema': ema.EMA().analyze,
-            'ichimoku': ichimoku.Ichimoku().analyze,
             'vwap': vwap.VWAP().analyze,
             'bollinger_bands': bollinger_bands.Bollinger().analyze
+        }
+
+        return dispatcher
+
+
+    def crossover_dispatcher(self):
+
+        dispatcher = {
+            'std_crossover': crossover.CrossOver().analyze
         }
 
         return dispatcher
