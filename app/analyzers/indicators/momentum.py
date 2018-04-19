@@ -17,20 +17,16 @@ class Momentum(IndicatorUtils):
         Args:
             historical_data (list): A matrix of historical OHCLV data.
             period_count (int, optional): Defaults to 10. The number of data points to consider for
-                our simple moving average.
-            signal (string, optional): Defaults to momentum. The indicator line to check hot/cold
+                our momentum.
+            signal (list, optional): Defaults to momentum. The indicator line to check hot/cold
                 against.
             hot_thresh (float, optional): Defaults to None. The threshold at which this might be
                 good to purchase.
             cold_thresh (float, optional): Defaults to None. The threshold at which this might be
                 good to sell.
-            all_data (bool, optional): Defaults to False. If True, we return the momentum
-                associated with each data point in our historical dataset. Otherwise just return
-                the last one.
 
         Returns:
-            dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
-                indication.
+            pandas.DataFrame: A dataframe containing the indicators and hot/cold values.
         """
 
         dataframe = self.convert_to_dataframe(historical_data)

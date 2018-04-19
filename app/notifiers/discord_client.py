@@ -13,7 +13,9 @@ class DiscordNotifier():
         """Initialize DiscordNotifier class
 
         Args:
-            Discord_webhook (str): Discord web hook to allow message sending.
+            webhook (str): Discord web hook to allow message sending.
+            username (str): Display name for the discord bot.
+            avatar (str, optional): Defaults to None. Url of an image to use as an avatar.
         """
 
         self.logger = structlog.get_logger()

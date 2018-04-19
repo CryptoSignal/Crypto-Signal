@@ -17,8 +17,8 @@ class RSI(IndicatorUtils):
         Args:
             historical_data (list): A matrix of historical OHCLV data.
             period_count (int, optional): Defaults to 14. The number of data points to consider for
-                our simple moving average.
-            signal (string, optional): Defaults to momentum. The indicator line to check hot/cold
+                our RSI.
+            signal (list, optional): Defaults to rsi. The indicator line to check hot/cold
                 against.
             hot_thresh (float, optional): Defaults to None. The threshold at which this might be
                 good to purchase.
@@ -26,8 +26,7 @@ class RSI(IndicatorUtils):
                 good to sell.
 
         Returns:
-            dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
-                indication.
+            pandas.DataFrame: A dataframe containing the indicators and hot/cold values.
         """
 
         dataframe = self.convert_to_dataframe(historical_data)

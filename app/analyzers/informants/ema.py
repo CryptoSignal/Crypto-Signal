@@ -19,8 +19,7 @@ class EMA(IndicatorUtils):
 				our exponential moving average.
 
 		Returns:
-			dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
-				indication.
+			pandas.DataFrame: A dataframe containing the indicators and hot/cold values.
 		"""
 
         dataframe = self.convert_to_dataframe(historical_data)

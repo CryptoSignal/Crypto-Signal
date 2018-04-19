@@ -26,7 +26,8 @@ class Output():
         """Creates the message to output to the CLI
 
         Args:
-            results (dict): The result of the completed analysis
+            market_pair (str): Market pair that this message relates to.
+            results (dict): The result of the completed analysis to output.
 
         Returns:
             str: Completed cli message
@@ -93,10 +94,11 @@ class Output():
         """Creates the csv to output to the CLI
 
         Args:
-            results (dict): The result of the completed analysis
+            market_pair (str): Market pair that this message relates to.
+            results (dict): The result of the completed analysis to output.
 
         Returns:
-            str: Completed cli csv
+            str: Completed CSV message
         """
 
         output = str()
@@ -134,7 +136,8 @@ class Output():
         """Creates the JSON to output to the CLI
 
         Args:
-            results (dict): The result of the completed analysis
+            market_pair (str): Market pair that this message relates to.
+            results (dict): The result of the completed analysis to output.
 
         Returns:
             str: Completed JSON message

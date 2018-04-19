@@ -16,14 +16,15 @@ class Ichimoku(IndicatorUtils):
 
         Args:
             historical_data (list): A matrix of historical OHCLV data.
+            signal (list, optional): Defaults to leading_span_a and leading_span_b. The indicator
+                line to check hot/cold against.
             hot_thresh (float, optional): Defaults to None. The threshold at which this might be
                 good to purchase.
             cold_thresh (float, optional): Defaults to None. The threshold at which this might be
                 good to sell.
 
         Returns:
-            dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
-                indication.
+            pandas.DataFrame: A dataframe containing the indicators and hot/cold values.
         """
 
         tenkansen_period = 9

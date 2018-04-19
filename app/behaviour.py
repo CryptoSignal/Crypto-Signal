@@ -45,6 +45,7 @@ class Behaviour():
 
         Args:
             market_pairs (list): List of symbol pairs to operate on, if empty get all pairs.
+            output_mode (str): Which console output mode to use.
         """
 
         self.logger.info("Starting default analyzer...")
@@ -68,6 +69,7 @@ class Behaviour():
 
         Args:
             market_data (dict): A dictionary containing the market data of the symbols to analyze.
+            output_mode (str): Which console output mode to use.
         """
 
         new_result = dict()
@@ -108,6 +110,16 @@ class Behaviour():
 
 
     def _get_indicator_results(self, exchange, market_pair):
+        """Execute the indicator analysis on a particular exchange and pair.
+
+        Args:
+            exchange (str): The exchange to get the indicator results for.
+            market_pair (str): The pair to get the market pair results for.
+
+        Returns:
+            list: A list of dictinaries containing the results of the analysis.
+        """
+
         indicator_dispatcher = self.strategy_analyzer.indicator_dispatcher()
         results = { indicator: list() for indicator in self.indicator_conf.keys() }
         historical_data_cache = dict()
@@ -155,6 +167,16 @@ class Behaviour():
 
 
     def _get_informant_results(self, exchange, market_pair):
+        """Execute the informant analysis on a particular exchange and pair.
+
+        Args:
+            exchange (str): The exchange to get the indicator results for.
+            market_pair (str): The pair to get the market pair results for.
+
+        Returns:
+            list: A list of dictinaries containing the results of the analysis.
+        """
+
         informant_dispatcher = self.strategy_analyzer.informant_dispatcher()
         results = { informant: list() for informant in self.informant_conf.keys() }
         historical_data_cache = dict()
@@ -199,6 +221,16 @@ class Behaviour():
 
 
     def _get_crossover_results(self, new_result):
+        """Execute crossover analysis on the results so far.
+
+        Args:
+            new_result (dict): A dictionary containing the results of the informant and indicator
+                analysis.
+
+        Returns:
+            list: A list of dictinaries containing the results of the analysis.
+        """
+
         crossover_dispatcher = self.strategy_analyzer.crossover_dispatcher()
         results = { crossover: list() for crossover in self.crossover_conf.keys() }
 
@@ -230,6 +262,17 @@ class Behaviour():
 
 
     def _get_historical_data(self, market_pair, exchange, candle_period):
+        """Gets a list of OHLCV data for the given pair and exchange.
+
+        Args:
+            market_pair (str): The market pair to get the OHLCV data for.
+            exchange (str): The exchange to get the OHLCV data for.
+            candle_period (str): The timeperiod to collect for the given pair and exchange.
+
+        Returns:
+            list: A list of OHLCV data.
+        """
+
         historical_data = list()
         try:
             historical_data = self.exchange_interface.get_historical_data(
@@ -264,6 +307,18 @@ class Behaviour():
 
 
     def _get_analysis_result(self, dispatcher, indicator, dispatcher_args, market_pair):
+        """Get the results of performing technical analysis
+
+        Args:
+            dispatcher (dict): A dictionary of functions for performing TA.
+            indicator (str): The name of the desired indicator.
+            dispatcher_args (dict): A dictionary of arguments to provide the analyser
+            market_pair (str): The market pair to analyse
+
+        Returns:
+            pandas.DataFrame: Returns a pandas.DataFrame of results or an empty string.
+        """
+
         try:
             results = dispatcher[indicator](**dispatcher_args)
         except TypeError:

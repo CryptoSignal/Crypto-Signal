@@ -17,11 +17,10 @@ class VWAP(IndicatorUtils):
         Args:
             historical_data (list): A matrix of historical OHCLV data.
             period_count (int, optional): Defaults to 15. The number of data points to consider for
-                our simple moving average.
+                our volume weighted average price.
 
         Returns:
-            dict: A dictionary containing a tuple of indicator values and booleans for buy / sell
-                indication.
+            pandas.DataFrame: A dataframe containing the indicators and hot/cold values.
         """
 
         dataframe = self.convert_to_dataframe(historical_data)

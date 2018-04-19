@@ -25,7 +25,7 @@ class StrategyAnalyzer():
         """Returns a dictionary for dynamic anaylsis selector
 
         Returns:
-            dict: A dictionary of functions to serve as a dynamic analysis selector.
+            dictionary: A dictionary of functions to serve as a dynamic analysis selector.
         """
 
         dispatcher = {
@@ -44,7 +44,7 @@ class StrategyAnalyzer():
         """Returns a dictionary for dynamic informant selector
 
         Returns:
-            dict: A dictionary of functions to serve as a dynamic informant selector.
+            dictionary: A dictionary of functions to serve as a dynamic informant selector.
         """
 
         dispatcher = {
@@ -58,6 +58,11 @@ class StrategyAnalyzer():
 
 
     def crossover_dispatcher(self):
+        """Returns a pandas.DataFrame for dynamic crossover selector
+
+        Returns:
+            dictionary: A dictionary of functions to serve as a dynamic crossover selector.
+        """
 
         dispatcher = {
             'std_crossover': crossover.CrossOver().analyze
