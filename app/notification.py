@@ -242,8 +242,7 @@ class Notifier():
                                     indicator_number=index,
                                     analysis=analysis,
                                     status=status,
-                                    last_status=last_status,
-                                    raw_indicator=indicator
+                                    last_status=last_status
                                 )
 
         # Merge changes from new analysis into last analysis

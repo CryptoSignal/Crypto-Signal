@@ -14,7 +14,6 @@ Technical Analysis Automated:
 * Ichimoku Cloud (Leading Span A, Leading Span B, Conversion Line, Base Line)
 * Simple Moving Average
 * Exponential Moving Average
-* Breakouts / Pumps
 * MACD
 * MFI
 * VWAP
