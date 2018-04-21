@@ -155,7 +155,11 @@ NOTIFIERS_DISCORD_OPTIONAL_TEMPLATE="[{{analysis.config.candle_period}}] {{marke
 The result of the above custom template would generate a message that looks like: [1h] BURST/BTC on bittrex is hot.
 
 # Analyzers
-Settings for the analyzers behaviour. The formal grammar is defined as follows:
+Settings for the analyzers behaviour.
+
+## Valid settings for indicators
+
+The formal grammar is defined as follows:
 
 ```
 <indicator> := <indicator_name>_<indicator_index>
@@ -163,15 +167,23 @@ Settings for the analyzers behaviour. The formal grammar is defined as follows:
 <indicator_name> := MOMENTUM |
                     RSI |
                     MACD |
-                    SMA |
-                    EMA |
                     ICHIMOKU |
-                    STOCHASTIC_RSI
+                    STOCHASTIC_RSI |
+                    MFI
 
 <indicator_index> := {0, 1, 2, ...}
 ```
 
-## Valid settings for indicators
+Every indicator has a default set of signal lines, you can also tweak them to your liking. The first signal that you specify in the list is the signal tested for hot/cold and the others are output to the console.
+
+```
+MOMENTUM - momentum
+RSI - rsi
+MACD - macd
+ICHIMOKU - leading_span_a, leading_span_b
+STOCHASTIC_RSI - stoch_rsi
+MFI - mfi
+```
 
 *INDICATOR_\<indicator_name\>_NUM_INDICATORS*\
 default: 1\
@@ -187,6 +199,11 @@ description: Valid values are true or false. Whether to perform analysis on this
 default: True\
 necessity: optional\
 description: Valid values are true or false. Whether to send alerts for this particular indicator.
+
+*INDICATOR_\<indicator\>_SIGNAL_LINE*\
+default: A string\
+necessity: optional\
+description: Valid values are on a per indicator basis see the options in the table at the start of the analyzers section for a full list of what is available. Each indicator may have a variety of signal lines, this option allows you to specify which options you care about. The first one specified is used for determining hot/cold the others are just output to the cli for information.
 
 *INDICATOR_\<indicator\>_HOT*\
 default:\
@@ -206,7 +223,141 @@ description: Valid options vary by exchange, common options include 1m, 5m, 1h, 
 *INDICATOR_\<indicator\>_PERIOD_COUNT*\
 default: An integer\
 necessity: optional\
-description: Valid options are an integer. This is the count of candle periods to use for this analysis. Let's suppose you wanted to test 15 days of EMA data. You would set the `BEHAVIOUR_EMA_0_CANDLE_PERIOD=1d` and then set `BEHAVIOUR_EMA_0_PERIOD_COUNT=15`, which means 15 counts of 1d periods... or in other words... 15 days. Furthermore, you can also keep track of the same indicator with multiple period lengths. If we wanted to watch the 15, 21, and 50 day EMA simultaneously, we could set `BEHAVIOUR_EMA_0_PERIOD_COUNT=15`, `BEHAVIOUR_EMA_1_PERIOD_COUNT=21`, `BEHAVIOUR_EMA_2_PERIOD_COUNT=50`.
+description: Valid options are an integer. This is the count of candle periods to use for this analysis. Let's suppose you wanted to test 15 days of RSI data. You would set the `INDICATOR_RSI_0_CANDLE_PERIOD=1d` and then set `INDICATOR_RSI_0_PERIOD_COUNT=15`, which means 15 counts of 1d periods... or in other words... 15 days. Furthermore, you can also keep track of the same indicator with multiple period lengths. If we wanted to watch the 15, 21, and 50 day RSI simultaneously, we could set `INDICATOR_RSI_0_PERIOD_COUNT=15`, `INDICATOR_RSI_1_PERIOD_COUNT=21`, `INDICATOR_RSI_2_PERIOD_COUNT=50`.
+
+## Valid settings for informants
+
+The formal grammar is defined as follows:
+
+```
+<indicator> := <indicator_name>_<indicator_index>
+
+<indicator_name> := SMA |
+                    EMA |
+                    VWAP |
+                    BOL_BAND
+
+<indicator_index> := {0, 1, 2, ...}
+```
+
+Every indicator has a default set of signal lines, you can also tweak them to your liking. If you specify the signal lines it determines which ones are output to the console.
+
+```
+SMA - sma
+EMA - ema
+VWAP - vwap
+BOL_BAND - upperband, middleband, lowerband
+```
+
+*INFORMANT_\<indicator_name\>_NUM_INDICATORS*\
+default: 1\
+necessity: optional\
+description: Valid values are positive integers. This tells Crypto-Signal how many of the same indicator to keep track of.
+
+*INFORMANT_\<indicator\>_ENABLED*\
+default: True\
+necessity: optional\
+description: Valid values are true or false. Whether to perform analysis on this indicator.
+
+*INFORMANT_\<indicator\>_SIGNAL_LINE*\
+default: A string\
+necessity: optional\
+description: Valid values are on a per indicator basis see the options in the table at the start of the analyzers section for a full list of what is available. Each indicator may have a variety of signal lines, this option allows you to specify which options you care about.
+
+*INFORMANT_\<indicator\>_PERIOD_COUNT*\
+default: An integer\
+necessity: optional\
+description: Valid options are an integer. This is the count of candle periods to use for this analysis. Let's suppose you wanted to test 15 days of EMA data. You would set the `INFORMANT_EMA_0_CANDLE_PERIOD=1d` and then set `INFORMANT_EMA_0_PERIOD_COUNT=15`, which means 15 counts of 1d periods... or in other words... 15 days. Furthermore, you can also keep track of the same indicator with multiple period lengths. If we wanted to watch the 15, 21, and 50 day EMA simultaneously, we could set `INFORMANT_EMA_0_PERIOD_COUNT=15`, `INFORMANT_EMA_1_PERIOD_COUNT=21`, `INFORMANT_EMA_2_PERIOD_COUNT=50`.
+
+## Valid settings for crossovers
+
+The formal grammar is defined as follows:
+
+```
+<indicator> := <indicator_name>_<indicator_index>
+
+<indicator_name> := STD_CROSSOVER
+
+<indicator_index> := {0, 1, 2, ...}
+```
+
+*CROSSOVER_\<indicator_name\>_NUM_INDICATORS*\
+default: 1\
+necessity: optional\
+description: Valid values are positive integers. This tells Crypto-Signal how many of the same indicator to keep track of.
+
+*CROSSOVER_\<indicator\>_ENABLED*\
+default: False\
+necessity: optional\
+description: Valid values are true or false. Whether to perform analysis on this indicator.
+
+*CROSSOVER_\<indicator\>_ALERT_ENABLED*\
+default: False\
+necessity: optional\
+description: Valid values are true or false. Whether to send alerts for this particular indicator.
+
+*CROSSOVER_\<indicator\>_KEY_INDICATOR*\
+default: N/A\
+necessity: optional\
+description: Valid values are the name of any indicator or informant. The indicator that gets hot when it goes above the crossed indicator and cold when it goes below it.
+
+*CROSSOVER_\<indicator\>_KEY_INDICATOR_INDEX*\
+default: N/A\
+necessity: optional\
+description: Valid values are positive integers. The index of the selected key indicator or informant that you want to use.
+
+*CROSSOVER_\<indicator\>_KEY_INDICATOR_TYPE*\
+default: N/A\
+necessity: optional\
+description: Valid values are 'indicator' or 'informant'. Whether the key indicator is of type informant or indicator.
+
+*CROSSOVER_\<indicator\>_KEY_SIGNAL*\
+default: N/A\
+necessity: optional\
+description: Valid values are the name of a signal line for the select indicator or informant. Which signal to use of the selected indicator or informant.
+
+*CROSSOVER_\<indicator\>_CROSSED_INDICATOR*\
+default: N/A\
+necessity: optional\
+description: Valid values are the name of any indicator or informant. The indicator or informant that the key indicator is intended to cross.
+
+*CROSSOVER_\<indicator\>_CROSSED_INDICATOR_INDEX*\
+default: N/A\
+necessity: optional\
+description: Valid values are positive integers. The index of the selected crossed indicator or informant that you want to use.
+
+*CROSSOVER_\<indicator\>_CROSSED_INDICATOR_TYPE*\
+default: N/A\
+necessity: optional\
+description: Valid values are 'indicator' or 'informant'. Whether the crossed indicator is of type informant or indicator.
+
+*CROSSOVER_\<indicator\>_CROSSED_SIGNAL*\
+default: N/A\
+necessity: optional\
+description: Valid values are the name of a signal line for the select indicator or informant. Which signal to use of the selected indicator or informant.
+
+# Exchanges
+Settings that alter behaviour of interaction with an exchange.
+
+*EXCHANGES_exchangeid_REQUIRED_ENABLED*\
+default: False\
+necessity: required\
+description: Valid options are `true` or `false`. This setting enables or disables exchanges by specifying their id where specified in the variable name for bittrex the variable would be called `EXCHANGES_BITTREX_REQUIRED_ENABLED`. A list of exchange id's can be found [here](https://github.com/ccxt/ccxt/wiki/Exchange-Markets). In order to use crypto-signal you must set one exchange to true.
+
+# Examples
+Putting it all together an example settings.env might look like the config below if you want to use the default settings with bittrex
+
+```
+EXCHANGES_BITTREX_REQUIRED_ENABLED=true
+```
+
+If you want to filter to a specific set of markets and receive updates hourly:
+
+```
+SETTINGS_MARKET_PAIRS=ETH/BTC,DOGE/BTC
+SETTINGS_UPDATE_INTERVAL=3600
+EXCHANGES_BITTREX_REQUIRED_ENABLED=true
+```
 
 To hammer home this unique (and perhaps arcane) method of configuration, consider how we can translate the following example into a proper configuration using the grammar above:
 
@@ -225,46 +376,5 @@ INDICATOR_RSI_1_PERIOD_COUNT=50
 INDICATOR_SMA_0_PERIOD_COUNT=9
 INDICATOR_SMA_0_CANDLE_PERIOD=1h
 ```
+
 Notice that we don't need to specify the _NUM_INDICATORS_ option if we are only using a single instance of an indicator.
-
-## Valid settings for informants
-
-*INFORMANT_\<indicator_name\>_NUM_INDICATORS*\
-default: 1\
-necessity: optional\
-description: Valid values are positive integers. This tells Crypto-Signal how many of the same indicator to keep track of.
-
-*INFORMANT_\<indicator\>_ENABLED*\
-default: True\
-necessity: optional\
-description: Valid values are true or false. Whether to perform analysis on this indicator.
-
-*INFORMANT_\<indicator\>_PERIOD_COUNT*\
-default: An integer\
-necessity: optional\
-description: Valid options are an integer. This is the count of candle periods to use for this analysis. Let's suppose you wanted to test 15 days of EMA data. You would set the `BEHAVIOUR_EMA_0_CANDLE_PERIOD=1d` and then set `BEHAVIOUR_EMA_0_PERIOD_COUNT=15`, which means 15 counts of 1d periods... or in other words... 15 days. Furthermore, you can also keep track of the same indicator with multiple period lengths. If we wanted to watch the 15, 21, and 50 day EMA simultaneously, we could set `BEHAVIOUR_EMA_0_PERIOD_COUNT=15`, `BEHAVIOUR_EMA_1_PERIOD_COUNT=21`, `BEHAVIOUR_EMA_2_PERIOD_COUNT=50`.
-
-## Valid settings for crossovers
-
-# Exchanges
-Settings that alter behaviour of interaction with an exchange.
-
-*EXCHANGES_exchangeid_REQUIRED_ENABLED*\
-default: False\
-necessity: required\
-description: Valid options are `true` or `false`. This setting enables or disables exchanges by specifying their id where specified in the variable name for bittrex the variable would be called `EXCHANGES_BITTREX_REQUIRED_ENABLED`. A list of exchange id's can be found [here](https://github.com/ccxt/ccxt/wiki/Exchange-Markets). In order to use crypto-signal you must set one exchange to true.
-
-# Example
-Putting it all together an example settings.env might look like the config below if you want to use the default settings with bittrex
-
-```
-EXCHANGES_BITTREX_REQUIRED_ENABLED=true
-```
-
-If you want to filter to a specific set of markets and receive updates hourly:
-
-```
-SETTINGS_MARKET_PAIRS=ETH/BTC,DOGE/BTC
-SETTINGS_UPDATE_INTERVAL=3600
-EXCHANGES_BITTREX_REQUIRED_ENABLED=true
-```
