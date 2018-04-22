@@ -92,6 +92,19 @@ class Configuration():
                         "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
                     )
                 }
+            },
+
+            'webhook': {
+                'required': {
+                    'url': os.environ.get('NOTIFIERS_TELEGRAM_REQUIRED_URL', None)
+                },
+                'optional': {
+                    'auth_token': os.environ.get('NOTIFIERS_WEBHOOK_OPTIONAL_AUTH_TOKEN', None),
+                    'template': os.environ.get(
+                        'NOTIFIERS_TELEGRAM_OPTIONAL_TEMPLATE',
+                        "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
+                    )
+                }
             }
         }
 

@@ -9,6 +9,7 @@ from notifiers.slack_client import SlackNotifier
 from notifiers.discord_client import DiscordNotifier
 from notifiers.gmail_client import GmailNotifier
 from notifiers.telegram_client import TelegramNotifier
+from notifiers.webhook_client import WebhookNotifier
 
 class Notifier():
     """Handles sending notifications via the configured notifiers
@@ -68,6 +69,14 @@ class Notifier():
                 chat_id=notifier_config['telegram']['required']['chat_id']
             )
             enabled_notifiers.append('telegram')
+
+        self.webhook_configured = self._validate_required_config('webhook', notifier_config)
+        if self.webhook_configured:
+            self.webhook_client = WebhookNotifier(
+                url=notifier_config['webhook']['required']['url'],
+                auth_token=notifier_config['webhook']['optional']['auth_token']
+            )
+            enabled_notifiers.append('webhook')
 
         self.logger.info('enabled notifers: %s', enabled_notifiers)
 
@@ -164,6 +173,18 @@ class Notifier():
             )
             if message.strip():
                 self.telegram_client.notify(message)
+
+
+    def notify_webhook(self, new_analysis):
+        """Send a notification via the webhook notifier
+
+        Args:
+            new_analysis (dict): The new_analysis to send.
+        """
+
+        if self.webhook_configured:
+            message = ''
+            self.telegram_client.notify(message)
 
 
     def _validate_required_config(self, notifier, notifier_config):
