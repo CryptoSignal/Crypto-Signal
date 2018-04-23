@@ -96,14 +96,11 @@ class Configuration():
 
             'webhook': {
                 'required': {
-                    'url': os.environ.get('NOTIFIERS_TELEGRAM_REQUIRED_URL', None)
+                    'url': os.environ.get('NOTIFIERS_WEBHOOK_REQUIRED_URL', None)
                 },
                 'optional': {
-                    'auth_token': os.environ.get('NOTIFIERS_WEBHOOK_OPTIONAL_AUTH_TOKEN', None),
-                    'template': os.environ.get(
-                        'NOTIFIERS_TELEGRAM_OPTIONAL_TEMPLATE',
-                        "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
-                    )
+                    'username': os.environ.get('NOTIFIERS_WEBHOOK_OPTIONAL_USERNAME', None),
+                    'password': os.environ.get('NOTIFIERS_WEBHOOK_OPTIONAL_PASSWORD', None),
                 }
             }
         }

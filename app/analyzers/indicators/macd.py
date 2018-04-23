@@ -34,7 +34,4 @@ class MACD(IndicatorUtils):
             macd_values['is_hot'] = macd_values[signal[0]] > hot_thresh
             macd_values['is_cold'] = macd_values[signal[0]] < cold_thresh
 
-        print(macd_values)
-        exit()
-
         return macd_values

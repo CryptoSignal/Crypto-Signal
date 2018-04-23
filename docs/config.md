@@ -124,6 +124,23 @@ default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!
 necessity: optional\
 description: See the notifier templating section.
 
+## Webhook
+*NOTIFIERS_WEBHOOK_REQUIRED_URL*\
+default: None\
+necessity: required for webhook\
+description: The URL to send the json payload to.
+
+*NOTIFIERS_WEBHOOK_OPTIONAL_USERNAME*\
+default: None\
+necessity: optional for webhook\
+description: The username for basic authentication if required.
+
+*NOTIFIERS_WEBHOOK_OPTIONAL_PASSWORD*\
+default: None\
+necessity: optional for webhook\
+description: The password for basic authentication if required.
+
+
 # Notifier Templating
 The notifier templates are built with a templating language called [Jinja2](http://jinja.pocoo.org/docs/2.10/templates/) and anything that is a valid Jinja message is valid for crypto-signal. The options available are as follows:
 

@@ -1,6 +1,7 @@
 """Handles sending notifications via the configured notifiers
 """
 
+import json
 import structlog
 from jinja2 import Template
 
@@ -74,7 +75,8 @@ class Notifier():
         if self.webhook_configured:
             self.webhook_client = WebhookNotifier(
                 url=notifier_config['webhook']['required']['url'],
-                auth_token=notifier_config['webhook']['optional']['auth_token']
+                username=notifier_config['webhook']['optional']['username'],
+                password=notifier_config['webhook']['optional']['password']
             )
             enabled_notifiers.append('webhook')
 
@@ -93,6 +95,7 @@ class Notifier():
         self.notify_twilio(new_analysis)
         self.notify_gmail(new_analysis)
         self.notify_telegram(new_analysis)
+        self.notify_webhook(new_analysis)
 
 
     def notify_discord(self, new_analysis):
@@ -183,8 +186,14 @@ class Notifier():
         """
 
         if self.webhook_configured:
-            message = ''
-            self.telegram_client.notify(message)
+            for exchange in new_analysis:
+                for market in new_analysis[exchange]:
+                    for indicator_type in new_analysis[exchange][market]:
+                        for indicator in new_analysis[exchange][market][indicator_type]:
+                            for index, analysis in enumerate(new_analysis[exchange][market][indicator_type][indicator]):
+                                new_analysis[exchange][market][indicator_type][indicator][index] = analysis['result'].to_dict(orient='records')[-1]
+
+            self.webhook_client.notify(new_analysis)
 
 
     def _validate_required_config(self, notifier, notifier_config):
