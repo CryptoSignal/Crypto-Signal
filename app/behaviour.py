@@ -10,30 +10,34 @@ import structlog
 from ccxt import ExchangeError
 from tenacity import RetryError
 
+from analysis import StrategyAnalyzer
+from outputs import Output
 
 class Behaviour():
     """Default analyzer which gives users basic trading information.
     """
 
-    def __init__(self, behaviour_config, exchange_interface, strategy_analyzer, notifier):
+    def __init__(self, config, exchange_interface, notifier):
         """Initializes DefaultBehaviour class.
 
         Args:
-            behaviour_config (dict): A dictionary of configuration for this analyzer.
+            indicator_conf (dict): A dictionary of configuration for this analyzer.
             exchange_interface (ExchangeInterface): Instance of the ExchangeInterface class for
                 making exchange queries.
-            strategy_analyzer (StrategyAnalyzer): Instance of the StrategyAnalyzer class for
-                running analyzed_data on exchange information.
             notifier (Notifier): Instance of the notifier class for informing a user when a
                 threshold has been crossed.
         """
 
         self.logger = structlog.get_logger()
-        self.behaviour_config = behaviour_config
+        self.indicator_conf = config.indicators
+        self.informant_conf = config.informants
+        self.crossover_conf = config.crossovers
         self.exchange_interface = exchange_interface
-        self.strategy_analyzer = strategy_analyzer
+        self.strategy_analyzer = StrategyAnalyzer()
         self.notifier = notifier
-        self.last_result = dict()
+
+        output_interface = Output()
+        self.output = output_interface.dispatcher
 
 
     def run(self, market_pairs, output_mode):
@@ -41,6 +45,7 @@ class Behaviour():
 
         Args:
             market_pairs (list): List of symbol pairs to operate on, if empty get all pairs.
+            output_mode (str): Which console output mode to use.
         """
 
         self.logger.info("Starting default analyzer...")
@@ -64,184 +69,264 @@ class Behaviour():
 
         Args:
             market_data (dict): A dictionary containing the market data of the symbols to analyze.
+            output_mode (str): Which console output mode to use.
         """
 
-        analysis_dispatcher = self.strategy_analyzer.dispatcher()
         new_result = dict()
         for exchange in market_data:
+            self.logger.info("Beginning analysis of %s", exchange)
             if exchange not in new_result:
                 new_result[exchange] = dict()
-            self.logger.info("Beginning analysis of %s", exchange)
 
             for market_pair in market_data[exchange]:
                 if market_pair not in new_result[exchange]:
                     new_result[exchange][market_pair] = dict()
-                historical_data = dict()
 
-                for analyzer in self.behaviour_config:
-                    if analyzer not in new_result[exchange][market_pair]:
-                        new_result[exchange][market_pair][analyzer] = list()
+                new_result[exchange][market_pair]['indicators'] = self._get_indicator_results(
+                    exchange,
+                    market_pair
+                )
 
-                    if analyzer in analysis_dispatcher:
-                        behaviour_conf = self.behaviour_config[analyzer]
+                new_result[exchange][market_pair]['informants'] = self._get_informant_results(
+                    exchange,
+                    market_pair
+                )
 
-                        for indicator_conf in behaviour_conf:
-                            if indicator_conf['enabled']:
-                                candle_period = indicator_conf['candle_period']
+                new_result[exchange][market_pair]['crossovers'] = self._get_crossover_results(
+                    new_result[exchange][market_pair]
+                )
 
-                                try:
-                                    if candle_period not in historical_data:
-                                        historical_data[candle_period] = self.exchange_interface.get_historical_data(
-                                            market_data[exchange][market_pair]['symbol'],
-                                            exchange,
-                                            candle_period
-                                        )
-
-                                    analysis_args = {
-                                        'historical_data': historical_data[candle_period],
-                                        'hot_thresh': indicator_conf['hot'],
-                                        'cold_thresh': indicator_conf['cold']
-                                    }
-
-                                    # If the period is customizable for the current indicator,
-                                    # fetch it from the configuration
-                                    if 'period_count' in indicator_conf:
-                                        analysis_args['period_count'] = indicator_conf['period_count']
-
-                                    new_result[exchange][market_pair][analyzer].append({
-                                        'result': analysis_dispatcher[analyzer](**analysis_args),
-                                        'config': indicator_conf
-                                    })
-                                except ValueError as e:
-                                    self.logger.info(e)
-                                    self.logger.info(
-                                        'Invalid data encountered while processing pair %s, skipping',
-                                        market_pair
-                                    )
-                                    self.logger.debug(traceback.format_exc())
-                                except TypeError:
-                                    self.logger.info(
-                                        'Invalid data encountered while processing pair %s, skipping',
-                                        market_pair
-                                    )
-                                    self.logger.debug(traceback.format_exc())
-                                except AttributeError:
-                                    self.logger.info(
-                                        'Something went wrong fetching data for %s, skipping',
-                                        market_pair
-                                    )
-                                    self.logger.debug(traceback.format_exc())
-                                except RetryError:
-                                    self.logger.info(
-                                        'Too many retries fetching information for pair %s, skipping',
-                                        market_pair
-                                    )
-                                except ExchangeError:
-                                    self.logger.info(
-                                        'Exchange supplied bad data for pair %s, skipping',
-                                        market_pair
-                                    )
-                                    self.logger.debug(traceback.format_exc())
-                    else:
-                        self.logger.warn("No such analyzer %s, skipping.", analyzer)
-
-                if output_mode == 'cli':
-                    output = self._get_cli_output(new_result[exchange][market_pair], market_pair)
-                elif output_mode == 'csv':
-                    output = self._get_csv_output(new_result[exchange][market_pair], market_pair)
-                elif output_mode == 'json':
-                    output = self._get_json_output(new_result[exchange][market_pair], market_pair)
+                if output_mode in self.output:
+                    print(
+                        self.output[output_mode](new_result[exchange][market_pair], market_pair),
+                        end=''
+                    )
                 else:
-                    output = 'Unknown output mode!'
+                    self.logger.warn()
 
-                print(output)
-
+        # Print an empty line when complete
+        print()
         return new_result
 
 
-    def _get_cli_output(self, analyzed_data, market_pair):
-        """Creates the message to output to the CLI
+    def _get_indicator_results(self, exchange, market_pair):
+        """Execute the indicator analysis on a particular exchange and pair.
 
         Args:
-            analyzed_data (dict): The result of the completed analysis
+            exchange (str): The exchange to get the indicator results for.
+            market_pair (str): The pair to get the market pair results for.
 
         Returns:
-            str: Completed cli message
+            list: A list of dictinaries containing the results of the analysis.
         """
 
-        normal_colour = '\u001b[0m'
-        hot_colour = '\u001b[31m'
-        cold_colour = '\u001b[36m'
+        indicator_dispatcher = self.strategy_analyzer.indicator_dispatcher()
+        results = { indicator: list() for indicator in self.indicator_conf.keys() }
+        historical_data_cache = dict()
 
-        output = "{}:\t".format(market_pair)
-        for analysis in analyzed_data:
-            for i, indicator in enumerate(analyzed_data[analysis]):
-                colour_code = normal_colour
-                if indicator['result']['is_hot']:
-                    colour_code = hot_colour
+        for indicator in self.indicator_conf:
+            if indicator not in indicator_dispatcher:
+                self.logger.warn("No such indicator %s, skipping.", indicator)
+                continue
 
-                if indicator['result']['is_cold']:
-                    colour_code = cold_colour
+            for indicator_conf in self.indicator_conf[indicator]:
+                if indicator_conf['enabled']:
+                    candle_period = indicator_conf['candle_period']
+                else:
+                    self.logger.debug("%s is disabled, skipping.", indicator)
+                    continue
 
-                formatted_values = list()
-                for value in indicator['result']['values']:
-                    if isinstance(value, float):
-                        formatted_values.append(format(value, '.8f'))
-                    else:
-                        formatted_values.append(value)
-                formatted_string = '/'.join(formatted_values)
+                if candle_period not in historical_data_cache:
+                    historical_data_cache[candle_period] = self._get_historical_data(
+                        market_pair,
+                        exchange,
+                        candle_period
+                    )
 
-                output += "{}{}: {}{}     ".format(
-                    colour_code,
-                    '{} #{}'.format(analysis, i),
-                    formatted_string,
-                    normal_colour
-                )
-        return output
+                if historical_data_cache[candle_period]:
+                    analysis_args = {
+                        'historical_data': historical_data_cache[candle_period],
+                        'signal': indicator_conf['signal'],
+                        'hot_thresh': indicator_conf['hot'],
+                        'cold_thresh': indicator_conf['cold']
+                    }
+
+                    if 'period_count' in indicator_conf:
+                        analysis_args['period_count'] = indicator_conf['period_count']
+
+                    results[indicator].append({
+                        'result': self._get_analysis_result(
+                            indicator_dispatcher,
+                            indicator,
+                            analysis_args,
+                            market_pair
+                        ),
+                        'config': indicator_conf
+                    })
+        return results
 
 
-    def _get_csv_output(self, analyzed_data, market_pair):
-        """Creates the csv to output to the CLI
+    def _get_informant_results(self, exchange, market_pair):
+        """Execute the informant analysis on a particular exchange and pair.
 
         Args:
-            analyzed_data (dict): The result of the completed analysis
+            exchange (str): The exchange to get the indicator results for.
+            market_pair (str): The pair to get the market pair results for.
 
         Returns:
-            str: Completed cli csv
+            list: A list of dictinaries containing the results of the analysis.
         """
 
-        output = market_pair
-        for analysis in analyzed_data:
-            for i, indicator in enumerate(analyzed_data[analysis]):
-                output += ',{} #{}'.format(analysis, i)
-                if indicator['result']['is_hot']:
-                    output += ',hot'
+        informant_dispatcher = self.strategy_analyzer.informant_dispatcher()
+        results = { informant: list() for informant in self.informant_conf.keys() }
+        historical_data_cache = dict()
 
-                if indicator['result']['is_cold']:
-                    output += ',cold'
+        for informant in self.informant_conf:
+            if informant not in informant_dispatcher:
+                self.logger.warn("No such informant %s, skipping.", informant)
+                continue
 
-                formatted_values = list()
-                for value in indicator['result']['values']:
-                    if isinstance(value, float):
-                        formatted_values.append(format(value, '.8f'))
-                    else:
-                        formatted_values.append(value)
-                formatted_string = '/'.join(formatted_values)
+            for informant_conf in self.informant_conf[informant]:
+                if informant_conf['enabled']:
+                    candle_period = informant_conf['candle_period']
+                else:
+                    self.logger.debug("%s is disabled, skipping.", informant)
+                    continue
 
-                output += ',' + formatted_string
-        return output
+                if candle_period not in historical_data_cache:
+                    historical_data_cache[candle_period] = self._get_historical_data(
+                        market_pair,
+                        exchange,
+                        candle_period
+                    )
+
+                if historical_data_cache[candle_period]:
+                    analysis_args = {
+                        'historical_data': historical_data_cache[candle_period]
+                    }
+
+                    if 'period_count' in informant_conf:
+                        analysis_args['period_count'] = informant_conf['period_count']
+
+                    results[informant].append({
+                        'result': self._get_analysis_result(
+                            informant_dispatcher,
+                            informant,
+                            analysis_args,
+                            market_pair
+                        ),
+                        'config': informant_conf
+                    })
+        return results
 
 
-    def _get_json_output(self, analyzed_data, market_pair):
-        """Creates the JSON to output to the CLI
+    def _get_crossover_results(self, new_result):
+        """Execute crossover analysis on the results so far.
 
         Args:
-            analyzed_data (dict): The result of the completed analysis
+            new_result (dict): A dictionary containing the results of the informant and indicator
+                analysis.
 
         Returns:
-            str: Completed JSON message
+            list: A list of dictinaries containing the results of the analysis.
         """
 
-        output = {'pair': market_pair, 'analysis': analyzed_data}
-        output = json.dumps(output)
-        return output
+        crossover_dispatcher = self.strategy_analyzer.crossover_dispatcher()
+        results = { crossover: list() for crossover in self.crossover_conf.keys() }
+
+        for crossover in self.crossover_conf:
+            if crossover not in crossover_dispatcher:
+                self.logger.warn("No such crossover %s, skipping.", crossover)
+                continue
+
+            for crossover_conf in self.crossover_conf[crossover]:
+                if not crossover_conf['enabled']:
+                    self.logger.debug("%s is disabled, skipping.", crossover)
+                    continue
+
+                key_indicator = new_result[crossover_conf['key_indicator_type']][crossover_conf['key_indicator']][crossover_conf['key_indicator_index']]
+                crossed_indicator = new_result[crossover_conf['crossed_indicator_type']][crossover_conf['crossed_indicator']][crossover_conf['crossed_indicator_index']]
+
+                dispatcher_args = {
+                    'key_indicator': key_indicator['result'],
+                    'key_signal': crossover_conf['key_signal'],
+                    'crossed_indicator': crossed_indicator['result'],
+                    'crossed_signal': crossover_conf['crossed_signal']
+                }
+
+                results[crossover].append({
+                    'result': crossover_dispatcher[crossover](**dispatcher_args),
+                    'config': crossover_conf
+                })
+        return results
+
+
+    def _get_historical_data(self, market_pair, exchange, candle_period):
+        """Gets a list of OHLCV data for the given pair and exchange.
+
+        Args:
+            market_pair (str): The market pair to get the OHLCV data for.
+            exchange (str): The exchange to get the OHLCV data for.
+            candle_period (str): The timeperiod to collect for the given pair and exchange.
+
+        Returns:
+            list: A list of OHLCV data.
+        """
+
+        historical_data = list()
+        try:
+            historical_data = self.exchange_interface.get_historical_data(
+                market_pair,
+                exchange,
+                candle_period
+            )
+        except RetryError:
+            self.logger.error(
+                'Too many retries fetching information for pair %s, skipping',
+                market_pair
+            )
+        except ExchangeError:
+            self.logger.error(
+                'Exchange supplied bad data for pair %s, skipping',
+                market_pair
+            )
+        except ValueError as e:
+            self.logger.error(e)
+            self.logger.error(
+                'Invalid data encountered while processing pair %s, skipping',
+                market_pair
+            )
+            self.logger.debug(traceback.format_exc())
+        except AttributeError:
+            self.logger.error(
+                'Something went wrong fetching data for %s, skipping',
+                market_pair
+            )
+            self.logger.debug(traceback.format_exc())
+        return historical_data
+
+
+    def _get_analysis_result(self, dispatcher, indicator, dispatcher_args, market_pair):
+        """Get the results of performing technical analysis
+
+        Args:
+            dispatcher (dict): A dictionary of functions for performing TA.
+            indicator (str): The name of the desired indicator.
+            dispatcher_args (dict): A dictionary of arguments to provide the analyser
+            market_pair (str): The market pair to analyse
+
+        Returns:
+            pandas.DataFrame: Returns a pandas.DataFrame of results or an empty string.
+        """
+
+        try:
+            results = dispatcher[indicator](**dispatcher_args)
+        except TypeError:
+            self.logger.info(
+                'Invalid type encountered while processing pair %s for indicator %s, skipping',
+                market_pair,
+                indicator
+            )
+            self.logger.info(traceback.format_exc())
+            results = str()
+        return results

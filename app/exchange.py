@@ -67,7 +67,7 @@ class ExchangeInterface():
                     )
                 )
         except AttributeError:
-            self.logger.info(
+            self.logger.error(
                 '%s interface does not support timeframe queries! We are unable to fetch data!',
                 exchange
             )
