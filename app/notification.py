@@ -46,6 +46,7 @@ class Notifier():
                 username=notifier_config['discord']['required']['username'],
                 avatar=notifier_config['discord']['optional']['avatar']
             )
+            enabled_notifiers.append('discord')
 
         self.slack_configured = self._validate_required_config('slack', notifier_config)
         if self.slack_configured:
