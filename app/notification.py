@@ -1,6 +1,7 @@
 """Handles sending notifications via the configured notifiers
 """
 
+import json
 import structlog
 from jinja2 import Template
 
@@ -9,6 +10,7 @@ from notifiers.slack_client import SlackNotifier
 from notifiers.discord_client import DiscordNotifier
 from notifiers.gmail_client import GmailNotifier
 from notifiers.telegram_client import TelegramNotifier
+from notifiers.webhook_client import WebhookNotifier
 
 class Notifier():
     """Handles sending notifications via the configured notifiers
@@ -69,6 +71,15 @@ class Notifier():
             )
             enabled_notifiers.append('telegram')
 
+        self.webhook_configured = self._validate_required_config('webhook', notifier_config)
+        if self.webhook_configured:
+            self.webhook_client = WebhookNotifier(
+                url=notifier_config['webhook']['required']['url'],
+                username=notifier_config['webhook']['optional']['username'],
+                password=notifier_config['webhook']['optional']['password']
+            )
+            enabled_notifiers.append('webhook')
+
         self.logger.info('enabled notifers: %s', enabled_notifiers)
 
 
@@ -84,6 +95,7 @@ class Notifier():
         self.notify_twilio(new_analysis)
         self.notify_gmail(new_analysis)
         self.notify_telegram(new_analysis)
+        self.notify_webhook(new_analysis)
 
 
     def notify_discord(self, new_analysis):
@@ -164,6 +176,24 @@ class Notifier():
             )
             if message.strip():
                 self.telegram_client.notify(message)
+
+
+    def notify_webhook(self, new_analysis):
+        """Send a notification via the webhook notifier
+
+        Args:
+            new_analysis (dict): The new_analysis to send.
+        """
+
+        if self.webhook_configured:
+            for exchange in new_analysis:
+                for market in new_analysis[exchange]:
+                    for indicator_type in new_analysis[exchange][market]:
+                        for indicator in new_analysis[exchange][market][indicator_type]:
+                            for index, analysis in enumerate(new_analysis[exchange][market][indicator_type][indicator]):
+                                new_analysis[exchange][market][indicator_type][indicator][index] = analysis['result'].to_dict(orient='records')[-1]
+
+            self.webhook_client.notify(new_analysis)
 
 
     def _validate_required_config(self, notifier, notifier_config):
