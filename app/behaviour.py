@@ -79,6 +79,7 @@ class Behaviour():
                 new_result[exchange] = dict()
 
             for market_pair in market_data[exchange]:
+                self.logger.info("Beginning analysis of %s", market_pair)
                 if market_pair not in new_result[exchange]:
                     new_result[exchange][market_pair] = dict()
 

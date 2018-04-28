@@ -44,13 +44,17 @@ class Output():
                 for i, analysis in enumerate(results[indicator_type][indicator]):
                     colour_code = normal_colour
 
-                    if 'is_hot' in analysis['result'].iloc[-1]:
-                        if analysis['result'].iloc[-1]['is_hot']:
-                            colour_code = hot_colour
+                    if analysis['result'].shape[0] > 0:
+                        if 'is_hot' in analysis['result'].iloc[-1]:
+                            if analysis['result'].iloc[-1]['is_hot']:
+                                colour_code = hot_colour
 
-                    if 'is_cold' in analysis['result'].iloc[-1]:
-                        if analysis['result'].iloc[-1]['is_cold']:
-                            colour_code = cold_colour
+                        if 'is_cold' in analysis['result'].iloc[-1]:
+                            if analysis['result'].iloc[-1]['is_cold']:
+                                colour_code = cold_colour
+                    else:
+                        self.logger.info('No results for %s #%s', indicator, i)
+                        continue
 
                     formatted_values = list()
                     if 'signal' in analysis['config']:
