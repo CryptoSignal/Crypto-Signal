@@ -24,9 +24,16 @@ class CrossOver(IndicatorUtils):
             pandas.DataFrame: A dataframe containing the indicators and hot/cold values.
         """
 
-        combined_data = pandas.concat([key_indicator, crossed_indicator], axis=1)
+        key_indicator_name = key_signal + '_key'
+        key_indicator.rename(columns={key_signal: key_indicator_name}, inplace=True)
 
-        combined_data['is_hot'] = combined_data[key_signal] > combined_data[crossed_signal]
-        combined_data['is_cold'] = combined_data[key_signal] < combined_data[crossed_signal]
+        crossed_indicator_name = crossed_signal + '_crossed'
+        crossed_indicator.rename(columns={crossed_signal: crossed_indicator_name}, inplace=True)
+
+        combined_data = pandas.concat([key_indicator, crossed_indicator], axis=1)
+        combined_data.dropna(how='any', inplace=True)
+
+        combined_data['is_hot'] = combined_data[key_indicator_name] > combined_data[crossed_indicator_name]
+        combined_data['is_cold'] = combined_data[key_indicator_name] < combined_data[crossed_indicator_name]
 
         return combined_data
