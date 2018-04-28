@@ -143,13 +143,14 @@ class Output():
             str: Completed JSON message
         """
 
-        result_list = list()
         for indicator_type in results:
             for indicator in results[indicator_type]:
-                for analysis in results[indicator_type][indicator]:
-                    result_list.append(analysis['result'].to_dict(orient='records')[-1])
+                for index, analysis in enumerate(results[indicator_type][indicator]):
+                    results[indicator_type][indicator][index]['result'] = analysis['result'].to_dict(
+                        orient='records'
+                    )[-1]
 
-        output = {'pair': market_pair, indicator_type: result_list}
-        output = json.dumps(output)
+        formatted_results = { 'pair': market_pair, 'results': results }
+        output = json.dumps(formatted_results)
         output += '\n'
         return output
