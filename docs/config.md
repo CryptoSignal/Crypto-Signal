@@ -179,9 +179,9 @@ Every indicator has a default set of signal lines, you can also tweak them to yo
 ```
 MOMENTUM - momentum
 RSI - rsi
-MACD - macd
+MACD - macd, macdsignal, macdhist
 ICHIMOKU - leading_span_a, leading_span_b
-STOCHASTIC_RSI - stoch_rsi
+STOCHASTIC_RSI - stoch_rsi, slow_k, slow_d
 MFI - mfi
 ```
 
