@@ -52,21 +52,21 @@ class Ichimoku(IndicatorUtils):
             last_index = index + 1
             tankansen_min = dataframe['low'][start_index:last_index].min()
             tankansen_max = dataframe['high'][start_index:last_index].max()
-            ichimoku_values['tenkansen'][last_index-1] = (tankansen_min + tankansen_max) / 2
+            ichimoku_values['tenkansen'][index] = (tankansen_min + tankansen_max) / 2
 
         for index in range(kijunsen_period, ichimoku_df_size):
             start_index = index - kijunsen_period
             last_index = index + 1
             kijunsen_min = dataframe['low'][start_index:last_index].min()
             kijunsen_max = dataframe['high'][start_index:last_index].max()
-            ichimoku_values['kijunsen'][last_index-1] = (kijunsen_min + kijunsen_max) / 2
+            ichimoku_values['kijunsen'][index] = (kijunsen_min + kijunsen_max) / 2
 
         for index in range(leading_span_b_period, ichimoku_df_size):
             start_index = index - leading_span_b_period
             last_index = index + 1
             leading_span_b_min = dataframe['low'][start_index:last_index].min()
             leading_span_b_max = dataframe['high'][start_index:last_index].max()
-            ichimoku_values['leading_span_b'][last_index-1] = (
+            ichimoku_values['leading_span_b'][index] = (
                 leading_span_b_min + leading_span_b_max
             ) / 2
 

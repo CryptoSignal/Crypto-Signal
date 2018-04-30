@@ -79,6 +79,7 @@ class Behaviour():
                 new_result[exchange] = dict()
 
             for market_pair in market_data[exchange]:
+                self.logger.info("Beginning analysis of %s", market_pair)
                 if market_pair not in new_result[exchange]:
                     new_result[exchange][market_pair] = dict()
 
@@ -250,8 +251,10 @@ class Behaviour():
                 dispatcher_args = {
                     'key_indicator': key_indicator['result'],
                     'key_signal': crossover_conf['key_signal'],
+                    'key_indicator_index': crossover_conf['key_indicator_index'],
                     'crossed_indicator': crossed_indicator['result'],
-                    'crossed_signal': crossover_conf['crossed_signal']
+                    'crossed_signal': crossover_conf['crossed_signal'],
+                    'crossed_indicator_index': crossover_conf['crossed_indicator_index']
                 }
 
                 results[crossover].append({

@@ -1,5 +1,5 @@
 twilio==6.6.3
-ccxt==1.11.36
+ccxt==1.13.26
 structlog==17.2.0
 python-json-logger==0.1.8
 pandas==0.22.0
@@ -11,3 +11,4 @@ tenacity==4.8.0
 python-telegram-bot==10.0.1
 webcord==0.2
 jinja2==2.10
+requests==2.18.4

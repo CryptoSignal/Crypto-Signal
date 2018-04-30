@@ -43,8 +43,10 @@ class StochasticRSI(IndicatorUtils):
             rsi_min = rsi_values['rsi'].iloc[start_index:last_index].min()
             rsi_max = rsi_values['rsi'].iloc[start_index:last_index].max()
             stoch_rsi = (100 * ((rsi_values['rsi'][index] - rsi_min) / (rsi_max - rsi_min)))
-            rsi_values['stoch_rsi'][last_index-1] = stoch_rsi
+            rsi_values['stoch_rsi'][index] = stoch_rsi
 
+        rsi_values['slow_k'] = rsi_values['stoch_rsi'].rolling(window=3).mean()
+        rsi_values['slow_d'] = rsi_values['slow_k'].rolling(window=3).mean()
         rsi_values.dropna(how='any', inplace=True)
 
         if rsi_values[signal[0]].shape[0]:
