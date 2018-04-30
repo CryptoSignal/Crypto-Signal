@@ -107,7 +107,7 @@ class Notifier():
         """
 
         if self.discord_configured:
-            message = self._message_templater(
+            message = self._indicator_message_templater(
                 new_analysis,
                 self.notifier_config['discord']['optional']['template']
             )
@@ -123,7 +123,7 @@ class Notifier():
         """
 
         if self.slack_configured:
-            message = self._message_templater(
+            message = self._indicator_message_templater(
                 new_analysis,
                 self.notifier_config['slack']['optional']['template']
             )
@@ -139,7 +139,7 @@ class Notifier():
         """
 
         if self.twilio_configured:
-            message = self._message_templater(
+            message = self._indicator_message_templater(
                 new_analysis,
                 self.notifier_config['twilio']['optional']['template']
             )
@@ -155,7 +155,7 @@ class Notifier():
         """
 
         if self.gmail_configured:
-            message = self._message_templater(
+            message = self._indicator_message_templater(
                 new_analysis,
                 self.notifier_config['gmail']['optional']['template']
             )
@@ -171,7 +171,7 @@ class Notifier():
         """
 
         if self.telegram_configured:
-            message = self._message_templater(
+            message = self._indicator_message_templater(
                 new_analysis,
                 self.notifier_config['telegram']['optional']['template']
             )
@@ -215,7 +215,7 @@ class Notifier():
         return notifier_configured
 
 
-    def _message_templater(self, new_analysis, template):
+    def _indicator_message_templater(self, new_analysis, template):
         """Creates a message from a user defined template
 
         Args:
@@ -233,48 +233,76 @@ class Notifier():
         new_message = str()
         for exchange in new_analysis:
             for market in new_analysis[exchange]:
-                for indicator in new_analysis[exchange][market]['indicators']:
-                    for index, analysis in enumerate(new_analysis[exchange][market]['indicators'][indicator]):
-                        values = dict()
-                        for signal in analysis['config']['signal']:
-                            latest_result = analysis['result'].iloc[-1]
+                for indicator_type in new_analysis[exchange][market]:
+                    if indicator_type == 'informants':
+                        continue
+                    for indicator in new_analysis[exchange][market][indicator_type]:
+                        for index, analysis in enumerate(new_analysis[exchange][market][indicator_type][indicator]):
+                            if analysis['result'].shape[0] == 0:
+                                continue
 
-                            values[signal] = analysis['result'].iloc[-1][signal]
-                            if isinstance(values[signal], float):
-                                values[signal] = format(values[signal], '.8f')
+                            values = dict()
 
-                        status = 'neutral'
-                        if latest_result['is_hot']:
-                            status = 'hot'
-                        elif latest_result['is_cold']:
-                            status = 'cold'
+                            if indicator_type == 'indicators':
+                                for signal in analysis['config']['signal']:
+                                    latest_result = analysis['result'].iloc[-1]
 
-                        if latest_result['is_hot'] or latest_result['is_cold']:
-                            try:
-                                last_status = self.last_analysis[exchange][market]['indicators'][indicator][index]['status']
-                            except:
-                                last_status = str()
+                                    values[signal] = analysis['result'].iloc[-1][signal]
+                                    if isinstance(values[signal], float):
+                                        values[signal] = format(values[signal], '.8f')
+                            elif indicator_type == 'crossovers':
+                                latest_result = analysis['result'].iloc[-1]
 
-                            should_alert = True
-                            if analysis['config']['alert_frequency'] == 'once':
-                                if last_status == status:
+                                key_signal = '{}_{}'.format(
+                                    analysis['config']['key_signal'],
+                                    analysis['config']['key_indicator_index']
+                                )
+
+                                crossed_signal = '{}_{}'.format(
+                                    analysis['config']['crossed_signal'],
+                                    analysis['config']['crossed_indicator_index']
+                                )
+
+                                values[key_signal] = analysis['result'].iloc[-1][key_signal]
+                                if isinstance(values[key_signal], float):
+                                        values[key_signal] = format(values[key_signal], '.8f')
+
+                                values[crossed_signal] = analysis['result'].iloc[-1][crossed_signal]
+                                if isinstance(values[crossed_signal], float):
+                                        values[crossed_signal] = format(values[crossed_signal], '.8f')
+
+                            status = 'neutral'
+                            if latest_result['is_hot']:
+                                status = 'hot'
+                            elif latest_result['is_cold']:
+                                status = 'cold'
+
+                            if latest_result['is_hot'] or latest_result['is_cold']:
+                                try:
+                                    last_status = self.last_analysis[exchange][market][indicator_type][indicator][index]['status']
+                                except:
+                                    last_status = str()
+
+                                should_alert = True
+                                if analysis['config']['alert_frequency'] == 'once':
+                                    if last_status == status:
+                                        should_alert = False
+
+                                if not analysis['config']['alert_enabled']:
                                     should_alert = False
 
-                            if not analysis['config']['alert_enabled']:
-                                should_alert = False
-
-                            if should_alert:
-                                new_analysis[exchange][market]['indicators'][indicator][index]['status'] = status
-                                new_message += message_template.render(
-                                    values=values,
-                                    exchange=exchange,
-                                    market=market,
-                                    indicator=indicator,
-                                    indicator_number=index,
-                                    analysis=analysis,
-                                    status=status,
-                                    last_status=last_status
-                                )
+                                if should_alert:
+                                    new_analysis[exchange][market][indicator_type][indicator][index]['status'] = status
+                                    new_message += message_template.render(
+                                        values=values,
+                                        exchange=exchange,
+                                        market=market,
+                                        indicator=indicator,
+                                        indicator_number=index,
+                                        analysis=analysis,
+                                        status=status,
+                                        last_status=last_status
+                                    )
 
         # Merge changes from new analysis into last analysis
         self.last_analysis = {**self.last_analysis, **new_analysis}

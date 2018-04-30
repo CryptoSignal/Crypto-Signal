@@ -251,8 +251,10 @@ class Behaviour():
                 dispatcher_args = {
                     'key_indicator': key_indicator['result'],
                     'key_signal': crossover_conf['key_signal'],
+                    'key_indicator_index': crossover_conf['key_indicator_index'],
                     'crossed_indicator': crossed_indicator['result'],
-                    'crossed_signal': crossover_conf['crossed_signal']
+                    'crossed_signal': crossover_conf['crossed_signal'],
+                    'crossed_indicator_index': crossover_conf['crossed_indicator_index']
                 }
 
                 results[crossover].append({

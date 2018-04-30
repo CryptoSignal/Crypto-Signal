@@ -42,22 +42,50 @@ class Output():
             output += '\n{}:\t'.format(indicator_type)
             for indicator in results[indicator_type]:
                 for i, analysis in enumerate(results[indicator_type][indicator]):
-                    colour_code = normal_colour
-
-                    if analysis['result'].shape[0] > 0:
-                        if 'is_hot' in analysis['result'].iloc[-1]:
-                            if analysis['result'].iloc[-1]['is_hot']:
-                                colour_code = hot_colour
-
-                        if 'is_cold' in analysis['result'].iloc[-1]:
-                            if analysis['result'].iloc[-1]['is_cold']:
-                                colour_code = cold_colour
-                    else:
+                    if analysis['result'].shape[0] == 0:
                         self.logger.info('No results for %s #%s', indicator, i)
                         continue
 
-                    formatted_values = list()
-                    if 'signal' in analysis['config']:
+                    colour_code = normal_colour
+
+                    if 'is_hot' in analysis['result'].iloc[-1]:
+                        if analysis['result'].iloc[-1]['is_hot']:
+                            colour_code = hot_colour
+
+                    if 'is_cold' in analysis['result'].iloc[-1]:
+                        if analysis['result'].iloc[-1]['is_cold']:
+                            colour_code = cold_colour
+
+                    if indicator_type == 'crossovers':
+                        key_signal = '{}_{}'.format(
+                            analysis['config']['key_signal'],
+                            analysis['config']['key_indicator_index']
+                        )
+
+                        key_value = analysis['result'].iloc[-1][key_signal]
+
+                        crossed_signal = '{}_{}'.format(
+                            analysis['config']['crossed_signal'],
+                            analysis['config']['crossed_indicator_index']
+                        )
+
+                        crossed_value = analysis['result'].iloc[-1][crossed_signal]
+
+                        if isinstance(key_value, float):
+                            key_value = format(key_value, '.8f')
+
+                        if isinstance(crossed_value, float):
+                            crossed_value = format(crossed_value, '.8f')
+
+                        formatted_string = '{}/{}'.format(key_value, crossed_value)
+                        output += "{}{}: {}{} \t".format(
+                            colour_code,
+                            '{} #{}'.format(indicator, i),
+                            formatted_string,
+                            normal_colour
+                        )
+                    else:
+                        formatted_values = list()
                         for signal in analysis['config']['signal']:
                             value = analysis['result'].iloc[-1][signal]
                             if isinstance(value, float):
@@ -66,23 +94,6 @@ class Output():
                                 formatted_values.append(value)
                             formatted_string = '/'.join(formatted_values)
 
-                        output += "{}{}: {}{} \t".format(
-                            colour_code,
-                            '{} #{}'.format(indicator, i),
-                            formatted_string,
-                            normal_colour
-                        )
-
-                    if 'key_signal' in analysis['config'] and 'crossed_signal' in analysis['config']:
-                        key_value = analysis['result'].iloc[-1][analysis['config']['key_signal']]
-                        crossed_value = analysis['result'].iloc[-1][analysis['config']['crossed_signal']]
-                        if isinstance(key_value, float):
-                            key_value = format(key_value, '.8f')
-
-                        if isinstance(crossed_value, float):
-                            crossed_value = format(crossed_value, '.8f')
-
-                        formatted_string = '{}/{}'.format(key_value, crossed_value)
                         output += "{}{}: {}{} \t".format(
                             colour_code,
                             '{} #{}'.format(indicator, i),
@@ -109,29 +120,55 @@ class Output():
         for indicator_type in results:
             for indicator in results[indicator_type]:
                 for i, analysis in enumerate(results[indicator_type][indicator]):
-                    for signal in analysis['config']['signal']:
-                        value = analysis['result'].iloc[-1][signal]
-                        if isinstance(value, float):
-                            value = format(value, '.8f')
+                    value = str()
 
-                        is_hot = str()
-                        if 'is_hot' in analysis['result'].iloc[-1]:
-                            is_hot = str(analysis['result'].iloc[-1]['is_hot'])
+                    if indicator_type == 'crossovers':
+                        key_signal = '{}_{}'.format(
+                            analysis['config']['key_signal'],
+                            analysis['config']['key_indicator_index']
+                        )
 
-                        is_cold = str()
-                        if 'is_cold' in analysis['result'].iloc[-1]:
-                            is_cold = str(analysis['result'].iloc[-1]['is_cold'])
+                        key_value = analysis['result'].iloc[-1][key_signal]
 
-                        new_output = ','.join([
-                            market_pair,
-                            indicator,
-                            str(i),
-                            value,
-                            is_hot,
-                            is_cold
-                        ])
+                        crossed_signal = '{}_{}'.format(
+                            analysis['config']['crossed_signal'],
+                            analysis['config']['crossed_indicator_index']
+                        )
 
-                        output += '\n{}'.format(new_output)
+                        crossed_value = analysis['result'].iloc[-1][crossed_signal]
+
+                        if isinstance(key_value, float):
+                            key_value = format(key_value, '.8f')
+
+                        if isinstance(crossed_value, float):
+                            crossed_value = format(crossed_value, '.8f')
+
+                        value = '/'.join([key_value, crossed_value])
+                    else:
+                        for signal in analysis['config']['signal']:
+                            value = analysis['result'].iloc[-1][signal]
+                            if isinstance(value, float):
+                                value = format(value, '.8f')
+
+                    is_hot = str()
+                    if 'is_hot' in analysis['result'].iloc[-1]:
+                        is_hot = str(analysis['result'].iloc[-1]['is_hot'])
+
+                    is_cold = str()
+                    if 'is_cold' in analysis['result'].iloc[-1]:
+                        is_cold = str(analysis['result'].iloc[-1]['is_cold'])
+
+                    new_output = ','.join([
+                        market_pair,
+                        indicator_type,
+                        indicator,
+                        str(i),
+                        value,
+                        is_hot,
+                        is_cold
+                    ])
+
+                    output += '\n{}'.format(new_output)
 
         return output
 
