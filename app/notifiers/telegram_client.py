@@ -14,7 +14,7 @@ class TelegramNotifier(NotifierUtils):
     """Used to notify user of events via telegram.
     """
 
-    def __init__(self, token, chat_id):
+    def __init__(self, token, chat_id, parse_mode):
         """Initialize TelegramNotifier class
 
         Args:
@@ -25,6 +25,7 @@ class TelegramNotifier(NotifierUtils):
         self.logger = structlog.get_logger()
         self.bot = telegram.Bot(token=token)
         self.chat_id = chat_id
+        self.parse_mode = parse_mode
 
 
     @retry(
@@ -41,6 +42,7 @@ class TelegramNotifier(NotifierUtils):
 
         max_message_size = 4096
         message_chunks = self.chunk_message(message=message, max_message_size=max_message_size)
-
+        #print(message_chunks)
+        #exit()
         for message_chunk in message_chunks:
-            self.bot.send_message(chat_id=self.chat_id, text=message_chunk)
+            self.bot.send_message(chat_id=self.chat_id, text=message_chunk, parse_mode=self.parse_mode)
