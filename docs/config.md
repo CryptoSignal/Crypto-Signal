@@ -169,7 +169,8 @@ The formal grammar is defined as follows:
                     MACD |
                     ICHIMOKU |
                     STOCHASTIC_RSI |
-                    MFI
+                    MFI |
+                    OBV
 
 <indicator_index> := {0, 1, 2, ...}
 ```
@@ -183,6 +184,7 @@ MACD - macd
 ICHIMOKU - leading_span_a, leading_span_b
 STOCHASTIC_RSI - stoch_rsi
 MFI - mfi
+OBV - obv
 ```
 
 *INDICATOR_\<indicator_name\>_NUM_INDICATORS*\
