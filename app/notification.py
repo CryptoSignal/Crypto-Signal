@@ -68,7 +68,8 @@ class Notifier():
         if self.telegram_configured:
             self.telegram_client = TelegramNotifier(
                 token=notifier_config['telegram']['required']['token'],
-                chat_id=notifier_config['telegram']['required']['chat_id']
+                chat_id=notifier_config['telegram']['required']['chat_id'],
+                parse_mode=notifier_config['telegram']['optional']['parse_mode']
             )
             enabled_notifiers.append('telegram')
 

@@ -87,6 +87,7 @@ class Configuration():
                     'chat_id': os.environ.get('NOTIFIERS_TELEGRAM_REQUIRED_CHAT_ID', None)
                 },
                 'optional': {
+                    'parse_mode': os.environ.get('NOTIFIERS_TELEGRAM_OPTIONAL_PARSE_MODE', 'html'),
                     'template': os.environ.get(
                         'NOTIFIERS_TELEGRAM_OPTIONAL_TEMPLATE',
                         "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"

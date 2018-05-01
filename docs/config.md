@@ -98,6 +98,11 @@ default: None\
 necessity: required for Telegram\
 description: The chat_id to send the message too. The easiest way to get get this id is probably using RawDataBot or Userinfobot.
 
+*NOTIFIERS_TELEGRAM_OPTIONAL_PARSE_MODE*\
+default: html\
+necessity: optional\
+description: Valid options are html or markdown. Choose what text formatting parser to use.
+
 *NOTIFIERS_TELEGRAM_OPTIONAL_TEMPLATE*\
 default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}\
 necessity: optional\
