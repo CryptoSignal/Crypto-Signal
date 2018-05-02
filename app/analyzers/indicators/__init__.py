@@ -4,5 +4,6 @@ __all__ = [
     'momentum',
     'rsi',
     'stoch_rsi',
-    'mfi'
+    'mfi',
+    'obv'
 ]

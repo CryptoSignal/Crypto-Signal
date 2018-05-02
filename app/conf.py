@@ -137,6 +137,20 @@ class Configuration():
                 'period_count': int(os.environ.get('INDICATOR_MFI_{}_PERIOD_COUNT'.format(i), 10))
             } for i in range(int(os.environ.get('INDICATOR_MFI_NUM_INDICATORS', 1)))],
 
+            'obv': [{
+                'enabled': bool(distutils.util.strtobool(
+                    os.environ.get('INDICATOR_OBV_{}_ENABLED'.format(i), 'True')
+                )),
+                'alert_enabled': bool(distutils.util.strtobool(
+                    os.environ.get('INDICATOR_OBV_{}_ALERT_ENABLED'.format(i), 'True')
+                )),
+                'alert_frequency': os.environ.get('INDICATOR_OBV_{}_ALERT_FREQUENCY'.format(i), 'once'),
+                'signal': self._string_splitter(os.environ.get('INDICATOR_MOMENTUM_{}_SIGNAL'.format(i), ['obv'])),
+                'hot': self._hot_cold_typer(os.environ.get('INDICATOR_OBV_{}_HOT'.format(i), 0)),
+                'cold': self._hot_cold_typer(os.environ.get('INDICATOR_OBV_{}_COLD'.format(i), 0)),
+                'candle_period': os.environ.get('INDICATOR_OBV_{}_CANDLE_PERIOD'.format(i), '1d')
+            } for i in range(int(os.environ.get('INDICATOR_OBV_NUM_INDICATORS', 1)))],
+
             'rsi': [{
                 'enabled': bool(distutils.util.strtobool(
                     os.environ.get('INDICATOR_RSI_{}_ENABLED'.format(i), 'True')

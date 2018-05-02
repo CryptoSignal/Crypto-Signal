@@ -16,6 +16,7 @@ Technical Analysis Automated:
 * Exponential Moving Average
 * MACD
 * MFI
+* OBV
 * VWAP
 
 Alerts:
