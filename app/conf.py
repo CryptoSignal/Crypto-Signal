@@ -263,7 +263,7 @@ class Configuration():
                 'crossed_indicator': os.environ.get('CROSSOVER_STD_CROSSOVER_{}_CROSSED_INDICATOR'.format(i), 'sma'),
                 'crossed_indicator_index': int(os.environ.get('CROSSOVER_STD_CROSSOVER_{}_CROSSED_INDICATOR_INDEX'.format(i), 0)),
                 'crossed_indicator_type': os.environ.get('CROSSOVER_STD_CROSSOVER_{}_CROSSED_INDICATOR_TYPE'.format(i), 'informants'),
-                'crossed_signal': os.environ.get('INDICATOR_EMA_CROSSOVER_{}_CROSSED_SIGNAL'.format(i), 'sma')
+                'crossed_signal': os.environ.get('CROSSOVER_STD_CROSSOVER_{}_CROSSED_SIGNAL'.format(i), 'sma')
             } for i in range(int(os.environ.get('CROSSOVER_STD_CROSSOVER_NUM_INDICATORS', 1)))]
         }
 
