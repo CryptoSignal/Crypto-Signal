@@ -5,6 +5,7 @@
 
 import json
 import traceback
+from copy import deepcopy
 
 import structlog
 from ccxt import ExchangeError
@@ -98,8 +99,9 @@ class Behaviour():
                 )
 
                 if output_mode in self.output:
+                    output_data = deepcopy(new_result[exchange][market_pair])
                     print(
-                        self.output[output_mode](new_result[exchange][market_pair], market_pair),
+                        self.output[output_mode](output_data, market_pair),
                         end=''
                     )
                 else:
