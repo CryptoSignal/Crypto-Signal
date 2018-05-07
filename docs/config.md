@@ -12,27 +12,27 @@ You will find a detailed description of each key below
 # Settings
 General settings for crypto-signal
 
-*log_mode*\
+**log_mode**\
 default: text\
 necessity: optional\
 description: Can be set to `text`, `json` or `standard`. This will specify the log format for events emitted by the logger.
 
-*log_level*\
+**log_level**\
 default: INFO\
 necessity: optional\
 description: Can be set to `DEBUG`, `INFO`, `WARN`, `ERROR`. Used to set the logger verbosity.
 
-*output_mode*\
+**output_mode**\
 default: cli\
 necessity: optional\
 description: Can be set to `cli`, `csv` or `json`. This will specify the output format for events emitted by the app.
 
-*update_interval*\
+**update_interval**\
 default: 300\
 necessity: optional\
 description: This option controls how frequently to rescan the exchange information (in seconds).
 
-*market_pairs*\
+**market_pairs**\
 default: None\
 necessity: optional\
 description: Allows you to specify a list of market pairs you are interested in.
@@ -54,7 +54,7 @@ settings:
 # Exchanges
 Settings that alter behaviour of interaction with an exchange.
 
-*enabled*\
+**enabled**\
 default: False\
 necessity: required\
 description: Valid options are `true` or `false`. This setting enables or disables exchanges.
@@ -72,27 +72,27 @@ exchanges:
 Settings to configure what services to notify when a hot or cold threshold is tripped.
 
 ## Twilio
-*key*\
+**key**\
 default: None\
 necessity: required for Twilio\
 description: The twilio API key required for communication.
 
-*secret*\
+**secret**\
 default: None\
 necessity: required for Twilio\
 description: The twilio API key secret required for communication.
 
-*sender_number*\
+**sender_number**\
 default: None\
 necessity: required for Twilio\
 description: The twilio phone number for sending the message.
 
-*receiver_number*\
+**receiver_number**\
 default: None\
 necessity: required for Twilio\
 description: The receiving phone number (your phone number) for receiving the message.
 
-*template*\
+**template**\
 default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}\
 necessity: optional\
 description: See the notifier templating section.
@@ -112,12 +112,12 @@ notifiers:
 ```
 
 ## Slack
-*webhook*\
+**webhook**\
 default: None\
 necessity: required for Slack\
 description: The Slack webhook required for sending messages.
 
-*template*\
+**template**\
 default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}\
 necessity: optional\
 description: See the notifier templating section.
@@ -134,22 +134,22 @@ notifiers:
 ```
 
 ## Gmail
-*username*\
+**username**\
 default: None\
 necessity: required for Gmail\
 description: Your gmail username which is required for sending emails.
 
-*password*\
+**password**\
 default: None\
 necessity: required for Gmail\
 description: Your gmail password which is required for sending emails.
 
-*destination_emails*\
+**destination_emails**\
 default: None\
 necessity: required for Gmail\
 description: The email addresses to receive the emails that are sent.
 
-*template*\
+**template**\
 default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}\
 necessity: optional\
 description: See the notifier templating section.
@@ -169,22 +169,22 @@ notifiers:
 ```
 
 ## Telegram
-*token*\
+**token**\
 default: None\
 necessity: required for Telegram\
 description: Your telegram bot token you can generate a token by following the instructions [here](https://core.telegram.org/bots#6-botfather)
 
-*chat_id*\
+**chat_id**\
 default: None\
 necessity: required for Telegram\
 description: The chat_id to send the message too. The easiest way to get get this id is probably using RawDataBot or Userinfobot.
 
-*parse_mode*\
+**parse_mode**\
 default: html\
 necessity: optional\
 description: Valid options are html or markdown. Choose what text formatting parser to use.
 
-*template*\
+**template**\
 default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}\
 necessity: optional\
 description: See the notifier templating section.
@@ -203,22 +203,22 @@ notifiers:
 ```
 
 ## Discord
-*webhook*\
+**webhook**\
 default: None\
 necessity: required for Discord\
 description: The Discord webhook REQUIRED for sending messages.
 
-*username*\
+**username**\
 default: None\
 necessity: required for Discord\
 description: The Discord username that will be sending messages. Can be anything.
 
-*avatar*\
+**avatar**\
 default: None\
 necessity: optional for Discord\
 description: The Discord avatar image for the username sending messages. Set to None for default pokemon.
 
-*template*\
+**template**\
 default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}\
 necessity: optional\
 description: See the notifier templating section.
@@ -237,17 +237,17 @@ notifiers:
 ```
 
 ## Webhook
-*url*\
+**url**\
 default: None\
 necessity: required for webhook\
 description: The URL to send the json payload to.
 
-*username*\
+**username**\
 default: None\
 necessity: optional for webhook\
 description: The username for basic authentication if required.
 
-*password*\
+**password**\
 default: None\
 necessity: optional for webhook\
 description: The password for basic authentication if required.
@@ -296,17 +296,17 @@ The result of the above custom template would generate a message that looks like
 
 # Indicators
 
-*enabled*\
+**enabled**\
 default: True\
 necessity: optional\
 description: Valid values are true or false. Whether to perform analysis on this indicator.
 
-*alert_enabled*\
+**alert_enabled**\
 default: True\
 necessity: optional\
 description: Valid values are true or false. Whether to send alerts for this particular indicator.
 
-*signal*\
+**signal**\
 default: A string\
 necessity: optional\
 description: Valid values are on a per indicator basis see the table below. Each indicator may have a variety of signal lines, this option allows you to specify which options you care about. The first one specified is used for determining hot/cold the others are just output to the cli for information. Valid options are:
@@ -321,22 +321,22 @@ MFI - mfi
 OBV - obv
 ```
 
-*hot*\
+**hot**\
 default:\
 necessity: optional\
 description: A valid option must be an integer or float. This is the number at which you want this indicator to become hot. For some indicators that is when it is above a threshold and for some it is below a threshold... this is automatically handled by the indicator you just need to provide the value.
 
-*cold*\
+**cold**\
 default:\
 necessity: optional\
 description: A valid option must be an integer or float. This is the number at which you want this indicator to become cold. For some indicators that is when it is above a threshold and for some it is below a threshold... this is automatically handled by the indicator you just need to provide the value.
 
-*candle_period*\
+**candle_period**\
 default: 1d\
 necessity: optional\
 description: Valid options vary by exchange, common options include 1m, 5m, 1h, 4h, 1d. This dictates what granularity of rollup to use for the analyzed candles, so a candle period of 1d will roll the candles up to 1 day blocks.
 
-*period_count*\
+**period_count**\
 default: An integer\
 necessity: optional\
 description: Valid options are an integer. This is the count of candle periods to use for this analysis. Let's suppose you wanted to test 15 days of RSI data. You would set the `candle_period: 1d` and then set `period_count: 15`, which means 15 counts of 1d periods, or in other words 15 days.
@@ -362,12 +362,12 @@ indicators:
 
 # Informants
 
-*enabled*\
+**enabled**\
 default: True\
 necessity: optional\
 description: Valid values are true or false. Whether to perform analysis on this indicator.
 
-*signal*\
+**signal**\
 default: A string\
 necessity: optional\
 description: Valid values are on a per indicator basis see the options in the table at the start of the analyzers section for a full list of what is available. Each indicator may have a variety of signal lines, this option allows you to specify which options you care about. Valid options are:
@@ -379,7 +379,7 @@ VWAP - vwap
 BOL_BAND - upperband, middleband, lowerband
 ```
 
-*period_count*\
+**period_count**\
 default: An integer\
 necessity: optional\
 description: Valid options are an integer. This is the count of candle periods to use for this analysis. Let's suppose you wanted to test 15 days of EMA data. You would set the `candle_period: 1d` and then set `period_count: 15`, which means 15 counts of 1d periods, or in other words 15 days.
@@ -399,52 +399,52 @@ informants:
 
 # Crossovers
 
-*enabled*\
+**enabled**\
 default: False\
 necessity: optional\
 description: Valid values are true or false. Whether to perform analysis on this indicator.
 
-*alert_enabled*\
+**alert_enabled**\
 default: False\
 necessity: optional\
 description: Valid values are true or false. Whether to send alerts for this particular indicator.
 
-*key_indicator*\
+**key_indicator**\
 default: N/A\
 necessity: optional\
 description: Valid values are the name of any indicator or informant. The indicator that gets hot when it goes above the crossed indicator and cold when it goes below it.
 
-*key_indicator_index*\
+**key_indicator_index**\
 default: N/A\
 necessity: optional\
 description: Valid values are positive integers. The index of the selected key indicator or informant that you want to use.
 
-*key_indicator_type*\
+**key_indicator_type**\
 default: N/A\
 necessity: optional\
 description: Valid values are 'indicator' or 'informant'. Whether the key indicator is of type informant or indicator.
 
-*key_signal*\
+**key_signal**\
 default: N/A\
 necessity: optional\
 description: Valid values are the name of a signal line for the select indicator or informant. Which signal to use of the selected indicator or informant.
 
-*crossed_indicator*\
+**crossed_indicator**\
 default: N/A\
 necessity: optional\
 description: Valid values are the name of any indicator or informant. The indicator or informant that the key indicator is intended to cross.
 
-*crossed_indicator_index*\
+**crossed_indicator_index**\
 default: N/A\
 necessity: optional\
 description: Valid values are positive integers. The index of the selected crossed indicator or informant that you want to use.
 
-*crossed_indicator_type*\
+**crossed_indicator_type**\
 default: N/A\
 necessity: optional\
 description: Valid values are 'indicator' or 'informant'. Whether the crossed indicator is of type informant or indicator.
 
-*crossed_signal*\
+**crossed_signal**\
 default: N/A\
 necessity: optional\
 description: Valid values are the name of a signal line for the select indicator or informant. Which signal to use of the selected indicator or informant.
@@ -468,38 +468,76 @@ crossovers:
           crossed_signal: sma
 ```
 
-############################################
+
 # Examples
 Putting it all together an example config.yml might look like the config below if you want to use the default settings with bittrex
 
-```
-EXCHANGES_BITTREX_REQUIRED_ENABLED=true
+```yml
+exchanges:
+    bittrex:
+        required:
+            enabled: true
 ```
 
 If you want to filter to a specific set of markets and receive updates hourly:
 
-```
-SETTINGS_MARKET_PAIRS=ETH/BTC,DOGE/BTC
-SETTINGS_UPDATE_INTERVAL=3600
-EXCHANGES_BITTREX_REQUIRED_ENABLED=true
+```yml
+settings:
+    update_interval: 300
+    market_pairs:
+        - ETH/BTC
+        - DOGE/BTC
+
+exchanges:
+    bittrex:
+        required:
+            enabled: true
 ```
 
-To hammer home this unique (and perhaps arcane) method of configuration, consider how we can translate the following example into a proper configuration using the grammar above:
+Now lets do something a little more involved and add the following to our above example:
 
 - 21-period RSI over daily candlesticks
 - 50-period RSI over hourly candlesticks
 - 9-period hourly SMA
 
-This is the respective configuration for config.yml:
+```yml
+settings:
+    update_interval: 300
+    market_pairs:
+        - ETH/BTC
+        - DOGE/BTC
 
-```
-INDICATOR_RSI_NUM_INDICATORS=2
-INDICATOR_RSI_0_CANDLE_PERIOD=1d
-INDICATOR_RSI_0_PERIOD_COUNT=21
-INDICATOR_RSI_1_CANDLE_PERIOD=1h
-INDICATOR_RSI_1_PERIOD_COUNT=50
-INDICATOR_SMA_0_PERIOD_COUNT=9
-INDICATOR_SMA_0_CANDLE_PERIOD=1h
-```
+exchanges:
+    bittrex:
+        required:
+            enabled: true
 
-Notice that we don't need to specify the _NUM_INDICATORS_ option if we are only using a single instance of an indicator.
+indicators:
+    rsi:
+        - enabled: true
+          alert_enabled: true
+          alert_frequency: once
+          signal:
+            - rsi
+          hot: 30
+          cold: 70
+          candle_period: 1d
+          period_count: 21
+        - enabled: true
+          alert_enabled: true
+          alert_frequency: once
+          signal:
+            - rsi
+          hot: 30
+          cold: 70
+          candle_period: 1h
+          period_count: 50
+
+informants:
+    sma:
+        - enabled: true
+          signal:
+            - sma
+          candle_period: 1h
+          period_count: 9
+```
