@@ -8,4 +8,4 @@ build:
 	docker tag ${DOCKER_IMAGE_NAME}:${GIT_BRANCH} ${DOCKER_IMAGE_NAME}:latest
 
 run:
-	docker run -it --rm --env-file settings.env ${DOCKER_IMAGE_NAME}
+	docker run -it --rm -v ./config.yml:/app/config.yml ${DOCKER_IMAGE_NAME}
