@@ -149,6 +149,12 @@ informants:
         - middleband
         - lowerband
       candle_period: 1d
+  ohlcv:
+    - enabled: true
+      signal:
+        - close
+      candle_period: 1d
+      period_count: 15
 
 crossovers:
   std_crossover:
