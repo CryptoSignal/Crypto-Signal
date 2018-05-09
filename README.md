@@ -37,15 +37,15 @@ The commands listed below are intended to be run in a terminal.
 
 1. Install [docker CE](https://docs.docker.com/install/)
 
-1. Create a settings.env file in your current directory. See the Configuring settings.env section below for customizing settings.
+1. Create a config.yml file in your current directory. See the Configuring config.yml section below for customizing settings.
 
-1. In a terminal run the application. `docker run --rm --env-file=settings.env shadowreaver/crypto-signal:master`.
+1. In a terminal run the application. `docker run --rm -v ./config.yml:/app/config.yml shadowreaver/crypto-signal:master`.
 
 1. When you want to update the application run `docker pull shadowreaver/crypto-signal:master`
 
-### Configuring settings.env
+### Configuring config.yml
 
-For a list of all possible options for settings.env and some example configurations look [here](docs/config.md)
+For a list of all possible options for config.yml and some example configurations look [here](docs/config.md)
 
 # FAQ
 
