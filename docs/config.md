@@ -377,6 +377,7 @@ SMA - sma
 EMA - ema
 VWAP - vwap
 BOL_BAND - upperband, middleband, lowerband
+OHLCV - open, high, low, close, volume
 ```
 
 **period_count**\
