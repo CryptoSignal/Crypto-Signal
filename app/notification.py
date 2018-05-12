@@ -278,6 +278,9 @@ class Notifier():
                             elif latest_result['is_cold']:
                                 status = 'cold'
 
+                            # Save status of indicator's new analysis
+                            new_analysis[exchange][market][indicator_type][indicator][index]['status'] = status
+
                             if latest_result['is_hot'] or latest_result['is_cold']:
                                 try:
                                     last_status = self.last_analysis[exchange][market][indicator_type][indicator][index]['status']
@@ -293,7 +296,6 @@ class Notifier():
                                     should_alert = False
 
                                 if should_alert:
-                                    new_analysis[exchange][market][indicator_type][indicator][index]['status'] = status
                                     new_message += message_template.render(
                                         values=values,
                                         exchange=exchange,
