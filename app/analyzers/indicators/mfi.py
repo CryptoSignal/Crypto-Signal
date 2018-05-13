@@ -35,8 +35,8 @@ class MFI(IndicatorUtils):
         mfi_values.rename(columns={0: 'mfi'}, inplace=True)
 
         if mfi_values[signal[0]].shape[0]:
-            mfi_values['is_hot'] = mfi_values[signal[0]] > hot_thresh
-            mfi_values['is_cold'] = mfi_values[signal[0]] < cold_thresh
+            mfi_values['is_hot'] = mfi_values[signal[0]] < hot_thresh
+            mfi_values['is_cold'] = mfi_values[signal[0]] > cold_thresh
 
         return mfi_values
 
