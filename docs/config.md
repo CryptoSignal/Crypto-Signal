@@ -424,7 +424,7 @@ description: Valid values are positive integers. The index of the selected key i
 **key_indicator_type**\
 default: N/A\
 necessity: optional\
-description: Valid values are 'indicator' or 'informant'. Whether the key indicator is of type informant or indicator.
+description: Valid values are 'indicators' or 'informants'. Whether the key indicator is of type informant or indicator.
 
 **key_signal**\
 default: N/A\
@@ -444,7 +444,7 @@ description: Valid values are positive integers. The index of the selected cross
 **crossed_indicator_type**\
 default: N/A\
 necessity: optional\
-description: Valid values are 'indicator' or 'informant'. Whether the crossed indicator is of type informant or indicator.
+description: Valid values are 'indicators' or 'informants'. Whether the crossed indicator is of type informant or indicator.
 
 **crossed_signal**\
 default: N/A\
