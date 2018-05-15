@@ -4,6 +4,7 @@ The configuration file is YAML formatted and consists of the following top level
 - settings
 - exchanges
 - notifiers
+- indicators
 - informants
 - crossovers
 
