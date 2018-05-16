@@ -38,13 +38,16 @@ class Bollinger(IndicatorUtils):
         )
 
         bb_df_size = bb_values.shape[0]
-        bb_data = tulipy.bbands(numpy.array(dataframe['close']), period_count, 2)
+        close_data = numpy.array(dataframe['close'])
 
-        for index in range(period_count, bb_df_size):
-            data_index = index - period_count
-            bb_values['upperband'][index] = bb_data[0][data_index]
-            bb_values['middleband'][index] = bb_data[1][data_index]
-            bb_values['lowerband'][index] = bb_data[2][data_index]
+        if close_data.size > period_count:
+            bb_data = tulipy.bbands(close_data, period_count, 2)
+
+            for index in range(period_count, bb_df_size):
+                data_index = index - period_count
+                bb_values['upperband'][index] = bb_data[0][data_index]
+                bb_values['middleband'][index] = bb_data[1][data_index]
+                bb_values['lowerband'][index] = bb_data[2][data_index]
 
         bb_values.dropna(how='all', inplace=True)
 
