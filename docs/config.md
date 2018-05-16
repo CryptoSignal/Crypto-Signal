@@ -26,7 +26,7 @@ description: Can be set to `DEBUG`, `INFO`, `WARN`, `ERROR`. Used to set the log
 **output_mode**\
 default: cli\
 necessity: optional\
-description: Can be set to `cli`, `csv` or `json`. This will specify the output format for events emitted by the app.
+description: This option is deprecated and will be removed in a later version. Can be set to `cli`, `csv` or `json`. This will specify the output format for events emitted by the app.
 
 **update_interval**\
 default: 300\

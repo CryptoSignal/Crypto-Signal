@@ -116,6 +116,8 @@ class Output():
             str: Completed CSV message
         """
 
+        logger.warn('WARNING: CSV output is deprecated and will be removed in a future version')
+
         output = str()
         for indicator_type in results:
             for indicator in results[indicator_type]:
@@ -183,6 +185,8 @@ class Output():
         Returns:
             str: Completed JSON message
         """
+
+        logger.warn('WARNING: JSON output is deprecated and will be removed in a future version')
 
         for indicator_type in results:
             for indicator in results[indicator_type]:
