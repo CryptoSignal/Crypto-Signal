@@ -13,3 +13,4 @@ webcord==0.2
 jinja2==2.10
 requests==2.18.4
 PyYAML==3.12
+tulipy==0.2.1
