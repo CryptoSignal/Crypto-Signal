@@ -193,7 +193,11 @@ class Notifier():
                     for indicator_type in new_analysis[exchange][market]:
                         for indicator in new_analysis[exchange][market][indicator_type]:
                             for index, analysis in enumerate(new_analysis[exchange][market][indicator_type][indicator]):
-                                new_analysis[exchange][market][indicator_type][indicator][index] = analysis['result'].to_dict(orient='records')[-1]
+                                analysis_dict = analysis['result'].to_dict(orient='records')
+                                if analysis_dict:
+                                    new_analysis[exchange][market][indicator_type][indicator][index] = analysis_dict[-1]
+                                else:
+                                    new_analysis[exchange][market][indicator_type][indicator][index] = ''
 
             self.webhook_client.notify(new_analysis)
 
