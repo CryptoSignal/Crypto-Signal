@@ -1,4 +1,15 @@
-# Configuration file structure
+# Table of Contents
+
+1) Configuration file structure
+2) Settings
+3) Exchanges
+4) Notifiers
+5) Indicators
+6) Informants
+7) Crossovers
+8) Examples
+
+# 1) Configuration file structure
 The configuration file is YAML formatted and consists of the following top level keys.
 
 - settings
@@ -10,7 +21,7 @@ The configuration file is YAML formatted and consists of the following top level
 
 You will find a detailed description of each key below
 
-# Settings
+# 2) Settings
 General settings for crypto-signal
 
 **log_mode**\
@@ -52,7 +63,7 @@ settings:
     - XMR/BTC
 ```
 
-# Exchanges
+# 3) Exchanges
 Settings that alter behaviour of interaction with an exchange.
 
 **enabled**\
@@ -69,7 +80,7 @@ exchanges:
             enabled: true
 ```
 
-# Notifiers
+# 4) Notifiers
 Settings to configure what services to notify when a hot or cold threshold is tripped.
 
 ## Twilio
@@ -295,7 +306,7 @@ template: "[{{analysis.config.candle_period}}] {{market}} on {{exchange}} is {{s
 
 The result of the above custom template would generate a message that looks like: [1h] BURST/BTC on bittrex is hot.
 
-# Indicators
+# 5) Indicators
 
 **enabled**\
 default: True\
@@ -361,7 +372,7 @@ indicators:
           period_count: 10
 ```
 
-# Informants
+# 6) Informants
 
 **enabled**\
 default: True\
@@ -399,7 +410,7 @@ informants:
           period_count: 15
 ```
 
-# Crossovers
+# 7) Crossovers
 
 **enabled**\
 default: False\
@@ -471,7 +482,7 @@ crossovers:
 ```
 
 
-# Examples
+# 8) Examples
 Putting it all together an example config.yml might look like the config below if you want to use the default settings with bittrex
 
 ```yml
@@ -542,4 +553,165 @@ informants:
             - sma
           candle_period: 1h
           period_count: 9
+```
+
+Another example:
+- 2 exchanges
+- 50-period RSI over hourly candlesticks
+- 14-period RSI over 5minutes candlesticks
+- 14-period Stoch-RSI over 5minutes candlesticks
+- 14-period MFI over 5minutes candlesticks
+- Momentum and MACD enabled, but without notifications
+- obv, ichimoku not enabled
+- 10-period EMA over daily candlesticks
+- 30-period EMA over daily candlesticks
+- EMA Crossover (crossing 10-period and 30-period)
+- MACD Crossover (crossing macd and macdsignal)
+
+
+Output template for notifications: " [5m / 15] huobipro - BTC/USDT - rsi - 1 is cold! ({'rsi': '80.19667083'}) "
+
+```yml
+settings:
+    log_level: INFO
+    update_interval: 500
+    market_pairs:
+        - BTC/USDT
+        - ETH/USDT
+
+exchanges:
+    huobipro:
+        required:
+            enabled: true
+    binance:
+        required:
+            enabled: true
+
+indicators:
+    rsi:
+        - enabled: true
+          alert_enabled: false
+          alert_frequency: once
+          signal:
+            - rsi
+          hot: 30
+          cold: 70
+          candle_period: 1h
+          period_count: 50
+        - enabled: true
+          alert_enabled: true
+          alert_frequency: once
+          signal:
+            - rsi
+          hot: 30
+          cold: 70
+          candle_period: 5m
+          period_count: 14
+    stoch_rsi:
+        - enabled: true
+          alert_enabled: true
+          alert_frequency: once
+          signal:
+            - stoch_rsi
+          hot: 20
+          cold: 80
+          candle_period: 5m
+          period_count: 14
+    momentum:
+        - enabled: true
+          alert_enabled: false
+          alert_frequency: once
+          signal:
+            - momentum
+          hot: 0
+          cold: 0
+          candle_period: 1d
+          period_count: 10
+        - enabled: true
+          alert_enabled: false
+          alert_frequency: once
+          signal:
+            - momentum
+          hot: 0
+          cold: 0
+          candle_period: 1h
+          period_count: 12
+    macd:
+        - enabled: true
+          alert_enabled: false
+          alert_frequency: once
+          signal:
+            - macd
+          hot: 0
+          cold: 0
+          candle_period: 15m
+        - enabled: true
+          alert_enabled: false
+          alert_frequency: once
+          signal:
+            - macdsignal
+          hot: 0
+          cold: 0
+          candle_period: 15m
+    obv:
+        - enabled: false
+    mfi:
+        - enabled: true
+          alert_enabled: true
+          alert_frequency: once
+          signal:
+            - mfi
+          hot: 20
+          cold: 80
+          candle_period: 5m
+          period_count: 14
+    ichimoku:
+        - enabled: false
+
+informants:
+    ema:
+        - enabled: true
+          signal:
+            - ema
+          candle_period: 1d
+          period_count: 10
+        - enabled: true
+          signal:
+            - ema
+          candle_period: 1d
+          period_count: 30
+
+crossovers:
+    std_crossover:
+        - enabled: true
+          alert_enabled: true
+          alert_frequency: once
+          key_indicator: ema
+          key_indicator_index: 0
+          key_indicator_type: informants
+          key_signal: ema
+          crossed_indicator: ema
+          crossed_indicator_index: 1
+          crossed_indicator_type: informants
+          crossed_signal: ema
+        - enabled: true
+          alert_enabled: true
+          alert_frequency: once
+          key_indicator: macd
+          key_indicator_index: 0
+          key_indicator_type: indicators
+          key_signal: macd
+          crossed_indicator: macd
+          crossed_indicator_index: 1
+          crossed_indicator_type: indicators
+          crossed_signal: macdsignal
+
+notifiers:
+    telegram:
+        required:
+            token: 4318021XXXX
+            chat_id: -300XXXXXXX
+        optional:
+            parse_mode: html
+            template: "[{{analysis.config.candle_period}} / {{analysis.config.period_count}}] {{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}! ({{values}}){{ '\n' -}}" 
 ```
