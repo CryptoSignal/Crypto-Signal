@@ -247,6 +247,14 @@ class Behaviour():
                     self.logger.debug("%s is disabled, skipping.", crossover)
                     continue
 
+                if not new_result[crossover_conf['key_indicator_type']][crossover_conf['key_indicator']]:
+                    self.logger.error("we got an empty new_result, skipping")
+                    continue # we got an empty new_result, "Exchange supplied bad data for pair .../BTC, skipping"
+
+                if not new_result[crossover_conf['crossed_indicator_type']][crossover_conf['crossed_indicator']]:
+                    self.logger.error("we got an empty new_result, skipping")
+                    continue # we got an empty new_result, "Exchange supplied bad data for pair .../BTC, skipping"
+
                 key_indicator = new_result[crossover_conf['key_indicator_type']][crossover_conf['key_indicator']][crossover_conf['key_indicator_index']]
                 crossed_indicator = new_result[crossover_conf['crossed_indicator_type']][crossover_conf['crossed_indicator']][crossover_conf['crossed_indicator_index']]
 
