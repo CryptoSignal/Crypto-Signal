@@ -12,6 +12,9 @@ settings:
 exchanges: null
 
 notifiers:
+  general:
+    min_hot: 1
+    min_cold: 1
   twilio:
     required:
       key: null

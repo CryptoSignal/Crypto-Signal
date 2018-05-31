@@ -238,6 +238,7 @@ class Notifier():
         new_message = str()
         for exchange in new_analysis:
             for market in new_analysis[exchange]:
+                message_list = list()
                 for indicator_type in new_analysis[exchange][market]:
                     if indicator_type == 'informants':
                         continue
@@ -298,18 +299,46 @@ class Notifier():
 
                                 if not analysis['config']['alert_enabled']:
                                     should_alert = False
+                                message_list.append({"should_alert":should_alert,
+                                                    "values":values, "exchange":exchange, "market":market, "indicator":indicator, "index":index,
+                                                    "analysis":analysis, "status":status, "last_status":last_status})
 
-                                if should_alert:
-                                    new_message += message_template.render(
-                                        values=values,
-                                        exchange=exchange,
-                                        market=market,
-                                        indicator=indicator,
-                                        indicator_number=index,
-                                        analysis=analysis,
-                                        status=status,
-                                        last_status=last_status
-                                    )
+                hot_count = 0
+                cold_count = 0
+                for possible_massage in message_list:
+                    if possible_massage['status'] == 'hot':
+                        hot_count = hot_count + 1
+                    if possible_massage['status'] == 'cold':
+                        cold_count = cold_count + 1
+
+                for possible_massage in message_list:
+                    should_alert = True
+                    if possible_massage['should_alert']:
+                        if possible_massage['status'] == 'hot' and hot_count < self.notifier_config['general']['min_hot']:
+                            should_alert = False
+                            print("Market={} Indicator={} suppress notification. To few hot indicators. you got {} but you need {}".format(
+                                    possible_massage['market'], possible_massage['indicator'], hot_count, self.notifier_config['general']['min_hot']))
+
+                        if possible_massage['status'] == 'cold' and cold_count < self.notifier_config['general']['min_cold']:
+                            should_alert = False
+                            print("Market={} Indicator={} suppress notification. To few cold indicators. you got {} but you need {}".format(
+                                    possible_massage['market'], possible_massage['indicator'], cold_count, self.notifier_config['general']['min_cold']))
+                    else:
+                        should_alert = False
+
+                    if should_alert:
+                        new_message += message_template.render(
+                            values=possible_massage['values'],
+                            exchange=possible_massage['exchange'],
+                            market=possible_massage['market'],
+                            indicator=possible_massage['indicator'],
+                            indicator_number=possible_massage['index'],
+                            analysis=possible_massage['analysis'],
+                            status=possible_massage['status'],
+                            last_status=possible_massage['last_status'],
+                            hot_count=hot_count,
+                            cold_count=cold_count
+                        )
 
         # Merge changes from new analysis into last analysis
         self.last_analysis = {**self.last_analysis, **new_analysis}
