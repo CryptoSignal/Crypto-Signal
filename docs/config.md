@@ -83,6 +83,24 @@ exchanges:
 # 4) Notifiers
 Settings to configure what services to notify when a hot or cold threshold is tripped.
 
+## general
+**min_hot**\
+default: 1\
+description: Number of indicators that must be hot befor send a notification
+
+**min_cold**\
+default: 1\
+description: Number of indicators that must be cold befor send a notification
+
+An example of general notifier settings
+
+```yml
+notifiers:
+  general:
+    min_hot: 1
+    min_cold: 1
+```
+
 ## Twilio
 **key**\
 default: None\
@@ -285,6 +303,8 @@ The notifier templates are built with a templating language called [Jinja2](http
 - indicator_number - Which configured instance of the analyzer this indicator applies too.
 - status - Whether the indicator is hot, cold or neutral.
 - last_status - The status of the previous analysis run.
+- hot_count - Number of indicator that are hot
+- cold_count - Number of indicator that are cold
 - values.<signal> - The stringified value from the selected signal line, see the indicator section for the signal lines available for each indicator.
 - analysis.result.<signal> - The raw value from the selected signal line, see the indicator section for the signal lines available for each indicator.
 - analysis.result.is_hot - The raw boolean value of if the indicator is hot.
