@@ -276,6 +276,18 @@ notifiers:
             password: abcd1234
 ```
 
+## StdOut
+
+An example of notifier settings for stdout. This will just print the notification to stdout.
+Usefull for testing
+
+```yml
+notifiers:
+    stdout:
+        required:
+            enable: true
+```
+
 ## Notifier Templating
 The notifier templates are built with a templating language called [Jinja2](http://jinja.pocoo.org/docs/2.10/templates/) and anything that is a valid Jinja message is valid for crypto-signal. The options available are as follows:
 

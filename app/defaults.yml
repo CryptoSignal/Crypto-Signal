@@ -52,6 +52,13 @@ notifiers:
     optional:
       username: null
       password: null
+  stdout:
+    required:
+      enable: null
+    optional:
+      parse_mode: html
+      template: "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
+
 
 indicators:
   momentum:

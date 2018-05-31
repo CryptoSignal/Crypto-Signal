@@ -11,6 +11,7 @@ from notifiers.discord_client import DiscordNotifier
 from notifiers.gmail_client import GmailNotifier
 from notifiers.telegram_client import TelegramNotifier
 from notifiers.webhook_client import WebhookNotifier
+from notifiers.stdout_client import StdoutNotifier
 
 class Notifier():
     """Handles sending notifications via the configured notifiers
@@ -82,6 +83,11 @@ class Notifier():
             )
             enabled_notifiers.append('webhook')
 
+        self.stdout_configured = self._validate_required_config('stdout', notifier_config)
+        if self.stdout_configured:
+            self.stdout_client = StdoutNotifier()
+            enabled_notifiers.append('stdout')
+
         self.logger.info('enabled notifers: %s', enabled_notifiers)
 
 
@@ -98,7 +104,7 @@ class Notifier():
         self.notify_gmail(new_analysis)
         self.notify_telegram(new_analysis)
         self.notify_webhook(new_analysis)
-
+        self.notify_stdout(new_analysis)
 
     def notify_discord(self, new_analysis):
         """Send a notification via the discord notifier
