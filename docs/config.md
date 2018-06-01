@@ -286,6 +286,8 @@ notifiers:
     stdout:
         required:
             enable: true
+        optional:
+            template: "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
 ```
 
 ## Notifier Templating
