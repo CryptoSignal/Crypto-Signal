@@ -276,6 +276,29 @@ notifiers:
             password: abcd1234
 ```
 
+## StdOut
+**enable**\
+default: None\
+necessity: required for StdOut\
+description: switches on the output via stdout
+
+**template**\
+default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}\
+necessity: optional\
+description: See the notifier templating section.
+
+An example of notifier settings for stdout. This will just print the notification to stdout.
+Usefull for testing
+
+```yml
+notifiers:
+    stdout:
+        required:
+            enable: true
+        optional:
+            template: "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
+```
+
 ## Notifier Templating
 The notifier templates are built with a templating language called [Jinja2](http://jinja.pocoo.org/docs/2.10/templates/) and anything that is a valid Jinja message is valid for crypto-signal. The options available are as follows:
 
