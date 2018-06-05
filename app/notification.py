@@ -324,6 +324,8 @@ class Notifier():
                                         values=values,
                                         exchange=exchange,
                                         market=market,
+                                        market_from=market.split("/")[0],
+                                        market_to=market.split("/")[1],
                                         indicator=indicator,
                                         indicator_number=index,
                                         analysis=analysis,
