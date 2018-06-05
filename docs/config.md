@@ -277,6 +277,15 @@ notifiers:
 ```
 
 ## StdOut
+**enable**\
+default: None\
+necessity: required for StdOut\
+description: switches on the output via stdout
+
+**template**\
+default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!{{ '\n' -}}\
+necessity: optional\
+description: See the notifier templating section.
 
 An example of notifier settings for stdout. This will just print the notification to stdout.
 Usefull for testing
