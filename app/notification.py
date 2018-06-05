@@ -207,6 +207,20 @@ class Notifier():
 
             self.webhook_client.notify(new_analysis)
 
+    def notify_stdout(self, new_analysis):
+        """Send a notification via the stdout notifier
+
+        Args:
+            new_analysis (dict): The new_analysis to send.
+        """
+
+        if self.stdout_configured:
+            message = self._indicator_message_templater(
+                new_analysis,
+                self.notifier_config['stdout']['optional']['template']
+            )
+            if message.strip():
+                self.stdout_client.notify(message)
 
     def _validate_required_config(self, notifier, notifier_config):
         """Validate the required configuration items are present for a notifier.
