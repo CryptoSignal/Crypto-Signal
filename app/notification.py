@@ -320,10 +320,13 @@ class Notifier():
                                     should_alert = False
 
                                 if should_alert:
+                                    base_currency, quote_currency = market.split('/')
                                     new_message += message_template.render(
                                         values=values,
                                         exchange=exchange,
                                         market=market,
+                                        base_currency=base_currency,
+                                        quote_currency=quote_currency,
                                         indicator=indicator,
                                         indicator_number=index,
                                         analysis=analysis,

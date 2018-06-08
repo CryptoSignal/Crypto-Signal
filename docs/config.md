@@ -304,6 +304,8 @@ The notifier templates are built with a templating language called [Jinja2](http
 
 - exchange - The name of the exchange for the indicator.
 - market - The name of the market for the indicator.
+- base_currency - The name of the base currency. If the market is BTC/USD, then this value is BTC.
+- quote_currency - The name of the quote currency. If the market is BTC/USD, then this value is USD.
 - indicator - The name of the analyzer used for this indicator.
 - indicator_number - Which configured instance of the analyzer this indicator applies too.
 - status - Whether the indicator is hot, cold or neutral.
