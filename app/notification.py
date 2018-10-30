@@ -171,19 +171,30 @@ class Notifier():
 
 
     def notify_telegram(self, new_analysis):
-        """Send a notification via the telegram notifier
+        """Send notifications via the telegram notifier
 
         Args:
             new_analysis (dict): The new_analysis to send.
         """
 
         if self.telegram_configured:
-            message = self._indicator_message_templater(
+
+            messages = self._indicator_messages(
                 new_analysis,
                 self.notifier_config['telegram']['optional']['template']
             )
-            if message.strip():
-                self.telegram_client.notify(message)
+
+            for market in messages:
+                if len(messages[market]) == 0:
+                    continue
+
+                for period in messages[market]:
+                    message = messages[market][period].strip()
+                    try:
+                        self.telegram_client.notify(message)
+                    except telegram.error.TimedOut:
+                        self.logger.info('Error TimeOut!')
+
 
 
     def notify_webhook(self, new_analysis):
@@ -337,3 +348,121 @@ class Notifier():
         # Merge changes from new analysis into last analysis
         self.last_analysis = {**self.last_analysis, **new_analysis}
         return new_message
+
+    def _indicator_messages(self, new_analysis, template):
+        """Creates a message list from a user defined template
+
+        Args:
+            new_analysis (dict): A dictionary of data related to the analysis to send a message about.
+            template (str): A Jinja formatted message template.
+
+        Returns:
+            list: A list with the templated messages for the notifier.
+        """
+
+        if not self.last_analysis:
+            self.last_analysis = new_analysis
+
+        message_template = Template(template)
+
+        new_messages = dict()
+        ohlcv_values = dict()
+
+        for exchange in new_analysis:
+            for market in new_analysis[exchange]:
+
+                market_key = market.lower().split('/')[0]
+                new_messages[market_key] = dict()
+                ohlcv_values[market_key] = dict()
+
+                #Getting price values for each market pair and candle period
+                for indicator_type in new_analysis[exchange][market]:
+                    if indicator_type == 'informants':
+                        for index, analysis in enumerate(new_analysis[exchange][market]['informants']['ohlcv']):
+                            values = dict()
+                            for signal in analysis['config']['signal']:
+                                values[signal] = analysis['result'].iloc[-1][signal]
+                                ohlcv_values[market_key][analysis['config']['candle_period']] = values
+
+                for indicator_type in new_analysis[exchange][market]:
+                    if indicator_type == 'informants':
+                        continue
+
+                    for indicator in new_analysis[exchange][market][indicator_type]:
+                        for index, analysis in enumerate(new_analysis[exchange][market][indicator_type][indicator]):
+                            if analysis['result'].shape[0] == 0:
+                                continue
+
+                            values = dict()
+
+                            if indicator_type == 'indicators':
+                                for signal in analysis['config']['signal']:
+                                    latest_result = analysis['result'].iloc[-1]
+
+                                    values[signal] = analysis['result'].iloc[-1][signal]
+                                    if isinstance(values[signal], float):
+                                        values[signal] = format(values[signal], '.2f')
+                            elif indicator_type == 'crossovers':
+                                latest_result = analysis['result'].iloc[-1]
+
+                                key_signal = '{}_{}'.format(
+                                    analysis['config']['key_signal'],
+                                    analysis['config']['key_indicator_index']
+                                )
+
+                                crossed_signal = '{}_{}'.format(
+                                    analysis['config']['crossed_signal'],
+                                    analysis['config']['crossed_indicator_index']
+                                )
+
+                                values[key_signal] = analysis['result'].iloc[-1][key_signal]
+                                if isinstance(values[key_signal], float):
+                                        values[key_signal] = format(values[key_signal], '.2f')
+
+                                values[crossed_signal] = analysis['result'].iloc[-1][crossed_signal]
+                                if isinstance(values[crossed_signal], float):
+                                        values[crossed_signal] = format(values[crossed_signal], '.2f')
+
+                            status = 'neutral'
+                            if latest_result['is_hot']:
+                                status = 'hot'
+                            elif latest_result['is_cold']:
+                                status = 'cold'
+
+                            # Save status of indicator's new analysis
+                            new_analysis[exchange][market][indicator_type][indicator][index]['status'] = status
+
+                            if latest_result['is_hot'] or latest_result['is_cold']:
+                                try:
+                                    last_status = self.last_analysis[exchange][market][indicator_type][indicator][index]['status']
+                                except:
+                                    last_status = str()
+
+                                should_alert = True
+
+                                if analysis['config']['alert_frequency'] == 'once':
+                                    if last_status == status:
+                                        should_alert = False
+
+                                if not analysis['config']['alert_enabled']:
+                                    should_alert = False
+
+                                if should_alert:
+                                    prices = ''
+                                    candle_period = analysis['config']['candle_period']
+
+                                    if candle_period in ohlcv_values[market_key]: 
+                                        prices = str(ohlcv_values[market_key][candle_period])
+
+                                    base_currency, quote_currency = market.split('/')
+
+                                    new_message = message_template.render(
+                                        values=values, exchange=exchange, market=market, base_currency=base_currency,
+                                        quote_currency=quote_currency, indicator=indicator, indicator_number=index,
+                                        analysis=analysis, status=status, last_status=last_status, prices=prices)
+
+                                    new_messages[market_key][candle_period] = new_message 
+
+        # Merge changes from new analysis into last analysis
+        self.last_analysis = {**self.last_analysis, **new_analysis}
+        return new_messages
