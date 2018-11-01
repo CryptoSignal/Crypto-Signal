@@ -14,6 +14,7 @@ from exchange import ExchangeInterface
 from notification import Notifier
 from behaviour import Behaviour
 
+
 def main():
     """Initializes the application
     """
@@ -27,6 +28,15 @@ def main():
 
     # Configure and run configured behaviour.
     exchange_interface = ExchangeInterface(config.exchanges)
+
+    if settings['market_pairs']:
+        market_pairs = settings['market_pairs']
+        logger.info("Found configured markets: %s", market_pairs)
+        market_data = exchange_interface.get_exchange_markets(markets=market_pairs)
+    else:
+        logger.info("No configured markets, using all available on exchange.")
+        market_data = exchange_interface.get_exchange_markets()
+
     notifier = Notifier(config.notifiers)
 
     behaviour = Behaviour(
@@ -35,10 +45,15 @@ def main():
         notifier
     )
 
+    behaviour.run(market_data, settings['output_mode'])
+
+"""
     while True:
-        behaviour.run(settings['market_pairs'], settings['output_mode'])
+        behaviour.run(market_data, settings['output_mode'])
         logger.info("Sleeping for %s seconds", settings['update_interval'])
         time.sleep(settings['update_interval'])
+        """
+
 
 if __name__ == "__main__":
     try:
