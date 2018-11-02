@@ -37,7 +37,7 @@ def main():
         logger.info("No configured markets, using all available on exchange.")
         market_data = exchange_interface.get_exchange_markets()
 
-    notifier = Notifier(config.notifiers)
+    notifier = Notifier(config.notifiers, market_data)
 
     behaviour = Behaviour(
         config,
@@ -45,14 +45,10 @@ def main():
         notifier
     )
 
-    behaviour.run(market_data, settings['output_mode'])
-
-"""
     while True:
         behaviour.run(market_data, settings['output_mode'])
         logger.info("Sleeping for %s seconds", settings['update_interval'])
         time.sleep(settings['update_interval'])
-        """
 
 
 if __name__ == "__main__":
