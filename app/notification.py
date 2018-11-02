@@ -2,6 +2,7 @@
 """
 
 import json
+import os
 import structlog
 from jinja2 import Template
 
@@ -17,7 +18,7 @@ class Notifier():
     """Handles sending notifications via the configured notifiers
     """
 
-    def __init__(self, notifier_config):
+    def __init__(self, notifier_config, market_data):
         """Initializes Notifier class
 
         Args:
@@ -26,6 +27,7 @@ class Notifier():
 
         self.logger = structlog.get_logger()
         self.notifier_config = notifier_config
+        self.market_data = market_data
         self.last_analysis = dict()
 
         enabled_notifiers = list()
@@ -184,18 +186,34 @@ class Notifier():
                 self.notifier_config['telegram']['optional']['template']
             )
 
-            for market in messages:
-                if len(messages[market]) == 0:
-                    continue
+            for exchange in messages:
+                for market_pair in messages[exchange]:
+                    _messages = messages[exchange][market_pair]
+                    if len(_messages) == 0:
+                        continue
 
-                for period in messages[market]:
-                    message = messages[market][period].strip()
-                    try:
-                        self.telegram_client.notify(message)
-                    except telegram.error.TimedOut:
-                        self.logger.info('Error TimeOut!')
+                    for candle_period in _messages:
+                        message = _messages[candle_period].strip()
 
+                        market_pair = market_pair.replace('/', '_').lower()
+                        chart_file = './charts/{}_{}_{}.png'.format(exchange, market_pair, candle_period)
 
+                        if os.path.exists(chart_file):
+                            try:
+                                self.telegram_client.send_chart(open(chart_file, 'rb'), message)
+                            except (IOError, SyntaxError) :
+                                self.notify_telegram_message(message)
+                        else:
+                            self.logger.info('Chart file %s doesnt exist, sending text message.', chart_file)
+                            self.notify_telegram_message(message)
+                        
+
+    def notify_telegram_message(self, message):
+        try:
+            self.telegram_client.notify(message)
+        except (telegram.error.TimedOut) as e:
+            self.logger.info('Error TimeOut!')
+            self.logger.info(e)
 
     def notify_webhook(self, new_analysis):
         """Send a notification via the webhook notifier
@@ -369,11 +387,14 @@ class Notifier():
         ohlcv_values = dict()
 
         for exchange in new_analysis:
+            new_messages[exchange] = dict()
+            ohlcv_values[exchange] = dict()
             for market in new_analysis[exchange]:
 
-                market_key = market.lower().split('/')[0]
-                new_messages[market_key] = dict()
-                ohlcv_values[market_key] = dict()
+                #market_pair = market.lower().split('/')[0]
+                market_pair = market.replace('/', '_').lower()
+                new_messages[exchange][market_pair] = dict()
+                ohlcv_values[exchange][market_pair] = dict()
 
                 #Getting price values for each market pair and candle period
                 for indicator_type in new_analysis[exchange][market]:
@@ -382,7 +403,7 @@ class Notifier():
                             values = dict()
                             for signal in analysis['config']['signal']:
                                 values[signal] = analysis['result'].iloc[-1][signal]
-                                ohlcv_values[market_key][analysis['config']['candle_period']] = values
+                                ohlcv_values[exchange][market_pair][analysis['config']['candle_period']] = values
 
                 for indicator_type in new_analysis[exchange][market]:
                     if indicator_type == 'informants':
@@ -448,20 +469,25 @@ class Notifier():
                                     should_alert = False
 
                                 if should_alert:
+                                    base_currency, quote_currency = market.split('/')
+                                    precision = self.market_data[exchange][market]['precision']
+                                    decimal_format = '.{}f'.format(precision['price'])
+
                                     prices = ''
                                     candle_period = analysis['config']['candle_period']
+                                    candle_values = ohlcv_values[exchange][market_pair]
 
-                                    if candle_period in ohlcv_values[market_key]: 
-                                        prices = str(ohlcv_values[market_key][candle_period])
-
-                                    base_currency, quote_currency = market.split('/')
+                                    if candle_period in candle_values :
+                                        for key, value in candle_values[candle_period].items():
+                                            value = format(value, decimal_format)
+                                            prices = '{} {}: {}' . format(prices, key.title(), value)                                   
 
                                     new_message = message_template.render(
                                         values=values, exchange=exchange, market=market, base_currency=base_currency,
                                         quote_currency=quote_currency, indicator=indicator, indicator_number=index,
                                         analysis=analysis, status=status, last_status=last_status, prices=prices)
 
-                                    new_messages[market_key][candle_period] = new_message 
+                                    new_messages[exchange][market_pair][candle_period] = new_message 
 
         # Merge changes from new analysis into last analysis
         self.last_analysis = {**self.last_analysis, **new_analysis}
