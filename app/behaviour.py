@@ -8,6 +8,7 @@ import traceback
 import structlog
 import os
 
+import pandas
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -20,6 +21,7 @@ from copy import deepcopy
 from ccxt import ExchangeError
 from tenacity import RetryError
 
+from stockstats import StockDataFrame
 from analysis import StrategyAnalyzer
 from outputs import Output
 from analyzers.utils import IndicatorUtils
@@ -424,7 +426,7 @@ class Behaviour(IndicatorUtils):
 
         ax1 = fig.add_axes(rect1, facecolor=axescolor)  # left, bottom, width, height
         ax2 = fig.add_axes(rect2, facecolor=axescolor, sharex=ax1)
-        ax2t = ax2.twinx()
+        
         ax3 = fig.add_axes(rect3, facecolor=axescolor, sharex=ax1)
 
         #'1h' 0.02 , max_locator -> 1
@@ -477,29 +479,50 @@ class Behaviour(IndicatorUtils):
                         facecolor=fillcolor, edgecolor=fillcolor)
         ax2.set_ylim(0, 100)
         ax2.set_yticks([30, 70])
-        ax2.text(0.024, 0.94, 'RSI (14)', va='top',
-                transform=ax2.transAxes, fontsize=textsize)
-        #ax1.set_title('%s daily' % ticker)    
+        ax2.text(0.024, 0.94, 'RSI (14)', va='top',transform=ax2.transAxes, fontsize=textsize)
 
 
-        # compute the MACD indicator
-        fillcolor = 'darkslategrey'
-        nslow = 26
-        nfast = 12
-        nema = 9
-        emaslow, emafast, macd = self.moving_average_convergence(
-            prices, nslow=nslow, nfast=nfast)
-        ema9 = self.moving_average(macd, nema, type='exponential')
-        ax3.plot(df.index, macd, color='blue', lw=0.5)
-        ax3.plot(df.index, ema9, color='red', lw=0.5)
-        ax3.fill_between(df.index, macd - ema9, 0, alpha=0.4,
-                        facecolor=fillcolor, edgecolor=fillcolor)
+        # Calculate MACD
+        df = StockDataFrame.retype(df)
+        df['macd'] = df.get('macd')
+        
+        min_y = df.macd.min()
+        max_y = df.macd.max()
 
-        ax3.text(0.024, 0.94, 'MACD (%d, %d, close, %d)' % (nfast, nslow, nema), va='top',
+        #Reduce Macd Histogram values to have a better visualization
+        macd_h = df.macdh * 0.5
+
+        if (macd_h.min() < min_y):
+            min_y = macd_h.min()
+
+        if (macd_h.max() > max_y):
+            max_y = macd_h.max() 
+
+        #Adding some extra space at bottom/top
+        min_y = min_y * 1.2
+        max_y = max_y * 1.2
+
+        bar_width = 1.2
+
+        # plot macd      
+        if(candle_period == '4h'):
+            bar_width = 0.18
+
+        if(candle_period == '1h' or candle_period == '30m' or candle_period == '15m'):
+            bar_width = 0.04
+
+        ax3.bar(x=df.index, bottom=[0 for _ in macd_h.index], height=macd_h, width=bar_width, color="red", alpha = 0.4)
+        ax3.plot(df.index, df.macd, color='blue', lw=0.6)
+        ax3.plot(df.index, df.macds, color='red', lw=0.6)
+        ax3.set_ylim((min_y, max_y))
+    
+        ax3.yaxis.set_major_locator(mticker.MaxNLocator(nbins=5, prune='upper'))
+
+        ax3.text(0.024, 0.94, 'MACD (12, 26, close, 9)', va='top',
                 transform=ax3.transAxes, fontsize=textsize)    
 
 
-        for ax in ax1, ax2, ax2t, ax3:
+        for ax in ax1, ax2, ax3:
             if ax != ax3:
                 for label in ax.get_xticklabels():
                     label.set_visible(False)
@@ -509,12 +532,12 @@ class Behaviour(IndicatorUtils):
                     label.set_horizontalalignment('right')
 
             #ax.fmt_xdata = mdates.DateFormatter('%d/%b') #%d/%b  %Y-%m-%d
-            #ax.xaxis.set_major_locator(DayLocator(interval=2))
+            ax.xaxis.set_major_locator(mticker.MaxNLocator(10))
             ax.xaxis.set_major_formatter(DateFormatter('%d/%b'))
             #for 4h is not useful
             #ax.xaxis.set_minor_locator(HourLocator(interval=min_locator))  #6 for 1h
             #ax.xaxis.set_minor_formatter(DateFormatter('%H:%M'))
-            #ax.xaxis.set_tick_params(which='major', pad=15) 
+            ax.xaxis.set_tick_params(which='major', pad=15) 
 
         fig.autofmt_xdate()
 
