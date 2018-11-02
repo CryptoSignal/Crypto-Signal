@@ -6,8 +6,9 @@
 import json
 import traceback
 import structlog
-import numpy as np
+import os
 
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as mticker
@@ -387,6 +388,10 @@ class Behaviour(IndicatorUtils):
         Args:
             market_data (dict): A dictionary containing the market data of the symbols
         """
+        charts_dir = './charts'
+
+        if not os.path.exists(charts_dir):
+            os.mkdir(charts_dir)
 
         for exchange in market_data:
             self.logger.info("Beginning chart creation for %s", exchange)
@@ -395,13 +400,14 @@ class Behaviour(IndicatorUtils):
                 historical_data = self.all_historical_data[exchange][market_pair]
 
                 for candle_period in historical_data:
+                    candles_data = historical_data[candle_period]
                     self.logger.info('Creating chart for %s %s', market_pair, candle_period)
+                    self._create_chart(exchange, market_pair, candle_period, candles_data, charts_dir)
 
 
-    def _create_chart(self, exchange, market_pair, candle_period):
-        data = self.all_historical_data[exchange][market_pair][candle_period]
+    def _create_chart(self, exchange, market_pair, candle_period, candles_data, charts_dir):
 
-        df = self.convert_to_dataframe(data)
+        df = self.convert_to_dataframe(candles_data)
 
         plt.rc('axes', grid=True)
         plt.rc('grid', color='0.75', linestyle='-', linewidth=0.5)
@@ -429,6 +435,8 @@ class Behaviour(IndicatorUtils):
         stick_width = 0.02
 
         ax1.set_ymargin(0.2)
+        ax1.ticklabel_format(axis='y', style='plain')
+
         candlestick_ohlc(ax1, zip(mdates.date2num(df.index.to_pydatetime()),
                             df['open'], df['high'],
                             df['low'], df['close']),
@@ -510,10 +518,13 @@ class Behaviour(IndicatorUtils):
 
         fig.autofmt_xdate()
 
-        market_pair = market_pair.replace('/', '_').lower()
-        chart_name = '{}_{}_{}.png'.format(exchange, market_pair, candle_period)
+        title = '{} {} {}'.format(exchange, market_pair, candle_period).upper()
+        fig.suptitle(title, fontsize=14)
 
-        plt.savefig(chart_name)        
+        market_pair = market_pair.replace('/', '_').lower()
+        chart_file = '{}/{}_{}_{}.png'.format(charts_dir, exchange, market_pair, candle_period)
+
+        plt.savefig(chart_file)        
 
     def relative_strength(self, prices, n=14):
         """
