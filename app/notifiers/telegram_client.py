@@ -46,3 +46,17 @@ class TelegramNotifier(NotifierUtils):
         #exit()
         for message_chunk in message_chunks:
             self.bot.send_message(chat_id=self.chat_id, text=message_chunk, parse_mode=self.parse_mode)
+
+    @retry(
+        retry=retry_if_exception_type(telegram.error.TimedOut),
+        stop=stop_after_attempt(6),
+        wait=wait_fixed(5)
+    )
+    def send_chart(self, photo_url, caption):
+        """Send image chart
+
+        Args:
+            photo_url (str): The photo url to send.
+        """
+
+        self.bot.send_photo(chat_id=self.chat_id, photo=photo_url, caption=caption, timeout=40)
