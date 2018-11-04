@@ -397,8 +397,6 @@ class Behaviour(IndicatorUtils):
             os.mkdir(charts_dir)
 
         for exchange in market_data:
-            self.logger.info("Beginning chart creation for %s", exchange)
-
             for market_pair in market_data[exchange]:
                 historical_data = self.all_historical_data[exchange][market_pair]
 
@@ -415,11 +413,10 @@ class Behaviour(IndicatorUtils):
         plt.rc('axes', grid=True)
         plt.rc('grid', color='0.75', linestyle='-', linewidth=0.5)
 
-        textsize = 11
         left, width = 0.1, 0.8
         rect1 = [left, 0.6, width, 0.3]
-        rect2 = [left, 0.3, width, 0.3]
-        rect3 = [left, 0.1, width, 0.2]
+        rect2 = [left, 0.4, width, 0.2]
+        rect3 = [left, 0.1, width, 0.3]
 
         fig = plt.figure(facecolor='white')
         fig.set_size_inches(8, 12, forward=True)
@@ -429,83 +426,14 @@ class Behaviour(IndicatorUtils):
         ax2 = fig.add_axes(rect2, facecolor=axescolor, sharex=ax1)
         ax3 = fig.add_axes(rect3, facecolor=axescolor, sharex=ax1)
 
-        stick_width = 0.02
+        #Plot Candles chart
+        self.plot_candlestick(ax1, df, candle_period)
 
-        ax1.set_ymargin(0.2)
-        ax1.ticklabel_format(axis='y', style='plain')
+        #Plot RSI (14)
+        self.plot_rsi(ax2, df)
 
-        self.candlestick_ohlc(ax1, zip(mdates.date2num(df.index.to_pydatetime()),
-                            df['open'], df['high'],
-                            df['low'], df['close']),
-                    width=stick_width, colorup='olivedrab', colordown='crimson')
-                    
-
-        # plot the relative strength indicator
-        prices = df["close"]
-
-        ma25 = self.moving_average(prices, 25, type='simple')
-        ma7 = self.moving_average(prices, 7, type='simple')
-
-        ax1.plot(df.index, ma25, color='indigo', lw=0.5, label='MA (25)')
-        ax1.plot(df.index, ma7, color='orange', lw=0.5, label='MA (7)')
-    
-        ax1.text(0.04, 0.94, 'MA (7, close, 0)', color='orange', transform=ax1.transAxes, fontsize=textsize, va='top')
-        ax1.text(0.24, 0.94, 'MA (25, close, 0)', color='indigo', transform=ax1.transAxes,  fontsize=textsize, va='top')
-
-        rsi = self.relative_strength(prices)
-        fillcolor = 'darkmagenta'
-
-        ax2.plot(df.index, rsi, color=fillcolor, linewidth=0.5)
-        ax2.axhline(70, color='darkmagenta', linestyle='dashed', alpha=0.6)
-        ax2.axhline(30, color='darkmagenta', linestyle='dashed', alpha=0.6)
-        ax2.fill_between(df.index, rsi, 70, where=(rsi >= 70),
-                        facecolor=fillcolor, edgecolor=fillcolor)
-        ax2.fill_between(df.index, rsi, 30, where=(rsi <= 30),
-                        facecolor=fillcolor, edgecolor=fillcolor)
-        ax2.set_ylim(0, 100)
-        ax2.set_yticks([30, 70])
-        ax2.text(0.024, 0.94, 'RSI (14)', va='top',transform=ax2.transAxes, fontsize=textsize)
-
-
-        # Calculate MACD
-        df = StockDataFrame.retype(df)
-        df['macd'] = df.get('macd')
-        
-        min_y = df.macd.min()
-        max_y = df.macd.max()
-
-        #Reduce Macd Histogram values to have a better visualization
-        macd_h = df.macdh * 0.5
-
-        if (macd_h.min() < min_y):
-            min_y = macd_h.min()
-
-        if (macd_h.max() > max_y):
-            max_y = macd_h.max() 
-
-        #Adding some extra space at bottom/top
-        min_y = min_y * 1.2
-        max_y = max_y * 1.2
-
-        bar_width = 1.2
-
-        # plot macd      
-        if(candle_period == '4h'):
-            bar_width = 0.18
-
-        if(candle_period == '1h' or candle_period == '30m' or candle_period == '15m'):
-            bar_width = 0.04
-
-        ax3.bar(x=df.index, bottom=[0 for _ in macd_h.index], height=macd_h, width=bar_width, color="red", alpha = 0.4)
-        ax3.plot(df.index, df.macd, color='blue', lw=0.6)
-        ax3.plot(df.index, df.macds, color='red', lw=0.6)
-        ax3.set_ylim((min_y, max_y))
-    
-        ax3.yaxis.set_major_locator(mticker.MaxNLocator(nbins=5, prune='upper'))
-
-        ax3.text(0.024, 0.94, 'MACD (12, 26, close, 9)', va='top',
-                transform=ax3.transAxes, fontsize=textsize)    
-
+        # Calculate and plot MACD       
+        self.plot_macd(ax3, df, candle_period)
 
         for ax in ax1, ax2, ax3:
             if ax != ax3:
@@ -516,12 +444,8 @@ class Behaviour(IndicatorUtils):
                     label.set_rotation(30)
                     label.set_horizontalalignment('right')
 
-            #ax.fmt_xdata = mdates.DateFormatter('%d/%b') #%d/%b  %Y-%m-%d
             ax.xaxis.set_major_locator(mticker.MaxNLocator(10))
             ax.xaxis.set_major_formatter(DateFormatter('%d/%b'))
-            #for 4h is not useful
-            #ax.xaxis.set_minor_locator(HourLocator(interval=min_locator))  #6 for 1h
-            #ax.xaxis.set_minor_formatter(DateFormatter('%H:%M'))
             ax.xaxis.set_tick_params(which='major', pad=15) 
 
         fig.autofmt_xdate()
@@ -616,6 +540,84 @@ class Behaviour(IndicatorUtils):
 
         return lines, patches
 
+    def plot_candlestick(self, ax, df, candle_period):
+        textsize = 11
+        stick_width = 0.02
+
+        prices = df["close"]
+
+        ax.set_ymargin(0.2)
+        ax.ticklabel_format(axis='y', style='plain')
+
+        self.candlestick_ohlc(ax, zip(mdates.date2num(df.index.to_pydatetime()),
+                            df['open'], df['high'], df['low'], df['close']),
+                    width=stick_width, colorup='olivedrab', colordown='crimson')
+                    
+        ma25 = self.moving_average(prices, 25, type='simple')
+        ma7 = self.moving_average(prices, 7, type='simple')
+
+        ax.plot(df.index, ma25, color='indigo', lw=0.5, label='MA (25)')
+        ax.plot(df.index, ma7, color='orange', lw=0.5, label='MA (7)')
+    
+        ax.text(0.04, 0.94, 'MA (7, close, 0)', color='orange', transform=ax.transAxes, fontsize=textsize, va='top')
+        ax.text(0.24, 0.94, 'MA (25, close, 0)', color='indigo', transform=ax.transAxes,  fontsize=textsize, va='top')
+
+    def plot_rsi(self, ax, df):
+        textsize = 11
+        fillcolor = 'darkmagenta'
+
+        rsi = self.relative_strength(df["close"])
+
+        ax.plot(df.index, rsi, color=fillcolor, linewidth=0.5)
+        ax.axhline(70, color='darkmagenta', linestyle='dashed', alpha=0.6)
+        ax.axhline(30, color='darkmagenta', linestyle='dashed', alpha=0.6)
+        ax.fill_between(df.index, rsi, 70, where=(rsi >= 70),
+                        facecolor=fillcolor, edgecolor=fillcolor)
+        ax.fill_between(df.index, rsi, 30, where=(rsi <= 30),
+                        facecolor=fillcolor, edgecolor=fillcolor)
+        ax.set_ylim(0, 100)
+        ax.set_yticks([30, 70])
+        ax.text(0.024, 0.94, 'RSI (14)', va='top',transform=ax.transAxes, fontsize=textsize)
+
+    def plot_macd(self, ax, df, candle_period):
+        textsize = 11
+
+        df = StockDataFrame.retype(df)
+        df['macd'] = df.get('macd')
+
+        min_y = df.macd.min()
+        max_y = df.macd.max()
+
+        #Reduce Macd Histogram values to have a better visualization
+        macd_h = df.macdh * 0.5
+
+        if (macd_h.min() < min_y):
+            min_y = macd_h.min()
+
+        if (macd_h.max() > max_y):
+            max_y = macd_h.max() 
+
+        #Adding some extra space at bottom/top
+        min_y = min_y * 1.2
+        max_y = max_y * 1.2
+
+        #Define candle bar width
+        bar_width = 1.2
+  
+        if(candle_period == '4h'):
+            bar_width = 0.18
+
+        if(candle_period == '1h' or candle_period == '30m' or candle_period == '15m'):
+            bar_width = 0.04
+
+        ax.bar(x=df.index, bottom=[0 for _ in macd_h.index], height=macd_h, width=bar_width, color="red", alpha = 0.4)
+        ax.plot(df.index, df.macd, color='blue', lw=0.6)
+        ax.plot(df.index, df.macds, color='red', lw=0.6)
+        ax.set_ylim((min_y, max_y))
+    
+        ax.yaxis.set_major_locator(mticker.MaxNLocator(nbins=5, prune='upper'))
+        ax.text(0.024, 0.94, 'MACD (12, 26, close, 9)', va='top', transform=ax.transAxes, fontsize=textsize)  
+
     def relative_strength(self, prices, n=14):
         """
         compute the n period relative strength indicator
@@ -668,15 +670,3 @@ class Behaviour(IndicatorUtils):
         a = np.convolve(x, weights, mode='full')[:len(x)]
         a[:n] = a[n]
         return a
-
-
-    def moving_average_convergence(self, x, nslow=26, nfast=12):
-        """
-        compute the MACD (Moving Average Convergence/Divergence) using a fast and
-        slow exponential moving avg
-
-        return value is emaslow, emafast, macd which are len(x) arrays
-        """
-        emaslow = self.moving_average(x, nslow, type='exponential')
-        emafast = self.moving_average(x, nfast, type='exponential')
-        return emaslow, emafast, emafast - emaslow
