@@ -15,7 +15,8 @@ import matplotlib.dates as mdates
 import matplotlib.ticker as mticker
 
 from matplotlib.dates import DateFormatter, DayLocator,HourLocator,  WeekdayLocator, MONDAY
-from mpl_finance.mpl_finance import candlestick_ohlc
+from matplotlib.lines import Line2D
+from matplotlib.patches import Rectangle
 
 from copy import deepcopy
 from ccxt import ExchangeError
@@ -426,20 +427,14 @@ class Behaviour(IndicatorUtils):
 
         ax1 = fig.add_axes(rect1, facecolor=axescolor)  # left, bottom, width, height
         ax2 = fig.add_axes(rect2, facecolor=axescolor, sharex=ax1)
-        
         ax3 = fig.add_axes(rect3, facecolor=axescolor, sharex=ax1)
 
-        #'1h' 0.02 , max_locator -> 1
-        # 4h -> 0.08, max_locator -> 8
-
-        min_locator = 4
-        max_locator = 1
         stick_width = 0.02
 
         ax1.set_ymargin(0.2)
         ax1.ticklabel_format(axis='y', style='plain')
 
-        candlestick_ohlc(ax1, zip(mdates.date2num(df.index.to_pydatetime()),
+        self.candlestick_ohlc(ax1, zip(mdates.date2num(df.index.to_pydatetime()),
                             df['open'], df['high'],
                             df['low'], df['close']),
                     width=stick_width, colorup='olivedrab', colordown='crimson')
@@ -448,21 +443,11 @@ class Behaviour(IndicatorUtils):
         # plot the relative strength indicator
         prices = df["close"]
 
-        # plot the price and volume data
-        #dx = r["Adj Close"] - r.Close
-        #low = r.Low + dx
-        #high = r.High + dx
-
-        deltas = np.zeros_like(prices)
-        deltas[1:] = np.diff(prices)
-        up = deltas > 0
-        #ax2.vlines(r.index[up], low[up], high[up], color='black', label='_nolegend_')
-        #ax2.vlines(r.index[~up], low[~up], high[~up],color='black', label='_nolegend_')
         ma25 = self.moving_average(prices, 25, type='simple')
         ma7 = self.moving_average(prices, 7, type='simple')
 
-        linema20, = ax1.plot(df.index, ma25, color='indigo', lw=0.5, label='MA (25)')
-        linema200, = ax1.plot(df.index, ma7, color='orange', lw=0.5, label='MA (7)')
+        ax1.plot(df.index, ma25, color='indigo', lw=0.5, label='MA (25)')
+        ax1.plot(df.index, ma7, color='orange', lw=0.5, label='MA (7)')
     
         ax1.text(0.04, 0.94, 'MA (7, close, 0)', color='orange', transform=ax1.transAxes, fontsize=textsize, va='top')
         ax1.text(0.24, 0.94, 'MA (25, close, 0)', color='indigo', transform=ax1.transAxes,  fontsize=textsize, va='top')
@@ -549,6 +534,87 @@ class Behaviour(IndicatorUtils):
 
         plt.savefig(chart_file)
         plt.close(fig)
+
+    def candlestick_ohlc(self, ax, quotes, width=0.2, colorup='k', colordown='r',
+                    alpha=1.0, ochl=False):
+        """
+        Plot the time, open, high, low, close as a vertical line ranging
+        from low to high.  Use a rectangular bar to represent the
+        open-close span.  If close >= open, use colorup to color the bar,
+        otherwise use colordown
+
+        Parameters
+        ----------
+        ax : `Axes`
+            an Axes instance to plot to
+        quotes : sequence of quote sequences
+            data to plot.  time must be in float date format - see date2num
+            (time, open, high, low, close, ...) vs
+            (time, open, close, high, low, ...)
+            set by `ochl`
+        width : float
+            fraction of a day for the rectangle width
+        colorup : color
+            the color of the rectangle where close >= open
+        colordown : color
+            the color of the rectangle where close <  open
+        alpha : float
+            the rectangle alpha level
+        ochl: bool
+            argument to select between ochl and ohlc ordering of quotes
+
+        Returns
+        -------
+        ret : tuple
+            returns (lines, patches) where lines is a list of lines
+            added and patches is a list of the rectangle patches added
+
+        """
+
+        OFFSET = width / 2.0
+
+        lines = []
+        patches = []
+        for q in quotes:
+            if ochl:
+                t, open, close, high, low = q[:5]
+            else:
+                t, open, high, low, close = q[:5]
+
+            if close >= open:
+                color = colorup
+                lower = open
+                height = close - open
+            else:
+                color = colordown
+                lower = close
+                height = open - close
+
+            #from matplotlib.lines import TICKLEFT, TICKRIGHT, Line2D
+            #from matplotlib.patches import Rectangle
+            vline = Line2D(
+                xdata=(t, t), ydata=(low, high),
+                color=color,
+                linewidth=0.5,
+                antialiased=True,
+            )
+
+            rect = Rectangle(
+                xy=(t - OFFSET, lower),
+                width=width,
+                height=height,
+                facecolor=color,
+                edgecolor=color,
+            )
+            rect.set_alpha(alpha)
+
+            lines.append(vline)
+            patches.append(rect)
+            ax.add_line(vline)
+            ax.add_patch(rect)
+        ax.autoscale_view()
+
+        return lines, patches
 
     def relative_strength(self, prices, n=14):
         """
