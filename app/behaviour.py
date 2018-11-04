@@ -547,7 +547,8 @@ class Behaviour(IndicatorUtils):
         market_pair = market_pair.replace('/', '_').lower()
         chart_file = '{}/{}_{}_{}.png'.format(charts_dir, exchange, market_pair, candle_period)
 
-        plt.savefig(chart_file)        
+        plt.savefig(chart_file)
+        plt.close(fig)
 
     def relative_strength(self, prices, n=14):
         """
