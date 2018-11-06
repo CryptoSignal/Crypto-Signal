@@ -23,7 +23,6 @@ class Bollinger(IndicatorUtils):
         Returns:
             pandas.DataFrame: A dataframe containing the indicators and hot/cold values.
         """
-
         dataframe = self.convert_to_dataframe(historical_data)
 
         bb_columns = {

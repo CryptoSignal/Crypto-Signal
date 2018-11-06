@@ -24,7 +24,7 @@ class Output():
 
     def to_cli(self, results, market_pair):
         """Creates the message to output to the CLI
-
+   
         Args:
             market_pair (str): Market pair that this message relates to.
             results (dict): The result of the completed analysis to output.
@@ -32,7 +32,8 @@ class Output():
         Returns:
             str: Completed cli message
         """
-
+        
+        f = open('result.log','a')
         normal_colour = '\u001b[0m'
         hot_colour = '\u001b[31m'
         cold_colour = '\u001b[36m'
@@ -102,6 +103,8 @@ class Output():
                         )
 
         output += '\n\n'
+        f.write(market_pair + '\n' );
+        f.close();
         return output
 
 
@@ -116,7 +119,7 @@ class Output():
             str: Completed CSV message
         """
 
-        logger.warn('WARNING: CSV output is deprecated and will be removed in a future version')
+        self.logger.warn('WARNING: CSV output is deprecated and will be removed in a future version')
 
         output = str()
         for indicator_type in results:
