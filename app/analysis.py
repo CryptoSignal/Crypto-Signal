@@ -34,6 +34,9 @@ class StrategyAnalyzer():
             'rsi': rsi.RSI().analyze,
             'momentum': momentum.Momentum().analyze,
             'mfi': mfi.MFI().analyze,
+            'adx': adx.ADX().analyze,
+            'plus_di': plus_di.PLUS_DI().analyze,
+            'minus_di': minus_di.MINUS_DI().analyze,
             'stoch_rsi': stoch_rsi.StochasticRSI().analyze,
             'obv': obv.OBV().analyze
         }

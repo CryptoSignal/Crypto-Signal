@@ -2,6 +2,7 @@
 """
 
 import sys
+print (sys.path)
 import logging
 
 import structlog

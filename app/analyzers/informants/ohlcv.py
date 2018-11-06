@@ -14,6 +14,5 @@ class OHLCV(IndicatorUtils):
         Returns:
             pandas.DataFrame: A dataframe containing the indicators and hot/cold values.
         """
-
         ohlcv_values = self.convert_to_dataframe(historical_data)
         return ohlcv_values

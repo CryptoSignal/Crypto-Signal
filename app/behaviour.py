@@ -75,12 +75,12 @@ class Behaviour():
 
         new_result = dict()
         for exchange in market_data:
-            self.logger.info("Beginning analysis of %s", exchange)
+#             self.logger.info("Beginning analysis of %s", exchange)
             if exchange not in new_result:
                 new_result[exchange] = dict()
 
             for market_pair in market_data[exchange]:
-                self.logger.info("Beginning analysis of %s", market_pair)
+#                 self.logger.info("Beginning analysis of %s", market_pair)
                 if market_pair not in new_result[exchange]:
                     new_result[exchange][market_pair] = dict()
 
@@ -94,24 +94,53 @@ class Behaviour():
                     market_pair
                 )
 
-                new_result[exchange][market_pair]['crossovers'] = self._get_crossover_results(
-                    new_result[exchange][market_pair]
-                )
-
-                if output_mode in self.output:
-                    output_data = deepcopy(new_result[exchange][market_pair])
-                    print(
-                        self.output[output_mode](output_data, market_pair),
-                        end=''
-                    )
-                else:
-                    self.logger.warn()
-
+                #new_result[exchange][market_pair]['crossovers'] = self._get_crossover_results(
+                #    new_result[exchange][market_pair]
+                #)
+                try:
+                    middleband = new_result[exchange][market_pair]['informants']['bollinger_bands'][0]['result']['middleband'] ;
+                    close = new_result[exchange][market_pair]['informants']['ohlcv'][0]['result']['close'] ;
+                    delta_close_middleband = close - middleband;
+                    plus_di = new_result[exchange][market_pair]['indicators']['plus_di'][0]['result']['plus_di'] ;
+                    minus_di = new_result[exchange][market_pair]['indicators']['minus_di'][0]['result']['minus_di'] ;
+                    delta_di = plus_di - minus_di;
+                    incre_seq = self._lis(delta_di.values.tolist())
+          
+                    if (output_mode in self.output 
+                       and len(delta_di)>0 and len(delta_close_middleband)>0 
+                       and delta_di.iloc[-1] > 0 
+                       and delta_di.iloc[-2] <= 0 
+                       #remove this condi as it is not a longest-incremental sequence problem for short-term trading
+                       #and delta_di.iloc[-1] == incre_seq[len(incre_seq)-1]
+                       and delta_close_middleband.iloc[-1]) > 0:
+                        output_data = deepcopy(new_result[exchange][market_pair])
+                        print(
+                            exchange,
+                            self.output[output_mode](output_data, market_pair),
+                            end=''
+                        )
+                except Exception as e:
+                    print("An exception occurred:" + str(e))
         # Print an empty line when complete
         print()
         return new_result
-
-
+    
+    def _lis(self, arr):
+        n = len(arr)
+        m = [0]*n
+        for x in range(n-2,-1,-1):
+            for y in range(n-1,x,-1):
+                if arr[x] < arr[y] and m[x] <= m[y]:
+                    m[x] += 1
+            max_value = max(m)
+            result = []
+            for i in range(n):
+                if m[i] == max_value:
+                    result.append(arr[i])
+                    max_value -= 1
+        return result
+     
+ 
     def _get_indicator_results(self, exchange, market_pair):
         """Execute the indicator analysis on a particular exchange and pair.
 
@@ -210,7 +239,7 @@ class Behaviour():
 
                     if 'period_count' in informant_conf:
                         analysis_args['period_count'] = informant_conf['period_count']
-
+                   
                     results[informant].append({
                         'result': self._get_analysis_result(
                             informant_dispatcher,
@@ -220,6 +249,7 @@ class Behaviour():
                         ),
                         'config': informant_conf
                     })
+
         return results
 
 
@@ -246,7 +276,7 @@ class Behaviour():
                 if not crossover_conf['enabled']:
                     self.logger.debug("%s is disabled, skipping.", crossover)
                     continue
-
+                
                 key_indicator = new_result[crossover_conf['key_indicator_type']][crossover_conf['key_indicator']][crossover_conf['key_indicator_index']]
                 crossed_indicator = new_result[crossover_conf['crossed_indicator_type']][crossover_conf['crossed_indicator']][crossover_conf['crossed_indicator_index']]
 
