@@ -29,6 +29,7 @@ class Notifier():
         self.notifier_config = notifier_config
         self.market_data = market_data
         self.last_analysis = dict()
+        self.enable_charts = False
 
         enabled_notifiers = list()
         self.logger = structlog.get_logger()
@@ -191,9 +192,13 @@ class Notifier():
                     _messages = messages[exchange][market_pair]
                     if len(_messages) == 0:
                         continue
-
+                    
                     for candle_period in _messages:
                         message = _messages[candle_period].strip()
+                        
+                        if self.enable_charts == False:
+                            self.notify_telegram_message(message)
+                            continue
 
                         market_pair = market_pair.replace('/', '_').lower()
                         chart_file = './charts/{}_{}_{}.png'.format(exchange, market_pair, candle_period)
@@ -492,3 +497,8 @@ class Notifier():
         # Merge changes from new analysis into last analysis
         self.last_analysis = {**self.last_analysis, **new_analysis}
         return new_messages
+    
+    def set_enable_charts(self, enable_charts):
+        self.enable_charts = enable_charts
+            
+        

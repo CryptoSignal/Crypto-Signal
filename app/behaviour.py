@@ -53,6 +53,8 @@ class Behaviour(IndicatorUtils):
 
         output_interface = Output()
         self.output = output_interface.dispatcher
+        
+        self.enable_charts = config.settings['enable_charts']
 
 
     def run(self, market_data, output_mode):
@@ -69,11 +71,14 @@ class Behaviour(IndicatorUtils):
 
         self.all_historical_data = self.get_all_historical_data(market_data)
 
-        self._create_charts(market_data)
-
         new_result = self._test_strategies(market_data, output_mode)
 
         self.notifier.notify_all(new_result)
+        
+        if self.enable_charts:
+            self.notifier.set_enable_charts(True)
+            self.logger.info('Option to create charts is enabled. Working...')
+            self._create_charts(market_data)
 
     def get_all_historical_data(self, market_data):
         """Get historical data for each exchange/market pair/candle period
