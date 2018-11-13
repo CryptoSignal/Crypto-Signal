@@ -8,7 +8,7 @@ import traceback
 import structlog
 import os
 
-import pandas
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -613,6 +613,24 @@ class Behaviour(IndicatorUtils):
     
         ax.yaxis.set_major_locator(mticker.MaxNLocator(nbins=5, prune='upper'))
         ax.text(0.024, 0.94, 'MACD (12, 26, close, 9)', va='top', transform=ax.transAxes, fontsize=textsize) 
+
+    def plot_ppsr(self, ax, df, candle_period):
+        """Calculate Pivot Points, Supports and Resistances for given data
+        
+        :param df: pandas.DataFrame
+        :return: pandas.DataFrame
+        """
+        PP = pd.Series((df['high'] + df['how'] + df['close']) / 3)
+        R1 = pd.Series(2 * PP - df['low'])
+        S1 = pd.Series(2 * PP - df['high'])
+        R2 = pd.Series(PP + df['high'] - df['low'])
+        S2 = pd.Series(PP - df['high'] + df['low'])
+        R3 = pd.Series(df['high'] + 2 * (PP - df['low']))
+        S3 = pd.Series(df['low'] - 2 * (df['high'] - PP))
+        psr = {'PP': PP, 'R1': R1, 'S1': S1, 'R2': R2, 'S2': S2, 'R3': R3, 'S3': S3}
+        PSR = pd.DataFrame(psr)
+        df = df.join(PSR)
+        return df
 
     def relative_strength(self, prices, n=14):
         """
