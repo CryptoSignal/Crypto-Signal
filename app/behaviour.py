@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as mticker
 
-from matplotlib.dates import DateFormatter, DayLocator,HourLocator,  WeekdayLocator, MONDAY
+from matplotlib.dates import DateFormatter
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
 
@@ -72,13 +72,13 @@ class Behaviour(IndicatorUtils):
         self.all_historical_data = self.get_all_historical_data(market_data)
 
         new_result = self._test_strategies(market_data, output_mode)
-
-        self.notifier.notify_all(new_result)
         
         if self.enable_charts:
             self.notifier.set_enable_charts(True)
             self.logger.info('Option to create charts is enabled. Working...')
             self._create_charts(market_data)
+
+        self.notifier.notify_all(new_result)
 
     def get_all_historical_data(self, market_data):
         """Get historical data for each exchange/market pair/candle period
@@ -184,21 +184,14 @@ class Behaviour(IndicatorUtils):
                 continue
 
             for indicator_conf in self.indicator_conf[indicator]:
-                if indicator_conf['enabled']:
-                    candle_period = indicator_conf['candle_period']
-                else:
-                    self.logger.debug("%s is disabled, skipping.", indicator)
+                if not indicator_conf['enabled']:
                     continue
+                    
+                candle_period = indicator_conf['candle_period']
 
-                if candle_period in historical_data_cache:
-                    self.logger.info('Reading candle data from cache for %s %s',indicator, indicator_conf['candle_period'])
-                else:
-                    self.logger.info('Re-Reading candle data from exchange for %s %s',indicator, indicator_conf['candle_period'])
-                    historical_data_cache[candle_period] = self._get_historical_data(
-                        market_pair,
-                        exchange,
-                        candle_period
-                    )
+                #Exchange doesnt support such candle period
+                if candle_period not in historical_data_cache:
+                    continue
 
                 if historical_data_cache[candle_period]:
                     analysis_args = {
@@ -236,7 +229,7 @@ class Behaviour(IndicatorUtils):
 
         informant_dispatcher = self.strategy_analyzer.informant_dispatcher()
         results = { informant: list() for informant in self.informant_conf.keys() }
-        historical_data_cache = dict()
+        historical_data_cache = self.all_historical_data[exchange][market_pair]
 
         for informant in self.informant_conf:
             if informant not in informant_dispatcher:
@@ -244,18 +237,14 @@ class Behaviour(IndicatorUtils):
                 continue
 
             for informant_conf in self.informant_conf[informant]:
-                if informant_conf['enabled']:
-                    candle_period = informant_conf['candle_period']
-                else:
-                    self.logger.debug("%s is disabled, skipping.", informant)
+                if not informant_conf['enabled']:
                     continue
 
+                candle_period = informant_conf['candle_period']
+
+                #Exchange doesnt support such candle period
                 if candle_period not in historical_data_cache:
-                    historical_data_cache[candle_period] = self._get_historical_data(
-                        market_pair,
-                        exchange,
-                        candle_period
-                    )
+                    continue
 
                 if historical_data_cache[candle_period]:
                     analysis_args = {
@@ -519,13 +508,11 @@ class Behaviour(IndicatorUtils):
                 lower = close
                 height = open - close
 
-            #from matplotlib.lines import TICKLEFT, TICKRIGHT, Line2D
-            #from matplotlib.patches import Rectangle
             vline = Line2D(
                 xdata=(t, t), ydata=(low, high),
                 color=color,
                 linewidth=0.5,
-                antialiased=True,
+                antialiased=False,
             )
 
             rect = Rectangle(
@@ -533,36 +520,42 @@ class Behaviour(IndicatorUtils):
                 width=width,
                 height=height,
                 facecolor=color,
-                edgecolor=color,
+                edgecolor=None,
+                antialiased=False,
+                alpha=1.0
             )
-            rect.set_alpha(alpha)
 
             lines.append(vline)
             patches.append(rect)
             ax.add_line(vline)
             ax.add_patch(rect)
+
         ax.autoscale_view()
 
         return lines, patches
 
     def plot_candlestick(self, ax, df, candle_period):
         textsize = 11
-        stick_width = 0.02
+
+        _time = mdates.date2num(df.index.to_pydatetime())
+        min_x = np.nanmin(_time)
+        max_x = np.nanmax(_time)
+
+        stick_width = ((max_x - min_x) / _time.size ) 
 
         prices = df["close"]
 
         ax.set_ymargin(0.2)
         ax.ticklabel_format(axis='y', style='plain')
 
-        self.candlestick_ohlc(ax, zip(mdates.date2num(df.index.to_pydatetime()),
-                            df['open'], df['high'], df['low'], df['close']),
+        self.candlestick_ohlc(ax, zip(_time, df['open'], df['high'], df['low'], df['close']),
                     width=stick_width, colorup='olivedrab', colordown='crimson')
                     
         ma25 = self.moving_average(prices, 25, type='simple')
         ma7 = self.moving_average(prices, 7, type='simple')
 
-        ax.plot(df.index, ma25, color='indigo', lw=0.5, label='MA (25)')
-        ax.plot(df.index, ma7, color='orange', lw=0.5, label='MA (7)')
+        ax.plot(df.index, ma25, color='indigo', lw=0.6, label='MA (25)')
+        ax.plot(df.index, ma7, color='orange', lw=0.6, label='MA (7)')
     
         ax.text(0.04, 0.94, 'MA (7, close, 0)', color='orange', transform=ax.transAxes, fontsize=textsize, va='top')
         ax.text(0.24, 0.94, 'MA (25, close, 0)', color='indigo', transform=ax.transAxes,  fontsize=textsize, va='top')
@@ -607,21 +600,19 @@ class Behaviour(IndicatorUtils):
         max_y = max_y * 1.2
 
         #Define candle bar width
-        bar_width = 1.2
-  
-        if(candle_period == '4h'):
-            bar_width = 0.18
+        _time = mdates.date2num(df.index.to_pydatetime())
+        min_x = np.nanmin(_time)
+        max_x = np.nanmax(_time)
 
-        if(candle_period == '1h' or candle_period == '30m' or candle_period == '15m'):
-            bar_width = 0.04
+        bar_width = ((max_x - min_x) / _time.size ) * 0.8            
 
-        ax.bar(x=df.index, bottom=[0 for _ in macd_h.index], height=macd_h, width=bar_width, color="red", alpha = 0.4)
-        ax.plot(df.index, df.macd, color='blue', lw=0.6)
-        ax.plot(df.index, df.macds, color='red', lw=0.6)
+        ax.bar(x=_time, bottom=[0 for _ in macd_h.index], height=macd_h, width=bar_width, color="red", alpha = 0.4)
+        ax.plot(_time, df.macd, color='blue', lw=0.6)
+        ax.plot(_time, df.macds, color='red', lw=0.6)
         ax.set_ylim((min_y, max_y))
     
         ax.yaxis.set_major_locator(mticker.MaxNLocator(nbins=5, prune='upper'))
-        ax.text(0.024, 0.94, 'MACD (12, 26, close, 9)', va='top', transform=ax.transAxes, fontsize=textsize)  
+        ax.text(0.024, 0.94, 'MACD (12, 26, close, 9)', va='top', transform=ax.transAxes, fontsize=textsize) 
 
     def relative_strength(self, prices, n=14):
         """
