@@ -17,7 +17,7 @@ The commands listed below are intended to be run in a terminal.
 
 1. Create a config.yml file and put it into "app" folder.
 
-1. Build your own image, for example `docker build -t laliux/crypto-signals:latest .`
+1. Build your own Docker image, for example `docker build -t laliux/crypto-signals:latest .`
 
 1. For testing and debugging run `docker run --rm -ti -v  $PWD/app:/app laliux/crypto-signals:latest`
 
@@ -30,7 +30,7 @@ All possible options for config.yml are almost the same for original CryptoSigna
 
 At the moment the only aditional option is to enable/disable charts creation.
 
-`
+```
 settings:
     log_level: INFO
     update_interval: 600
@@ -40,11 +40,11 @@ settings:
         - ETH/USDT
         - BTC/USDT
         ....
-`
+```
 
 Finally, if you want prices, you can configure your messages template.
 
-`
+```
 notifiers:
     telegram:
         required:
@@ -53,7 +53,7 @@ notifiers:
         optional:
             parse_mode: html
             template: "[{{analysis.config.candle_period}}] {{market}} {{values}} Prices: [{{prices}}]"
-`
+```
 
 
 # Liability
