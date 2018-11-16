@@ -42,7 +42,7 @@ settings:
         ....
 ```
 
-Finally, if you want prices, you can configure your messages template.
+Finally, if you want prices in your notification messages, you can use a new variable "prices".
 
 ```
 notifiers:
@@ -55,6 +55,29 @@ notifiers:
             template: "[{{analysis.config.candle_period}}] {{market}} {{values}} Prices: [{{prices}}]"
 ```
 
+By the way, to have this feature you need to configure "ohlcv" informant for each candle period of your indicators.
+
+```
+informants:
+    ....
+    bollinger_bands:
+        - enabled: false
+    ohlcv:
+        - enabled: true
+          signal:
+            - high
+            - low
+            - close
+          candle_period: 1h
+          period_count: 14
+        - enabled: true
+          signal:
+            - high
+            - low
+            - close
+          candle_period: 4h
+          period_count: 14
+```
 
 # Liability
 I am not your financial adviser, nor is this tool. Use this program as an educational tool, and nothing more. None of the contributors to this project are liable for any losses you may incur. Be wise and always do your own research.
