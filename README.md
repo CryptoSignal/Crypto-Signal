@@ -28,7 +28,11 @@ The commands listed below are intended to be run in a terminal.
 
 All possible options for config.yml are almost the same for original CryptoSignal, so look [here](docs/config.md)
 
-At the moment the only aditional option is to enable/disable charts creation.
+However there are some aditional options to use.
+
+#### Charts
+
+You can enable/disable charts creation.
 
 ```
 settings:
@@ -39,6 +43,28 @@ settings:
         - XRP/USDT
         - ETH/USDT
         - BTC/USDT
+        ....
+```
+
+#### All pairs
+
+It is very useful to process all symbols of a specific base market (BTC, ETH, USD, USDT). In this way you can avoid to write pair by pair in settings.market_pairs option.
+
+The all_pairs option must be specified by each exchange and base market. Example:
+
+```
+exchanges:
+    binance:
+        required:
+            enabled: true
+        all_pairs:
+            - USDT
+    bittrex:
+        required:
+            enabled: false
+        all_pairs:
+            - ETH
+            - BTC
         ....
 ```
 
