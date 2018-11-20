@@ -23,6 +23,7 @@ class ExchangeInterface():
 
         self.logger = structlog.get_logger()
         self.exchanges = dict()
+        self.base_markets = dict()
 
         # Loads the exchanges using ccxt.
         for exchange in exchange_config:
@@ -34,6 +35,11 @@ class ExchangeInterface():
                 # sets up api permissions for user if given
                 if new_exchange:
                     self.exchanges[new_exchange.id] = new_exchange
+                    if 'all_pairs' in exchange_config[exchange]:
+                        if len(exchange_config[exchange]['all_pairs']) > 0:
+                            self.base_markets[new_exchange.id] = exchange_config[exchange]['all_pairs']
+                        else:
+                            self.base_markets[new_exchange.id] = list()
                 else:
                     self.logger.error("Unable to load exchange %s", new_exchange)
 
@@ -135,16 +141,20 @@ class ExchangeInterface():
         exchange_markets = dict()
         for exchange in exchanges:
             exchange_markets[exchange] = self.exchanges[exchange].load_markets()
+            curr_markets = exchange_markets[exchange]
 
             if markets:
-                curr_markets = exchange_markets[exchange]
-
                 # Only retrieve markets the users specified
                 exchange_markets[exchange] = { key: curr_markets[key] for key in curr_markets if key in markets }
 
                 for market in markets:
                     if market not in exchange_markets[exchange]:
                         self.logger.info('%s has no market %s, ignoring.', exchange, market)
+            else:
+                if self.base_markets[exchange] :
+                    self.logger.info('Getting all %s market pairs for %s ' % (self.base_markets[exchange], exchange))
+                    exchange_markets[exchange] = { key: curr_markets[key] for key in curr_markets 
+                                                        if curr_markets[key]['quote'] in self.base_markets[exchange] }
 
             time.sleep(self.exchanges[exchange].rateLimit / 1000)
 
