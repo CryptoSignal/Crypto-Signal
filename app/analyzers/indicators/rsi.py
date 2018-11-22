@@ -35,7 +35,7 @@ class RSI(IndicatorUtils):
         rsi_values.rename(columns={rsi_values.columns[0]: 'rsi'}, inplace=True)
 
         if rsi_values[signal[0]].shape[0]:
-            rsi_values['is_hot'] = rsi_values[signal[0]] < hot_thresh
+            rsi_values['is_hot'] = rsi_values.rsi.apply(lambda x: x > 20 and x < hot_thresh)
             rsi_values['is_cold'] = rsi_values[signal[0]] > cold_thresh
 
         return rsi_values
