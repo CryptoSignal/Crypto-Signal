@@ -3,5 +3,6 @@ __all__ = [
     'ema',
     'sma',
     'vwap',
-    'ohlcv'
+    'ohlcv',
+    'lrsi'
 ]

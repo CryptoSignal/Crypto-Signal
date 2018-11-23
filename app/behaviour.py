@@ -194,6 +194,9 @@ class Behaviour():
                     if 'period_count' in indicator_conf:
                         analysis_args['period_count'] = indicator_conf['period_count']
 
+                    if indicator == 'rsi' and 'lrsi_filter' in indicator_conf:
+                        analysis_args['lrsi_filter'] = indicator_conf['lrsi_filter']
+
                     results[indicator].append({
                         'result': self._get_analysis_result(
                             indicator_dispatcher,

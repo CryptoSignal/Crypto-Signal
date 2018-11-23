@@ -53,7 +53,8 @@ class StrategyAnalyzer():
             'ema': ema.EMA().analyze,
             'vwap': vwap.VWAP().analyze,
             'bollinger_bands': bollinger_bands.Bollinger().analyze,
-            'ohlcv': ohlcv.OHLCV().analyze
+            'ohlcv': ohlcv.OHLCV().analyze,
+            'lrsi': lrsi.LRSI().analyze
         }
 
         return dispatcher
