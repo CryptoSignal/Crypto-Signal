@@ -220,38 +220,43 @@ class Notifier(IndicatorUtils):
 
                 for market_pair in messages[exchange]:
                     _messages = messages[exchange][market_pair]
-                    
-                    if len(_messages) == 0:
-                        continue
-                
+                                    
                     for candle_period in _messages:
-                        message = _messages[candle_period].strip()
+                        #message = _messages[candle_period].strip()
 
                         if self.enable_charts == True:
                             candles_data = self.all_historical_data[exchange][market_pair][candle_period]
                             executor.submit(notify_telegram_chart_worker, self.notify_telegram_chart, 
-                                                exchange, market_pair, candle_period, candles_data, message)
+                                                exchange, market_pair, candle_period, candles_data, _messages[candle_period])
                         else:
-                            self.notify_telegram_message(message)
+                            self.notify_telegram_message(_messages[candle_period])
 
 
-    def notify_telegram_chart(self, exchange, market_pair, candle_period, candles_data, message):
+    def notify_telegram_chart(self, exchange, market_pair, candle_period, candles_data, messages):
+        
+        if not isinstance(messages, list) or len (messages) == 0:
+            return
+            
         self.logger.info('Creating chart for %s %s %s', exchange, market_pair, candle_period)
 
         chart_file = self.create_chart(exchange, market_pair, candle_period, candles_data)
 
         if os.path.exists(chart_file):
             try:
+                message = '{} {} '.format(market_pair, candle_period)
                 self.telegram_client.send_chart(open(chart_file, 'rb'), message)
+                self.notify_telegram_message(messages)
             except (IOError, SyntaxError) :
-                self.notify_telegram_message(message)
+                self.notify_telegram_message(messages)
         else:
             self.logger.info('Chart file %s doesnt exist, sending text message.', chart_file)
-            self.notify_telegram_message(message)
+            self.notify_telegram_message(messages)
 
-    def notify_telegram_message(self, message):
+    def notify_telegram_message(self, messages):
         try:
-            self.telegram_client.notify(message)
+            if isinstance(messages, list) and len (messages) > 0:
+                for message in messages:
+                    self.telegram_client.notify(message.strip())
         except (TelegramTimedOut) as e:
             self.logger.info('Error TimeOut!')
             self.logger.info(e)
@@ -467,6 +472,9 @@ class Notifier(IndicatorUtils):
                                 continue
 
                             values = dict()
+                            if 'candle_period' in analysis['config']:
+                                candle_period = analysis['config']['candle_period']
+                                new_messages[exchange][market_pair][candle_period] = list()
 
                             if indicator_type == 'indicators':
                                 for signal in analysis['config']['signal']:
@@ -545,7 +553,8 @@ class Notifier(IndicatorUtils):
                                         analysis=analysis, status=status, last_status=last_status, 
                                         prices=prices, lrsi=lrsi)
 
-                                    new_messages[exchange][market_pair][candle_period] = new_message 
+                                    #new_messages[exchange][market_pair][candle_period] = new_message 
+                                    new_messages[exchange][market_pair][candle_period].append(new_message)
 
         # Merge changes from new analysis into last analysis
         self.last_analysis = {**self.last_analysis, **new_analysis}
