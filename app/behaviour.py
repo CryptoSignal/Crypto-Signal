@@ -46,6 +46,7 @@ class Behaviour():
         self.output = output_interface.dispatcher
         
         self.enable_charts = config.settings['enable_charts']
+        self.timezone = config.settings['timezone']
 
 
     def run(self, market_data, output_mode):
@@ -65,6 +66,7 @@ class Behaviour():
         new_result = self._test_strategies(market_data, output_mode)
         
         if self.enable_charts:
+            self.notifier.set_timezone(self.timezone)
             self.notifier.set_enable_charts(True)
             self.notifier.set_all_historical_data(self.all_historical_data)
 

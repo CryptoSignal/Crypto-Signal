@@ -9,6 +9,7 @@ settings:
   output_mode: cli
   update_interval: 300
   market_pairs: null
+  timezone: UTC
 
 exchanges: null
 

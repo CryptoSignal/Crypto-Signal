@@ -20,6 +20,8 @@ from matplotlib.dates import DateFormatter
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
 
+from datetime import datetime
+from pytz import timezone
 from stockstats import StockDataFrame
 from jinja2 import Template
 from telegram.error import TimedOut as TelegramTimedOut
@@ -51,6 +53,7 @@ class Notifier(IndicatorUtils):
         self.last_analysis = dict()
         self.enable_charts = False
         self.all_historical_data = False
+        self.timezone = None
 
         enabled_notifiers = list()
         self.logger = structlog.get_logger()
@@ -222,7 +225,6 @@ class Notifier(IndicatorUtils):
                     _messages = messages[exchange][market_pair]
                                     
                     for candle_period in _messages:
-                        #message = _messages[candle_period].strip()
 
                         if self.enable_charts == True:
                             candles_data = self.all_historical_data[exchange][market_pair][candle_period]
@@ -560,6 +562,9 @@ class Notifier(IndicatorUtils):
         self.last_analysis = {**self.last_analysis, **new_analysis}
         return new_messages
     
+    def set_timezone(self, timezone):
+        self.timezone = timezone
+
     def set_enable_charts(self, enable_charts):
         self.enable_charts = enable_charts
     
@@ -567,6 +572,9 @@ class Notifier(IndicatorUtils):
         self.all_historical_data = all_historical_data
 
     def create_chart(self, exchange, market_pair, candle_period, candles_data):
+        now = datetime.now(timezone(self.timezone))
+        creation_date = now.strftime("%Y-%m-%d %H:%M:%S")
+        
         df = self.convert_to_dataframe(candles_data)
 
         plt.rc('axes', grid=True)
@@ -609,7 +617,7 @@ class Notifier(IndicatorUtils):
 
         fig.autofmt_xdate()
 
-        title = '{} {} {}'.format(exchange, market_pair, candle_period).upper()
+        title = '{} {} {} - {}'.format(exchange, market_pair, candle_period, creation_date).upper()
         fig.suptitle(title, fontsize=14)
 
         market_pair = market_pair.replace('/', '_').lower()
