@@ -35,7 +35,8 @@ class StrategyAnalyzer():
             'momentum': momentum.Momentum().analyze,
             'mfi': mfi.MFI().analyze,
             'stoch_rsi': stoch_rsi.StochasticRSI().analyze,
-            'obv': obv.OBV().analyze
+            'obv': obv.OBV().analyze,
+            'iiv': iiv.IIV().analyze
         }
 
         return dispatcher

@@ -130,7 +130,15 @@ indicators:
       hot: true
       cold: true
       candle_period: 1d
-
+  iiv:
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - iiv
+      hot: 5
+      cold: 0
+      candle_period: 5m
 informants:
   vwap:
     - enabled: true
