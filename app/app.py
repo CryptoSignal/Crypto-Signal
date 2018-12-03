@@ -60,7 +60,7 @@ def main():
             time.sleep(60)
             num += 1
 
-    logger.info('All threads are working!')
+    logger.info('All workers are running!')
 
     for worker in thread_list:
         worker.join()
@@ -98,9 +98,9 @@ class AnalysisWorker(Thread):
 
     def run(self):
         while True:
-            self.logger.info('Starting {}'.format(self.threadName))
+            self.logger.info('Starting %s', self.threadName)
             self.behaviour.run(self.market_data, self.settings['output_mode'])
-            self.logger.info("Sleeping %s seconds for %s", self.settings['update_interval'], self.threadName)
+            self.logger.info("%s sleeping for %s seconds", self.threadName, self.settings['update_interval'])
             time.sleep(self.settings['update_interval'])
 
 if __name__ == "__main__":

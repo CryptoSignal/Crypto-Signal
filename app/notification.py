@@ -54,6 +54,7 @@ class Notifier(IndicatorUtils):
         self.enable_charts = False
         self.all_historical_data = False
         self.timezone = None
+        self.first_run = False
 
         enabled_notifiers = list()
         self.logger = structlog.get_logger()
@@ -426,8 +427,11 @@ class Notifier(IndicatorUtils):
             list: A list with the templated messages for the notifier.
         """
 
-        if not self.last_analysis:
+        if not self.last_analysis: #is the first run
             self.last_analysis = new_analysis
+            self.first_run = True
+
+        self.logger.info('Is first run: {}'.format(self.first_run))
 
         message_template = Template(template)
 
@@ -523,9 +527,15 @@ class Notifier(IndicatorUtils):
 
                                 should_alert = True
 
-                                if analysis['config']['alert_frequency'] == 'once':
-                                    if last_status == status:
-                                        should_alert = False
+                                if self.first_run:
+                                    self.logger.info('Alert once for %s %s %s', 
+                                            market_pair, indicator, candle_period)
+                                else:
+                                    if analysis['config']['alert_frequency'] == 'once':
+                                        if last_status == status:
+                                            self.logger.info('Alert frecuency once. Should alert: false. %s %s %s', 
+                                            market_pair, indicator, candle_period)
+                                            should_alert = False
 
                                 if not analysis['config']['alert_enabled']:
                                     should_alert = False
@@ -560,6 +570,10 @@ class Notifier(IndicatorUtils):
 
         # Merge changes from new analysis into last analysis
         self.last_analysis = {**self.last_analysis, **new_analysis}
+
+        if self.first_run == True:
+            self.first_run = False
+
         return new_messages
     
     def set_timezone(self, timezone):
