@@ -10,6 +10,7 @@ import logs
 import conf
 import structlog
 
+from threading import Thread
 from conf import Configuration
 from exchange import ExchangeInterface
 from notification import Notifier
@@ -37,25 +38,40 @@ def main():
         logger.info("No configured markets, using all available on exchange.")
         market_data = exchange_interface.get_exchange_markets()
         
-    notifier = Notifier(config.notifiers, market_data)
+#    notifier = Notifier(config.notifiers, market_data)
 
-    while True:
-        for exchange in market_data:
-            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+    thread_list = []
 
-                for chunk in split_market_data(market_data[exchange]):
-                    market_data_chunk = dict()
-                    market_data_chunk[exchange] = { key: market_data[exchange][key] for key in chunk }
+    for exchange in market_data:
+        num = 1
+        for chunk in split_market_data(market_data[exchange]):
+            market_data_chunk = dict()
+            market_data_chunk[exchange] = { key: market_data[exchange][key] for key in chunk }
 
-                    executor.submit(run_analysis, config, exchange_interface, notifier, market_data_chunk, settings['output_mode'])
+            notifier = Notifier(config.notifiers, market_data_chunk)
+            behaviour = Behaviour(config, exchange_interface, notifier)
 
-        logger.info("Sleeping for %s seconds", settings['update_interval'])        
-        time.sleep(settings['update_interval'])
+            workerName = "Worker-{}".format(num)
+            worker = AnalysisWorker(workerName, behaviour, notifier, market_data_chunk, settings, logger)
+            thread_list.append(worker)
+            worker.daemon = True
+            worker.start()
 
-def run_analysis(config, exchange_interface, notifier, market_data, output_mode):
+            time.sleep(60)
+            num += 1
+
+    logger.info('All threads are working!')
+
+    for worker in thread_list:
+        worker.join()
+
+def run_analysis(threadName, config, exchange_interface, notifier, market_data, settings, logger):
     behaviour = Behaviour(config, exchange_interface, notifier)
 
-    behaviour.run(market_data, output_mode)
+    while True:
+        behaviour.run(market_data, settings['output_mode'])
+        logger.info("Sleeping for %s seconds for thread %s", settings['update_interval'], threadName)
+        time.sleep(settings['update_interval'])
 
 def split_market_data(market_data):
     if len(market_data.keys()) > 20:
@@ -68,6 +84,24 @@ def chunks(l, n):
     for i in range(0, len(l), n):
         yield l[i:i + n]
 
+class AnalysisWorker(Thread):
+
+    def __init__(self, threadName, behaviour, notifier, market_data, settings, logger):
+        Thread.__init__(self)
+
+        self.threadName = threadName
+        self.behaviour = behaviour
+        self.notifier = notifier
+        self.market_data = market_data
+        self.settings = settings
+        self.logger = logger
+
+    def run(self):
+        while True:
+            self.logger.info('Starting {}'.format(self.threadName))
+            self.behaviour.run(self.market_data, self.settings['output_mode'])
+            self.logger.info("Sleeping %s seconds for %s", self.settings['update_interval'], self.threadName)
+            time.sleep(self.settings['update_interval'])
 
 if __name__ == "__main__":
     try:
