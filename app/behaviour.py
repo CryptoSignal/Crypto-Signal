@@ -65,8 +65,9 @@ class Behaviour():
 
         new_result = self._test_strategies(market_data, output_mode)
         
+        self.notifier.set_timezone(self.timezone)
+        
         if self.enable_charts:
-            self.notifier.set_timezone(self.timezone)
             self.notifier.set_enable_charts(True)
             self.notifier.set_all_historical_data(self.all_historical_data)
 

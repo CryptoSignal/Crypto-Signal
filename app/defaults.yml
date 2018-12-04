@@ -140,6 +140,17 @@ indicators:
       cold: 0
       candle_period: 5m
 informants:
+  lrsi:
+    - enabled: true
+      alert_enabled: true
+      signal:
+        - lrsi
+      candle_period: 4h
+    - enabled: true
+      alert_enabled: true
+      signal:
+        - lrsi
+      candle_period: 1d  
   vwap:
     - enabled: true
       signal:
