@@ -433,6 +433,9 @@ class Notifier(IndicatorUtils):
 
         self.logger.info('Is first run: {}'.format(self.first_run))
 
+        now = datetime.now(timezone(self.timezone))
+        creation_date = now.strftime("%Y-%m-%d %H:%M:%S")
+
         message_template = Template(template)
 
         new_messages = dict()
@@ -461,12 +464,13 @@ class Notifier(IndicatorUtils):
                                 ohlcv_values[exchange][market_pair][analysis['config']['candle_period']] = values
 
                         #Getting LRSI values
-                        for index, analysis in enumerate(new_analysis[exchange][market_pair]['informants']['lrsi']):
-                            values = dict()
-                            for signal in analysis['config']['signal']:
-                                values[signal] = analysis['result'].iloc[-1][signal]
+                        if 'lrsi' in new_analysis[exchange][market_pair]['informants']:
+                            for index, analysis in enumerate(new_analysis[exchange][market_pair]['informants']['lrsi']):
+                                values = dict()
+                                for signal in analysis['config']['signal']:
+                                    values[signal] = analysis['result'].iloc[-1][signal]
                             
-                            lrsi_values[exchange][market_pair][analysis['config']['candle_period']] = values                                 
+                                lrsi_values[exchange][market_pair][analysis['config']['candle_period']] = values                                 
 
                 for indicator_type in new_analysis[exchange][market_pair]:
                     if indicator_type == 'informants':
@@ -563,7 +567,7 @@ class Notifier(IndicatorUtils):
                                         values=values, exchange=exchange, market=market_pair, base_currency=base_currency,
                                         quote_currency=quote_currency, indicator=indicator, indicator_number=index,
                                         analysis=analysis, status=status, last_status=last_status, 
-                                        prices=prices, lrsi=lrsi)
+                                        prices=prices, lrsi=lrsi, creation_date=creation_date)
 
                                     #new_messages[exchange][market_pair][candle_period] = new_message 
                                     new_messages[exchange][market_pair][candle_period].append(new_message)
