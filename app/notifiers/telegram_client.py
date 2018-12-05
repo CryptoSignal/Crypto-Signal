@@ -53,11 +53,11 @@ class TelegramNotifier(NotifierUtils):
         stop=stop_after_attempt(6),
         wait=wait_fixed(5)
     )
-    def send_chart(self, photo_url, caption):
+    def send_chart(self, photo_url):
         """Send image chart
 
         Args:
             photo_url (str): The photo url to send.
         """
 
-        self.bot.send_photo(chat_id=self.chat_id, photo=photo_url, caption=caption, timeout=40)
+        self.bot.send_photo(chat_id=self.chat_id, photo=photo_url, timeout=40)
