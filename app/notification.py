@@ -5,7 +5,6 @@ import json
 import structlog
 import os
 import copy
-import concurrent.futures
 
 import pandas as pd
 import numpy as np
@@ -220,19 +219,17 @@ class Notifier(IndicatorUtils):
         )
 
         for exchange in messages:
-            with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-
-                for market_pair in messages[exchange]:
-                    _messages = messages[exchange][market_pair]
+            for market_pair in messages[exchange]:
+                _messages = messages[exchange][market_pair]
                                     
-                    for candle_period in _messages:
+                for candle_period in _messages:
 
-                        if self.enable_charts == True:
-                            candles_data = self.all_historical_data[exchange][market_pair][candle_period]
-                            executor.submit(notify_telegram_chart_worker, self.notify_telegram_chart, 
-                                                exchange, market_pair, candle_period, candles_data, _messages[candle_period])
-                        else:
-                            self.notify_telegram_message(_messages[candle_period])
+                    if self.enable_charts == True:
+                        candles_data = self.all_historical_data[exchange][market_pair][candle_period]
+                        self.notify_telegram_chart(exchange, market_pair, candle_period, candles_data, _messages[candle_period])
+                        #executor.submit(notify_telegram_chart_worker, self.notify_telegram_chart, exchange, market_pair, candle_period, candles_data, _messages[candle_period])
+                    else:
+                        self.notify_telegram_message(_messages[candle_period])
 
 
     def notify_telegram_chart(self, exchange, market_pair, candle_period, candles_data, messages):
@@ -246,8 +243,7 @@ class Notifier(IndicatorUtils):
 
         if os.path.exists(chart_file):
             try:
-                message = '{} {} '.format(market_pair, candle_period)
-                self.telegram_client.send_chart(open(chart_file, 'rb'), message)
+                self.telegram_client.send_chart(open(chart_file, 'rb'))
                 self.notify_telegram_message(messages)
             except (IOError, SyntaxError) :
                 self.notify_telegram_message(messages)
