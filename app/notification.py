@@ -484,7 +484,9 @@ class Notifier(IndicatorUtils):
                             values = dict()
                             if 'candle_period' in analysis['config']:
                                 candle_period = analysis['config']['candle_period']
-                                new_messages[exchange][market_pair][candle_period] = list()
+
+                                if not candle_period in new_messages[exchange][market_pair]:
+                                    new_messages[exchange][market_pair][candle_period] = list()
 
                             if indicator_type == 'indicators':
                                 for signal in analysis['config']['signal']:
@@ -532,12 +534,11 @@ class Notifier(IndicatorUtils):
                                 should_alert = True
 
                                 if self.first_run:
-                                    self.logger.info('Alert once for %s %s %s', 
-                                            market_pair, indicator, candle_period)
+                                    self.logger.info('Alert once for %s %s %s', market_pair, indicator, candle_period)
                                 else:
                                     if analysis['config']['alert_frequency'] == 'once':
                                         if last_status == status:
-                                            self.logger.info('Alert frecuency once. Should alert: false. %s %s %s', 
+                                            self.logger.info('Alert frecuency once. Dont alert. %s %s %s', 
                                             market_pair, indicator, candle_period)
                                             should_alert = False
 
@@ -569,7 +570,6 @@ class Notifier(IndicatorUtils):
                                         analysis=analysis, status=status, last_status=last_status, 
                                         prices=prices, lrsi=lrsi, creation_date=creation_date)
 
-                                    #new_messages[exchange][market_pair][candle_period] = new_message 
                                     new_messages[exchange][market_pair][candle_period].append(new_message)
 
         # Merge changes from new analysis into last analysis
