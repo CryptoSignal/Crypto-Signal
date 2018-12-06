@@ -15,3 +15,4 @@ requests==2.20.0
 PyYAML==3.12
 tulipy==0.2.1
 matplotlib==3.0.1
+scipy==1.1.0
