@@ -376,6 +376,11 @@ class Notifier(IndicatorUtils):
                             elif latest_result['is_cold']:
                                 status = 'cold'
 
+                            if 'indicator_label' in analysis['config']:
+                                indicator_label = analysis['config']['indicator_label']
+                            else:
+                                indicator_label = '{} {}'.format(indicator, analysis['config']['candle_period'])
+
                             # Save status of indicator's new analysis
                             new_analysis[exchange][market][indicator_type][indicator][index]['status'] = status
 
@@ -405,7 +410,8 @@ class Notifier(IndicatorUtils):
                                         indicator_number=index,
                                         analysis=analysis,
                                         status=status,
-                                        last_status=last_status
+                                        last_status=last_status,
+                                        indicator_label=indicator_label
                                     )
 
         # Merge changes from new analysis into last analysis
@@ -518,6 +524,11 @@ class Notifier(IndicatorUtils):
                             elif latest_result['is_cold']:
                                 status = 'cold'
 
+                            if 'indicator_label' in analysis['config']:
+                                indicator_label = analysis['config']['indicator_label']
+                            else:
+                                indicator_label = '{} {}'.format(indicator, analysis['config']['candle_period'])                                
+
                             # Save status of indicator's new analysis
                             new_analysis[exchange][market_pair][indicator_type][indicator][index]['status'] = status
 
@@ -564,7 +575,7 @@ class Notifier(IndicatorUtils):
                                         values=values, exchange=exchange, market=market_pair, base_currency=base_currency,
                                         quote_currency=quote_currency, indicator=indicator, indicator_number=index,
                                         analysis=analysis, status=status, last_status=last_status, 
-                                        prices=prices, lrsi=lrsi, creation_date=creation_date)
+                                        prices=prices, lrsi=lrsi, creation_date=creation_date, indicator_label=indicator_label)
 
                                     new_messages[exchange][market_pair][candle_period].append(new_message)
 
