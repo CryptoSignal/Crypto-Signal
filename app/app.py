@@ -65,14 +65,6 @@ def main():
     for worker in thread_list:
         worker.join()
 
-def run_analysis(threadName, config, exchange_interface, notifier, market_data, settings, logger):
-    behaviour = Behaviour(config, exchange_interface, notifier)
-
-    while True:
-        behaviour.run(market_data, settings['output_mode'])
-        logger.info("Sleeping for %s seconds for thread %s", settings['update_interval'], threadName)
-        time.sleep(settings['update_interval'])
-
 def split_market_data(market_data):
     if len(market_data.keys()) > 20:
         return list(chunks(list(market_data.keys()), 20))

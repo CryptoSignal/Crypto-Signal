@@ -10,7 +10,8 @@ RUN cd /tmp && \
   make && \
   make install
 
-ADD app/ /app
+ADD app/requirements-step-1.txt /app/requirements-step-1.txt
+ADD app/requirements-step-2.txt /app/requirements-step-2.txt
 WORKDIR /app
 
 # Pip doesn't install requirements sequentially.
