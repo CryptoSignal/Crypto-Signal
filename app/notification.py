@@ -140,7 +140,7 @@ class Notifier(IndicatorUtils):
         self.notify_twilio(new_analysis)
         self.notify_gmail(new_analysis)
         self.notify_telegram(messages)
-        self.notify_webhook(new_analysis)
+        self.notify_webhook(messages)
         self.notify_stdout(new_analysis)
 
     def notify_discord(self, new_analysis):
@@ -211,7 +211,7 @@ class Notifier(IndicatorUtils):
         """Send notifications via the telegram notifier
 
         Args:
-            new_analysis (dict): The new_analysis to send.
+            messages (dict): The notification messages to send.
         """
 
         if not self.telegram_configured:
@@ -256,26 +256,27 @@ class Notifier(IndicatorUtils):
             self.logger.info('Error TimeOut!')
             self.logger.info(e)
 
-    def notify_webhook(self, new_analysis):
-        """Send a notification via the webhook notifier
+    def notify_webhook(self, messages):
+        """Send notifications via a new webhook notifier
 
         Args:
-            new_analysis (dict): The new_analysis to send.
+            messages (dict): The notification messages to send.
         """
 
-        if self.webhook_configured:
-            for exchange in new_analysis:
-                for market in new_analysis[exchange]:
-                    for indicator_type in new_analysis[exchange][market]:
-                        for indicator in new_analysis[exchange][market][indicator_type]:
-                            for index, analysis in enumerate(new_analysis[exchange][market][indicator_type][indicator]):
-                                analysis_dict = analysis['result'].to_dict(orient='records')
-                                if analysis_dict:
-                                    new_analysis[exchange][market][indicator_type][indicator][index] = analysis_dict[-1]
-                                else:
-                                    new_analysis[exchange][market][indicator_type][indicator][index] = ''
+        if not self.webhook_configured:
+            return
 
-            self.webhook_client.notify(new_analysis)
+        #message_template = Template(self.notifier_config['telegram']['optional']['template'])
+
+        for exchange in messages:
+            for market_pair in messages[exchange]:
+                _messages = messages[exchange][market_pair]
+                                    
+                for candle_period in _messages:
+                    if not isinstance(_messages[candle_period], list) or len (_messages[candle_period]) == 0:
+                        continue
+
+                    self.webhook_client.notify(exchange, market_pair, candle_period, _messages[candle_period], self.enable_charts)          
 
     def notify_stdout(self, new_analysis):
         """Send a notification via the stdout notifier
