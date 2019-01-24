@@ -11,6 +11,7 @@ I'm making minor changes and adding some features in this repo because the origi
 - It allows to include prices as part of the notification message.
 - New configuration to easily add many coins. Check bellow for "all_pairs".
 - New config var to use a custom "indicator_label" for each configured indicator and crossovers. Mainly useful for std_crossover.
+- New indicator iiv (Increase In Volume) to try to identify a pump/dump.
 
 ## Installing And Running
 The commands listed below are intended to be run in a terminal.
@@ -106,6 +107,35 @@ informants:
           candle_period: 4h
           period_count: 14
 ```
+#### Increase In Volume indicator - iiv
+
+There is a new indicator called "iiv" enabled for default for 5m period. The hot value is 5 by default, you can adjust it as you want, may be 10 o 15. This value is a measure about how strong is the increase in volume.
+
+The main idea is to try to identify a possible pump or dump.
+
+```
+indicators:
+  iiv:
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - iiv
+      hot: 5
+      cold: 0
+      candle_period: 5m
+```
+
+If you don't want to receive such notifications just disable the iiv indicator in your config file.
+
+```
+indicators:
+  iiv:
+    - enabled: false
+      candle_period: 5m
+```
+
+Of course, this indicator can be used in other candle periods, 15m, 1h.. etc.
 
 #### Chart images on webhook
 
