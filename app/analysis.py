@@ -36,7 +36,8 @@ class StrategyAnalyzer():
             'mfi': mfi.MFI().analyze,
             'stoch_rsi': stoch_rsi.StochasticRSI().analyze,
             'obv': obv.OBV().analyze,
-            'iiv': iiv.IIV().analyze
+            'iiv': iiv.IIV().analyze,
+            'ma_ribbon': ma_ribbon.MARibbon().analyze
         }
 
         return dispatcher
