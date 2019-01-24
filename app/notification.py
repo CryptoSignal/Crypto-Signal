@@ -160,12 +160,12 @@ class Notifier():
         Args:
             new_analysis (dict): The new_analysis to send.
         """
-
         if self.gmail_configured:
             message = self._indicator_message_templater(
                 new_analysis,
                 self.notifier_config['gmail']['optional']['template']
             )
+            print(message)
             if message.strip():
                 self.gmail_client.notify(message)
 

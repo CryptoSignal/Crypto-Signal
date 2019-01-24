@@ -4,7 +4,7 @@
 import json
 
 import structlog
-
+import sys
 
 class Output():
     """ Handles outputting results to the terminal.
@@ -22,7 +22,7 @@ class Output():
         }
 
 
-    def to_cli(self, results, market_pair):
+    def to_cli(self, results, market_pair, exchange):
         """Creates the message to output to the CLI
    
         Args:
@@ -32,8 +32,7 @@ class Output():
         Returns:
             str: Completed cli message
         """
-        
-        f = open('result.log','a')
+        f = open(sys.argv[2],'a')
         normal_colour = '\u001b[0m'
         hot_colour = '\u001b[31m'
         cold_colour = '\u001b[36m'
@@ -103,7 +102,7 @@ class Output():
                         )
 
         output += '\n\n'
-        f.write(market_pair + '\n' );
+        f.write(exchange+ " " +market_pair + '\n' );
         f.close();
         return output
 

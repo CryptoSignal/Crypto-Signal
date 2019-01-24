@@ -13,6 +13,7 @@ from tenacity import RetryError
 
 from analysis import StrategyAnalyzer
 from outputs import Output
+from symbol import except_clause
 
 class Behaviour():
     """Default analyzer which gives users basic trading information.
@@ -72,6 +73,7 @@ class Behaviour():
             market_data (dict): A dictionary containing the market data of the symbols to analyze.
             output_mode (str): Which console output mode to use.
         """
+        epsilon = 0.05
 
         new_result = dict()
         for exchange in market_data:
@@ -97,33 +99,76 @@ class Behaviour():
                 #new_result[exchange][market_pair]['crossovers'] = self._get_crossover_results(
                 #    new_result[exchange][market_pair]
                 #)
-                try:
+                band_flag_waiver = False
+                di_flag_waiver = False
+                try:          
+                    upperband = new_result[exchange][market_pair]['informants']['bollinger_bands'][0]['result']['upperband'] ;
+                    upperband = upperband * (1+epsilon)
                     middleband = new_result[exchange][market_pair]['informants']['bollinger_bands'][0]['result']['middleband'] ;
                     close = new_result[exchange][market_pair]['informants']['ohlcv'][0]['result']['close'] ;
-                    delta_close_middleband = close - middleband;
+                    high = new_result[exchange][market_pair]['informants']['ohlcv'][0]['result']['high'] ;
+                    if (len(upperband) != 0) and (len(middleband) != 0):
+                        delta_close_middleband = close - middleband;
+                        delta_high_upperband = high - upperband;
+                    else:
+                        band_flag_waiver = True;
+                    
                     plus_di = new_result[exchange][market_pair]['indicators']['plus_di'][0]['result']['plus_di'] ;
                     minus_di = new_result[exchange][market_pair]['indicators']['minus_di'][0]['result']['minus_di'] ;
-                    delta_di = plus_di - minus_di;
-                    incre_seq = self._lis(delta_di.values.tolist())
-          
+                    if (len(plus_di)) and (len(minus_di)):
+                        delta_di = plus_di - minus_di;
+                        incre_seq = self._lis(delta_di.values.tolist())
+                    else:
+                        di_flag_waiver = True
+
                     if (output_mode in self.output 
-                       and len(delta_di)>0 and len(delta_close_middleband)>0 
-                       and delta_di.iloc[-1] > 0 
-                       and delta_di.iloc[-2] <= 0 
+                       and (di_flag_waiver
+                            or (len(delta_di)>0
+                                and delta_di.iloc[-1] > 0
+#                                 and self._hasMinusBefore(delta_di)
+                                ) 
+                           )
+                       
                        #remove this condi as it is not a longest-incremental sequence problem for short-term trading
                        #and delta_di.iloc[-1] == incre_seq[len(incre_seq)-1]
-                       and delta_close_middleband.iloc[-1]) > 0:
+                       
+                       and (band_flag_waiver
+                            or (len(delta_close_middleband)>0
+                                and len(delta_close_middleband)>0  
+                                and delta_close_middleband.iloc[-1] > 0 
+                                and (delta_high_upperband.iloc[-1] < 0 
+                                      or self._hasMinusBefore(delta_close_middleband, self.informant_conf["bollinger_bands"])
+                                    )
+                                )) 
+                        ):
                         output_data = deepcopy(new_result[exchange][market_pair])
                         print(
                             exchange,
-                            self.output[output_mode](output_data, market_pair),
+                            self.output[output_mode](output_data, market_pair, exchange),
                             end=''
                         )
                 except Exception as e:
-                    print("An exception occurred:" + str(e))
+                    print("An exception occurred for " + market_pair + ":" + exchange + ":" + str(e))
         # Print an empty line when complete
         print()
         return new_result
+    
+    def _hasMinusBefore(self, arr, informant):
+        n = len(arr)
+        period = informant[0]["candle_period"]
+        if period == '1d':
+            N = 10
+        elif period == '1w':
+            N = 3
+        else:
+            N = 10
+        try:
+            for index in range(n-1, n-1-N, -1):
+                if arr[index] <= 0:
+                    return True;
+            return False;
+        except Exception as e:         
+            print("An exception occurred:" + str(e))
     
     def _lis(self, arr):
         n = len(arr)
