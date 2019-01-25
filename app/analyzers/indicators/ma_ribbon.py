@@ -35,21 +35,21 @@ class MARibbon(IndicatorUtils):
                 corr[idy], pval[idy] = stats.spearmanr(ma_array[idy,:], range(len(ma_series), 0, -1))
                 dist[idy] = max(ma_array[idy,:]) - min(ma_array[idy,:])
         
-        corr_ts = pandas.Series(corr*100, index = df.index, name = "MARIBBON_CORR")
-        pval_ts = pandas.Series(pval*100, index = df.index, name = "MARIBBON_PVAL")
+        corr_ts = pandas.Series(corr*100, index = df.index, name = "MARIBBON_CORR").round(2)
+        pval_ts = pandas.Series(pval*100, index = df.index, name = "MARIBBON_PVAL").round(2)
         dist_ts = pandas.Series(dist, index = df.index, name = "MARIBBON_DIST")
         
         return pandas.concat([corr_ts, pval_ts, dist_ts] + ema_list, join='outer', axis=1)
 
-    def analyze(self, historical_data, signal=['ma_ribbon'], hot_thresh=10, cold_thresh=0):
+    def analyze(self, historical_data, pval_th, corr_th, ma_series, signal=['ma_ribbon']):
         """Performs an analysis about the increase in volumen on the historical data
 
         Args:
             historical_data (list): A matrix of historical OHCLV data.
             signal (list, optional): Defaults to ma_ribbon. The indicator line to check hot against.
-            hot_thresh (float, optional): Defaults to 10. 
-            cold_thresh: Unused
-            
+            pval_th (integer):
+            corr_th (integer): 
+            ma_series (list): 
 
         Returns:
             pandas.DataFrame: A dataframe containing the indicator and hot/cold values.
@@ -57,21 +57,19 @@ class MARibbon(IndicatorUtils):
 
         dataframe = self.convert_to_dataframe(historical_data)
         
-        ma_series = [5, 15, 25, 35, 45]
-
         ma_ribbon = self.MA_RIBBON(dataframe, ma_series)
 
+        ribbon_pval = ma_ribbon['MARIBBON_PVAL'][-1]
+        ribbon_corr = ma_ribbon['MARIBBON_CORR'][-1]
+        ribbon_prev_corr = ma_ribbon['MARIBBON_CORR'][-2]
 
-        """
-        z = np.abs(stats.zscore(dataframe['volume']))
-        filtered = dataframe.volume[(z < 3)]
-        
-        previous_mean = filtered.mean()
-        
-        dataframe[signal[0]] = dataframe['volume'] / previous_mean
-
-        dataframe['is_hot']  = dataframe[signal[0]] >= hot_thresh
+        dataframe['is_hot']  = False
         dataframe['is_cold'] = False
-        """
+
+        if ribbon_pval < pval_th:
+            if ribbon_corr >= corr_th and ribbon_corr > ribbon_prev_corr:
+                dataframe['is_hot'].iloc[-1] = True
+            if ribbon_corr <= -corr_th and ribbon_prev_corr > ribbon_corr:
+                dataframe['is_cold'].iloc[-1] = True
 
         return dataframe
