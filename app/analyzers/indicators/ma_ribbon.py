@@ -2,7 +2,7 @@
 """
 
 from scipy import stats
-from talib import abstract
+import talib
 import numpy as np
 import pandas
 
@@ -13,7 +13,7 @@ class MARibbon(IndicatorUtils):
 
     #Exponential Moving Average
     def EMA(self, df, n, field = 'close'):
-        return pandas.Series(abstract.EMA(df[field].astype('f8').values, n), name = 'EMA_' + field.upper() + '_' + str(n), index = df.index)
+        return pandas.Series(talib.EMA(df[field].astype('f8').values, n), name = 'EMA_' + field.upper() + '_' + str(n), index = df.index)
 
     def MA_RIBBON(self, df, ma_series):
         ma_array = np.zeros([len(df), len(ma_series)])
@@ -41,7 +41,7 @@ class MARibbon(IndicatorUtils):
         
         return pandas.concat([corr_ts, pval_ts, dist_ts] + ema_list, join='outer', axis=1)
 
-    def analyze(self, historical_data, pval_th, corr_th, ma_series, signal=['ma_ribbon']):
+    def analyze(self, historical_data, pval_th, corr_th, ma_series, signal=['ma_ribbon'], hot_thresh=None, cold_thresh=None):
         """Performs an analysis about the increase in volumen on the historical data
 
         Args:
@@ -59,17 +59,19 @@ class MARibbon(IndicatorUtils):
         
         ma_ribbon = self.MA_RIBBON(dataframe, ma_series)
 
-        ribbon_pval = ma_ribbon['MARIBBON_PVAL'][-1]
-        ribbon_corr = ma_ribbon['MARIBBON_CORR'][-1]
-        ribbon_prev_corr = ma_ribbon['MARIBBON_CORR'][-2]
+        ma_ribbon.rename(index=str, columns={'MARIBBON_PVAL': 'pval', 'MARIBBON_CORR': 'corr'}, inplace=True)
 
-        dataframe['is_hot']  = False
-        dataframe['is_cold'] = False
+        ribbon_pval = ma_ribbon['pval'][-1]
+        ribbon_corr = ma_ribbon['corr'][-1]
+        ribbon_prev_corr = ma_ribbon['corr'][-2]
+
+        ma_ribbon['is_hot']  = False
+        ma_ribbon['is_cold'] = False        
 
         if ribbon_pval < pval_th:
             if ribbon_corr >= corr_th and ribbon_corr > ribbon_prev_corr:
-                dataframe['is_hot'].iloc[-1] = True
+                ma_ribbon['is_hot'].iloc[-1] = True
             if ribbon_corr <= -corr_th and ribbon_prev_corr > ribbon_corr:
-                dataframe['is_cold'].iloc[-1] = True
+                ma_ribbon['is_cold'].iloc[-1] = True
 
-        return dataframe
+        return ma_ribbon
