@@ -215,6 +215,31 @@ If you have enable_charts: true, you will have a parameter "chart" in the same w
     fh.write(fileinfo['body'])
 ```
 
+### Custom Hot/Cold labels
+
+Setting a custom for the "hot" or "cold" signals allows to use a new variable in your message template.
+
+```
+indicators:
+    rsi:
+        - enabled: true
+          alert_enabled: true
+          alert_frequency: always
+          signal:
+            - rsi
+          hot: 40
+          cold: 60
+          hot_label: We Are In Oversold!
+          cold_label: Attention! Overbought!
+          candle_period: 1h
+          period_count: 13
+```
+
+Then in the message template the "hot_cold_label" variable will have one of the two possible values.
+
+```
+template: "[{{indicator_label}}] **{{hot_cold_label}}** {{market}}  Prices: [{{prices}}]"  
+```
 
 # Liability
 I am not your financial adviser, nor is this tool. Use this program as an educational tool, and nothing more. None of the contributors to this project are liable for any losses you may incur. Be wise and always do your own research.
