@@ -217,7 +217,7 @@ If you have enable_charts: true, you will have a parameter "chart" in the same w
 
 ### Custom Hot/Cold labels
 
-Setting a custom for the "hot" or "cold" signals allows to use a new variable in your message template.
+Setting a custom text for the "hot" or "cold" signals allows to have a really cool notification message.
 
 ```
 indicators:
@@ -235,7 +235,7 @@ indicators:
           period_count: 13
 ```
 
-Then in the message template the "hot_cold_label" variable will have one of the two possible values.
+So, in the message template the "hot_cold_label" variable will have one of the two possible values.
 
 ```
 template: "[{{indicator_label}}] **{{hot_cold_label}}** {{market}}  Prices: [{{prices}}]"  
