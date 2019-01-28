@@ -382,6 +382,14 @@ class Notifier(IndicatorUtils):
                             new_analysis[exchange][market][indicator_type][indicator][index]['status'] = status
 
                             if latest_result['is_hot'] or latest_result['is_cold']:
+
+                                #Custom 'hot' or 'cold' labels
+                                hot_cold_label = ''
+                                if latest_result['is_hot'] and 'hot_label' in analysis['config']:
+                                    hot_cold_label = analysis['config']['hot_label']
+                                if latest_result['is_cold'] and 'cold_label' in analysis['config']:
+                                    hot_cold_label = analysis['config']['cold_label']
+
                                 try:
                                     last_status = self.last_analysis[exchange][market][indicator_type][indicator][index]['status']
                                 except:
@@ -408,6 +416,7 @@ class Notifier(IndicatorUtils):
                                         analysis=analysis,
                                         status=status,
                                         last_status=last_status,
+                                        hot_cold_label=hot_cold_label,
                                         indicator_label=indicator_label
                                     )
 
@@ -521,12 +530,20 @@ class Notifier(IndicatorUtils):
                             if 'indicator_label' in analysis['config']:
                                 indicator_label = analysis['config']['indicator_label']
                             else:
-                                indicator_label = '{} {}'.format(indicator, analysis['config']['candle_period'])                                
+                                indicator_label = ''
 
                             # Save status of indicator's new analysis
                             new_analysis[exchange][market_pair][indicator_type][indicator][index]['status'] = status
 
                             if latest_result['is_hot'] or latest_result['is_cold']:
+
+                                #Custom 'hot' / 'cold' labels
+                                hot_cold_label = ''
+                                if latest_result['is_hot'] and 'hot_label' in analysis['config']:
+                                    hot_cold_label = analysis['config']['hot_label']
+                                if latest_result['is_cold'] and 'cold_label' in analysis['config']:
+                                    hot_cold_label = analysis['config']['cold_label']
+
                                 try:
                                     last_status = self.last_analysis[exchange][market_pair][indicator_type][indicator][index]['status']
                                 except:
@@ -581,7 +598,8 @@ class Notifier(IndicatorUtils):
                                         values=values, exchange=exchange, market=market_pair, base_currency=base_currency,
                                         quote_currency=quote_currency, indicator=indicator, indicator_number=index,
                                         analysis=analysis, status=status, last_status=last_status, 
-                                        prices=prices, lrsi=lrsi, creation_date=creation_date, indicator_label=indicator_label)                                    
+                                        prices=prices, lrsi=lrsi, creation_date=creation_date, hot_cold_label=hot_cold_label,
+                                        indicator_label=indicator_label)                                    
 
                                     new_messages[exchange][market_pair][candle_period].append(new_message)
 

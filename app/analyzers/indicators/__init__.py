@@ -6,5 +6,6 @@ __all__ = [
     'stoch_rsi',
     'mfi',
     'obv',
-    'iiv'
+    'iiv',
+    'ma_ribbon'
 ]

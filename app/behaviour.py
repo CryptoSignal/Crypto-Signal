@@ -200,6 +200,14 @@ class Behaviour():
                     if indicator == 'rsi' and 'lrsi_filter' in indicator_conf:
                         analysis_args['lrsi_filter'] = indicator_conf['lrsi_filter']
 
+                    if indicator == 'ma_ribbon':
+                        analysis_args['pval_th'] = indicator_conf['pval_th'] if 'pval_th' in indicator_conf else 20
+                        if 'ma_series' in indicator_conf:
+                            series = indicator_conf['ma_series']
+                            analysis_args['ma_series'] =  [int(i) for i in series.replace(' ','').split(',')]
+                        else:
+                            analysis_args['ma_series'] = [5, 15, 25, 35, 45]
+
                     results[indicator].append({
                         'result': self._get_analysis_result(
                             indicator_dispatcher,
