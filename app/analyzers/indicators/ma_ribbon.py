@@ -41,14 +41,16 @@ class MARibbon(IndicatorUtils):
         
         return pandas.concat([corr_ts, pval_ts, dist_ts] + ema_list, join='outer', axis=1)
 
-    def analyze(self, historical_data, pval_th, corr_th, ma_series, signal=['ma_ribbon'], hot_thresh=None, cold_thresh=None):
+    def analyze(self, historical_data, pval_th, ma_series, signal=['ma_ribbon'], 
+                hot_thresh=10, cold_thresh=-10):
         """Performs an analysis about the increase in volumen on the historical data
 
         Args:
             historical_data (list): A matrix of historical OHCLV data.
             signal (list, optional): Defaults to ma_ribbon. The indicator line to check hot against.
             pval_th (integer):
-            corr_th (integer): 
+            hot_thresh (integer):
+            cold_thresh (integer):
             ma_series (list): 
 
         Returns:
@@ -59,19 +61,19 @@ class MARibbon(IndicatorUtils):
         
         ma_ribbon = self.MA_RIBBON(dataframe, ma_series)
 
-        ma_ribbon.rename(index=str, columns={'MARIBBON_PVAL': 'pval', 'MARIBBON_CORR': 'corr'}, inplace=True)
+        ma_ribbon.rename(columns={'MARIBBON_PVAL': 'pval', 'MARIBBON_CORR': 'corr'}, inplace=True)
 
         ribbon_pval = ma_ribbon['pval'][-1]
         ribbon_corr = ma_ribbon['corr'][-1]
         ribbon_prev_corr = ma_ribbon['corr'][-2]
 
         ma_ribbon['is_hot']  = False
-        ma_ribbon['is_cold'] = False        
+        ma_ribbon['is_cold'] = False
 
         if ribbon_pval < pval_th:
-            if ribbon_corr >= corr_th and ribbon_corr > ribbon_prev_corr:
+            if ribbon_corr >= hot_thresh and ribbon_corr > ribbon_prev_corr:
                 ma_ribbon['is_hot'].iloc[-1] = True
-            if ribbon_corr <= -corr_th and ribbon_prev_corr > ribbon_corr:
+            if ribbon_corr <= cold_thresh and ribbon_prev_corr > ribbon_corr:
                 ma_ribbon['is_cold'].iloc[-1] = True
 
         return ma_ribbon

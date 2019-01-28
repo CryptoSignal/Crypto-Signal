@@ -202,7 +202,6 @@ class Behaviour():
 
                     if indicator == 'ma_ribbon':
                         analysis_args['pval_th'] = indicator_conf['pval_th'] if 'pval_th' in indicator_conf else 20
-                        analysis_args['corr_th'] = indicator_conf['corr_th'] if 'corr_th' in indicator_conf else 10
                         if 'ma_series' in indicator_conf:
                             series = indicator_conf['ma_series']
                             analysis_args['ma_series'] =  [int(i) for i in series.replace(' ','').split(',')]
