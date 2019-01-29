@@ -5,6 +5,7 @@ import json
 import structlog
 import os
 import copy
+import talib
 
 import pandas as pd
 import numpy as np
@@ -790,14 +791,17 @@ class Notifier(IndicatorUtils):
         self.candlestick_ohlc(ax, zip(_time, df['open'], df['high'], df['low'], df['close']),
                     width=stick_width, colorup='olivedrab', colordown='crimson')
                     
-        ma25 = self.moving_average(prices, 25, type='simple')
-        ma7 = self.moving_average(prices, 7, type='simple')
+        ma5  = self.EMA(df, 5)
+        ma25 = self.EMA(df, 25)
+        ma45 = self.EMA(df, 45)
 
-        ax.plot(df.index, ma25, color='indigo', lw=0.6, label='MA (25)')
-        ax.plot(df.index, ma7, color='orange', lw=0.6, label='MA (7)')
+        ax.plot(df.index, ma5, color='dodgerblue', lw=0.6, label='EMA (5)')
+        ax.plot(df.index, ma25, color='indigo', lw=0.6, label='EMA (25)')
+        ax.plot(df.index, ma45, color='darkorange', lw=0.6, label='EMA (45)')
     
-        ax.text(0.04, 0.94, 'MA (7, close, 0)', color='orange', transform=ax.transAxes, fontsize=textsize, va='top')
-        ax.text(0.24, 0.94, 'MA (25, close, 0)', color='indigo', transform=ax.transAxes,  fontsize=textsize, va='top')
+        ax.text(0.04, 0.94, 'EMA (5, close)', color='dodgerblue', transform=ax.transAxes, fontsize=textsize, va='top')
+        ax.text(0.24, 0.94, 'EMA (25, close)', color='indigo', transform=ax.transAxes,  fontsize=textsize, va='top')
+        ax.text(0.48, 0.94, 'EMA (45, close)', color='darkorange', transform=ax.transAxes,  fontsize=textsize, va='top')
 
     def plot_rsi(self, ax, df):
         textsize = 11
@@ -923,3 +927,6 @@ class Notifier(IndicatorUtils):
         a = np.convolve(x, weights, mode='full')[:len(x)]
         a[:n] = a[n]
         return a
+
+    def EMA(self, df, n, field = 'close'):
+        return pd.Series(talib.EMA(df[field].astype('f8').values, n), name = 'EMA_' + field.upper() + '_' + str(n), index = df.index)        
