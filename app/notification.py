@@ -795,9 +795,9 @@ class Notifier(IndicatorUtils):
         ma25 = self.EMA(df, 25)
         ma45 = self.EMA(df, 45)
 
-        ax.plot(df.index, ma5, color='dodgerblue', lw=0.6, label='EMA (5)')
-        ax.plot(df.index, ma25, color='indigo', lw=0.6, label='EMA (25)')
-        ax.plot(df.index, ma45, color='darkorange', lw=0.6, label='EMA (45)')
+        ax.plot(df.index, ma5, color='dodgerblue', lw=0.8, label='EMA (5)')
+        ax.plot(df.index, ma25, color='indigo', lw=0.8, label='EMA (25)')
+        ax.plot(df.index, ma45, color='darkorange', lw=0.8, label='EMA (45)')
     
         ax.text(0.04, 0.94, 'EMA (5, close)', color='dodgerblue', transform=ax.transAxes, fontsize=textsize, va='top')
         ax.text(0.24, 0.94, 'EMA (25, close)', color='indigo', transform=ax.transAxes,  fontsize=textsize, va='top')
