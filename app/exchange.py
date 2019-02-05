@@ -141,7 +141,7 @@ class ExchangeInterface():
         exchange_markets = dict()
         for exchange in exchanges:
             exchange_markets[exchange] = self.exchanges[exchange].load_markets()
-            curr_markets = exchange_markets[exchange]
+            curr_markets = {k : v for k,v in exchange_markets[exchange].items() if v['active'] == True}
 
             if markets:
                 # Only retrieve markets the users specified

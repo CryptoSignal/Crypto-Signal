@@ -81,6 +81,8 @@ class Behaviour():
         """
 
         indicator_dispatcher = self.strategy_analyzer.indicator_dispatcher()
+        informant_dispatcher = self.strategy_analyzer.informant_dispatcher()
+
         data = dict()
 
         for exchange in market_data:
@@ -107,6 +109,23 @@ class Behaviour():
                                 exchange,
                                 candle_period
                              )
+
+                for informant in self.informant_conf:
+                    if informant not in informant_dispatcher:
+                        self.logger.warn("No such informant %s, skipping.", informant)
+                        continue
+
+                    for informant_conf in self.informant_conf[informant]:
+                        if informant_conf['enabled']:
+                            candle_period = informant_conf['candle_period']
+
+                            if candle_period not in data[exchange][market_pair]:
+                                data[exchange][market_pair][candle_period] = self._get_historical_data(
+                                market_pair,
+                                exchange,
+                                candle_period
+                             )                            
+
         return data
 
     def _test_strategies(self, market_data, output_mode):
@@ -136,7 +155,7 @@ class Behaviour():
                 new_result[exchange][market_pair]['informants'] = self._get_informant_results(
                     exchange,
                     market_pair
-                )
+                )               
 
                 new_result[exchange][market_pair]['crossovers'] = self._get_crossover_results(
                     new_result[exchange][market_pair]
@@ -236,6 +255,7 @@ class Behaviour():
         historical_data_cache = self.all_historical_data[exchange][market_pair]
 
         for informant in self.informant_conf:
+            
             if informant not in informant_dispatcher:
                 self.logger.warn("No such informant %s, skipping.", informant)
                 continue
@@ -296,6 +316,8 @@ class Behaviour():
 
                 key_indicator = new_result[crossover_conf['key_indicator_type']][crossover_conf['key_indicator']][crossover_conf['key_indicator_index']]
                 crossed_indicator = new_result[crossover_conf['crossed_indicator_type']][crossover_conf['crossed_indicator']][crossover_conf['crossed_indicator_index']]
+
+                crossover_conf['candle_period'] = crossover_conf['key_indicator'] + str(crossover_conf['key_indicator_index'])
 
                 dispatcher_args = {
                     'key_indicator': key_indicator['result'],

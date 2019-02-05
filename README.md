@@ -12,6 +12,8 @@ I'm making minor changes and adding some features in this repo because the origi
 - New configuration to easily add many coins. Check bellow for "all_pairs".
 - New config var to use a custom "indicator_label" for each configured indicator and crossovers. Mainly useful for std_crossover.
 - New indicator iiv (Increase In Volume) to try to identify a pump/dump.
+- New indicator MA Ribbon
+- New config values "hot_label" and "cold_label" for each indicator setup to set custom texts instead of the typical "hot" and "cold".
 
 ## Installing And Running
 The commands listed below are intended to be run in a terminal.
@@ -137,6 +139,38 @@ indicators:
 
 Of course, this indicator can be used in other candle periods, 15m, 1h.. etc.
 
+#### Moving Average Ribbon
+
+First, read the following link to know about what it is: 
+https://www.investopedia.com/terms/m/movingaverageribbon.asp
+
+Second, the code used to implement this indicator was taken from another proyect called pyktrader2. It is not my own and therefore 
+I don't know the details about how this indicator works, so what I comment below is what I think it is. 
+
+```
+indicators:
+    ma_ribbon:
+        - enabled: true
+          alert_enabled: true
+          alert_frequency: always
+          signal:
+            - pval
+            - corr
+          hot: 10
+          cold: -10
+          hot_label: 'Uptrend is coming'
+          cold_label: 'Downtred is coming'
+          candle_period: 15m
+          pval_th: 20
+          ma_series: 5, 15, 25, 35, 45
+```
+
+The "corr" value changes from -100 to 100. When corr starts increasing from 0 to 100 we talk of an possible Uptrend, when corr goes from 0 to -100 we are entering in a Downtrend. The "hot" and "cold" values in config file are associated with such corr.
+
+To confirm the change in trend, the "pval" is used. This value changes from 0 to 100, but, when this value approaches 0 it confirms the signal given by corr.
+
+The "ma_series" config value is used to set the moving averages that will be used by the indicator.
+
 #### Chart images on webhook
 
 The config for a webhook notifier is the same as original CryptoSignal, no changes here, BUT the data sent in the request is completely different. 
@@ -181,6 +215,31 @@ If you have enable_charts: true, you will have a parameter "chart" in the same w
     fh.write(fileinfo['body'])
 ```
 
+### Custom Hot/Cold labels
+
+Setting a custom text for the "hot" or "cold" signals allows to have a really cool notification message.
+
+```
+indicators:
+    rsi:
+        - enabled: true
+          alert_enabled: true
+          alert_frequency: always
+          signal:
+            - rsi
+          hot: 40
+          cold: 60
+          hot_label: We Are In Oversold!
+          cold_label: Attention! Overbought!
+          candle_period: 1h
+          period_count: 13
+```
+
+So, in the message template the "hot_cold_label" variable will have one of the two possible values.
+
+```
+template: "[{{indicator_label}}] **{{hot_cold_label}}** {{market}}  Prices: [{{prices}}]"  
+```
 
 # Liability
 I am not your financial adviser, nor is this tool. Use this program as an educational tool, and nothing more. None of the contributors to this project are liable for any losses you may incur. Be wise and always do your own research.
