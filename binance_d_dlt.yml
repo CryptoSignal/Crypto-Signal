@@ -9,14 +9,12 @@ settings:
   output_mode: cli
   update_interval: 864000
   market_pairs:
-      - UKG/BTC
-
+    - DLT/USD  
 
 exchanges:
-    bittrex:
+    binance:
         required:
-            enabled: true
-            
+            enabled: true 
 notifiers:
   twilio:
     required:
@@ -40,11 +38,13 @@ notifiers:
       template: "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
   gmail:
     required:
-      username: null
-      password: null
-      destination_emails: null
+      username: lfz.carlos@gmail.com
+      password: 868891251q1q1q1q
+      destination_emails: 
+          - lfz.carlos@gmail.com
     optional:
       template: "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
+      
   telegram:
     required:
       token: null
@@ -74,7 +74,7 @@ indicators:
         - momentum
       hot: 0
       cold: 0
-      candle_period: 1w
+      candle_period: 1d
       period_count: 10
   adx:
     - enabled: true
@@ -84,7 +84,7 @@ indicators:
         - adx
       hot: 0
       cold: 0
-      candle_period: 1w
+      candle_period: 1d
       period_count: 10
   plus_di:
     - enabled: true
@@ -94,7 +94,7 @@ indicators:
         - plus_di
       hot: 0
       cold: 0
-      candle_period: 1w
+      candle_period: 1d
       period_count: 10
   minus_di:
     - enabled: true
@@ -104,7 +104,7 @@ indicators:
         - minus_di
       hot: 0
       cold: 0
-      candle_period: 1w
+      candle_period: 1d
       period_count: 10
   mfi:
     - enabled: true
@@ -114,7 +114,7 @@ indicators:
         - mfi
       hot: 0
       cold: 0
-      candle_period: 1w
+      candle_period: 1d
       period_count: 10
   obv:
     - enabled: true
@@ -124,7 +124,7 @@ indicators:
         - obv
       hot: 0
       cold: 0
-      candle_period: 1w
+      candle_period: 1d
   rsi:
     - enabled: true
       alert_enabled: true
@@ -133,7 +133,7 @@ indicators:
         - rsi
       hot: 30
       cold: 70
-      candle_period: 1w
+      candle_period: 1d
       period_count: 14
   stoch_rsi:
     - enabled: true
@@ -143,7 +143,7 @@ indicators:
         - stoch_rsi
       hot: 20
       cold: 80
-      candle_period: 1w
+      candle_period: 1d
       period_count: 14
   macd:
     - enabled: true
@@ -153,7 +153,7 @@ indicators:
         - macd
       hot: 0
       cold: 0
-      candle_period: 1w
+      candle_period: 1d
   ichimoku:
     - enabled: true
       alert_enabled: true
@@ -163,26 +163,26 @@ indicators:
         - leading_span_b
       hot: true
       cold: true
-      candle_period: 1w
+      candle_period: 1d
 
 informants:
   vwap:
     - enabled: true
       signal:
         - vwap
-      candle_period: 1w
+      candle_period: 1d
       period_count: 15
   sma:
     - enabled: true
       signal:
         - sma
-      candle_period: 1w
+      candle_period: 1d
       period_count: 15
   ema:
     - enabled: true
       signal:
         - ema
-      candle_period: 1w
+      candle_period: 1d
       period_count: 15
   bollinger_bands:
     - enabled: true
@@ -190,12 +190,12 @@ informants:
         - upperband
         - middleband
         - lowerband
-      candle_period: 1w
+      candle_period: 1d
   ohlcv:
     - enabled: true
       signal:
         - close
-      candle_period: 1w
+      candle_period: 1d
       period_count: 15
 
 crossovers:
