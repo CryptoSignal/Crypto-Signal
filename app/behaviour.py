@@ -254,12 +254,8 @@ class Behaviour():
         results = { informant: list() for informant in self.informant_conf.keys() }
         historical_data_cache = self.all_historical_data[exchange][market_pair]
 
-        self.logger.info('###Market pair: ' + market_pair + ', ' + str(historical_data_cache.keys()))
-
         for informant in self.informant_conf:
             
-            self.logger.info('*** market pair: ' + market_pair + ' ' +  str(informant))
-
             if informant not in informant_dispatcher:
                 self.logger.warn("No such informant %s, skipping.", informant)
                 continue
