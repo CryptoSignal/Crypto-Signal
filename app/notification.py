@@ -777,13 +777,23 @@ class Notifier(IndicatorUtils):
     def plot_candlestick(self, ax, df, candle_period):
         textsize = 11
 
+        ma5  = self.EMA(df, 5)
+        ma25 = self.EMA(df, 25)
+        ma50 = self.EMA(df, 50)
+        ma90 = self.EMA(df, 90)
+
+        if(df['close'].count() > 120):
+            df   = df.iloc[-120:]
+            ma5  = ma5.iloc[-120:]
+            ma25 = ma25.iloc[-120:]
+            ma50 = ma50.iloc[-120:]
+            ma90 = ma90.iloc[-120:]
+
         _time = mdates.date2num(df.index.to_pydatetime())
         min_x = np.nanmin(_time)
         max_x = np.nanmax(_time)
 
-        stick_width = ((max_x - min_x) / _time.size ) 
-
-        prices = df["close"]
+        stick_width = ((max_x - min_x) / _time.size )             
 
         ax.set_ymargin(0.2)
         ax.ticklabel_format(axis='y', style='plain')
@@ -791,23 +801,26 @@ class Notifier(IndicatorUtils):
         self.candlestick_ohlc(ax, zip(_time, df['open'], df['high'], df['low'], df['close']),
                     width=stick_width, colorup='olivedrab', colordown='crimson')
                     
-        ma5  = self.EMA(df, 5)
-        ma25 = self.EMA(df, 25)
-        ma45 = self.EMA(df, 45)
 
         ax.plot(df.index, ma5, color='dodgerblue', lw=0.8, label='EMA (5)')
-        ax.plot(df.index, ma25, color='indigo', lw=0.8, label='EMA (25)')
-        ax.plot(df.index, ma45, color='darkorange', lw=0.8, label='EMA (45)')
+        ax.plot(df.index, ma25, color='mediumslateblue', lw=0.8, label='EMA (25)')
+        ax.plot(df.index, ma50, color='darkorange', lw=0.8, label='EMA (50)')
+        ax.plot(df.index, ma90, color='firebrick', lw=0.8, label='EMA (90)')
     
-        ax.text(0.04, 0.94, 'EMA (5, close)', color='dodgerblue', transform=ax.transAxes, fontsize=textsize, va='top')
-        ax.text(0.24, 0.94, 'EMA (25, close)', color='indigo', transform=ax.transAxes,  fontsize=textsize, va='top')
-        ax.text(0.48, 0.94, 'EMA (45, close)', color='darkorange', transform=ax.transAxes,  fontsize=textsize, va='top')
+        ax.text(0.04, 0.94, 'EMA (5, close)', color='darkorange', transform=ax.transAxes, fontsize=textsize, va='top')
+        ax.text(0.24, 0.94, 'EMA (25, close)', color='mediumslateblue', transform=ax.transAxes,  fontsize=textsize, va='top')
+        ax.text(0.46, 0.94, 'EMA (50, close)', color='dodgerblue', transform=ax.transAxes,  fontsize=textsize, va='top')
+        ax.text(0.68, 0.94, 'EMA (90, close)', color='firebrick', transform=ax.transAxes,  fontsize=textsize, va='top')
 
     def plot_rsi(self, ax, df):
         textsize = 11
         fillcolor = 'darkmagenta'
 
         rsi = self.relative_strength(df["close"])
+
+        if(df['close'].count() > 120):
+            df = df.iloc[-120:]
+            rsi = rsi[-120:]     
 
         ax.plot(df.index, rsi, color=fillcolor, linewidth=0.5)
         ax.axhline(70, color='darkmagenta', linestyle='dashed', alpha=0.6)
@@ -825,6 +838,9 @@ class Notifier(IndicatorUtils):
 
         df = StockDataFrame.retype(df)
         df['macd'] = df.get('macd')
+
+        if(df['macd'].count() > 120):
+            df = df.iloc[-120:]
 
         min_y = df.macd.min()
         max_y = df.macd.max()
