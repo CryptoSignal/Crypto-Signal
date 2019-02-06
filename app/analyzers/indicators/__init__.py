@@ -7,5 +7,6 @@ __all__ = [
     'mfi',
     'obv',
     'iiv',
-    'ma_ribbon'
+    'ma_ribbon',
+    'ma_crossover'
 ]
