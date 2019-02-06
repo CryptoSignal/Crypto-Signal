@@ -171,6 +171,30 @@ To confirm the change in trend, the "pval" is used. This value changes from 0 to
 
 The "ma_series" config value is used to set the moving averages that will be used by the indicator.
 
+#### Moving Average Crossover
+
+It is a new indicator created with the idea of making the configuration of MA crossovers simpler and clearer. It is called "ma_crossover" and is configured into "indicators" section.
+
+```
+indicators:
+    ma_crossover:
+        - enabled: true
+          candle_period: 1h
+          alert_enabled: true
+          alert_frequency: once
+          exponential: true
+          ma_fast: 13
+          ma_slow: 30
+          signal:
+            - open
+            - close
+          hot_label: 'Uptrend is coming'
+          cold_label: 'Downtred is coming'
+          indicator_label: 'EMA 1h crossover'
+```
+
+The three basic values to configure are "exponential", "ma_slow" and "ma_fast". The "exponential" value is a true/false value indicating when to use Exponential Moving Average. If false, Simple Moving Average will be used. "ma_fast" is the number of periods to use for the fast line, and "ma_slow" is the number of periods to use for the slow line.
+
 #### Chart images on webhook
 
 The config for a webhook notifier is the same as original CryptoSignal, no changes here, BUT the data sent in the request is completely different. 
