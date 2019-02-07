@@ -209,8 +209,8 @@ class Behaviour():
                     analysis_args = {
                         'historical_data': historical_data_cache[candle_period],
                         'signal': indicator_conf['signal'],
-                        'hot_thresh': indicator_conf['hot'],
-                        'cold_thresh': indicator_conf['cold']
+                        'hot_thresh': indicator_conf['hot'] if 'hot' in indicator_conf else 0,
+                        'cold_thresh': indicator_conf['cold'] if 'cold' in indicator_conf else 0
                     }
 
                     if 'period_count' in indicator_conf:
@@ -226,6 +226,12 @@ class Behaviour():
                             analysis_args['ma_series'] =  [int(i) for i in series.replace(' ','').split(',')]
                         else:
                             analysis_args['ma_series'] = [5, 15, 25, 35, 45]
+
+                    if indicator == 'ma_crossover':
+                        analysis_args['exponential'] = indicator_conf['exponential'] if 'exponential' in indicator_conf else False
+                        analysis_args['ma_fast'] = indicator_conf['ma_fast'] if 'ma_fast' in indicator_conf else 13
+                        analysis_args['ma_slow'] = indicator_conf['ma_slow'] if 'ma_slow' in indicator_conf else 30
+
 
                     results[indicator].append({
                         'result': self._get_analysis_result(
