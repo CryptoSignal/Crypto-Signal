@@ -183,14 +183,14 @@ indicators:
           alert_enabled: true
           alert_frequency: once
           exponential: true
-          ma_fast: 13
-          ma_slow: 30
+          ma_fast: 50
+          ma_slow: 100
           signal:
             - open
             - close
           hot_label: 'Uptrend is coming'
           cold_label: 'Downtred is coming'
-          indicator_label: 'EMA 1h crossover'
+          indicator_label: 'EMA 50/100 Cross'
 ```
 
 The three basic values to configure are "exponential", "ma_slow" and "ma_fast". The "exponential" value is a true/false value indicating when to use Exponential Moving Average. If false, Simple Moving Average will be used. 
