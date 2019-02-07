@@ -193,7 +193,11 @@ indicators:
           indicator_label: 'EMA 1h crossover'
 ```
 
-The three basic values to configure are "exponential", "ma_slow" and "ma_fast". The "exponential" value is a true/false value indicating when to use Exponential Moving Average. If false, Simple Moving Average will be used. "ma_fast" is the number of periods to use for the fast line, and "ma_slow" is the number of periods to use for the slow line.
+The three basic values to configure are "exponential", "ma_slow" and "ma_fast". The "exponential" value is a true/false value indicating when to use Exponential Moving Average. If false, Simple Moving Average will be used. 
+
+"ma_fast" is the number of periods to use for the fast line, and "ma_slow" is the number of periods to use for the slow line.
+
+"signal" isn't really a meaning value for this indicator, but we have to set something because the code base requires that parameter for all indicators. So we can simply set some ohlcv value to avoid an error config.
 
 #### Chart images on webhook
 
