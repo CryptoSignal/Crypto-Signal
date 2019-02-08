@@ -137,27 +137,40 @@ class Notifier(IndicatorUtils):
             self.create_charts(messages)
 
         self.notify_slack(new_analysis)
-        self.notify_discord(new_analysis)
+        self.notify_discord(messages)
         self.notify_twilio(new_analysis)
         self.notify_gmail(new_analysis)
         self.notify_telegram(messages)
         self.notify_webhook(messages)
         self.notify_stdout(new_analysis)
 
-    def notify_discord(self, new_analysis):
+    def notify_discord(self, messages):
         """Send a notification via the discord notifier
 
         Args:
-            new_analysis (dict): The new_analysis to send.
+            messages (dict): The notification messages to send.
         """
 
-        if self.discord_configured:
-            message = self._indicator_message_templater(
-                new_analysis,
-                self.notifier_config['discord']['optional']['template']
-            )
-            if message.strip():
-                self.discord_client.notify(message)
+        if not self.discord_configured:
+            return
+
+        message_template = Template(self.notifier_config['discord']['optional']['template'])
+
+        for exchange in messages:
+            for market_pair in messages[exchange]:
+                _messages = messages[exchange][market_pair]
+                                    
+                for candle_period in _messages:
+                    if not isinstance(_messages[candle_period], list) or len (_messages[candle_period]) == 0:
+                        continue
+
+                    self.notify_discord_message(_messages[candle_period], message_template)                 
+
+    def notify_discord_message(self, messages, message_template):
+        for message in messages:
+            formatted_message = message_template.render(message)
+            
+            self.discord_client.notify(formatted_message.strip())
 
 
     def notify_slack(self, new_analysis):
@@ -266,8 +279,6 @@ class Notifier(IndicatorUtils):
 
         if not self.webhook_configured:
             return
-
-        #message_template = Template(self.notifier_config['telegram']['optional']['template'])
 
         for exchange in messages:
             for market_pair in messages[exchange]:
