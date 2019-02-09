@@ -1,44 +1,29 @@
-binance LTC/BTC
-bitfinex LTC/BTC
-binance SNT/ETH
-binance OAX/ETH
-binance LRC/BTC
-binance LRC/ETH
-binance LINK/BTC
-binance LINK/ETH
-binance MDA/BTC
-binance MDA/ETH
-bitfinex ANT/ETH
-bitfinex GOT/ETH
-binance OAX/BTC
-bitfinex OMN/BTC
-bitfinex DGB/BTC
-binance EVX/BTC
-binance EVX/ETH
-bitfinex BSV/BTC
-bitfinex BAB/BTC
-bitfinex RBT/BTC
-binance VIB/ETH
-bitfinex RIF/BTC
-binance ARK/ETH
-binance XRP/BTC
-binance XRP/ETH
-binance ENJ/ETH
-binance KMD/BTC
-binance KMD/ETH
-binance ADA/ETH
-binance WAVES/BTC
-binance WAVES/ETH
-binance BRD/ETH
-binance EDO/BTC
-binance EDO/ETH
-binance WINGS/BTC
-binance WINGS/ETH
-binance VIBE/BTC
-binance VIBE/ETH
-binance RLC/BTC
-binance RLC/ETH
-binance INS/BTC
-binance INS/ETH
-binance PIVX/ETH
-binance IOST/ETH
+BNBUSD
+TUSDUSD
+TRXUSD
+PAXUSD
+BCHABCUSD
+BCHSVUSD
+USDCUSD
+LINKUSD
+WAVESUSD
+BTTUSD
+OAXUSD
+LRCUSD
+MDAUSD
+EVXUSD
+XRPUSD
+ADXUSD
+WABIUSD
+EDOUSD
+WINGSUSD
+VIBEUSD
+RLCUSD
+INSUSD
+IOSTUSD
+AGIUSD
+ARDRUSD
+HCUSD
+RVNUSD
+MITHUSD
+RENUSD

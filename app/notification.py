@@ -9,7 +9,7 @@ from notifiers.twilio_client import TwilioNotifier
 from notifiers.slack_client import SlackNotifier
 from notifiers.discord_client import DiscordNotifier
 from notifiers.gmail_client import GmailNotifier
-from notifiers.telegram_client import TelegramNotifier
+#from notifiers.telegram_client import TelegramNotifier
 from notifiers.webhook_client import WebhookNotifier
 from notifiers.stdout_client import StdoutNotifier
 
@@ -66,14 +66,14 @@ class Notifier():
             enabled_notifiers.append('gmail')
 
         self.telegram_configured = self._validate_required_config('telegram', notifier_config)
-        if self.telegram_configured:
-            self.telegram_client = TelegramNotifier(
-                token=notifier_config['telegram']['required']['token'],
-                chat_id=notifier_config['telegram']['required']['chat_id'],
-                parse_mode=notifier_config['telegram']['optional']['parse_mode']
-            )
-            enabled_notifiers.append('telegram')
-
+#        if self.telegram_configured:
+#            self.telegram_client = TelegramNotifier(
+#                token=notifier_config['telegram']['required']['token'],
+#                chat_id=notifier_config['telegram']['required']['chat_id'],
+#                parse_mode=notifier_config['telegram']['optional']['parse_mode']
+#            )
+#           enabled_notifiers.append('telegram')
+#
         self.webhook_configured = self._validate_required_config('webhook', notifier_config)
         if self.webhook_configured:
             self.webhook_client = WebhookNotifier(
