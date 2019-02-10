@@ -6,12 +6,12 @@ crossovers:
     key_signal: close}
 exchanges:
   huobipro:
-    required: {enabled: false}
+    required: {enabled: true}
 indicators:
   adx:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 4h
+    candle_period: 30m
     cold: 0
     enabled: true
     hot: 0
@@ -20,7 +20,7 @@ indicators:
   ichimoku:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 4h
+    candle_period: 30m
     cold: true
     enabled: true
     hot: true
@@ -28,7 +28,7 @@ indicators:
   macd:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 4h
+    candle_period: 30m
     cold: 0
     enabled: true
     hot: 0
@@ -36,7 +36,7 @@ indicators:
   mfi:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 4h
+    candle_period: 30m
     cold: 0
     enabled: true
     hot: 0
@@ -45,7 +45,7 @@ indicators:
   minus_di:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 4h
+    candle_period: 30m
     cold: 0
     enabled: true
     hot: 0
@@ -54,7 +54,7 @@ indicators:
   momentum:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 4h
+    candle_period: 30m
     cold: 0
     enabled: true
     hot: 0
@@ -63,7 +63,7 @@ indicators:
   obv:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 4h
+    candle_period: 30m
     cold: 0
     enabled: true
     hot: 0
@@ -71,7 +71,7 @@ indicators:
   plus_di:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 4h
+    candle_period: 30m
     cold: 0
     enabled: true
     hot: 0
@@ -80,7 +80,7 @@ indicators:
   rsi:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 4h
+    candle_period: 30m
     cold: 70
     enabled: true
     hot: 30
@@ -89,7 +89,7 @@ indicators:
   stoch_rsi:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 4h
+    candle_period: 30m
     cold: 80
     enabled: true
     hot: 20
@@ -97,26 +97,26 @@ indicators:
     signal: [stoch_rsi]
 informants:
   bollinger_bands:
-  - candle_period: 4h
+  - candle_period: 30m
     enabled: true
     signal: [upperband, middleband, lowerband]
   ema:
-  - candle_period: 4h
+  - candle_period: 30m
     enabled: true
     period_count: 15
     signal: [ema]
   ohlcv:
-  - candle_period: 4h
+  - candle_period: 30m
     enabled: true
     period_count: 15
     signal: [close]
   sma:
-  - candle_period: 4h
+  - candle_period: 30m
     enabled: true
     period_count: 15
     signal: [sma]
   vwap:
-  - candle_period: 4h
+  - candle_period: 30m
     enabled: true
     period_count: 15
     signal: [vwap]
@@ -220,4 +220,4 @@ settings:
     UIP/ETH, BFT/ETH, POWR/ETH, ZEN/ETH, REQ/ETH, DBC/ETH, ARDR/ETH, PROPY/ETH, TNT/ETH,
     LYM/ETH, ENG/ETH, QSP/ETH, OST/ETH, GAS/ETH, RCN/ETH, PC/ETH, EGCC/ETH]
   output_mode: cli
-  update_interval: 14400
+  update_interval: 1800

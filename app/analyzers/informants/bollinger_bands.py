@@ -7,12 +7,12 @@ import tulipy
 import numpy
 import pandas
 #from talib import abstract
-
+ 
 from analyzers.utils import IndicatorUtils
 
 
 class Bollinger(IndicatorUtils):
-    def analyze(self, historical_data, period_count=21):
+    def analyze(self, historical_data, period_count=20):
         """Performs a bollinger band analysis on the historical data
 
         Args:

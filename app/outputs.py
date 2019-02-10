@@ -22,7 +22,7 @@ class Output():
         }
 
 
-    def to_cli(self, results, market_pair, exchange):
+    def to_cli(self, results, criteriaType, market_pair, exchange):
         """Creates the message to output to the CLI
    
         Args:
@@ -87,12 +87,13 @@ class Output():
                     else:
                         formatted_values = list()
                         for signal in analysis['config']['signal']:
-                            value = analysis['result'].iloc[-1][signal]
-                            if isinstance(value, float):
-                                formatted_values.append(format(value, '.8f'))
-                            else:
-                                formatted_values.append(value)
-                            formatted_string = '/'.join(formatted_values)
+                            if signal != 'kdj': 
+                                value = analysis['result'].iloc[-1][signal]
+                                if isinstance(value, float):
+                                    formatted_values.append(format(value, '.8f'))
+                                else:
+                                    formatted_values.append(value)
+                                formatted_string = '/'.join(formatted_values)
 
                         output += "{}{}: {}{} \t".format(
                             colour_code,
@@ -102,7 +103,7 @@ class Output():
                         )
 
         output += '\n\n'
-        f.write(exchange+ " " +market_pair + '\n' );
+        f.write(exchange+ " " + criteriaType + " " + "https://www.tradingview.com/symbols/" + market_pair.replace('/','') + '\n' );
         f.close();
         return output
 

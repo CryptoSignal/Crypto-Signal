@@ -38,16 +38,17 @@ class GmailNotifier(NotifierUtils):
         Returns:
             dict: A dictionary containing the result of the attempt to send the email.
         """
-
         header = 'From: %s\n' % self.username
         header += 'To: %s\n' % self.destination_addresses
         header += 'Content-Type: text/plain\n'
-        header += 'Subject: Crypto-signal alert!\n\n'
+        header += 'Subject: signal alert!\n\n'
         message = header + message
 
         smtp_handler = smtplib.SMTP(self.smtp_server)
+        smtp_handler.ehlo()
         smtp_handler.starttls()
         smtp_handler.login(self.username, self.password)
-        result = smtp_handler.sendmail(self.username, self.destination_addresses, message)
+        addressList = self.destination_addresses.split(",")   
+        result = smtp_handler.sendmail(self.username, addressList, message)
         smtp_handler.quit()
         return result

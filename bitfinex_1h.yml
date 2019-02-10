@@ -11,7 +11,7 @@ indicators:
   adx:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 6h
+    candle_period: 1h
     cold: 0
     enabled: true
     hot: 0
@@ -20,7 +20,7 @@ indicators:
   ichimoku:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 6h
+    candle_period: 1h
     cold: true
     enabled: true
     hot: true
@@ -28,7 +28,7 @@ indicators:
   macd:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 6h
+    candle_period: 1h
     cold: 0
     enabled: true
     hot: 0
@@ -36,7 +36,7 @@ indicators:
   mfi:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 6h
+    candle_period: 1h
     cold: 0
     enabled: true
     hot: 0
@@ -45,7 +45,7 @@ indicators:
   minus_di:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 6h
+    candle_period: 1h
     cold: 0
     enabled: true
     hot: 0
@@ -54,7 +54,7 @@ indicators:
   momentum:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 6h
+    candle_period: 1h
     cold: 0
     enabled: true
     hot: 0
@@ -63,7 +63,7 @@ indicators:
   obv:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 6h
+    candle_period: 1h
     cold: 0
     enabled: true
     hot: 0
@@ -71,7 +71,7 @@ indicators:
   plus_di:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 6h
+    candle_period: 1h
     cold: 0
     enabled: true
     hot: 0
@@ -80,7 +80,7 @@ indicators:
   rsi:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 6h
+    candle_period: 1h
     cold: 70
     enabled: true
     hot: 30
@@ -89,34 +89,42 @@ indicators:
   stoch_rsi:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 6h
+    candle_period: 1h
     cold: 80
     enabled: true
     hot: 20
     period_count: 14
     signal: [stoch_rsi]
+  kdj:
+  - alert_enabled: true
+    alert_frequency: once
+    candle_period: 1h
+    enabled: true
+    signal: [kdj]
+    hot: 0
+    cold: 0
 informants:
   bollinger_bands:
-  - candle_period: 6h
+  - candle_period: 1h
     enabled: true
     signal: [upperband, middleband, lowerband]
   ema:
-  - candle_period: 6h
+  - candle_period: 1h
     enabled: true
     period_count: 15
     signal: [ema]
   ohlcv:
-  - candle_period: 6h
+  - candle_period: 1h
     enabled: true
     period_count: 15
     signal: [close]
   sma:
-  - candle_period: 6h
+  - candle_period: 1h
     enabled: true
     period_count: 15
     signal: [sma]
   vwap:
-  - candle_period: 6h
+  - candle_period: 1h
     enabled: true
     period_count: 15
     signal: [vwap]
@@ -133,10 +141,10 @@ notifiers:
 
         '' -}}'}
     required:
-            enable: true
-            destination_emails: [lfz.carlos@gmail.com,502118525@QQ.com]
-            password: 868891251q1q1q1q
-            username: lfz.carlos@gmail.com
+      destination_emails: [lfz.carlos@gmail.com,502118525@QQ.com]
+      enable: true
+      password: 868891251q1q1q1q
+      username: lfz.carlos@gmail.com
   slack:
     optional: {template: '{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}}
         is {{status}}!{{ ''
@@ -167,14 +175,14 @@ notifiers:
 settings:
   log_level: INFO
   log_mode: text
-  market_pairs: [LTC/BTC, ETH/BTC, EOS/BTC, XRP/BTC, BAB/BTC, XMR/BTC, BSV/BTC, NEO/BTC,
-    DASH/BTC, ZEC/BTC, ETC/BTC, TRX/BTC, BTG/BTC, XLM/BTC, XTZ/BTC, RIF/BTC, VET/BTC,
-    ETP/BTC, QTUM/BTC, XVG/BTC, OMN/BTC, IQX/BTC, DGB/BTC, RBT/BTC, ANT/BTC, AIO/BTC,
-    BCI/BTC, PAI/BTC, BTC/USD, ETH/USD, LTC/USD, EOS/USD, XRP/USD, UST/USD, BAB/USD,
-    NEO/USD, ETC/USD, BSV/USD, XMR/USD, ZEC/USD, DASH/USD, TRX/USD, BTG/USD, XLM/USD,
-    ETP/USD, QTUM/USD, UDC/USD, RIF/USD, TSD/USD, VET/USD, WLO/USD, XTZ/USD, XVG/USD,
-    IQX/USD, GOT/USD, PAX/USD, XRA/USD, DGB/USD, GSD/USD, RBT/USD, AIO/USD, PAI/USD,
-    ANT/USD, OMN/USD, BCI/USD, EOS/ETH, NEO/ETH, XLM/ETH, GOT/ETH, VET/ETH, TRX/ETH,
-    ETP/ETH, QTUM/ETH, XVG/ETH, XRA/ETH, ANT/ETH, AIO/ETH]
+  market_pairs: [LTC/BTC, ETH/BTC, EOS/BTC, XRP/BTC, XMR/BTC, NEO/BTC, BAB/BTC, BSV/BTC,
+    ETC/BTC, ZEC/BTC, RIF/BTC, XTZ/BTC, DASH/BTC, VET/BTC, TRX/BTC, BTG/BTC, PAI/BTC,
+    XLM/BTC, ETP/BTC, QTUM/BTC, DGB/BTC, RBT/BTC, XVG/BTC, AIO/BTC, BCI/BTC, OMN/BTC,
+    ANT/BTC, IQX/BTC, BTC/USD, ETH/USD, LTC/USD, EOS/USD, XRP/USD, NEO/USD, UST/USD,
+    BAB/USD, ETC/USD, XMR/USD, DASH/USD, ZEC/USD, BSV/USD, BTG/USD, TRX/USD, RIF/USD,
+    XLM/USD, ETP/USD, PAI/USD, QTUM/USD, VET/USD, WLO/USD, XTZ/USD, TSD/USD, XRA/USD,
+    UDC/USD, RBT/USD, IQX/USD, ANT/USD, GSD/USD, BCI/USD, DGB/USD, PAX/USD, XVG/USD,
+    GOT/USD, OMN/USD, AIO/USD, EOS/ETH, NEO/ETH, VET/ETH, TRX/ETH, XLM/ETH, QTUM/ETH,
+    ETP/ETH, XRA/ETH, AIO/ETH, GOT/ETH, XVG/ETH, ANT/ETH]
   output_mode: cli
   update_interval: 14400

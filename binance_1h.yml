@@ -11,7 +11,7 @@ indicators:
   adx:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 1w
+    candle_period: 1h
     cold: 0
     enabled: true
     hot: 0
@@ -20,7 +20,7 @@ indicators:
   ichimoku:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 1w
+    candle_period: 1h
     cold: true
     enabled: true
     hot: true
@@ -28,7 +28,7 @@ indicators:
   macd:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 1w
+    candle_period: 1h
     cold: 0
     enabled: true
     hot: 0
@@ -36,7 +36,7 @@ indicators:
   mfi:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 1w
+    candle_period: 1h
     cold: 0
     enabled: true
     hot: 0
@@ -45,7 +45,7 @@ indicators:
   minus_di:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 1w
+    candle_period: 1h
     cold: 0
     enabled: true
     hot: 0
@@ -54,7 +54,7 @@ indicators:
   momentum:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 1w
+    candle_period: 1h
     cold: 0
     enabled: true
     hot: 0
@@ -63,7 +63,7 @@ indicators:
   obv:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 1w
+    candle_period: 1h
     cold: 0
     enabled: true
     hot: 0
@@ -71,7 +71,7 @@ indicators:
   plus_di:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 1w
+    candle_period: 1h
     cold: 0
     enabled: true
     hot: 0
@@ -80,7 +80,7 @@ indicators:
   rsi:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 1w
+    candle_period: 1h
     cold: 70
     enabled: true
     hot: 30
@@ -89,7 +89,7 @@ indicators:
   stoch_rsi:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 1w
+    candle_period: 1h
     cold: 80
     enabled: true
     hot: 20
@@ -98,33 +98,33 @@ indicators:
   kdj:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: 1w
+    candle_period: 1h
     enabled: true
     signal: [kdj]
     hot: 0
     cold: 0
 informants:
   bollinger_bands:
-  - candle_period: 1w
+  - candle_period: 1h
     enabled: true
     signal: [upperband, middleband, lowerband]
   ema:
-  - candle_period: 1w
+  - candle_period: 1h
     enabled: true
     period_count: 15
     signal: [ema]
   ohlcv:
-  - candle_period: 1w
+  - candle_period: 1h
     enabled: true
     period_count: 15
     signal: [close]
   sma:
-  - candle_period: 1w
+  - candle_period: 1h
     enabled: true
     period_count: 15
     signal: [sma]
   vwap:
-  - candle_period: 1w
+  - candle_period: 1h
     enabled: true
     period_count: 15
     signal: [vwap]
@@ -212,4 +212,4 @@ settings:
     IOTX/ETH, SNM/ETH, CDT/ETH, BTG/ETH, LEND/ETH, RCN/ETH, KEY/ETH, BCPT/ETH, NAV/ETH,
     FUN/ETH, QSP/ETH, SNGLS/ETH, YOYO/ETH, GXS/ETH, NXS/ETH, DNT/ETH, BRD/ETH]
   output_mode: cli
-  update_interval: 86400
+  update_interval: 14400

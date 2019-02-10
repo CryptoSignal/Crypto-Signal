@@ -4,6 +4,8 @@
 import json
 import structlog
 from jinja2 import Template
+import sys 
+import extractCoins
 
 from notifiers.twilio_client import TwilioNotifier
 from notifiers.slack_client import SlackNotifier
@@ -88,7 +90,7 @@ class Notifier():
             self.stdout_client = StdoutNotifier()
             enabled_notifiers.append('stdout')
 
-        self.logger.info('enabled notifers: %s', enabled_notifiers)
+        self.logger.info('enabled notifiers: %s', enabled_notifiers)
 
 
     def notify_all(self, new_analysis):
@@ -165,7 +167,6 @@ class Notifier():
                 new_analysis,
                 self.notifier_config['gmail']['optional']['template']
             )
-            print(message)
             if message.strip():
                 self.gmail_client.notify(message)
 
@@ -256,6 +257,14 @@ class Notifier():
 
         message_template = Template(template)
         new_message = str()
+        
+        #extractCoins.matchCoinPairsToUsdt(sys.argv[2]);
+        file = open(sys.argv[2], mode='r')
+        text = file.read()
+        new_message = new_message + sys.argv[2] + "\n"
+        new_message = new_message + text
+        file.close()
+        
         for exchange in new_analysis:
             for market in new_analysis[exchange]:
                 for indicator_type in new_analysis[exchange][market]:
@@ -270,11 +279,22 @@ class Notifier():
 
                             if indicator_type == 'indicators':
                                 for signal in analysis['config']['signal']:
+                                    
                                     latest_result = analysis['result'].iloc[-1]
-
-                                    values[signal] = analysis['result'].iloc[-1][signal]
-                                    if isinstance(values[signal], float):
-                                        values[signal] = format(values[signal], '.8f')
+                                    if signal == 'kdj':
+                                        values['k'] = analysis['result'].iloc[-1]['k']
+                                        values['d'] = analysis['result'].iloc[-1]['d']
+                                        values['j'] = analysis['result'].iloc[-1]['j']
+                                        if isinstance(values['k'], float):
+                                            values['k'] = format(values['k'], '.8f')
+                                        if isinstance(values['d'], float):
+                                            values['d'] = format(values['d'], '.8f')
+                                        if isinstance(values['j'], float):
+                                            values['j'] = format(values['j'], '.8f')
+                                    else:
+                                        values[signal] = analysis['result'].iloc[-1][signal]
+                                        if isinstance(values[signal], float):
+                                            values[signal] = format(values[signal], '.8f')
                             elif indicator_type == 'crossovers':
                                 latest_result = analysis['result'].iloc[-1]
 
@@ -319,7 +339,7 @@ class Notifier():
                                 if not analysis['config']['alert_enabled']:
                                     should_alert = False
 
-                                if should_alert:
+                                if False and should_alert:
                                     base_currency, quote_currency = market.split('/')
                                     new_message += message_template.render(
                                         values=values,
@@ -333,7 +353,6 @@ class Notifier():
                                         status=status,
                                         last_status=last_status
                                     )
-
         # Merge changes from new analysis into last analysis
         self.last_analysis = {**self.last_analysis, **new_analysis}
         return new_message

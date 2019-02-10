@@ -14,6 +14,11 @@ from tenacity import RetryError
 from analysis import StrategyAnalyzer
 from outputs import Output
 from symbol import except_clause
+import numpy as np
+
+
+import sys
+from _ast import Or
 
 class Behaviour():
     """Default analyzer which gives users basic trading information.
@@ -61,11 +66,15 @@ class Behaviour():
 
         self.logger.info("Using the following exchange(s): %s", list(market_data.keys()))
 
+        self.truncateFile()
         new_result = self._test_strategies(market_data, output_mode)
 
         self.notifier.notify_all(new_result)
 
-
+    def truncateFile(self):
+        f = open(sys.argv[2],'r+')
+        f.truncate()
+        
     def _test_strategies(self, market_data, output_mode):
         """Test the strategies and perform notifications as required
 
@@ -73,16 +82,12 @@ class Behaviour():
             market_data (dict): A dictionary containing the market data of the symbols to analyze.
             output_mode (str): Which console output mode to use.
         """
-        epsilon = 0.05
-
         new_result = dict()
         for exchange in market_data:
-#             self.logger.info("Beginning analysis of %s", exchange)
             if exchange not in new_result:
                 new_result[exchange] = dict()
 
             for market_pair in market_data[exchange]:
-#                 self.logger.info("Beginning analysis of %s", market_pair)
                 if market_pair not in new_result[exchange]:
                     new_result[exchange][market_pair] = dict()
 
@@ -95,63 +100,253 @@ class Behaviour():
                     exchange,
                     market_pair
                 )
-
-                #new_result[exchange][market_pair]['crossovers'] = self._get_crossover_results(
-                #    new_result[exchange][market_pair]
-                #)
+                
                 band_flag_waiver = False
                 di_flag_waiver = False
                 try:          
+                    
                     upperband = new_result[exchange][market_pair]['informants']['bollinger_bands'][0]['result']['upperband'] ;
-                    upperband = upperband * (1+epsilon)
                     middleband = new_result[exchange][market_pair]['informants']['bollinger_bands'][0]['result']['middleband'] ;
+                    lowerband = new_result[exchange][market_pair]['informants']['bollinger_bands'][0]['result']['lowerband'] ;
+                    low = new_result[exchange][market_pair]['informants']['ohlcv'][0]['result']['low'] ;
                     close = new_result[exchange][market_pair]['informants']['ohlcv'][0]['result']['close'] ;
                     high = new_result[exchange][market_pair]['informants']['ohlcv'][0]['result']['high'] ;
-                    if (len(upperband) != 0) and (len(middleband) != 0):
-                        delta_close_middleband = close - middleband;
-                        delta_high_upperband = high - upperband;
-                    else:
-                        band_flag_waiver = True;
-                    
                     plus_di = new_result[exchange][market_pair]['indicators']['plus_di'][0]['result']['plus_di'] ;
                     minus_di = new_result[exchange][market_pair]['indicators']['minus_di'][0]['result']['minus_di'] ;
-                    if (len(plus_di)) and (len(minus_di)):
-                        delta_di = plus_di - minus_di;
-                        incre_seq = self._lis(delta_di.values.tolist())
-                    else:
-                        di_flag_waiver = True
+                    delta_di = plus_di - minus_di
+                    macd = new_result[exchange][market_pair]['indicators']['macd'][0]['result']['macd'];
+                    macd_signal = new_result[exchange][market_pair]['indicators']['macd'][0]['result']['macdsignal'];
+                    delta_macd = new_result[exchange][market_pair]['indicators']['macd'][0]['result']['macdhist'];
+                    ema = new_result[exchange][market_pair]['informants']['ema'][0]['result'];
+                    kt = new_result[exchange][market_pair]['indicators']['kdj'][0]['result']['k'];
+                    dt = new_result[exchange][market_pair]['indicators']['kdj'][0]['result']['d'];
+                    jt = new_result[exchange][market_pair]['indicators']['kdj'][0]['result']['j'];
+                    
+                    #core algorithm 1:
+#                     if (len(upperband) != 0) and (len(middleband) != 0):
+#                         delta_close_middleband = close - middleband;
+#                         delta_high_upperband = high - upperband;
+#                     else:
+#                         band_flag_waiver = True;
+#                     
+#                     if (len(plus_di)) and (len(minus_di)):
+#                         delta_di = plus_di - minus_di;
+#                         incre_seq = self._lis(delta_di.values.tolist())
+#                     else:
+#                         di_flag_waiver = True
+# 
+#                     if (output_mode in self.output 
+#                        and (di_flag_waiver
+#                             or (len(delta_di)>0
+#                                 and delta_di.iloc[-1] > 0
+# #                                 and self._hasMinusBefore(delta_di)
+#                                 ) 
+#                            )
+#                        and (band_flag_waiver
+#                             or (len(delta_close_middleband)>0
+#                                 and len(delta_close_middleband)>0  
+#                                 and delta_close_middleband.iloc[-1] > 0 
+#                                 and (delta_high_upperband.iloc[-1] < 0 
+#                                       or self._hasMinusBefore(delta_close_middleband, self.informant_conf["bollinger_bands"])
+#                                     )
+#                                 )) 
+#                         ):
+#                         output_data = deepcopy(new_result[exchange][market_pair])
+#                         print(
+#                             exchange,
+#                             self.output[output_mode](output_data, market_pair, exchange),
+#                             end=''
+#                         )
+                        ##################################################
+                        
+                     #core algorithm 2:
+                    
+#                     yiZiChangShe 
+#                     fluatuateFlag = (delta_macd[len(delta_macd)-1] >= 0 and delta_macd[len(delta_macd)-1] <= 0.0001) and 
+#                            (delta_macd[len(delta_macd)-2] >= 0 and delta_macd[len(delta_macd)-2] <= 0.0001) and
+#                            macd_history[len(delta_macd)-1] >= 0; 
+#                     if( market_pair.endswith("BTC") ):
+#                         lowPositionFluctuateFlag = fluatuateFlag and (macd_history[len(delta_macd)-1] <= 0.0001);
+#                     elif( market_pair.endswith("USDT") or market_pair.endswith("USD") ):
+#                         lowPositionFluctuateFlag = fluatuateFlag and (macd_history[len(delta_macd)-1] <= 0.0005);
+#                          
+                    # goldenFork
+                    intersectionValueAndMin = [0,0]
+                    goldenForkMacd = (
+                        
+                        (delta_macd[len(delta_macd)-1] >= 0  and delta_macd[len(delta_macd)-2] <= 0 
+                         and self.isTheIntersectionPointCloseToBePositive(macd, macd_signal, 1, intersectionValueAndMin)) or
+                                  
+                        (delta_macd[len(delta_macd)-1] >= 0  and delta_macd[len(delta_macd)-2] >= 0 and delta_macd[len(delta_macd)-3] <= 0 
+                         and self.isTheIntersectionPointCloseToBePositive(macd, macd_signal, 2, intersectionValueAndMin)) or
+                        
+                        (delta_macd[len(delta_macd)-1] >= 0  and delta_macd[len(delta_macd)-2] >= 0 and delta_macd[len(delta_macd)-3] >= 0 
+                         and delta_macd[len(delta_macd)-4] <= 0 
+                         and self.isTheIntersectionPointCloseToBePositive(macd, macd_signal, 3, intersectionValueAndMin))
+                    )
+                    
+                    #flatMacd
+#                     flatMacd = (self.lastNMacdsArePositive(delta_macd, macd, 7))
 
-                    if (output_mode in self.output 
-                       and (di_flag_waiver
-                            or (len(delta_di)>0
-                                and delta_di.iloc[-1] > 0
-#                                 and self._hasMinusBefore(delta_di)
-                                ) 
-                           )
-                       
-                       #remove this condi as it is not a longest-incremental sequence problem for short-term trading
-                       #and delta_di.iloc[-1] == incre_seq[len(incre_seq)-1]
-                       
-                       and (band_flag_waiver
-                            or (len(delta_close_middleband)>0
-                                and len(delta_close_middleband)>0  
-                                and delta_close_middleband.iloc[-1] > 0 
-                                and (delta_high_upperband.iloc[-1] < 0 
-                                      or self._hasMinusBefore(delta_close_middleband, self.informant_conf["bollinger_bands"])
-                                    )
-                                )) 
-                        ):
-                        output_data = deepcopy(new_result[exchange][market_pair])
-                        print(
-                            exchange,
-                            self.output[output_mode](output_data, market_pair, exchange),
-                            end=''
-                        )
+                    macdVolumeMinusIsDecreased = False  
+                    (macdVolumeMinus,min) = self.lastNMinusMacdVolume(delta_macd[0:len(delta_macd)-1])
+                    if( len(macdVolumeMinus) != 0 and self.lastNMinusDecreased(macdVolumeMinus,min) ):
+                        macdVolumeMinusIsDecreased = True
+                    
+                    #goldenForkKdj
+                    len_k = len(kt)
+                    len_d = len(dt)
+                    len_j = len(jt)
+                    goldenForkKdj = (
+                        ((dt[len_d-2] >= kt[len_k-2]) and (kt[len_k-2] >= jt[len_j-2]))  
+                        and 
+                        ((dt[len_d-1] <= kt[len_k-1]) and (kt[len_k-1] <= jt[len_j-1]))  
+                    )
+                    
+                    #dmi
+                    lastNDMIIsPositive = goldenForkKdj and (self.lastNDMIIsPositive(delta_di, 2) or self.lastNDMIIsPositive(delta_di, 3) or self.lastNDMIIsPositive(delta_di, 4)) 
+                    
+                    #bottomDivergence
+                    
+                   
+                    #bollCross
+#                     bollCross = False
+#                     if (len(middleband) != 0):
+#                         delta_close_middleband = close - middleband;
+#                         delta_low_middleband = low - middleband;
+#                         if ((delta_close_middleband.iloc[-1] > 0 and delta_low_middleband.iloc[-1] < 0) or
+#                             (delta_close_middleband.iloc[-2] > 0 and delta_low_middleband.iloc[-2] < 0) 
+#                             ):
+#                             bollCross = True
+                    
+                    #narrowedBoll
+                    (narrowedBoll, test_arr) = self.lastNBoolIsNarrowed((upperband/lowerband)**10, 5) # counts of narrowed points
+
+########################################Filter coins by indicators
+                    if (goldenForkMacd):
+                        self.printResult(new_result, exchange, market_pair, output_mode, ("positive:" if intersectionValueAndMin[0]>0 else "") + "goldenFork" + ":"
+                                          + (str(round(intersectionValueAndMin[0],5)) + ":" +str(round(intersectionValueAndMin[1],5)) + ":" + str(round(intersectionValueAndMin[0]/intersectionValueAndMin[1], 2))
+                                            )
+                                        )
+                        
+#                     if (flatMacd):
+#                         self.printResult(new_result, exchange, market_pair, output_mode, "flatMacd")
+                        
+#                     if (macdVolumeMinusIsDecreased):
+#                         self.printResult(new_result, exchange, market_pair, output_mode, "macdVolumeMinusIsDecreased")
+                        
+                    if (lastNDMIIsPositive):
+                        self.printResult(new_result, exchange, market_pair, output_mode, "DMI")
+                        
+                    if (goldenForkKdj):
+                        self.printResult(new_result, exchange, market_pair, output_mode, "kdjFork")
+                    
+                    if (narrowedBoll):
+                        self.printResult(new_result, exchange, market_pair, output_mode, "narrowedBoll:" + str(test_arr))
+                    
+#                     if (bollCross):
+#                         self.printResult(new_result, exchange, market_pair, output_mode, "bollCrossUp")
+                     ######################################################   
+                        
                 except Exception as e:
-                    print("An exception occurred for " + market_pair + ":" + exchange + ":" + str(e))
+                    print("An exception occurred for " + market_pair + ":" + exchange)
+                    print(e)
         # Print an empty line when complete
-        print()
         return new_result
+
+    def isTheIntersectionPointCloseToBePositive(self, macd, macd_signal, n, intersectionValueAndMin):
+        return self.calIntersectionPointRate(self.GetIntersectPointofLines(self.organizeDataPoint(macd, macd_signal, n))[0], macd, intersectionValueAndMin) is not None ;
+    
+    def organizeDataPoint(self, macd, macd_signal, n):
+        return (macd[len(macd)-1-n], 1, macd[len(macd)-n], 2, macd_signal[len(macd_signal)-1-n], 1, macd_signal[len(macd_signal)-n], 2);
+    
+    def calIntersectionPointRate(self, intersectionValue, macd, intersectionValueAndMin): #intersectionRate
+        (result, min) = self.lastNMinusMacdVolume(macd)
+        intersectionValueAndMin[0] = intersectionValue;
+        intersectionValueAndMin[1] = min;
+        return intersectionValueAndMin;
+       
+    
+    def GeneralEquation(self, first_x,first_y,second_x,second_y):
+        A=second_y-first_y
+        B=first_x-second_x
+        C=second_x*first_y-first_x*second_y
+        return A,B,C
+
+    def GetIntersectPointofLines(self, vector):
+        x1 = vector[0]
+        y1 = vector[1] 
+        x2 = vector[2] 
+        y2 = vector[3] 
+        x3 = vector[4] 
+        y3 = vector[5] 
+        x4 = vector[6] 
+        y4 = vector[7] 
+        A1,B1,C1 = self.GeneralEquation(x1,y1,x2,y2)
+        A2, B2, C2 = self.GeneralEquation(x3,y3,x4,y4)
+        m=A1*B2-A2*B1
+        if m==0:
+            print("no intersection")
+        else:
+            x=(C2*B1-C1*B2)/m
+            y=(C1*A2-C2*A1)/m
+        return x,y
+
+    def lastNBoolIsNarrowed(self, delta_boll,n):
+        test_arr = delta_boll[0-n:];
+        for x in test_arr:
+            if(x > 5.0): #narrowed area
+                return (False, test_arr);
+        return (True, test_arr);
+    
+    def lastNDMIIsPositive(self, delta_dmi,n):
+        test_arr = delta_dmi[0-n:];
+        theOneBefore = delta_dmi[len(delta_dmi)-n-1];
+        for x in test_arr:
+            if(x < 0):
+                return False;
+            
+        return (theOneBefore < 0);
+        
+    def printResult(self, new_result, exchange, market_pair, output_mode, criteriaType):
+        output_data = deepcopy(new_result[exchange][market_pair])
+        print(
+                                exchange,
+                                criteriaType,
+                                self.output[output_mode](output_data, criteriaType, market_pair, exchange),
+                                end=''
+            )
+    
+    def lastNMacdsArePositive(self, delta_macd, macd, n):
+        (result, min) = self.lastNMinusMacdVolume(macd)
+        test_arr = delta_macd[0-n:];
+        theOneBefore = delta_macd[len(delta_macd)-n-1];
+        for x in test_arr:
+            if(x < 0 or (abs(x/min) >= 0.3)): #the rate of macd value divided by the megative highest macd value is less than 0.3
+                return False;
+            
+        return True;
+        
+    def lastNMinusDecreased(self, delta_macd, min):
+        for i in range(len(delta_macd)):
+            if(delta_macd[i] == min and i != 0):
+                return True;
+            else:
+                return False;
+    
+    def lastNMinusMacdVolume(self, delta_macd):
+        result = []
+        min = 0
+        negativeStarted = False
+        for x in reversed(delta_macd):
+            if(x <= 0):
+                negativeStarted = True
+                if(x < min):
+                    min = x
+                result.append(x)
+            elif negativeStarted: #always return from here
+                return (result, min)
+        return (result, min)
     
     def _hasMinusBefore(self, arr, informant):
         n = len(arr)
