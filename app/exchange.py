@@ -180,7 +180,7 @@ class ExchangeInterface():
                         self.logger.info('%s has no market %s, ignoring.', exchange, market)
             else:
                 if self.base_markets[exchange] :
-                    if self.top_pairs > 0:
+                    if self.top_pairs and self.top_pairs > 0:
                         self.logger.info('Getting top %d pairs from %s in %s', self.top_pairs, str(self.base_markets[exchange]), exchange)
                         all_markets = { key: curr_markets[key] for key in curr_markets 
                                                         if curr_markets[key]['quote'] in self.base_markets[exchange] }
