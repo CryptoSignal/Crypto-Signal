@@ -814,8 +814,6 @@ class Notifier(IndicatorUtils):
         ax.plot(df.index, ma7, color='darkorange', lw=0.8, label='EMA (7)')
         ax.plot(df.index, ma25, color='mediumslateblue', lw=0.8, label='EMA (25)')
         ax.plot(df.index, ma99, color='firebrick', lw=0.8, label='EMA (99)')
-    
-        self.logger.info('PAinting EMAs')
 
         ax.text(0.04, 0.94, 'EMA (7, close)', color='darkorange', transform=ax.transAxes, fontsize=textsize, va='top')
         ax.text(0.24, 0.94, 'EMA (25, close)', color='mediumslateblue', transform=ax.transAxes,  fontsize=textsize, va='top')
