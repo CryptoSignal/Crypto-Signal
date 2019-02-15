@@ -788,17 +788,15 @@ class Notifier(IndicatorUtils):
     def plot_candlestick(self, ax, df, candle_period):
         textsize = 11
 
-        ma5  = self.EMA(df, 5)
+        ma7  = self.EMA(df, 7)
         ma25 = self.EMA(df, 25)
-        ma50 = self.EMA(df, 50)
-        ma90 = self.EMA(df, 90)
+        ma99 = self.EMA(df, 99)
 
         if(df['close'].count() > 120):
             df   = df.iloc[-120:]
-            ma5  = ma5.iloc[-120:]
+            ma7  = ma7.iloc[-120:]
             ma25 = ma25.iloc[-120:]
-            ma50 = ma50.iloc[-120:]
-            ma90 = ma90.iloc[-120:]
+            ma99 = ma99.iloc[-120:]
 
         _time = mdates.date2num(df.index.to_pydatetime())
         min_x = np.nanmin(_time)
@@ -813,15 +811,15 @@ class Notifier(IndicatorUtils):
                     width=stick_width, colorup='olivedrab', colordown='crimson')
                     
 
-        ax.plot(df.index, ma5, color='dodgerblue', lw=0.8, label='EMA (5)')
+        ax.plot(df.index, ma7, color='darkorange', lw=0.8, label='EMA (7)')
         ax.plot(df.index, ma25, color='mediumslateblue', lw=0.8, label='EMA (25)')
-        ax.plot(df.index, ma50, color='darkorange', lw=0.8, label='EMA (50)')
-        ax.plot(df.index, ma90, color='firebrick', lw=0.8, label='EMA (90)')
+        ax.plot(df.index, ma99, color='firebrick', lw=0.8, label='EMA (99)')
     
-        ax.text(0.04, 0.94, 'EMA (5, close)', color='darkorange', transform=ax.transAxes, fontsize=textsize, va='top')
+        self.logger.info('PAinting EMAs')
+
+        ax.text(0.04, 0.94, 'EMA (7, close)', color='darkorange', transform=ax.transAxes, fontsize=textsize, va='top')
         ax.text(0.24, 0.94, 'EMA (25, close)', color='mediumslateblue', transform=ax.transAxes,  fontsize=textsize, va='top')
-        ax.text(0.46, 0.94, 'EMA (50, close)', color='dodgerblue', transform=ax.transAxes,  fontsize=textsize, va='top')
-        ax.text(0.68, 0.94, 'EMA (90, close)', color='firebrick', transform=ax.transAxes,  fontsize=textsize, va='top')
+        ax.text(0.46, 0.94, 'EMA (99, close)', color='firebrick', transform=ax.transAxes,  fontsize=textsize, va='top')
 
     def plot_rsi(self, ax, df):
         textsize = 11
