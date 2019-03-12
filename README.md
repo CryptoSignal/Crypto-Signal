@@ -1,67 +1,273 @@
 # Crypto Signals
 
-### Development state: Beta (Code is stable, documentation is often lagging)
-
-### Join our community [Discord](https://discord.gg/MWTJVFf) channel!
-
 Crypto Signals is a command line tool that automates your crypto currency Technical Analysis (TA).
 
-Track over 500 coins across Bittrex, Bitfinex, GDAX, Gemini and more!
+It is based on [Crypto Signals] https://github.com/CryptoSignal/crypto-signal , so I recommend you to take a look in that proyect to known what is it.
 
-Technical Analysis Automated:
-* Momentum
-* Relative Strength Index (RSI)
-* Ichimoku Cloud (Leading Span A, Leading Span B, Conversion Line, Base Line)
-* Simple Moving Average
-* Exponential Moving Average
-* MACD
-* MFI
-* OBV
-* VWAP
+I'm making minor changes and adding some features in this repo because the original CryptoSignal project is no longer maintained.
 
-Alerts:
-* SMS via Twilio
-* Email
-* Slack
-* Telegram
-* Discord
-
-Features:
-* Modular code for easy trading strategy implementation
-* Easy install with Docker
-
-You can build on top of this tool and implement algorithm trading and some machine learning models to experiment with predictive analysis.
+## Notable Changes
+- It creates candle bar charts with MAs, RSI and MACD. These images can be sent as part of a Telegram notification or a Webhook call.
+- It allows to include prices as part of the notification message.
+- New configuration to easily add many coins. Check bellow for "all_pairs".
+- New config var to use a custom "indicator_label" for each configured indicator and crossovers. Mainly useful for std_crossover.
+- New indicator iiv (Increase In Volume) to try to identify a pump/dump.
+- New indicator MA Ribbon
+- New config values "hot_label" and "cold_label" for each indicator setup to set custom texts instead of the typical "hot" and "cold".
 
 ## Installing And Running
 The commands listed below are intended to be run in a terminal.
 
-1. Install [docker CE](https://docs.docker.com/install/)
+1. Clone this repo
 
-1. Create a config.yml file in your current directory. See the Configuring config.yml section below for customizing settings.
+1. Create a config.yml file and put it into "app" folder.
 
-1. In a terminal run the application. `docker run --rm -v $PWD/config.yml:/app/config.yml shadowreaver/crypto-signal:master`.
+1. Build your own Docker image, for example `docker build -t laliux/crypto-signals:latest .`
 
-1. When you want to update the application run `docker pull shadowreaver/crypto-signal:master`
+1. For testing and debugging run `docker run --rm -ti -v  $PWD/app:/app laliux/crypto-signals:latest`
+
+1. For production run in daemon mode `docker run --rm -di -v  $PWD/app:/app laliux/crypto-signals:latest`
+
 
 ### Configuring config.yml
 
-For a list of all possible options for config.yml and some example configurations look [here](docs/config.md)
+All possible options for config.yml are almost the same for original CryptoSignal, so look [here](docs/config.md)
 
-# FAQ
+However there are some aditional options to use.
 
-## Common Questions
+#### Charts
 
-### Why does Tradingview show me different information than crypto-signal?
-There are a number of reasons why the information crypto-signal provides could be different from tradingview and the truth is we have no way to be 100% certain of why the differences exist. Below are some things that affect the indicators that _may_ differ between crypto-signal and tradingview.
+You can enable/disable charts creation.
 
-- tradingview will have more historical data and for some indicators this can make a [big difference](https://ta-lib.org/d_api/ta_setunstableperiod.html).
+```
+settings:
+    log_level: INFO
+    update_interval: 600
+    enable_charts: true
+    market_pairs:
+        - XRP/USDT
+        - ETH/USDT
+        - BTC/USDT
+        ....
+```
 
-- tradingview uses a rolling 15 minute timeframe which means that the data they are analyzing can be more recent than ours by a factor of minutes or hours depending on what candlestick timeframe you are using.
+#### All pairs
 
-- tradingview may collect data in a way that means the timeperiods we have may not line up with theres, which can have an effect on the analysis. This seems unlikely to us, but stranger things have happened.
+It is very useful to process all symbols of a specific base market (BTC, ETH, USD, USDT). In this way you can avoid to write pair by pair in settings.market_pairs option.
 
-### So if it doesn't match Tradingview how do you know your information is accurate?
-Underpinning crypto-signal for most of our technical analysis is [TA-Lib](https://ta-lib.org/index.html) which is an open source technical analysis project started in 1999. This project has been used in a rather large number of technical analysis projects over the last two decades and is one of the most trusted open source libraries for analyzing candlestick data.
+The all_pairs option must be specified by each exchange and base market. Example:
+
+```
+exchanges:
+    binance:
+        required:
+            enabled: true
+        all_pairs:
+            - USDT
+    bittrex:
+        required:
+            enabled: false
+        all_pairs:
+            - ETH
+            - BTC
+        ....
+```
+
+Finally, if you want prices in your notification messages, you can use a new variable "prices".
+
+```
+notifiers:
+    telegram:
+        required:
+            token: 791615820:AAGFgGSumWUrb-CyXtGxzAuYaabababababababa
+            chat_id: 687950000
+        optional:
+            parse_mode: html
+            template: "[{{analysis.config.candle_period}}] {{market}} {{values}} Prices: [{{prices}}]"
+```
+
+By the way, to have this feature you need to configure "ohlcv" informant for each candle period of your indicators.
+
+```
+informants:
+    ....
+    bollinger_bands:
+        - enabled: false
+    ohlcv:
+        - enabled: true
+          signal:
+            - high
+            - low
+            - close
+          candle_period: 1h
+          period_count: 14
+        - enabled: true
+          signal:
+            - high
+            - low
+            - close
+          candle_period: 4h
+          period_count: 14
+```
+#### Increase In Volume indicator - iiv
+
+There is a new indicator called "iiv" enabled for default for 5m period. The hot value is 5 by default, you can adjust it as you want, may be 10 o 15. This value is a measure about how strong is the increase in volume.
+
+The main idea is to try to identify a possible pump or dump.
+
+```
+indicators:
+  iiv:
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - iiv
+      hot: 5
+      cold: 0
+      candle_period: 5m
+```
+
+If you don't want to receive such notifications just disable the iiv indicator in your config file.
+
+```
+indicators:
+  iiv:
+    - enabled: false
+      candle_period: 5m
+```
+
+Of course, this indicator can be used in other candle periods, 15m, 1h.. etc.
+
+#### Moving Average Ribbon
+
+First, read the following link to know about what it is: 
+https://www.investopedia.com/terms/m/movingaverageribbon.asp
+
+Second, the code used to implement this indicator was taken from another proyect called pyktrader2. It is not my own and therefore 
+I don't know the details about how this indicator works, so what I comment below is what I think it is. 
+
+```
+indicators:
+    ma_ribbon:
+        - enabled: true
+          alert_enabled: true
+          alert_frequency: always
+          signal:
+            - pval
+            - corr
+          hot: 10
+          cold: -10
+          hot_label: 'Uptrend is coming'
+          cold_label: 'Downtred is coming'
+          candle_period: 15m
+          pval_th: 20
+          ma_series: 5, 15, 25, 35, 45
+```
+
+The "corr" value changes from -100 to 100. When corr starts increasing from 0 to 100 we talk of an possible Uptrend, when corr goes from 0 to -100 we are entering in a Downtrend. The "hot" and "cold" values in config file are associated with such corr.
+
+To confirm the change in trend, the "pval" is used. This value changes from 0 to 100, but, when this value approaches 0 it confirms the signal given by corr.
+
+The "ma_series" config value is used to set the moving averages that will be used by the indicator.
+
+#### Moving Average Crossover
+
+It is a new indicator created with the idea of making the configuration of MA crossovers simpler and clearer. It is called "ma_crossover" and is configured into "indicators" section.
+
+```
+indicators:
+    ma_crossover:
+        - enabled: true
+          candle_period: 1h
+          alert_enabled: true
+          alert_frequency: once
+          exponential: true
+          ma_fast: 50
+          ma_slow: 100
+          signal:
+            - open
+            - close
+          hot_label: 'Uptrend is coming'
+          cold_label: 'Downtred is coming'
+          indicator_label: 'EMA 50/100 Cross'
+```
+
+The three basic values to configure are "exponential", "ma_slow" and "ma_fast". The "exponential" value is a true/false value indicating when to use Exponential Moving Average. If false, Simple Moving Average will be used. 
+
+"ma_fast" is the number of periods to use for the fast line, and "ma_slow" is the number of periods to use for the slow line.
+
+"signal" isn't really a meaning value for this indicator, but we have to set something because the code base requires that parameter for all indicators. So we can simply set some ohlcv value to avoid an error config.
+
+#### Chart images on webhook
+
+The config for a webhook notifier is the same as original CryptoSignal, no changes here, BUT the data sent in the request is completely different. 
+
+```
+notifiers:
+    telegram:
+        required:
+            token: 791615820:AAGFgGSumWUrb-CyXtGxzAuY7UPxxxxx
+            chat_id: 687957000
+        optional:
+            parse_mode: html
+            template: "[{{indicator_label}}] {{market}} {{values}}, Prices: [{{prices}}]" 
+    webhook:
+        required:
+            url: http://somename.or.ip.here:8888/someuri
+        optional:
+            username: null
+            password: null    
+```
+
+Then in your webhook you will have a parameter "messages" which is a list/array of the notification messages in form of string values. Apply a json decode to access all values. In python pseudo code:
+
+```
+msg = self.get_argument('messages')
+print ( json.loads(msg) )
+        
+[{'values': {'rsi': '84.20'}, 'exchange': 'binance', 'market': 'VET/USDT', 'base_currency': 'VET', 'quote_currency': 'USDT', 'indicator': 'rsi', 'indicator_number': 0, 'analysis': {'config': {'enabled': True, 'alert_enabled': True, 'alert_frequency': 'always', 'signal': ['rsi'], 'hot': 40, 'cold': 60, 'candle_period': '15m', 'period_count': 13}, 'status': 'cold'}, 'status': 'cold', 'last_status': 'cold', 'creation_date': '2019-01-04 15:31:40', 'indicator_label': 'rsi 15m'}]
+```
+
+If you have enable_charts: true, you will have a parameter "chart" in the same way of a HTTP file upload. Reading this file depends 100% in your backend. Example python pseudo code to save the received chart:
+
+```
+    fileinfo = self.request.files['chart'][0]
+        
+    print ("filename is " , fileinfo['filename'], ', content_type: ', fileinfo['content_type'])
+
+    fname = fileinfo['filename']
+    extn = os.path.splitext(fname)[1]
+    cname = str(uuid.uuid4()) + extn
+    fh = open(__UPLOADS__ + cname, 'wb')
+    fh.write(fileinfo['body'])
+```
+
+### Custom Hot/Cold labels
+
+Setting a custom text for the "hot" or "cold" signals allows to have a really cool notification message.
+
+```
+indicators:
+    rsi:
+        - enabled: true
+          alert_enabled: true
+          alert_frequency: always
+          signal:
+            - rsi
+          hot: 40
+          cold: 60
+          hot_label: We Are In Oversold!
+          cold_label: Attention! Overbought!
+          candle_period: 1h
+          period_count: 13
+```
+
+So, in the message template the "hot_cold_label" variable will have one of the two possible values.
+
+```
+template: "[{{indicator_label}}] **{{hot_cold_label}}** {{market}}  Prices: [{{prices}}]"  
+```
 
 # Liability
 I am not your financial adviser, nor is this tool. Use this program as an educational tool, and nothing more. None of the contributors to this project are liable for any losses you may incur. Be wise and always do your own research.

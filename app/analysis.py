@@ -35,7 +35,10 @@ class StrategyAnalyzer():
             'momentum': momentum.Momentum().analyze,
             'mfi': mfi.MFI().analyze,
             'stoch_rsi': stoch_rsi.StochasticRSI().analyze,
-            'obv': obv.OBV().analyze
+            'obv': obv.OBV().analyze,
+            'iiv': iiv.IIV().analyze,
+            'ma_ribbon': ma_ribbon.MARibbon().analyze,
+            'ma_crossover': ma_crossover.MACrossover().analyze
         }
 
         return dispatcher
@@ -53,7 +56,8 @@ class StrategyAnalyzer():
             'ema': ema.EMA().analyze,
             'vwap': vwap.VWAP().analyze,
             'bollinger_bands': bollinger_bands.Bollinger().analyze,
-            'ohlcv': ohlcv.OHLCV().analyze
+            'ohlcv': ohlcv.OHLCV().analyze,
+            'lrsi': lrsi.LRSI().analyze
         }
 
         return dispatcher

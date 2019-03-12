@@ -4,3 +4,4 @@ config.yml
 .vscode
 .idea/
 lib/ta-lib/
+app/charts

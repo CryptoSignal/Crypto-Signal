@@ -5,9 +5,13 @@
 
 import json
 import traceback
-from copy import deepcopy
-
 import structlog
+import os
+
+import pandas as pd
+import numpy as np
+
+from copy import deepcopy
 from ccxt import ExchangeError
 from tenacity import RetryError
 
@@ -36,34 +40,93 @@ class Behaviour():
         self.exchange_interface = exchange_interface
         self.strategy_analyzer = StrategyAnalyzer()
         self.notifier = notifier
+        self.all_historical_data = dict()
 
         output_interface = Output()
         self.output = output_interface.dispatcher
+        
+        self.enable_charts = config.settings['enable_charts']
+        self.timezone = config.settings['timezone']
 
 
-    def run(self, market_pairs, output_mode):
+    def run(self, market_data, output_mode):
         """The analyzer entrypoint
 
         Args:
-            market_pairs (list): List of symbol pairs to operate on, if empty get all pairs.
+            market_data (dict): Dict of exchanges and symbol pairs to operate on.
             output_mode (str): Which console output mode to use.
         """
 
         self.logger.info("Starting default analyzer...")
 
-        if market_pairs:
-            self.logger.info("Found configured markets: %s", market_pairs)
-        else:
-            self.logger.info("No configured markets, using all available on exchange.")
-
-        market_data = self.exchange_interface.get_exchange_markets(markets=market_pairs)
-
         self.logger.info("Using the following exchange(s): %s", list(market_data.keys()))
 
+        self.all_historical_data = self.get_all_historical_data(market_data)
+
         new_result = self._test_strategies(market_data, output_mode)
+        
+        self.notifier.set_timezone(self.timezone)
+        
+        if self.enable_charts:
+            self.notifier.set_enable_charts(True)
+            self.notifier.set_all_historical_data(self.all_historical_data)
 
         self.notifier.notify_all(new_result)
 
+    def get_all_historical_data(self, market_data):
+        """Get historical data for each exchange/market pair/candle period
+
+        Args:
+            market_data (dict): A dictionary containing the market data of the symbols to get data.
+        """
+
+        indicator_dispatcher = self.strategy_analyzer.indicator_dispatcher()
+        informant_dispatcher = self.strategy_analyzer.informant_dispatcher()
+
+        data = dict()
+
+        for exchange in market_data:
+            self.logger.info("Getting data for %s", list(market_data[exchange].keys()))
+            if exchange not in data:
+                data[exchange] = dict()
+
+            for market_pair in market_data[exchange]:
+                if market_pair not in data[exchange]:
+                    data[exchange][market_pair] = dict()
+
+                for indicator in self.indicator_conf:
+                    if indicator not in indicator_dispatcher:
+                        self.logger.warn("No such indicator %s, skipping.", indicator)
+                        continue
+
+                    for indicator_conf in self.indicator_conf[indicator]:
+                        if indicator_conf['enabled']:
+                            candle_period = indicator_conf['candle_period']
+
+                            if candle_period not in data[exchange][market_pair]:
+                                data[exchange][market_pair][candle_period] = self._get_historical_data(
+                                market_pair,
+                                exchange,
+                                candle_period
+                             )
+
+                for informant in self.informant_conf:
+                    if informant not in informant_dispatcher:
+                        self.logger.warn("No such informant %s, skipping.", informant)
+                        continue
+
+                    for informant_conf in self.informant_conf[informant]:
+                        if informant_conf['enabled']:
+                            candle_period = informant_conf['candle_period']
+
+                            if candle_period not in data[exchange][market_pair]:
+                                data[exchange][market_pair][candle_period] = self._get_historical_data(
+                                market_pair,
+                                exchange,
+                                candle_period
+                             )                            
+
+        return data
 
     def _test_strategies(self, market_data, output_mode):
         """Test the strategies and perform notifications as required
@@ -92,7 +155,7 @@ class Behaviour():
                 new_result[exchange][market_pair]['informants'] = self._get_informant_results(
                     exchange,
                     market_pair
-                )
+                )               
 
                 new_result[exchange][market_pair]['crossovers'] = self._get_crossover_results(
                     new_result[exchange][market_pair]
@@ -125,7 +188,7 @@ class Behaviour():
 
         indicator_dispatcher = self.strategy_analyzer.indicator_dispatcher()
         results = { indicator: list() for indicator in self.indicator_conf.keys() }
-        historical_data_cache = dict()
+        historical_data_cache = self.all_historical_data[exchange][market_pair]
 
         for indicator in self.indicator_conf:
             if indicator not in indicator_dispatcher:
@@ -133,29 +196,42 @@ class Behaviour():
                 continue
 
             for indicator_conf in self.indicator_conf[indicator]:
-                if indicator_conf['enabled']:
-                    candle_period = indicator_conf['candle_period']
-                else:
-                    self.logger.debug("%s is disabled, skipping.", indicator)
+                if not indicator_conf['enabled']:
                     continue
+                    
+                candle_period = indicator_conf['candle_period']
 
+                #Exchange doesnt support such candle period
                 if candle_period not in historical_data_cache:
-                    historical_data_cache[candle_period] = self._get_historical_data(
-                        market_pair,
-                        exchange,
-                        candle_period
-                    )
+                    continue
 
                 if historical_data_cache[candle_period]:
                     analysis_args = {
                         'historical_data': historical_data_cache[candle_period],
                         'signal': indicator_conf['signal'],
-                        'hot_thresh': indicator_conf['hot'],
-                        'cold_thresh': indicator_conf['cold']
+                        'hot_thresh': indicator_conf['hot'] if 'hot' in indicator_conf else 0,
+                        'cold_thresh': indicator_conf['cold'] if 'cold' in indicator_conf else 0
                     }
 
                     if 'period_count' in indicator_conf:
                         analysis_args['period_count'] = indicator_conf['period_count']
+
+                    if indicator == 'rsi' and 'lrsi_filter' in indicator_conf:
+                        analysis_args['lrsi_filter'] = indicator_conf['lrsi_filter']
+
+                    if indicator == 'ma_ribbon':
+                        analysis_args['pval_th'] = indicator_conf['pval_th'] if 'pval_th' in indicator_conf else 20
+                        if 'ma_series' in indicator_conf:
+                            series = indicator_conf['ma_series']
+                            analysis_args['ma_series'] =  [int(i) for i in series.replace(' ','').split(',')]
+                        else:
+                            analysis_args['ma_series'] = [5, 15, 25, 35, 45]
+
+                    if indicator == 'ma_crossover':
+                        analysis_args['exponential'] = indicator_conf['exponential'] if 'exponential' in indicator_conf else False
+                        analysis_args['ma_fast'] = indicator_conf['ma_fast'] if 'ma_fast' in indicator_conf else 13
+                        analysis_args['ma_slow'] = indicator_conf['ma_slow'] if 'ma_slow' in indicator_conf else 30
+
 
                     results[indicator].append({
                         'result': self._get_analysis_result(
@@ -182,26 +258,23 @@ class Behaviour():
 
         informant_dispatcher = self.strategy_analyzer.informant_dispatcher()
         results = { informant: list() for informant in self.informant_conf.keys() }
-        historical_data_cache = dict()
+        historical_data_cache = self.all_historical_data[exchange][market_pair]
 
         for informant in self.informant_conf:
+            
             if informant not in informant_dispatcher:
                 self.logger.warn("No such informant %s, skipping.", informant)
                 continue
 
             for informant_conf in self.informant_conf[informant]:
-                if informant_conf['enabled']:
-                    candle_period = informant_conf['candle_period']
-                else:
-                    self.logger.debug("%s is disabled, skipping.", informant)
+                if not informant_conf['enabled']:
                     continue
 
+                candle_period = informant_conf['candle_period']
+
+                #Exchange doesnt support such candle period
                 if candle_period not in historical_data_cache:
-                    historical_data_cache[candle_period] = self._get_historical_data(
-                        market_pair,
-                        exchange,
-                        candle_period
-                    )
+                    continue
 
                 if historical_data_cache[candle_period]:
                     analysis_args = {
@@ -249,6 +322,8 @@ class Behaviour():
 
                 key_indicator = new_result[crossover_conf['key_indicator_type']][crossover_conf['key_indicator']][crossover_conf['key_indicator_index']]
                 crossed_indicator = new_result[crossover_conf['crossed_indicator_type']][crossover_conf['crossed_indicator']][crossover_conf['crossed_indicator_index']]
+
+                crossover_conf['candle_period'] = crossover_conf['key_indicator'] + str(crossover_conf['key_indicator_index'])
 
                 dispatcher_args = {
                     'key_indicator': key_indicator['result'],
