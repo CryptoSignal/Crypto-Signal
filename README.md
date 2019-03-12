@@ -16,31 +16,19 @@ Because this is a development branch you need to build your custom Docker image.
 
 Be sure you have git installed in your system.
 
-1. Clone this repo
+1. Clone this repo `git clone https://github.com/CryptoSignal/crypto-signal.git`
 
-`git clone https://github.com/CryptoSignal/crypto-signal.git`
+1. Enter to cripto-signal folder `cd crypto-signal`
 
-1. Enter to cripto-signal folder
-
-`cd crypto-signal`
-
-1. Switch to develop branch
-
-`git checkout develop`
+1. Switch to develop branch `git checkout develop`
  
 1. Create a config.yml file and put it into "app" folder.
 
-1. Build your own Docker image, for example:
+1. Build your own Docker image, for example, `docker build -t dev/crypto-signals:latest .`
 
-`docker build -t dev/crypto-signals:latest .`
+1. For testing and debugging run docker with "-t" option `docker run --rm -ti -v  $PWD/app:/app dev/crypto-signals:latest`
 
-1. For testing and debugging run docker with "-t" option
-
-`docker run --rm -ti -v  $PWD/app:/app dev/crypto-signals:latest`
-
-1. For production run in daemon mode using "-d" option 
-
-`docker run --rm -di -v  $PWD/app:/app dev/crypto-signals:latest`
+1. For production run in daemon mode using "-d" option `docker run --rm -di -v  $PWD/app:/app dev/crypto-signals:latest`
 
 
 ### Configuring config.yml
