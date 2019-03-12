@@ -1,10 +1,6 @@
 # Crypto Signals
 
-Crypto Signals is a command line tool that automates your crypto currency Technical Analysis (TA).
-
-It is based on [Crypto Signals] https://github.com/CryptoSignal/crypto-signal , so I recommend you to take a look in that proyect to known what is it.
-
-I'm making minor changes and adding some features in this repo because the original CryptoSignal project is no longer maintained.
+Development branch to testing new features. If you are looking for the latest stable version check the master branch.
 
 ## Notable Changes
 - It creates candle bar charts with MAs, RSI and MACD. These images can be sent as part of a Telegram notification or a Webhook call.
@@ -16,17 +12,35 @@ I'm making minor changes and adding some features in this repo because the origi
 - New config values "hot_label" and "cold_label" for each indicator setup to set custom texts instead of the typical "hot" and "cold".
 
 ## Installing And Running
-The commands listed below are intended to be run in a terminal.
+Because this is a development branch you need to build your custom Docker image. The commands listed below are intended to be run in a terminal.
+
+Be sure you have git installed in your system.
 
 1. Clone this repo
 
+`git clone https://github.com/CryptoSignal/crypto-signal.git`
+
+1. Enter to cripto-signal folder
+
+`cd crypto-signal`
+
+1. Switch to develop branch
+
+`git checkout develop`
+ 
 1. Create a config.yml file and put it into "app" folder.
 
-1. Build your own Docker image, for example `docker build -t laliux/crypto-signals:latest .`
+1. Build your own Docker image, for example:
 
-1. For testing and debugging run `docker run --rm -ti -v  $PWD/app:/app laliux/crypto-signals:latest`
+`docker build -t dev/crypto-signals:latest .`
 
-1. For production run in daemon mode `docker run --rm -di -v  $PWD/app:/app laliux/crypto-signals:latest`
+1. For testing and debugging run docker with "-t" option
+
+`docker run --rm -ti -v  $PWD/app:/app dev/crypto-signals:latest`
+
+1. For production run in daemon mode using "-d" option 
+
+`docker run --rm -di -v  $PWD/app:/app dev/crypto-signals:latest`
 
 
 ### Configuring config.yml
@@ -268,6 +282,3 @@ So, in the message template the "hot_cold_label" variable will have one of the t
 ```
 template: "[{{indicator_label}}] **{{hot_cold_label}}** {{market}}  Prices: [{{prices}}]"  
 ```
-
-# Liability
-I am not your financial adviser, nor is this tool. Use this program as an educational tool, and nothing more. None of the contributors to this project are liable for any losses you may incur. Be wise and always do your own research.
