@@ -1,5 +1,5 @@
 twilio==6.6.3
-ccxt==1.13.26
+ccxt==1.18.361
 structlog==17.2.0
 python-json-logger==0.1.8
 pandas==0.22.0
