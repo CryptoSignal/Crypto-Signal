@@ -37,6 +37,25 @@ All possible options for config.yml are almost the same for original CryptoSigna
 
 However there are some aditional options to use.
 
+#### Mute cold
+
+If the indicator you are using dispatch notifications for hot/cold signals you can use the "mute_cold" option to silence (mute) cold messages. Example:
+
+```
+indicators:
+  rsi:
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: once
+      signal:
+        - rsi
+      hot: 30
+      cold: 70
+      candle_period: 1d
+      period_count: 14      
+      mute_cold: true
+```
+
 #### Charts
 
 You can enable/disable charts creation.
