@@ -575,6 +575,10 @@ class Notifier(IndicatorUtils):
                                 if not analysis['config']['alert_enabled']:
                                     should_alert = False
 
+                                if 'mute_cold' in analysis['config'] and latest_result['is_cold'] == analysis['config']['mute_cold']:
+                                    self.logger.info('Skiping cold notification for %s %s %s', market_pair, indicator, candle_period)
+                                    should_alert = False                                    
+
                                 if should_alert:
                                     base_currency, quote_currency = market_pair.split('/')
                                     precision = self.market_data[exchange][market_pair]['precision']
