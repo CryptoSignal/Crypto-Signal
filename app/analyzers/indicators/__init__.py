@@ -8,5 +8,6 @@ __all__ = [
     'obv',
     'iiv',
     'ma_ribbon',
-    'ma_crossover'
+    'ma_crossover',
+    'bollinger'
 ]
