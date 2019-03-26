@@ -220,6 +220,31 @@ The three basic values to configure are "exponential", "ma_slow" and "ma_fast". 
 
 "signal" isn't really a meaning value for this indicator, but we have to set something because the code base requires that parameter for all indicators. So we can simply set some ohlcv value to avoid an error config.
 
+#### Bollinger
+
+It is a new indicator created to easily get alerts when the close price crosses the Up/Low bands calculated for the Bollinger Bands. It is different of the Bollinger informant, and therefore it is configured in the "indicators" section.
+
+```
+indicators:
+    bollinger:
+        - enabled: true
+          candle_period: 1h
+          alert_enabled: true
+          alert_frequency: once
+          period_count: 20
+          std_dev: 2
+          signal:
+            - low_band
+            - close
+            - up_band
+          hot_label: 'Lower Band'
+          cold_label: 'Upper Band'
+          indicator_label: 'Bollinger Crossing'
+          mute_cold: false
+```
+
+The most important config is the number of standar deviations to use. Tipically values are 2 and 1.
+
 #### Chart images on webhook
 
 The config for a webhook notifier is the same as original CryptoSignal, no changes here, BUT the data sent in the request is completely different. 
