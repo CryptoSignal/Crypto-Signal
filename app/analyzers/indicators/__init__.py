@@ -9,5 +9,6 @@ __all__ = [
     'iiv',
     'ma_ribbon',
     'ma_crossover',
-    'bollinger'
+    'bollinger',
+    'bbp'
 ]
