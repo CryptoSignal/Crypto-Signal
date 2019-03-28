@@ -245,6 +245,34 @@ indicators:
 
 The most important config is the number of standar deviations to use. Tipically values are 2 and 1.
 
+#### Percent B (%B)
+
+The Percent B indicator reflects closing price as a percentage of the lower and upper Bollinger Bands. The idea is almost the same as Bollinger indicator, to get alerts when the close price crosses the Up/Low bands. 
+
+```
+indicators:
+    bbp:
+        - enabled: true
+          candle_period: 1h
+          alert_enabled: true
+          alert_frequency: once
+          period_count: 20
+          hot: 0
+          cold: 0.8  
+          std_dev: 2
+          signal:
+            - bbp
+            - mfi
+          hot_label: 'Lower Band'
+          cold_label: 'Upper Band'
+          indicator_label: 'Bollinger Crossing'
+          mute_cold: false
+```
+
+Because this indicator is commonly used in conjunction with MFI indicator, such signal has been added as part of the configuration. This way, the values of both indicators can be read together. 
+
+Important: For this indicator the hot/cold config values are mandatory.
+
 #### Chart images on webhook
 
 The config for a webhook notifier is the same as original CryptoSignal, no changes here, BUT the data sent in the request is completely different. 
