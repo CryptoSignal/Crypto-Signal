@@ -232,7 +232,7 @@ class Behaviour():
                         analysis_args['ma_fast'] = indicator_conf['ma_fast'] if 'ma_fast' in indicator_conf else 13
                         analysis_args['ma_slow'] = indicator_conf['ma_slow'] if 'ma_slow' in indicator_conf else 30
 
-                    if indicator == 'bollinger':
+                    if indicator == 'bollinger' or indicator == 'bbp':
                         analysis_args['std_dev'] = indicator_conf['std_dev'] if 'std_dev' in indicator_conf else 2
 
                     results[indicator].append({

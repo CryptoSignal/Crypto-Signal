@@ -39,7 +39,8 @@ class StrategyAnalyzer():
             'iiv': iiv.IIV().analyze,
             'ma_ribbon': ma_ribbon.MARibbon().analyze,
             'ma_crossover': ma_crossover.MACrossover().analyze,
-            'bollinger': bollinger.Bollinger().analyze
+            'bollinger': bollinger.Bollinger().analyze,
+            'bbp': bbp.BBP().analyze
         }
 
         return dispatcher
