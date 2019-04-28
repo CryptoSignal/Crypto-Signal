@@ -657,46 +657,55 @@ class Notifier(IndicatorUtils):
     def create_chart(self, exchange, market_pair, candle_period, candles_data):
         now = datetime.now(timezone(self.timezone))
         creation_date = now.strftime("%Y-%m-%d %H:%M:%S")
-        
+
         df = self.convert_to_dataframe(candles_data)
 
         plt.rc('axes', grid=True)
         plt.rc('grid', color='0.75', linestyle='-', linewidth=0.5)
 
         left, width = 0.1, 0.8
-        rect1 = [left, 0.6, width, 0.3]
-        rect2 = [left, 0.4, width, 0.2]
-        rect3 = [left, 0.1, width, 0.3]
+        rect1 = [left, 0.69, width, 0.23]
+        rect2 = [left, 0.51, width, 0.18]
+        rect3 = [left, 0.35, width, 0.16]
+        rect4 = [left, 0.08, width, 0.23]
 
         fig = plt.figure(facecolor='white')
-        fig.set_size_inches(8, 12, forward=True)
+        fig.set_size_inches(8, 18, forward=True)
         axescolor = '#f6f6f6'  # the axes background color
 
         ax1 = fig.add_axes(rect1, facecolor=axescolor)  # left, bottom, width, height
         ax2 = fig.add_axes(rect2, facecolor=axescolor, sharex=ax1)
         ax3 = fig.add_axes(rect3, facecolor=axescolor, sharex=ax1)
+        ax4 = fig.add_axes(rect4, facecolor=axescolor)
 
-        #Plot Candles chart
+        # Plot Candles chart
         self.plot_candlestick(ax1, df, candle_period)
 
-        #Plot RSI (14)
+        # Plot RSI (14)
         self.plot_rsi(ax2, df)
 
-        # Calculate and plot MACD       
+        # Calculate and plot MACD
         self.plot_macd(ax3, df, candle_period)
 
-        for ax in ax1, ax2, ax3:
-            if ax != ax3:
+        # Plot ichimoku
+        self.plot_ichimoku(ax4, df, candles_data, candle_period)
+
+        for ax in ax1, ax2, ax3, ax4:
+            if ax != ax3 and ax != ax4:
                 for label in ax.get_xticklabels():
                     label.set_visible(False)
-            else:
+            elif ax == ax3:
+                for label in ax.get_xticklabels():
+                    label.set_rotation(30)
+                    label.set_horizontalalignment('right')
+            elif ax == ax4:
                 for label in ax.get_xticklabels():
                     label.set_rotation(30)
                     label.set_horizontalalignment('right')
 
             ax.xaxis.set_major_locator(mticker.MaxNLocator(10))
             ax.xaxis.set_major_formatter(DateFormatter('%d/%b'))
-            ax.xaxis.set_tick_params(which='major', pad=15) 
+            ax.xaxis.set_tick_params(which='major', pad=15)
 
         fig.autofmt_xdate()
 
