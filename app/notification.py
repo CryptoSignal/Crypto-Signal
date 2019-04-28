@@ -35,6 +35,8 @@ from notifiers.webhook_client import WebhookNotifier
 from notifiers.stdout_client import StdoutNotifier
 
 from analyzers.utils import IndicatorUtils
+from analyzers.indicators import ichimoku
+
 
 class Notifier(IndicatorUtils):
     """Handles sending notifications via the configured notifiers
@@ -974,7 +976,6 @@ class Notifier(IndicatorUtils):
 
     def plot_ichimoku(self, ax, df, historical_data, candle_period):
         textsize = 11
-
         ichimoku_data = ichimoku.Ichimoku().analyze(historical_data=historical_data, chart=True)
 
         if(df['close'].count() > 120):
