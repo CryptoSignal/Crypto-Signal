@@ -958,5 +958,50 @@ class Notifier(IndicatorUtils):
         a[:n] = a[n]
         return a
 
+
     def EMA(self, df, n, field = 'close'):
         return pd.Series(talib.EMA(df[field].astype('f8').values, n), name = 'EMA_' + field.upper() + '_' + str(n), index = df.index)        
+
+
+    def plot_ichimoku(self, ax, df, historical_data, candle_period):
+        textsize = 11
+
+        ichimoku_data = ichimoku.Ichimoku().analyze(historical_data=historical_data, chart=True)
+
+        if(df['close'].count() > 120):
+            df = df.iloc[-120:]
+            ##change 146 if cloud displacement period changed in ichimoku.Ichimoku().calculate()##
+            ichimoku_data = ichimoku_data.iloc[-146:]
+
+        _time = mdates.date2num(df.index.to_pydatetime())
+        _time2 = mdates.date2num(ichimoku_data.index.to_pydatetime())
+
+        min_x = np.nanmin(_time)
+        max_x = np.nanmax(_time)
+
+        stick_width = ((max_x - min_x) / _time.size )
+
+        ax.set_ymargin(0.2)
+        ax.ticklabel_format(axis='y', style='plain')
+
+        self.candlestick_ohlc(ax, zip(_time, df['open'], df['high'], df['low'], df['close']),
+                    width=stick_width, colorup='olivedrab', colordown='crimson')
+
+        kijunsen = ichimoku_data.kijunsen
+        tenkansen = ichimoku_data.tenkansen
+        leading_span_a = ichimoku_data.leading_span_a
+        leading_span_b = ichimoku_data.leading_span_b
+        ax.plot(_time2, kijunsen, color='red', lw=0.6)
+        ax.plot(_time2, tenkansen, color='blue', lw=0.6)
+        ax.plot(_time2, leading_span_a, color='darkgreen', lw=0.6, linestyle='dashed')
+        ax.plot(_time2, leading_span_b, color='darkred', lw=0.6, linestyle='dashed')
+
+        ax.fill_between(_time2, leading_span_a, leading_span_b, where = leading_span_a > leading_span_b,
+                        facecolor='#008000', interpolate=True, alpha=0.25)
+        ax.fill_between(_time2, leading_span_a, leading_span_b, where=leading_span_b > leading_span_a,
+                        facecolor='#ff0000', interpolate=True, alpha=0.25)
+
+        ax.text(0.04, 0.94, 'kijunsen', color='red', transform=ax.transAxes, fontsize=textsize, va='top')
+        ax.text(0.20, 0.94, 'tenkansen', color='blue', transform=ax.transAxes, fontsize=textsize, va='top')
+        ax.text(0.44, 0.94, '-Senkou-Span-A-', color='darkgreen', transform=ax.transAxes, fontsize=textsize, va='top', fontstyle='italic')
+        ax.text(0.66, 0.94, '-Senkou-Span-B-', color='darkred', transform=ax.transAxes, fontsize=textsize, va='top', fontstyle='italic')
