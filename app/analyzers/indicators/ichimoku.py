@@ -11,7 +11,7 @@ from analyzers.utils import IndicatorUtils
 
 
 class Ichimoku(IndicatorUtils):
-    def analyze(self, historical_data, signal=['leading_span_a', 'leading_span_b'], hot_thresh=None, cold_thresh=None):
+    def analyze(self, historical_data, signal=['leading_span_a', 'leading_span_b'], hot_thresh=None, cold_thresh=None, chart=None):
         """Performs an ichimoku cloud analysis on the historical data
 
         Args:
@@ -27,10 +27,6 @@ class Ichimoku(IndicatorUtils):
             pandas.DataFrame: A dataframe containing the indicators and hot/cold values.
         """
 
-        tenkansen_period = 9
-        kijunsen_period = 26
-        leading_span_b_period = 52
-
         dataframe = self.convert_to_dataframe(historical_data)
 
         ichimoku_columns = {
@@ -40,55 +36,58 @@ class Ichimoku(IndicatorUtils):
             'leading_span_b': [numpy.nan] * dataframe.index.shape[0]
         }
 
-        ichimoku_values = pandas.DataFrame(
-            ichimoku_columns,
-            index=dataframe.index
-        )
+        ichimoku_values = pandas.DataFrame(ichimoku_columns,
+                                           index=dataframe.index
+                                           )
+        # value calculations
+        low_9 = dataframe['low'].rolling(window=9).min()
+        low_26 = dataframe['low'].rolling(window=26).min()
+        low_52 = dataframe['low'].rolling(window=52).min()
+        high_9 = dataframe['high'].rolling(window=9).max()
+        high_26 = dataframe['high'].rolling(window=26).max()
+        high_52 = dataframe['high'].rolling(window=52).max()
 
-        ichimoku_df_size = ichimoku_values.shape[0]
+        ichimoku_values['tenkansen'] = (low_9 + high_9) / 2
+        ichimoku_values['kijunsen'] = (low_26 + high_26) / 2
+        ichimoku_values['leading_span_a'] = ((ichimoku_values['tenkansen'] + ichimoku_values['kijunsen']) / 2)
+        ichimoku_values['leading_span_b'] = (high_52 + low_52) / 2
 
-        for index in range(tenkansen_period, ichimoku_df_size):
-            start_index = index - tenkansen_period
-            last_index = index + 1
-            tankansen_min = dataframe['low'][start_index:last_index].min()
-            tankansen_max = dataframe['high'][start_index:last_index].max()
-            ichimoku_values['tenkansen'][index] = (tankansen_min + tankansen_max) / 2
-
-        for index in range(kijunsen_period, ichimoku_df_size):
-            start_index = index - kijunsen_period
-            last_index = index + 1
-            kijunsen_min = dataframe['low'][start_index:last_index].min()
-            kijunsen_max = dataframe['high'][start_index:last_index].max()
-            ichimoku_values['kijunsen'][index] = (kijunsen_min + kijunsen_max) / 2
-
-        for index in range(leading_span_b_period, ichimoku_df_size):
-            start_index = index - leading_span_b_period
-            last_index = index + 1
-            leading_span_b_min = dataframe['low'][start_index:last_index].min()
-            leading_span_b_max = dataframe['high'][start_index:last_index].max()
-            ichimoku_values['leading_span_b'][index] = (
-                leading_span_b_min + leading_span_b_max
-            ) / 2
-
-        ichimoku_values['leading_span_a'] = (
-            ichimoku_values['tenkansen'] + ichimoku_values['kijunsen']
-        ) / 2
-
-        ichimoku_values.dropna(how='any', inplace=True)
-        ichimoku_df_size = ichimoku_values.shape[0]
+        # add time period for cloud offset
+        ## if cloud discplacement changed the ichimuko plot will be off ##
+        cloud_displacement = 26
+        last_time = dataframe.index[-1]
+        timedelta = dataframe.index[1] - dataframe.index[0]
+        newindex = pandas.DatetimeIndex(start=last_time + timedelta,
+                                        freq=timedelta,
+                                        periods=cloud_displacement)
+        ichimoku_values = ichimoku_values.append(pandas.DataFrame(index=newindex))
+        # cloud offset
+        ichimoku_values['leading_span_a'] = ichimoku_values['leading_span_a'].shift(cloud_displacement)
+        ichimoku_values['leading_span_b'] = ichimoku_values['leading_span_b'].shift(cloud_displacement)
 
         ichimoku_values['is_hot'] = False
         ichimoku_values['is_cold'] = False
 
-        for index in range(0, ichimoku_df_size):
-            span_hot = ichimoku_values['leading_span_a'][index] > ichimoku_values['leading_span_b'][index]
-            close_hot = dataframe['close'][index] > ichimoku_values['leading_span_a'][index]
-            if hot_thresh:
-                ichimoku_values.at[ichimoku_values.index[index], 'is_hot'] = span_hot and close_hot
+        try:
+            for index in range(0, ichimoku_values.index.shape[0]):
+                date = ichimoku_values.index[index]
 
-            span_cold = ichimoku_values['leading_span_a'][index] < ichimoku_values['leading_span_b'][index]
-            close_cold = dataframe['close'][index] < ichimoku_values['leading_span_a'][index]
-            if cold_thresh:
-                ichimoku_values.at[ichimoku_values.index[index], 'is_cold'] = span_cold and close_cold
+                if date <= dataframe.index[-1]:
+                    span_hot = ichimoku_values['leading_span_a'][date] > ichimoku_values['leading_span_b'][date]
+                    close_hot = dataframe['close'][date] > ichimoku_values['leading_span_a'][date]
+                    if hot_thresh:
+                        ichimoku_values.at[date, 'is_hot'] = span_hot and close_hot
+                    span_cold = ichimoku_values['leading_span_a'][date] < ichimoku_values['leading_span_b'][date]
+                    close_cold = dataframe['close'][date] < ichimoku_values['leading_span_a'][date]
+                    if cold_thresh:
+                        ichimoku_values.at[date, 'is_cold'] = span_cold and close_cold
+                else:
+                    pass
+
+        except KeyError as e:
+            print('keyerror: {}'.format(e))
+
+        if chart == None:
+            ichimoku_values.dropna(how='any', inplace=True)
 
         return ichimoku_values
