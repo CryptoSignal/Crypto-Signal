@@ -35,6 +35,8 @@ from notifiers.webhook_client import WebhookNotifier
 from notifiers.stdout_client import StdoutNotifier
 
 from analyzers.utils import IndicatorUtils
+from analyzers.indicators import ichimoku
+
 
 class Notifier(IndicatorUtils):
     """Handles sending notifications via the configured notifiers
@@ -657,46 +659,55 @@ class Notifier(IndicatorUtils):
     def create_chart(self, exchange, market_pair, candle_period, candles_data):
         now = datetime.now(timezone(self.timezone))
         creation_date = now.strftime("%Y-%m-%d %H:%M:%S")
-        
+
         df = self.convert_to_dataframe(candles_data)
 
         plt.rc('axes', grid=True)
         plt.rc('grid', color='0.75', linestyle='-', linewidth=0.5)
 
         left, width = 0.1, 0.8
-        rect1 = [left, 0.6, width, 0.3]
-        rect2 = [left, 0.4, width, 0.2]
-        rect3 = [left, 0.1, width, 0.3]
+        rect1 = [left, 0.69, width, 0.23]
+        rect2 = [left, 0.51, width, 0.18]
+        rect3 = [left, 0.35, width, 0.16]
+        rect4 = [left, 0.08, width, 0.23]
 
         fig = plt.figure(facecolor='white')
-        fig.set_size_inches(8, 12, forward=True)
+        fig.set_size_inches(8, 18, forward=True)
         axescolor = '#f6f6f6'  # the axes background color
 
         ax1 = fig.add_axes(rect1, facecolor=axescolor)  # left, bottom, width, height
         ax2 = fig.add_axes(rect2, facecolor=axescolor, sharex=ax1)
         ax3 = fig.add_axes(rect3, facecolor=axescolor, sharex=ax1)
+        ax4 = fig.add_axes(rect4, facecolor=axescolor)
 
-        #Plot Candles chart
+        # Plot Candles chart
         self.plot_candlestick(ax1, df, candle_period)
 
-        #Plot RSI (14)
+        # Plot RSI (14)
         self.plot_rsi(ax2, df)
 
-        # Calculate and plot MACD       
+        # Calculate and plot MACD
         self.plot_macd(ax3, df, candle_period)
 
-        for ax in ax1, ax2, ax3:
-            if ax != ax3:
+        # Plot ichimoku
+        self.plot_ichimoku(ax4, df, candles_data, candle_period)
+
+        for ax in ax1, ax2, ax3, ax4:
+            if ax != ax3 and ax != ax4:
                 for label in ax.get_xticklabels():
                     label.set_visible(False)
-            else:
+            elif ax == ax3:
+                for label in ax.get_xticklabels():
+                    label.set_rotation(30)
+                    label.set_horizontalalignment('right')
+            elif ax == ax4:
                 for label in ax.get_xticklabels():
                     label.set_rotation(30)
                     label.set_horizontalalignment('right')
 
             ax.xaxis.set_major_locator(mticker.MaxNLocator(10))
             ax.xaxis.set_major_formatter(DateFormatter('%d/%b'))
-            ax.xaxis.set_tick_params(which='major', pad=15) 
+            ax.xaxis.set_tick_params(which='major', pad=15)
 
         fig.autofmt_xdate()
 
@@ -958,5 +969,49 @@ class Notifier(IndicatorUtils):
         a[:n] = a[n]
         return a
 
+
     def EMA(self, df, n, field = 'close'):
         return pd.Series(talib.EMA(df[field].astype('f8').values, n), name = 'EMA_' + field.upper() + '_' + str(n), index = df.index)        
+
+
+    def plot_ichimoku(self, ax, df, historical_data, candle_period):
+        textsize = 11
+        ichimoku_data = ichimoku.Ichimoku().analyze(historical_data=historical_data, chart=True)
+
+        if(df['close'].count() > 120):
+            df = df.iloc[-120:]
+            ##change 146 if cloud displacement period changed in ichimoku.Ichimoku().calculate()##
+            ichimoku_data = ichimoku_data.iloc[-146:]
+
+        _time = mdates.date2num(df.index.to_pydatetime())
+        _time2 = mdates.date2num(ichimoku_data.index.to_pydatetime())
+
+        min_x = np.nanmin(_time)
+        max_x = np.nanmax(_time)
+
+        stick_width = ((max_x - min_x) / _time.size )
+
+        ax.set_ymargin(0.2)
+        ax.ticklabel_format(axis='y', style='plain')
+
+        self.candlestick_ohlc(ax, zip(_time, df['open'], df['high'], df['low'], df['close']),
+                    width=stick_width, colorup='olivedrab', colordown='crimson')
+
+        kijunsen = ichimoku_data.kijunsen
+        tenkansen = ichimoku_data.tenkansen
+        leading_span_a = ichimoku_data.leading_span_a
+        leading_span_b = ichimoku_data.leading_span_b
+        ax.plot(_time2, kijunsen, color='red', lw=0.6)
+        ax.plot(_time2, tenkansen, color='blue', lw=0.6)
+        ax.plot(_time2, leading_span_a, color='darkgreen', lw=0.6, linestyle='dashed')
+        ax.plot(_time2, leading_span_b, color='darkred', lw=0.6, linestyle='dashed')
+
+        ax.fill_between(_time2, leading_span_a, leading_span_b, where = leading_span_a > leading_span_b,
+                        facecolor='#008000', interpolate=True, alpha=0.25)
+        ax.fill_between(_time2, leading_span_a, leading_span_b, where=leading_span_b > leading_span_a,
+                        facecolor='#ff0000', interpolate=True, alpha=0.25)
+
+        ax.text(0.04, 0.94, 'kijunsen', color='red', transform=ax.transAxes, fontsize=textsize, va='top')
+        ax.text(0.20, 0.94, 'tenkansen', color='blue', transform=ax.transAxes, fontsize=textsize, va='top')
+        ax.text(0.44, 0.94, '-Senkou-Span-A-', color='darkgreen', transform=ax.transAxes, fontsize=textsize, va='top', fontstyle='italic')
+        ax.text(0.66, 0.94, '-Senkou-Span-B-', color='darkred', transform=ax.transAxes, fontsize=textsize, va='top', fontstyle='italic')
