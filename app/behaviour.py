@@ -235,6 +235,11 @@ class Behaviour():
                     if indicator == 'bollinger' or indicator == 'bbp':
                         analysis_args['std_dev'] = indicator_conf['std_dev'] if 'std_dev' in indicator_conf else 2
 
+                    if indicator == 'ichimoku':
+                        analysis_args['tenkansen_period'] = indicator_conf['tenkansen_period'] if 'tenkansen_period' in indicator_conf else 20                       
+                        analysis_args['kijunsen_period'] = indicator_conf['kijunsen_period'] if 'kijunsen_period' in indicator_conf else 60
+                        analysis_args['senkou_span_b_period'] = indicator_conf['senkou_span_b_period'] if 'senkou_span_b_period' in indicator_conf else 120
+
                     results[indicator].append({
                         'result': self._get_analysis_result(
                             indicator_dispatcher,
