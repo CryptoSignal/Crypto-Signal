@@ -978,9 +978,12 @@ class Notifier(IndicatorUtils):
     def plot_ichimoku(self, ax, df, historical_data, candle_period):
         indicator_conf = {}
 
-        if 'ichimoku' in self.indicator_config and candle_period in self.indicator_config['ichimoku']:
-            indicator_conf = self.indicator_config['ichimoku'][candle_period]
-            
+        if 'ichimoku' in self.indicator_config:
+            for config in self.indicator_config['ichimoku']:
+                if config['enabled'] and config['candle_period'] == candle_period:
+                    indicator_conf = config
+                    break
+
         tenkansen_period = indicator_conf['tenkansen_period'] if 'tenkansen_period' in indicator_conf else 20                       
         kijunsen_period = indicator_conf['kijunsen_period'] if 'kijunsen_period' in indicator_conf else 60
         senkou_span_b_period = indicator_conf['senkou_span_b_period'] if 'senkou_span_b_period' in indicator_conf else 120
