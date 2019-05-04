@@ -73,10 +73,10 @@ class Adx():
         adx_values['is_cold'] = False
 
         for index in range(0, adx_values.index.shape[0]):
-            if adx_values[index]['adx'] < cold_thresh:
-                adx_values['is_cold'] = True
-            elif adx_values[index]['adx'] >= hot_thresh:
-                adx_values['is_hot'] = True
+            if adx_values['adx'][index] < cold_thresh:
+                adx_values['is_cold'][index] = True
+            elif adx_values['adx'][index] >= hot_thresh:
+                adx_values['is_hot'][index] = True
 
         return adx_values
 
@@ -214,7 +214,7 @@ if __name__ == '__main__':
     hist = hist.set_index(pandas.to_datetime(hist['datetime']))
     hist.drop('datetime', axis=1, inplace=True)
     adx = Adx()
-    data = adx.analyze(historical_data=hist)
+    data = adx.analyze(historical_data=hist, hot_thresh=30, cold_thresh=25)
     #data.to_csv('dmtest1', columns=['dx'], sep=' ')
     data.to_csv('dmtest1', columns= ['dx', 'adx'], sep=',')
     adx.create_chart(data)
