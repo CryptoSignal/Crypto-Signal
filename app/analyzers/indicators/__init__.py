@@ -1,4 +1,5 @@
 __all__ = [
+    'adx',
     'ichimoku',
     'macd',
     'momentum',
