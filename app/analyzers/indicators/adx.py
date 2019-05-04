@@ -1,183 +1,205 @@
 
 import pandas
 import os
-import numpy as np
+import numpy
 import matplotlib.pyplot as plt
 from pandas.plotting import table
 
 class Adx():
-    def analyze(self, historical_data):
-
-        #dataframe = self.convert_to_dataframe(historical_data)
-        dataframe = historical_data
-
-
+    def analyze(self, historical_data, signal=["adx"], hot_thresh=None, cold_thresh=None):
         """
         strength of a trend
         ADX > 25 = strength
         ADX < 20 = weak or trendless
-        
-        +DI = [(smoothed+DM)/ATR] * 100
-        -DI = [(smoothed-DM)/ATR] * 100
-        ADX= ((prior_adx * 13) + current_adx)/14
-        
-        +DM(directional movement) = current high - previous high
-        -DM = previous low - current low 
-        
-        smoothed +/- DM = sum(DM)over14periods - [(sum(DM)over14periods)/14] + currentDM
-        ~~~~~~~~~~~~~~~~~~~~~~~~
-        ATR = average true range
-        
-        calculate +DM,-DM and TR (true range) for each period. typically 14 periods are used
-        +DM = current high - previous high
-        -DM = previous low - current low
-        IF current high - previous high > previous low - current low
-            use +DM
-        IF previous low - current low > current high - previous high
-            use -DM
-        TR is the greater of 
-            current high - current low
-            current high - previous close
-            current low - previous close
-        smooth the 14-period averages of
-            +DM
-            -DM
-            TR
-        TR formula below. Insert the -DM and +DM values to calculate the smoothed averages of those
-        
-        first 14TR = sum of first 14TR readings
-        next 14TR value = first14TR - (prior14TR/14) + currentTR
-        next, divide the smoothed +DM value by the smoothed TR value to get +DI
-            multiply by 100
-        divide the smoothed -DM value by the smoother TR value to get -DI
-            multiply by 100
-        the directional movement index(DX) is 
-            +DI minus -DI, divided by the sum of +DI and -DI (all absolute values)
-            multiply by 100
-        to get ADX
-            continue to calculate DX values for at least 14 periods. then smooth the results to get ADX.
-            
-        first ADX = sum 14 periods of DX/14
-        after that, ADX = ((prior adx * 13)+current dx) / 14
-        
+        ------
+        0-25    absent or weak trend
+        25-50   strong trend
+        50-75   very strong trend
+        75-100  extremely strong trend
         """
+        #dataframe = self.convert_to_dataframe(historical_data)
+        dataframe = historical_data
 
-        data = self.TR(dataframe)
-        data = self.DM(data)
-        data = self.DI(data)
-        data = self.ATR(data)
-        data = self.ADX(data)
+        adx_columns = {
+            'tr': [numpy.nan] * dataframe.index.shape[0],
+            'atr': [numpy.nan] * dataframe.index.shape[0],
+            'pdm': [numpy.nan] * dataframe.index.shape[0],
+            'ndm': [numpy.nan] * dataframe.index.shape[0],
+            'pdm_smooth': [numpy.nan] * dataframe.index.shape[0],
+            'ndm_smooth': [numpy.nan] * dataframe.index.shape[0],
+            'ndi': [numpy.nan] * dataframe.index.shape[0],
+            'pdi': [numpy.nan] * dataframe.index.shape[0],
+            'dx': [numpy.nan] * dataframe.index.shape[0],
+            'adx': [numpy.nan] * dataframe.index.shape[0]
+        }
 
+        adx_values = pandas.DataFrame(adx_columns,
+                                      index=dataframe.index
+                                      )
 
-
-        return dataframe
-
-    def TR(self, dataframe):
-        """
-        TR is the greater of
-            current high - current low
-            current high - previous close
-            current low - previous close
-        :param dataframe:
-        :return:
-        """
-        dataframe['tr'] = np.nan
-        dataframe['tr'][0] = abs(dataframe['high'][0] - dataframe['low'][0])
-        for index in range(1, dataframe.shape[0]):
-            x = dataframe['high'][index] - dataframe['close'][index]
-            y = abs(dataframe['high'][index] - dataframe['close'][index-1])
-            z = abs(dataframe['low'][index] - dataframe['close'][index-1])
-            dataframe['tr'][index] = max(x, y, z)
-
-        return dataframe
-
-
-    def DM(self, dataframe):
-        """
-        +DM = current high - previous high
-        -DM = previous low - current low
-        IF current high - previous high > previous low - current low
-            use +DM
-        IF previous low - current low > current high - previous high
-            use -DM
-        :param dataframe:
-        :return:
-        """
-        dataframe['dm'] = np.nan
-        dataframe['pdm'] = np.nan
-        dataframe['ndm'] = np.nan
         period = 14
+        adx_values['tr'] = self.TR(dataframe['high'],
+                                   dataframe['low'],
+                                   dataframe['close'],
+                                   adx_values['tr']
+                                   )
+        adx_values['pdm'], adx_values['ndm'] = self.DM(dataframe['high'],
+                                                       dataframe['low'],
+                                                       adx_values['pdm'],
+                                                       adx_values['ndm']
+                                                       )
+        adx_values['pdm_smooth'], adx_values['ndm_smooth'] = self.DMsmooth(adx_values['pdm'],
+                                                                           adx_values['ndm'],
+                                                                           adx_values['pdm_smooth'],
+                                                                           adx_values['ndm_smooth'],
+                                                                           period
+                                                                           )
+        adx_values['pdi'], adx_values['ndi'] = self.DI(adx_values['pdm_smooth'],
+                                                       adx_values['ndm_smooth'],
+                                                       adx_values['tr'],
+                                                       adx_values['pdi'],
+                                                       adx_values['ndi']
+                                                       )
+        adx_values['atr'] = self.ATR(adx_values['tr'],
+                                     adx_values['atr'],
+                                     period
+                                     )
+        adx_values['dx'], adx_values['adx'] = self.ADX(adx_values['pdi'],
+                                                       adx_values['ndi'],
+                                                       adx_values['dx'],
+                                                       adx_values['adx'],
+                                                       period
+                                                       )
 
-        for index in range(1, dataframe.shape[0]):
-            up_move = dataframe['high'][index] - dataframe['high'][index-1]
-            down_move = dataframe['low'][index-1] - dataframe['low'][index]
+
+        '''
+        if obv_values[signal[0]].shape[0]:
+            adx_values['is_hot'] = rsi_values[signal[0]] < hot_thresh
+            rsi_values['is_cold'] = rsi_values[signal[0]] > cold_thresh
+        '''
+
+        return adx_values
+
+
+    def TR(self, high, low, close, tr):
+        """
+        TR (True Range)
+        :param high:
+        :param low:
+        :param close:
+        :param tr:
+        :return:
+        """
+
+        tr[0] = abs(high[0] - low[0])
+        for index in range(1, tr.shape[0]):
+            x = high[index] - close[index]
+            y = abs(high[index] - close[index - 1])
+            z = abs(low[index] - close[index - 1])
+            tr[index] = max(x, y, z)
+
+        return tr
+
+
+    def DM(self, high, low, pdm, ndm):
+        """
+        DM (Directional Movement)
+        :param high:
+        :param low:
+        :param pdm:
+        :param ndm:
+        :return:
+        """
+
+        for index in range(1, high.shape[0]):
+            up_move = high[index] - high[index-1]
+            down_move = low[index-1] - low[index]
 
             if up_move > down_move and up_move > 0:
-                dataframe['pdm'][index] = up_move
+                pdm[index] = up_move
             else:
-                dataframe['pdm'][index] = 0
+                pdm[index] = 0
             if down_move > up_move and down_move > 0:
-                dataframe['ndm'][index] = down_move
+                ndm[index] = down_move
             else:
-                dataframe['ndm'][index] = 0
+                ndm[index] = 0
 
-        dataframe['pdmsmooth'] = np.nan
-        dataframe['ndmsmooth'] = np.nan
+        return pdm, ndm
 
-        dataframe['pdmsmooth'][period-1] = dataframe['pdm'][0:period].sum() / period
-        dataframe['ndmsmooth'][period - 1] = dataframe['ndm'][0:period].sum() / period
-
-        for index in range(period, dataframe.shape[0]):
-            dataframe['pdmsmooth'][index] = (dataframe['pdm'][index-1] - (dataframe['pdmsmooth'][index-1]/period)) + dataframe['pdmsmooth'][index-1]
-            dataframe['ndmsmooth'][index] = (dataframe['ndm'][index - 1] - (dataframe['ndmsmooth'][index-1] / period)) + dataframe['ndmsmooth'][index-1]
-        return dataframe
-
-
-    def DI(self, dataframe):
+    def DMsmooth(self, pdm, ndm, pdm_smooth, ndm_smooth, period):
         """
-        +DI = [(smoothed+DM)/ATR] * 100
-        -DI = [(smoothed-DM)/ATR] * 100
+
+        :param pdm:
+        :param ndm:
+        :param pdm_smooth:
+        :param ndm_smooth:
+        :param period:
+        :return:
         """
-        dataframe['pdi'] = np.nan
-        dataframe['ndi'] = np.nan
-        for index in range(0, dataframe.shape[0]):
-            dataframe['pdi'][index] = (dataframe['pdmsmooth'][index] / dataframe['tr'][index]) * 100
-            dataframe['ndi'][index] = (dataframe['ndmsmooth'][index] / dataframe['tr'][index]) * 100
 
-        return dataframe
+        pdm_smooth[period-1] = pdm[0:period].sum() / period
+        ndm_smooth[period - 1] = ndm[0:period].sum() / period
+
+        for index in range(period, pdm.shape[0]):
+            pdm_smooth[index] = (pdm[index-1] - (pdm_smooth[index-1]/period)) + pdm_smooth[index-1]
+            ndm_smooth[index] = (ndm[index - 1] - (ndm_smooth[index-1] / period)) + ndm_smooth[index-1]
+
+        return pdm_smooth, ndm_smooth
 
 
-    def ATR(self, dataframe):
+    def DI(self, pdm_smooth, ndm_smooth, tr, pdi, ndi):
         """
-        WILDER'S SMOOTHING METHOD
+        DI (Directional Movement Indicator)
+        :param pdm_smooth:
+        :param ndm_smooth:
+        :param tr:
+        :param pdi:
+        :param ndi:
+        :return:
+        """
+        for index in range(0, tr.shape[0]):
+            pdi[index] = (pdm_smooth[index] / tr[index]) * 100
+            ndi[index] = (ndm_smooth[index] / tr[index]) * 100
+
+        return pdi, ndi
+
+
+    def ATR(self, tr, atr, period):
+        """
+        Uses WILDER'S SMOOTHING METHOD
         ATR = a*TR + (1-a)* ATR_1
         a = (1/n)
+        :param tr:
+        :param atr:
+        :param period:
+        :return:
         """
-        period = 14
-        dataframe['atr'] = np.nan
+        atr[period-1] = tr[0:period].sum() / period
 
-        dataframe['atr'][period-1] = dataframe['tr'][0:period].sum() / period
+        for index in range(period, tr.shape[0]):
+            atr[index] = ((atr[index-1] * (period - 1)) + tr[index]) / period
 
-        for index in range(period, dataframe.shape[0]):
-            dataframe['atr'][index] = ((dataframe['atr'][index-1] * (period - 1)) + dataframe['tr'][index]) / period
+        return atr
 
-        return dataframe
+    def ADX(self, pdi, ndi, dx, adx, period):
+        """
 
-    def ADX(self, dataframe):
-        period = 14
-
-        dataframe['dx'] = np.nan
-        for index in range(0, dataframe.shape[0]):
-            dataframe['dx'][index] = ((abs(dataframe['pdi'][index] - dataframe['ndi'][index])) / (abs(dataframe['pdi'][index] + dataframe['ndi'][index]))) * 100
-
-        dataframe['adx'] = np.nan
+        :param pdi:
+        :param ndi:
+        :param dx:
+        :param adx:
+        :param period:
+        :return:
+        """
+        for index in range(0, pdi.shape[0]):
+            dx[index] = ((abs(pdi[index] - ndi[index])) / (abs(pdi[index] + ndi[index]))) * 100
 
         period2 = period*2
-        dataframe['adx'][period2-1] = dataframe['dx'][period:period2].sum() / period
-        for index in range(period2, dataframe.shape[0]):
-            dataframe['adx'][index] = ((dataframe['adx'][index-1] * (period - 1)) + dataframe['dx'][index]) / period
+        adx[period2-1] = dx[period:period2].sum() / period
+        for index in range(period2, dx.shape[0]):
+            adx[index] = ((adx[index-1] * (period - 1)) + dx[index]) / period
 
-        return dataframe
+        return dx, adx
 
 
     def create_chart(self, dataframe):
