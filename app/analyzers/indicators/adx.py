@@ -5,7 +5,10 @@ import numpy
 import matplotlib.pyplot as plt
 from pandas.plotting import table
 
-class Adx():
+from analyzers.utils import IndicatorUtils
+
+
+class Adx(IndicatorUtils):
     def analyze(self, historical_data, signal=["adx"], period_count=14, hot_thresh=None, cold_thresh=None):
         """
         strength of a trend
@@ -17,8 +20,7 @@ class Adx():
         50-75   very strong trend
         75-100  extremely strong trend
         """
-        #dataframe = self.convert_to_dataframe(historical_data)
-        dataframe = historical_data
+        dataframe = self.convert_to_dataframe(historical_data)
 
         adx_columns = {
             'tr': [numpy.nan] * dataframe.index.shape[0],
@@ -215,7 +217,6 @@ if __name__ == '__main__':
     hist.drop('datetime', axis=1, inplace=True)
     adx = Adx()
     data = adx.analyze(historical_data=hist, hot_thresh=30, cold_thresh=25)
-    #data.to_csv('dmtest1', columns=['dx'], sep=' ')
     data.to_csv('dmtest1', columns= ['dx', 'adx'], sep=',')
     adx.create_chart(data)
 
