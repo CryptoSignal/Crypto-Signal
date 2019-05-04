@@ -1,9 +1,10 @@
 
+"""
+Average Directional Index indicator
+"""
+
 import pandas
-import os
 import numpy
-import matplotlib.pyplot as plt
-from pandas.plotting import table
 
 from analyzers.utils import IndicatorUtils
 
@@ -20,6 +21,7 @@ class Adx(IndicatorUtils):
         50-75   very strong trend
         75-100  extremely strong trend
         """
+
         dataframe = self.convert_to_dataframe(historical_data)
 
         adx_columns = {
@@ -128,6 +130,7 @@ class Adx(IndicatorUtils):
 
         return pdm, ndm
 
+
     def DMsmooth(self, pdm, ndm, pdm_smooth, ndm_smooth, period_count):
         """
         Smoothing positive and negative directional movement
@@ -141,7 +144,6 @@ class Adx(IndicatorUtils):
 
         pdm_smooth[period_count-1] = pdm[0:period_count].sum() / period_count
         ndm_smooth[period_count - 1] = ndm[0:period_count].sum() / period_count
-
         for index in range(period_count, pdm.shape[0]):
             pdm_smooth[index] = (pdm[index-1] - (pdm_smooth[index-1]/period_count)) + pdm_smooth[index-1]
             ndm_smooth[index] = (ndm[index - 1] - (ndm_smooth[index-1] / period_count)) + ndm_smooth[index-1]
@@ -159,6 +161,7 @@ class Adx(IndicatorUtils):
         :param ndi: negative directional index, nan dataframe
         :return: pdi, ndi
         """
+
         for index in range(0, tr.shape[0]):
             pdi[index] = (pdm_smooth[index] / tr[index]) * 100
             ndi[index] = (ndm_smooth[index] / tr[index]) * 100
@@ -177,12 +180,13 @@ class Adx(IndicatorUtils):
         :param period_count: time period_count
         :return: atr
         """
-        atr[period_count-1] = tr[0:period_count].sum() / period_count
 
+        atr[period_count-1] = tr[0:period_count].sum() / period_count
         for index in range(period_count, tr.shape[0]):
             atr[index] = ((atr[index-1] * (period_count - 1)) + tr[index]) / period_count
 
         return atr
+
 
     def ADX(self, pdi, ndi, dx, adx, period_count):
         """
@@ -194,6 +198,7 @@ class Adx(IndicatorUtils):
         :param period_count: time period_count
         :return: dx, adx
         """
+
         for index in range(0, pdi.shape[0]):
             dx[index] = ((abs(pdi[index] - ndi[index])) / (abs(pdi[index] + ndi[index]))) * 100
 
@@ -203,20 +208,3 @@ class Adx(IndicatorUtils):
             adx[index] = ((adx[index-1] * (period_count - 1)) + dx[index]) / period_count
 
         return dx, adx
-
-
-    def create_chart(self, dataframe):
-        x = dataframe.index
-        y = dataframe['adx']
-        plt.plot(x, y)
-        plt.show()
-
-if __name__ == '__main__':
-    hist = pandas.read_csv(r'savefunctiondata')
-    hist = hist.set_index(pandas.to_datetime(hist['datetime']))
-    hist.drop('datetime', axis=1, inplace=True)
-    adx = Adx()
-    data = adx.analyze(historical_data=hist, hot_thresh=30, cold_thresh=25)
-    data.to_csv('dmtest1', columns= ['dx', 'adx'], sep=',')
-    adx.create_chart(data)
-
