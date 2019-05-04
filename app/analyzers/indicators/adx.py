@@ -83,12 +83,12 @@ class Adx():
 
     def TR(self, high, low, close, tr):
         """
-        TR (True Range)
-        :param high:
-        :param low:
-        :param close:
-        :param tr:
-        :return:
+        Calculates TR (True Range)
+        :param high: high from candles
+        :param low: low from candles
+        :param close: close from candles
+        :param tr: true range
+        :return: tr
         """
 
         tr[0] = abs(high[0] - low[0])
@@ -103,12 +103,12 @@ class Adx():
 
     def DM(self, high, low, pdm, ndm):
         """
-        DM (Directional Movement)
-        :param high:
-        :param low:
-        :param pdm:
-        :param ndm:
-        :return:
+        Calculates DM (Directional Movement)
+        :param high: high from candles
+        :param low: low from candles
+        :param pdm: positive directional movement, nan dataframe
+        :param ndm: negative directional movement, nan dataframe
+        :return: pdm, ndm
         """
 
         for index in range(1, high.shape[0]):
@@ -128,13 +128,13 @@ class Adx():
 
     def DMsmooth(self, pdm, ndm, pdm_smooth, ndm_smooth, period):
         """
-
-        :param pdm:
-        :param ndm:
-        :param pdm_smooth:
-        :param ndm_smooth:
-        :param period:
-        :return:
+        Smoothing positive and negative directional movement
+        :param pdm: positive directional movement
+        :param ndm: negative directional movement
+        :param pdm_smooth: positive directional movement smoothed
+        :param ndm_smooth: negative directional movement smoothed
+        :param period: time period
+        :return: pdm_smooth, ndm_smooth
         """
 
         pdm_smooth[period-1] = pdm[0:period].sum() / period
@@ -149,13 +149,13 @@ class Adx():
 
     def DI(self, pdm_smooth, ndm_smooth, tr, pdi, ndi):
         """
-        DI (Directional Movement Indicator)
-        :param pdm_smooth:
-        :param ndm_smooth:
-        :param tr:
-        :param pdi:
-        :param ndi:
-        :return:
+        Calculates DI (Directional Movement Indicator)
+        :param pdm_smooth: positive directional movement smoothed
+        :param ndm_smooth: negative directional movement smoothed
+        :param tr: true range
+        :param pdi: positive directional index, nan dataframe
+        :param ndi: negative directional index, nan dataframe
+        :return: pdi, ndi
         """
         for index in range(0, tr.shape[0]):
             pdi[index] = (pdm_smooth[index] / tr[index]) * 100
@@ -166,13 +166,14 @@ class Adx():
 
     def ATR(self, tr, atr, period):
         """
+        Calculates ATR (Average True Range)
         Uses WILDER'S SMOOTHING METHOD
         ATR = a*TR + (1-a)* ATR_1
         a = (1/n)
-        :param tr:
-        :param atr:
-        :param period:
-        :return:
+        :param tr: true range
+        :param atr: average true range, nan dataframe
+        :param period: time period
+        :return: atr
         """
         atr[period-1] = tr[0:period].sum() / period
 
@@ -183,13 +184,13 @@ class Adx():
 
     def ADX(self, pdi, ndi, dx, adx, period):
         """
-
-        :param pdi:
-        :param ndi:
-        :param dx:
-        :param adx:
-        :param period:
-        :return:
+        Calculates DX (Directional index) and ADX (Average Directional Index)
+        :param pdi: positive directional index
+        :param ndi: negative directional index
+        :param dx: directional index, nan dataframe
+        :param adx: average directional index, nan dataframe
+        :param period: time period
+        :return: dx, adx
         """
         for index in range(0, pdi.shape[0]):
             dx[index] = ((abs(pdi[index] - ndi[index])) / (abs(pdi[index] + ndi[index]))) * 100
