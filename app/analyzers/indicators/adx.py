@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from pandas.plotting import table
 
 class Adx():
-    def analyze(self, historical_data, signal=["adx"], hot_thresh=None, cold_thresh=None):
+    def analyze(self, historical_data, signal=["adx"], period_count=14, hot_thresh=None, cold_thresh=None):
         """
         strength of a trend
         ADX > 25 = strength
@@ -37,7 +37,6 @@ class Adx():
                                       index=dataframe.index
                                       )
 
-        period = 14
         adx_values['tr'] = self.TR(dataframe['high'],
                                    dataframe['low'],
                                    dataframe['close'],
@@ -52,7 +51,7 @@ class Adx():
                                                                            adx_values['ndm'],
                                                                            adx_values['pdm_smooth'],
                                                                            adx_values['ndm_smooth'],
-                                                                           period
+                                                                           period_count
                                                                            )
         adx_values['pdi'], adx_values['ndi'] = self.DI(adx_values['pdm_smooth'],
                                                        adx_values['ndm_smooth'],
@@ -62,21 +61,21 @@ class Adx():
                                                        )
         adx_values['atr'] = self.ATR(adx_values['tr'],
                                      adx_values['atr'],
-                                     period
+                                     period_count
                                      )
         adx_values['dx'], adx_values['adx'] = self.ADX(adx_values['pdi'],
                                                        adx_values['ndi'],
                                                        adx_values['dx'],
                                                        adx_values['adx'],
-                                                       period
+                                                       period_count
                                                        )
         adx_values['is_hot'] = False
         adx_values['is_cold'] = False
 
         for index in range(0, adx_values.index.shape[0]):
-            if adx_values[index] < cold_thresh:
+            if adx_values[index]['adx'] < cold_thresh:
                 adx_values['is_cold'] = True
-            elif adx_values[index] >= hot_thresh:
+            elif adx_values[index]['adx'] >= hot_thresh:
                 adx_values['is_hot'] = True
 
         return adx_values
@@ -127,23 +126,23 @@ class Adx():
 
         return pdm, ndm
 
-    def DMsmooth(self, pdm, ndm, pdm_smooth, ndm_smooth, period):
+    def DMsmooth(self, pdm, ndm, pdm_smooth, ndm_smooth, period_count):
         """
         Smoothing positive and negative directional movement
         :param pdm: positive directional movement
         :param ndm: negative directional movement
         :param pdm_smooth: positive directional movement smoothed
         :param ndm_smooth: negative directional movement smoothed
-        :param period: time period
+        :param period_count: time period_count
         :return: pdm_smooth, ndm_smooth
         """
 
-        pdm_smooth[period-1] = pdm[0:period].sum() / period
-        ndm_smooth[period - 1] = ndm[0:period].sum() / period
+        pdm_smooth[period_count-1] = pdm[0:period_count].sum() / period_count
+        ndm_smooth[period_count - 1] = ndm[0:period_count].sum() / period_count
 
-        for index in range(period, pdm.shape[0]):
-            pdm_smooth[index] = (pdm[index-1] - (pdm_smooth[index-1]/period)) + pdm_smooth[index-1]
-            ndm_smooth[index] = (ndm[index - 1] - (ndm_smooth[index-1] / period)) + ndm_smooth[index-1]
+        for index in range(period_count, pdm.shape[0]):
+            pdm_smooth[index] = (pdm[index-1] - (pdm_smooth[index-1]/period_count)) + pdm_smooth[index-1]
+            ndm_smooth[index] = (ndm[index - 1] - (ndm_smooth[index-1] / period_count)) + ndm_smooth[index-1]
 
         return pdm_smooth, ndm_smooth
 
@@ -165,7 +164,7 @@ class Adx():
         return pdi, ndi
 
 
-    def ATR(self, tr, atr, period):
+    def ATR(self, tr, atr, period_count):
         """
         Calculates ATR (Average True Range)
         Uses WILDER'S SMOOTHING METHOD
@@ -173,33 +172,33 @@ class Adx():
         a = (1/n)
         :param tr: true range
         :param atr: average true range, nan dataframe
-        :param period: time period
+        :param period_count: time period_count
         :return: atr
         """
-        atr[period-1] = tr[0:period].sum() / period
+        atr[period_count-1] = tr[0:period_count].sum() / period_count
 
-        for index in range(period, tr.shape[0]):
-            atr[index] = ((atr[index-1] * (period - 1)) + tr[index]) / period
+        for index in range(period_count, tr.shape[0]):
+            atr[index] = ((atr[index-1] * (period_count - 1)) + tr[index]) / period_count
 
         return atr
 
-    def ADX(self, pdi, ndi, dx, adx, period):
+    def ADX(self, pdi, ndi, dx, adx, period_count):
         """
         Calculates DX (Directional index) and ADX (Average Directional Index)
         :param pdi: positive directional index
         :param ndi: negative directional index
         :param dx: directional index, nan dataframe
         :param adx: average directional index, nan dataframe
-        :param period: time period
+        :param period_count: time period_count
         :return: dx, adx
         """
         for index in range(0, pdi.shape[0]):
             dx[index] = ((abs(pdi[index] - ndi[index])) / (abs(pdi[index] + ndi[index]))) * 100
 
-        period2 = period*2
-        adx[period2-1] = dx[period:period2].sum() / period
-        for index in range(period2, dx.shape[0]):
-            adx[index] = ((adx[index-1] * (period - 1)) + dx[index]) / period
+        period_count2 = period_count*2
+        adx[period_count2-1] = dx[period_count:period_count2].sum() / period_count
+        for index in range(period_count2, dx.shape[0]):
+            adx[index] = ((adx[index-1] * (period_count - 1)) + dx[index]) / period_count
 
         return dx, adx
 
