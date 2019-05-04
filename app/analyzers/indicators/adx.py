@@ -70,13 +70,14 @@ class Adx():
                                                        adx_values['adx'],
                                                        period
                                                        )
+        adx_values['is_hot'] = False
+        adx_values['is_cold'] = False
 
-
-        '''
-        if obv_values[signal[0]].shape[0]:
-            adx_values['is_hot'] = rsi_values[signal[0]] < hot_thresh
-            rsi_values['is_cold'] = rsi_values[signal[0]] > cold_thresh
-        '''
+        for index in range(0, adx_values.index.shape[0]):
+            if adx_values[index] < cold_thresh:
+                adx_values['is_cold'] = True
+            elif adx_values[index] >= hot_thresh:
+                adx_values['is_hot'] = True
 
         return adx_values
 
