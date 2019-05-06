@@ -115,5 +115,5 @@ class Klinger_oscillator(IndicatorUtils):
                 klinger_values['is_hot'][index] = True
             elif klinger_values['kvo_signal'][index] <= 0 and klinger_values['mean'][index] < klinger_values['mean'][index-1]:
                 klinger_values['is_cold'][index]
-        print('klinger done')
+
         return klinger_values
