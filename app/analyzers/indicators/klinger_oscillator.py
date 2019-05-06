@@ -5,9 +5,6 @@ Klinger Oscillator
 import pandas
 import os
 import numpy
-from talib import abstract
-
-from analyzers.utils import IndicatorUtils
 
 
 class Klinger_oscillator(IndicatorUtils):
