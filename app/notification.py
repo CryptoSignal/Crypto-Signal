@@ -42,7 +42,7 @@ class Notifier(IndicatorUtils):
     """Handles sending notifications via the configured notifiers
     """
 
-    def __init__(self, notifier_config, market_data):
+    def __init__(self, notifier_config, indicator_config, market_data):
         """Initializes Notifier class
 
         Args:
@@ -51,6 +51,7 @@ class Notifier(IndicatorUtils):
 
         self.logger = structlog.get_logger()
         self.notifier_config = notifier_config
+        self.indicator_config = indicator_config
         self.market_data = market_data
         self.last_analysis = dict()
         self.enable_charts = False
@@ -975,8 +976,20 @@ class Notifier(IndicatorUtils):
 
 
     def plot_ichimoku(self, ax, df, historical_data, candle_period):
+        indicator_conf = {}
+
+        if 'ichimoku' in self.indicator_config:
+            for config in self.indicator_config['ichimoku']:
+                if config['enabled'] and config['candle_period'] == candle_period:
+                    indicator_conf = config
+                    break
+
+        tenkansen_period = indicator_conf['tenkansen_period'] if 'tenkansen_period' in indicator_conf else 20                       
+        kijunsen_period = indicator_conf['kijunsen_period'] if 'kijunsen_period' in indicator_conf else 60
+        senkou_span_b_period = indicator_conf['senkou_span_b_period'] if 'senkou_span_b_period' in indicator_conf else 120
+        
         textsize = 11
-        ichimoku_data = ichimoku.Ichimoku().analyze(historical_data=historical_data, chart=True)
+        ichimoku_data = ichimoku.Ichimoku().analyze(historical_data, tenkansen_period, kijunsen_period , senkou_span_b_period, chart=True)
 
         if(df['close'].count() > 120):
             df = df.iloc[-120:]

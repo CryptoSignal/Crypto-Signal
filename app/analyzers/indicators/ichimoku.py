@@ -11,7 +11,8 @@ from analyzers.utils import IndicatorUtils
 
 
 class Ichimoku(IndicatorUtils):
-    def analyze(self, historical_data, signal=['leading_span_a', 'leading_span_b'], hot_thresh=None, cold_thresh=None, chart=None):
+    def analyze(self, historical_data, tenkansen_period, kijunsen_period , senkou_span_b_period, 
+                signal=['leading_span_a', 'leading_span_b'], hot_thresh=None, cold_thresh=None, chart=None):
         """Performs an ichimoku cloud analysis on the historical data
 
         Args:
@@ -22,6 +23,9 @@ class Ichimoku(IndicatorUtils):
                 good to purchase.
             cold_thresh (float, optional): Defaults to None. The threshold at which this might be
                 good to sell.
+            tenkansen_period (int, optional)
+            kijunsen_period (int, optional)
+            senkou_span_b_period (int, optional)
 
         Returns:
             pandas.DataFrame: A dataframe containing the indicators and hot/cold values.
@@ -40,12 +44,12 @@ class Ichimoku(IndicatorUtils):
                                            index=dataframe.index
                                            )
         # value calculations
-        low_9 = dataframe['low'].rolling(window=9).min()
-        low_26 = dataframe['low'].rolling(window=26).min()
-        low_52 = dataframe['low'].rolling(window=52).min()
-        high_9 = dataframe['high'].rolling(window=9).max()
-        high_26 = dataframe['high'].rolling(window=26).max()
-        high_52 = dataframe['high'].rolling(window=52).max()
+        low_9 = dataframe['low'].rolling(window=tenkansen_period).min()
+        low_26 = dataframe['low'].rolling(window=kijunsen_period).min()
+        low_52 = dataframe['low'].rolling(window=senkou_span_b_period).min()
+        high_9 = dataframe['high'].rolling(window=tenkansen_period).max()
+        high_26 = dataframe['high'].rolling(window=kijunsen_period).max()
+        high_52 = dataframe['high'].rolling(window=senkou_span_b_period).max()
 
         ichimoku_values['tenkansen'] = (low_9 + high_9) / 2
         ichimoku_values['kijunsen'] = (low_26 + high_26) / 2

@@ -48,7 +48,7 @@ def main():
             market_data_chunk = dict()
             market_data_chunk[exchange] = { key: market_data[exchange][key] for key in chunk }
 
-            notifier = Notifier(config.notifiers, market_data_chunk)
+            notifier = Notifier(config.notifiers, config.indicators, market_data_chunk)
             behaviour = Behaviour(config, exchange_interface, notifier)
 
             workerName = "Worker-{}".format(num)
