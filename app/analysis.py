@@ -29,6 +29,7 @@ class StrategyAnalyzer():
         """
 
         dispatcher = {
+            'adx': adx.Adx().analyze,
             'ichimoku': ichimoku.Ichimoku().analyze,
             'macd': macd.MACD().analyze,
             'rsi': rsi.RSI().analyze,

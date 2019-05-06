@@ -349,6 +349,7 @@ necessity: optional\
 description: Valid values are on a per indicator basis see the table below. Each indicator may have a variety of signal lines, this option allows you to specify which options you care about. The first one specified is used for determining hot/cold the others are just output to the cli for information. Valid options are:
 
 ```
+ADX - adx
 MOMENTUM - momentum
 RSI - rsi
 MACD - macd, macdsignal, macdhist
@@ -378,7 +379,7 @@ default: An integer\
 necessity: optional\
 description: Valid options are an integer. This is the count of candle periods to use for this analysis. Let's suppose you wanted to test 15 days of RSI data. You would set the `candle_period: 1d` and then set `period_count: 15`, which means 15 counts of 1d periods, or in other words 15 days.
 
-This option is only supported by the following indicators: momentum, mfi, rsi, stoch_rsi
+This option is only supported by the following indicators: adx, momentum, mfi, rsi, stoch_rsi
 
 
 An example of configuring an indicator would look as follows:
