@@ -106,7 +106,14 @@ class Klinger_oscillator(IndicatorUtils):
         klinger_values['kvo'] = klinger_values['vf_ema_short'] - klinger_values['vf_ema_long']
         klinger_values['kvo_signal'] = abstract.EMA(klinger_values['kvo'], signal_period).to_frame()
 
+        klinger_values['is_hot'] = False
+        klinger_values['is_cold'] = False
 
-
+        for index in range(1, klinger_values):
+            ## might want to change mean index-1 to longer period and not just last candle ##
+            if klinger_values['kvo_signal'][index] > 0 and klinger_values['mean'][index] > klinger_values['mean'][index-1]:
+                klinger_values['is_hot'][index] = True
+            elif klinger_values['kvo_signal'][index] <= 0 and klinger_values['mean'][index] < klinger_values['mean'][index-1]:
+                klinger_values['is_cold'][index]
 
         return klinger_values
