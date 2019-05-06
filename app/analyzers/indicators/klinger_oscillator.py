@@ -1,5 +1,11 @@
 """
 Klinger Oscillator
+The Klinger oscillator was developed by Stephen Klinger to determine the long-term trend of money flow
+while remaining sensitive enough to detect short-term fluctuations. The indicator compares the volume
+flowing through a security with the security's price movements and then converts the result into an oscillator.
+The Klinger oscillator shows the difference between two moving averages which are based on more than price.
+Traders watch for divergence on the indicator to signal potential price reversals.
+Like other oscillators, a signal line can be added to provide additional trade signals.
 """
 
 import pandas
