@@ -235,6 +235,11 @@ class Behaviour():
                     if indicator == 'bollinger' or indicator == 'bbp':
                         analysis_args['std_dev'] = indicator_conf['std_dev'] if 'std_dev' in indicator_conf else 2
 
+                    if indicator == 'klinger_oscillator':
+                        analysis_args['ema_short_period'] = indicator_conf['vf_ema_short'] if 'vf_ema_short' in indicator_conf else 32
+                        analysis_args['ema_long_period'] = indicator_conf['vf_ema_long'] if 'vf_ema_long' in indicator_conf else 55
+                        analysis_args['signal_period'] = indicator_conf['kvo_signal'] if 'kvo_signal' in indicator_conf else 13
+
                     results[indicator].append({
                         'result': self._get_analysis_result(
                             indicator_dispatcher,

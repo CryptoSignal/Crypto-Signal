@@ -11,8 +11,23 @@ from analyzers.utils import IndicatorUtils
 
 
 class Klinger_oscillator(IndicatorUtils):
-    def analyze(self, historical_data, signal=['ema_long, ema_short'], hot_tresh=None, cold_tresh=None):
-        """
+    def analyze(self, historical_data, ema_short_period, ema_long_period, signal_period, signal=['kvo, kvo_signal'], hot_tresh=None, cold_tresh=None):
+        """Performs a Klinger Oscillator analysis on the historical data
+
+        Args:
+            historical_data (list): A matrix of historical OHCLV data.
+            signal (list, optional): Defaults to kvo and kvo_signal.
+            ema_short_period (int, optional): Short ema for Volume Force
+            ema_long_period (int, optional): Long ema for Volume Force
+            signal_period (int, optional): Ema for KVO signal line
+            hot_thresh (float, optional): Defaults to None. The threshold at which this might be
+                good to purchase.
+            cold_thresh (float, optional): Defaults to None. The threshold at which this might be
+                good to sell.
+
+        Returns:
+            pandas.DataFrame: A dataframe containing the indicators and hot/cold values.
+        ===============================================================================================================
         Klinger Oscillator = 34 period EMA of VF - 55 period EMA of VF
             LEADING INDICATOR
             USE WITH STOCHASTIC OSCILLATOR
@@ -85,15 +100,11 @@ class Klinger_oscillator(IndicatorUtils):
             else:
                 klinger_values['cm'][index] = klinger_values['dm'][index] + klinger_values['dm'][index-1]
 
-        ema_short_period = 32
-        ema_long_period = 55
-        ema_vf_period = 13
-
         klinger_values['vf'] = dataframe['volume'] * abs(2*((klinger_values['dm']/klinger_values['cm'])-1)) * klinger_values['trend'] * 100
         klinger_values['vf_ema_short'] = abstract.EMA(klinger_values['vf'], ema_short_period).to_frame()
         klinger_values['vf_ema_long'] = abstract.EMA(klinger_values['vf'], ema_long_period).to_frame()
         klinger_values['kvo'] = klinger_values['vf_ema_short'] - klinger_values['vf_ema_long']
-        klinger_values['kvo_signal'] = abstract.EMA(klinger_values['kvo'], ema_vf_period).to_frame()
+        klinger_values['kvo_signal'] = abstract.EMA(klinger_values['kvo'], signal_period).to_frame()
 
 
 
