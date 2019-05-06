@@ -44,17 +44,17 @@ class Ichimoku(IndicatorUtils):
                                            index=dataframe.index
                                            )
         # value calculations
-        low_9 = dataframe['low'].rolling(window=tenkansen_period).min()
-        low_26 = dataframe['low'].rolling(window=kijunsen_period).min()
-        low_52 = dataframe['low'].rolling(window=senkou_span_b_period).min()
-        high_9 = dataframe['high'].rolling(window=tenkansen_period).max()
-        high_26 = dataframe['high'].rolling(window=kijunsen_period).max()
-        high_52 = dataframe['high'].rolling(window=senkou_span_b_period).max()
+        low_tenkansen   = dataframe['low'].rolling(window=tenkansen_period).min()
+        low_kijunsen    = dataframe['low'].rolling(window=kijunsen_period).min()
+        low_senkou      = dataframe['low'].rolling(window=senkou_span_b_period).min()
+        high_tenkansen  = dataframe['high'].rolling(window=tenkansen_period).max()
+        high_kijunsen   = dataframe['high'].rolling(window=kijunsen_period).max()
+        high_senkou     = dataframe['high'].rolling(window=senkou_span_b_period).max()
 
-        ichimoku_values['tenkansen'] = (low_9 + high_9) / 2
-        ichimoku_values['kijunsen'] = (low_26 + high_26) / 2
-        ichimoku_values['leading_span_a'] = ((ichimoku_values['tenkansen'] + ichimoku_values['kijunsen']) / 2)
-        ichimoku_values['leading_span_b'] = (high_52 + low_52) / 2
+        ichimoku_values['tenkansen']        = (low_tenkansen + high_tenkansen) / 2
+        ichimoku_values['kijunsen']         = (low_kijunsen + high_kijunsen) / 2
+        ichimoku_values['leading_span_a']   = ((ichimoku_values['tenkansen'] + ichimoku_values['kijunsen']) / 2)
+        ichimoku_values['leading_span_b']   = (high_senkou    + low_senkou) / 2
 
         # add time period for cloud offset
         ## if cloud discplacement changed the ichimuko plot will be off ##
