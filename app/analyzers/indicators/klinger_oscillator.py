@@ -1,16 +1,17 @@
-
+"""
+Klinger Oscillator
+"""
 
 import pandas
 import os
-import numpy as np
-import matplotlib.pyplot as plt
+import numpy
+from talib import abstract
+
+from analyzers.utils import IndicatorUtils
+
 
 class Klinger_oscillator():
-    def analyze(self, historical_data):
-
-        #dataframe = self.convert_to_dataframe(historical_data)
-        dataframe = historical_data
-        print(dataframe.tail())
+    def analyze(self, historical_data, signal=['ema_long, ema_short'], hot_tresh=None, cold_tresh=None):
         """
         Klinger Oscillator = 34 period EMA of VF - 55 period EMA of VF
             LEADING INDICATOR
@@ -52,58 +53,50 @@ class Klinger_oscillator():
         vf = volume force
         
         """
+        dataframe = self.convert_to_dataframe(historical_data)
 
+        klinger_columns = {
+            'mean': [numpy.nan] * dataframe.index.shape[0],
+            'trend': [numpy.nan] * dataframe.index.shape[0],
+            'dm': [numpy.nan] * dataframe.index.shape[0],
+            'cm': [numpy.nan] * dataframe.index.shape[0],
+            'volumeforce': [numpy.nan] * dataframe.index.shape[0],
+            'ema_short': [numpy.nan] * dataframe.index.shape[0],
+            'ema_long': [numpy.nan] * dataframe.index.shape[0],
+            'kvo': [numpy.nan] * dataframe.index.shape[0],
+            'vf': [numpy.nan] * dataframe.index.shape[0],
+            'vfema': [numpy.nan] * dataframe.index.shape[0]
+        }
 
-        dataframe['mean'] = dataframe[['high', 'low', 'close']].mean(axis=1)
-        dataframe['trend'] = np.nan
-        print('calculating trend')
-        for index in range(1, (dataframe.shape[0])):
-            if dataframe['mean'][index] > dataframe['mean'][index-1]:
-                dataframe['trend'][index] = 1
+        klinger_values = pandas.DataFrame(klinger_columns,
+                                           index=dataframe.index
+                                           )
+
+        klinger_values['mean'] = dataframe[['high', 'low', 'close']].mean(axis=1)
+        for index in range(1, (klinger_values.shape[0])):
+            klinger_values['dm'] = dataframe['high'][index] - dataframe['low'][index]
+            if klinger_values['mean'][index] > klinger_values['mean'][index-1]:
+                klinger_values['trend'][index] = 1
             else:
-                dataframe['trend'][index] = -1
+                klinger_values['trend'][index] = -1
 
-            dataframe['dm'] = dataframe['high'][index] - dataframe['low'][index]
-        dataframe['cm'] = np.nan
-        print('calculating cm')
-        for index in range(0, (dataframe.shape[0])):
-            dataframe['cm_a'] = dataframe['dm'][index] + dataframe['dm'][index-1]
-            if dataframe['trend'][index] == dataframe['trend'][index-1]:
-                dataframe['cm'][index] = dataframe['cm'][index-1] + dataframe['dm'][index]
+        for index in range(0, (klinger_values.shape[0])):
+            klinger_values['cm_a'] = klinger_values['dm'][index] + klinger_values['dm'][index-1]
+            if klinger_values['trend'][index] == klinger_values['trend'][index-1]:
+                klinger_values['cm'][index] = klinger_values['cm'][index-1] + klinger_values['dm'][index]
             else:
-                dataframe['cm'][index] = dataframe['dm'][index] + dataframe['dm'][index-1]
-        print('calculating')
-        dataframe['vfema'] = np.nan
-        dataframe['volumeforce'] = dataframe['volume'] * abs(2*((dataframe['dm']/dataframe['cm'])-1)) * dataframe['trend'] * 100
-        dataframe['32ema'] = dataframe['volumeforce'].ewm(span=32, min_periods=0, adjust=False, ignore_na=True).mean()
-        dataframe['55ema'] = dataframe['volumeforce'].ewm(span=55, min_periods=0, adjust=False, ignore_na=True).mean()
-        dataframe['kvo'] = dataframe['32ema'] - dataframe['55ema']
-        dataframe['vf'] = dataframe['32ema'] - dataframe['55ema']
-        dataframe['vfema'] = dataframe['vf'].ewm(span=13, min_periods=0, adjust=False, ignore_na=True).mean()
-        print(dataframe.head())
-        print(dataframe.tail())
-        dataframe.to_csv('klinger')
-        print('finished calculations')
-        return dataframe
+                klinger_values['cm'][index] = klinger_values['dm'][index] + klinger_values['dm'][index-1]
+        abstract.EMA(dataframe, period_count).to_frame()
 
-    def create_chart(self, data):
+        ema_short_period = 32
+        ema_long_period = 55
+        ema_vf_period = 13
 
-        print('data:', data.tail())
-        x = data.index
-        y = data['vf']
-        plt.plot(x, y)
-        y1 = data['vfema']
-        plt.plot(x, y1)
-        plt.xlabel('x-axis')
-        plt.ylabel('dates')
-        plt.show()
+        klinger_values['volumeforce'] = dataframe['volume'] * abs(2*((klinger_values['dm']/klinger_values['cm'])-1)) * klinger_values['trend'] * 100
+        klinger_values['ema_short'] = abstract.EMA(klinger_values['volumeforce'], ema_short_period).to_frame()
+        klinger_values['ema_long'] = abstract.EMA(klinger_values['volumeforce'], ema_long_period).to_frame()
+        klinger_values['kvo'] = klinger_values['ema_short'] - klinger_values['ema_long']
+        klinger_values['vf'] = klinger_values['ema_short'] - klinger_values['ema_long']
+        klinger_values['vfema'] = abstract.EMA(klinger_values['vf'], ema_vf_period).to_frame()
 
-
-
-if __name__ == '__main__':
-    hist = pandas.read_csv(r'savefunctiondata')
-    hist = hist.set_index(pandas.to_datetime(hist['datetime']))
-    hist.drop('datetime', axis=1, inplace=True)
-    ko = Klinger_oscillator()
-    data = ko.analyze(historical_data=hist)
-    ko.create_chart(data)
+        return klinger_values
