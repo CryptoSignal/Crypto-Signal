@@ -59,12 +59,11 @@ class Klinger_oscillator(IndicatorUtils):
             'trend': [numpy.nan] * dataframe.index.shape[0],
             'dm': [numpy.nan] * dataframe.index.shape[0],
             'cm': [numpy.nan] * dataframe.index.shape[0],
-            'volumeforce': [numpy.nan] * dataframe.index.shape[0],
-            'ema_short': [numpy.nan] * dataframe.index.shape[0],
-            'ema_long': [numpy.nan] * dataframe.index.shape[0],
-            'kvo': [numpy.nan] * dataframe.index.shape[0],
             'vf': [numpy.nan] * dataframe.index.shape[0],
-            'vfema': [numpy.nan] * dataframe.index.shape[0]
+            'vf_ema_short': [numpy.nan] * dataframe.index.shape[0],
+            'vf_ema_long': [numpy.nan] * dataframe.index.shape[0],
+            'kvo': [numpy.nan] * dataframe.index.shape[0],
+            'kvo_signal': [numpy.nan] * dataframe.index.shape[0]
         }
 
         klinger_values = pandas.DataFrame(klinger_columns,
@@ -85,17 +84,18 @@ class Klinger_oscillator(IndicatorUtils):
                 klinger_values['cm'][index] = klinger_values['cm'][index-1] + klinger_values['dm'][index]
             else:
                 klinger_values['cm'][index] = klinger_values['dm'][index] + klinger_values['dm'][index-1]
-        abstract.EMA(dataframe, period_count).to_frame()
 
         ema_short_period = 32
         ema_long_period = 55
         ema_vf_period = 13
 
-        klinger_values['volumeforce'] = dataframe['volume'] * abs(2*((klinger_values['dm']/klinger_values['cm'])-1)) * klinger_values['trend'] * 100
-        klinger_values['ema_short'] = abstract.EMA(klinger_values['volumeforce'], ema_short_period).to_frame()
-        klinger_values['ema_long'] = abstract.EMA(klinger_values['volumeforce'], ema_long_period).to_frame()
-        klinger_values['kvo'] = klinger_values['ema_short'] - klinger_values['ema_long']
-        klinger_values['vf'] = klinger_values['ema_short'] - klinger_values['ema_long']
-        klinger_values['vfema'] = abstract.EMA(klinger_values['vf'], ema_vf_period).to_frame()
+        klinger_values['vf'] = dataframe['volume'] * abs(2*((klinger_values['dm']/klinger_values['cm'])-1)) * klinger_values['trend'] * 100
+        klinger_values['vf_ema_short'] = abstract.EMA(klinger_values['vf'], ema_short_period).to_frame()
+        klinger_values['vf_ema_long'] = abstract.EMA(klinger_values['vf'], ema_long_period).to_frame()
+        klinger_values['kvo'] = klinger_values['vf_ema_short'] - klinger_values['vf_ema_long']
+        klinger_values['kvo_signal'] = abstract.EMA(klinger_values['kvo'], ema_vf_period).to_frame()
+
+
+
 
         return klinger_values
