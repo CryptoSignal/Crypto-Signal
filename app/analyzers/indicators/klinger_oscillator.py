@@ -11,7 +11,7 @@ from analyzers.utils import IndicatorUtils
 
 
 class Klinger_oscillator(IndicatorUtils):
-    def analyze(self, historical_data, ema_short_period, ema_long_period, signal_period, signal=['kvo, kvo_signal'], hot_tresh=None, cold_tresh=None):
+    def analyze(self, historical_data, ema_short_period, ema_long_period, signal_period, signal=['kvo, kvo_signal'], hot_thresh=None, cold_thresh=None):
         """Performs a Klinger Oscillator analysis on the historical data
 
         Args:
@@ -101,19 +101,19 @@ class Klinger_oscillator(IndicatorUtils):
                 klinger_values['cm'][index] = klinger_values['dm'][index] + klinger_values['dm'][index-1]
 
         klinger_values['vf'] = dataframe['volume'] * abs(2*((klinger_values['dm']/klinger_values['cm'])-1)) * klinger_values['trend'] * 100
-        klinger_values['vf_ema_short'] = abstract.EMA(klinger_values['vf'], ema_short_period).to_frame()
-        klinger_values['vf_ema_long'] = abstract.EMA(klinger_values['vf'], ema_long_period).to_frame()
+        klinger_values['vf_ema_short'] = klinger_values['vf'].ewm(span=ema_short_period, min_periods=0, adjust=False, ignore_na=True).mean()
+        klinger_values['vf_ema_long'] = klinger_values['vf'].ewm(span=ema_long_period, min_periods=0, adjust=False, ignore_na=True).mean()
         klinger_values['kvo'] = klinger_values['vf_ema_short'] - klinger_values['vf_ema_long']
-        klinger_values['kvo_signal'] = abstract.EMA(klinger_values['kvo'], signal_period).to_frame()
+        klinger_values['kvo_signal'] = klinger_values['kvo'].ewm(span=signal_period, min_periods=0, adjust=False, ignore_na=True).mean()
 
         klinger_values['is_hot'] = False
         klinger_values['is_cold'] = False
 
-        for index in range(1, klinger_values):
+        for index in range(1, klinger_values.shape[0]):
             ## might want to change mean index-1 to longer period and not just last candle ##
             if klinger_values['kvo_signal'][index] > 0 and klinger_values['mean'][index] > klinger_values['mean'][index-1]:
                 klinger_values['is_hot'][index] = True
             elif klinger_values['kvo_signal'][index] <= 0 and klinger_values['mean'][index] < klinger_values['mean'][index-1]:
                 klinger_values['is_cold'][index]
-
+        print('klinger done')
         return klinger_values
