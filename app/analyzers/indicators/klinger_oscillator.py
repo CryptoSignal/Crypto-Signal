@@ -10,7 +10,7 @@ from talib import abstract
 from analyzers.utils import IndicatorUtils
 
 
-class Klinger_oscillator():
+class Klinger_oscillator(IndicatorUtils):
     def analyze(self, historical_data, signal=['ema_long, ema_short'], hot_tresh=None, cold_tresh=None):
         """
         Klinger Oscillator = 34 period EMA of VF - 55 period EMA of VF
@@ -26,8 +26,7 @@ class Klinger_oscillator():
             Trend = -1        
         
         dm = high - low
-        
-        
+        -----
         CM[today] =     / CM[yesterday] + DM[today] IF  trend[today]==trend[yesterday]
                         \ DM[yesterday] + DM[today] IF  trend[today]!=trend[yesterday]
         
