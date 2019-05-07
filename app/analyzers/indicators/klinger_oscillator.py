@@ -13,7 +13,7 @@ import os
 import numpy
 
 
-class Klinger_oscillator(IndicatorUtils):
+class Klinger_oscillator():
     def analyze(self, historical_data, ema_short_period, ema_long_period, signal_period, signal=['kvo, kvo_signal'], hot_thresh=None, cold_thresh=None):
         """Performs a Klinger Oscillator analysis on the historical data
 
