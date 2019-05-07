@@ -1,4 +1,5 @@
 __all__ = [
+    'aroon_oscillator',
     'adx',
     'ichimoku',
     'macd',
