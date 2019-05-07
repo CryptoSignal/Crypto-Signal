@@ -48,7 +48,7 @@ class BBP(IndicatorUtils):
         bollinger['is_hot']  = False
         bollinger['is_cold'] = False
 
-        bollinger['is_hot'].iloc[-1]  = bollinger['bbp'].iloc[-1] <= hot_thresh and bollinger['mfi'].iloc[-1] <= 20
+        bollinger['is_hot'].iloc[-1]  = bollinger['bbp'].iloc[-2] <= hot_thresh and bollinger['bbp'].iloc[-2] < bollinger['bbp'].iloc[-1]
         bollinger['is_cold'].iloc[-1] = bollinger['bbp'].iloc[-1] >= cold_thresh
 
         return bollinger
