@@ -11,9 +11,10 @@ Like other oscillators, a signal line can be added to provide additional trade s
 import pandas
 import os
 import numpy
+from analyzers.utils import IndicatorUtils
 
 
-class Klinger_oscillator():
+class Klinger_oscillator(IndicatorUtils):
     def analyze(self, historical_data, ema_short_period, ema_long_period, signal_period, signal=['kvo, kvo_signal'], hot_thresh=None, cold_thresh=None):
         """Performs a Klinger Oscillator analysis on the historical data
 
