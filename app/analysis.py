@@ -29,7 +29,9 @@ class StrategyAnalyzer():
         """
 
         dispatcher = {
+
             'klinger_oscillator': klinger_oscillator.Klinger_oscillator().analyze,
+            'adx': adx.Adx().analyze,
             'ichimoku': ichimoku.Ichimoku().analyze,
             'macd': macd.MACD().analyze,
             'rsi': rsi.RSI().analyze,
