@@ -11,6 +11,8 @@ Development branch to testing new features. If you are looking for the latest st
 - New indicator MA Ribbon
 - New config values "hot_label" and "cold_label" for each indicator setup to set custom texts instead of the typical "hot" and "cold".
 - New indicator ADX (Average Directional Index)
+- New indicator Klinger Oscillator
+
 
 ## Installing And Running
 Because this is a development branch you need to build your custom Docker image. The commands listed below are intended to be run in a terminal.
