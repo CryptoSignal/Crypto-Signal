@@ -130,6 +130,37 @@ informants:
           candle_period: 4h
           period_count: 14
 ```
+
+#### Klinger Oscillator - klinger_oscillator
+
+The Klinger oscillator (kvo) was developed by Stephen Klinger to determine the long-term trend of money flow
+while remaining sensitive enough to detect short-term fluctuations. The indicator compares the volume
+flowing through a security with the security's price movements and then converts the result into an oscillator.
+The Klinger oscillator shows the difference between two moving averages which are based on more than price.
+Traders watch for divergence on the indicator to signal potential price reversals.
+Like other oscillators, a signal line can be added to provide additional trade signals.
+
+If klinger signal line (kvo_signal) > 0 AND mean price is moving up from last candle = hot notification
+If klinger signal line (kvo_signal) < 0 AND mean price is moving down from last candle = cold notification
+mean price = (high + low + close) / 3
+
+Periods in example are the default values
+
+```
+indicators:
+  klinger_oscillator:
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: always
+      ema_short_period = 34
+      ema_long_period = 55
+      signal_period = 13
+      signal:
+        - kvo
+        - kvo_signal
+      candle_period: 1d
+```
+
 #### Increase In Volume indicator - iiv
 
 There is a new indicator called "iiv" enabled for default for 5m period. The hot value is 5 by default, you can adjust it as you want, may be 10 o 15. This value is a measure about how strong is the increase in volume.
