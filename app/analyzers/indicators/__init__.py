@@ -1,4 +1,5 @@
 __all__ = [
+    'klinger_oscillator',
     'adx',
     'ichimoku',
     'macd',
