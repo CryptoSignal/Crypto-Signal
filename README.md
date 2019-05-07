@@ -161,7 +161,8 @@ indicators:
         - kvo
         - kvo_signal
       candle_period: 1d
-=======
+```
+
 #### Average Directional Index - adx
 
 The Average Directional Movement Index (ADX) is designed to quantify trend strength by measuring the amount of price movement in a single direction. ADX is non-directional; it registers trend strength whether price is trending up or down
