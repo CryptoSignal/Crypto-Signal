@@ -240,6 +240,9 @@ class Behaviour():
                         analysis_args['kijunsen_period'] = indicator_conf['kijunsen_period'] if 'kijunsen_period' in indicator_conf else 60
                         analysis_args['senkou_span_b_period'] = indicator_conf['senkou_span_b_period'] if 'senkou_span_b_period' in indicator_conf else 120
 
+                    if indicator == 'aroon_oscillator':
+                        analysis_args['sma_vol_period'] = indicator_conf['sma_vol_period'] if 'sma_vol_period' in indicator_conf else 50
+
                     results[indicator].append({
                         'result': self._get_analysis_result(
                             indicator_dispatcher,
