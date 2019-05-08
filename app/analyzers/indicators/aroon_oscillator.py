@@ -10,7 +10,7 @@ from analyzers.utils import IndicatorUtils
 
 
 class Aroon_oscillator(IndicatorUtils):
-    def analyze(self, historical_data, signal=["aroon"], sma_vol_period, period_count=25, hot_thresh=None, cold_thresh=None):
+    def analyze(self, historical_data, sma_vol_period, period_count=25, signal=["aroon"], hot_thresh=None, cold_thresh=None):
         """Performs an aroon oscillator analysis on the historical data
 
         Args:
@@ -56,9 +56,9 @@ class Aroon_oscillator(IndicatorUtils):
         aroon_values['is_hot'] = False
         aroon_values['is_cold'] = False
 
-        aroon_values['sma_volume'] = df.dataframe.rolling(sma_vol_period).mean()
-        aroon = aroon_values['aroon']
-        volume = dataframe[volume].iloc[-1]
+        aroon_values['sma_volume'] = dataframe.volume.rolling(sma_vol_period).mean()
+        aroon = aroon_values['aroon'].iloc[-1]
+        volume = dataframe['volume'].iloc[-1]
         volume_sma = aroon_values['sma_volume'].iloc[-1]
 
         if aroon > hot_thresh and volume > volume_sma:
