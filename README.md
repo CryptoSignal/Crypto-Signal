@@ -11,6 +11,8 @@ Development branch to testing new features. If you are looking for the latest st
 - New indicator MA Ribbon
 - New config values "hot_label" and "cold_label" for each indicator setup to set custom texts instead of the typical "hot" and "cold".
 - New indicator ADX (Average Directional Index)
+- New indicator Klinger Oscillator
+
 
 ## Installing And Running
 Because this is a development branch you need to build your custom Docker image. The commands listed below are intended to be run in a terminal.
@@ -131,6 +133,38 @@ informants:
           candle_period: 4h
           period_count: 14
 ```
+
+
+#### Klinger Oscillator - klinger_oscillator
+
+The Klinger oscillator (kvo) was developed by Stephen Klinger to determine the long-term trend of money flow
+while remaining sensitive enough to detect short-term fluctuations. The indicator compares the volume
+flowing through a security with the security's price movements and then converts the result into an oscillator.
+The Klinger oscillator shows the difference between two moving averages which are based on more than price.
+Traders watch for divergence on the indicator to signal potential price reversals.
+Like other oscillators, a signal line can be added to provide additional trade signals.
+
+If klinger signal line (kvo_signal) > 0 AND mean price is moving up from last candle = hot notification
+If klinger signal line (kvo_signal) < 0 AND mean price is moving down from last candle = cold notification
+mean price = (high + low + close) / 3
+
+Periods in example are the default values
+
+```
+indicators:
+  klinger_oscillator:
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: always
+      ema_short_period = 34
+      ema_long_period = 55
+      signal_period = 13
+      signal:
+        - kvo
+        - kvo_signal
+      candle_period: 1d
+```
+
 #### Average Directional Index - adx
 
 The Average Directional Movement Index (ADX) is designed to quantify trend strength by measuring the amount of price movement in a single direction. ADX is non-directional; it registers trend strength whether price is trending up or down

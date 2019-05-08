@@ -1,5 +1,6 @@
 __all__ = [
     'aroon_oscillator',
+    'klinger_oscillator',
     'adx',
     'ichimoku',
     'macd',

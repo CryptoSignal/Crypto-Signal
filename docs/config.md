@@ -349,6 +349,7 @@ necessity: optional\
 description: Valid values are on a per indicator basis see the table below. Each indicator may have a variety of signal lines, this option allows you to specify which options you care about. The first one specified is used for determining hot/cold the others are just output to the cli for information. Valid options are:
 
 ```
+KLINGER OSCILLATOR - kvo, kvo_signal
 ADX - adx
 MOMENTUM - momentum
 RSI - rsi
