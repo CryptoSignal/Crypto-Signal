@@ -63,7 +63,7 @@ class Aroon_oscillator(IndicatorUtils):
 
         if aroon > hot_thresh and volume > volume_sma:
             aroon_values['is_hot'].iloc[-1] = True
-        elif aroon <= cold_thresh and volume < volume_sma:
+        elif aroon <= cold_thresh and volume > volume_sma:
             aroon_values['is_cold'].iloc[-1] = True
 
         return aroon_values
