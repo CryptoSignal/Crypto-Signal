@@ -137,8 +137,8 @@ informants:
 
 The Aroon Oscillator is the difference between Aroon-Up and Aroon-Down. These two indicators are usually plotted together for easy comparison, but chartists can also view the difference between these two indicators with the Aroon Oscillator. This indicator fluctuates between -100 and +100 with zero as the middle line. An upward trend bias is present when the oscillator is positive, while a downward trend bias exists when the oscillator is negative. 
 
-The Aroon Oscillator is positive daily volume was above the (default)50-day moving average of volume = hot notification
-The Aroon Oscillator is negative daily volume was above the (default)50-day moving average of volume = cold notification
+The Aroon Oscillator is positive AND daily volume was above the (default)50-day moving average of volume = hot notification
+The Aroon Oscillator is negative AND daily volume was above the (default)50-day moving average of volume = cold notification
 
 
 Periods in example are the default values
@@ -154,6 +154,8 @@ indicators:
       signal:
         - aroon
       candle_period: 1d
+      hot: 0
+      cold: 0
 ```
 
 #### Klinger Oscillator - klinger_oscillator
