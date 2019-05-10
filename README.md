@@ -136,10 +136,10 @@ informants:
 Uses TA-LIB for candlestick pattern recognition
 https://github.com/mrjbq7/ta-lib
 
-Set up `signal` for all candle patterns you want to check.
-Set up `candle_check` for how many candles you want to check. (default = 1 = checks last candle for pattern)
+* Set up `signal` for all candle patterns you want to check.
+* Set up `candle_check` for how many candles you want to check. (default = 1 = checks last candle for pattern)
     For example your bot runs every 4 hours, but you want to check the candles of 1 hour, you can set it to trigger if the pattern happened on the last 4 candles
-Set up `notification` for what kind of notification you want when triggered, depending on what candle you check for. (default = hot)
+* Set up `notification` for what kind of notification you want when triggered, depending on what candle you check for. (default = hot)
 
 <details>
     <summary>possible signals</summary>
