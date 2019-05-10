@@ -220,6 +220,7 @@ indicators:
         - doji
       candle_check: 1
       notification: hot
+      candle_period: 1d
 ```
 
 #### Aroon Oscillator - aroon_oscillator
