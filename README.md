@@ -143,12 +143,11 @@ Set up `notification` for what kind of notification you want when triggered, dep
 
 <details>
     <summary>possible signals</summary>
+
+```
 'two_crows': talib.CDLTRISTAR
- 
 'three_black_crows': talib.CDL3BLACKCROWS
-
 'three_inside_up_down': talib.CDL3INSIDE
-
 'three_line_strike': talib.CDL3LINESTRIKE
 'thee_stars_in_the_south': talib.CDL3OUTSIDE
 'three_advancing_white_soldiers': talib.CDL3WHITESOLDIERS
@@ -205,6 +204,7 @@ Set up `notification` for what kind of notification you want when triggered, dep
 'unique_three_river': talib.CDLUNIQUE3RIVER
 'upside_gap_two_crows': talib.CDLUPSIDEGAP2CROWS
 'xside_gap_three_methods': talib.CDLXSIDEGAP3METHODS
+```
 </details>
 
 ```
