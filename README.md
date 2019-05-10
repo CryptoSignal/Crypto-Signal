@@ -143,65 +143,65 @@ Set up `notification` for what kind of notification you want when triggered, dep
 
 <details>
     <summary>possible signals</summary>
-            'two_crows': talib.CDLTRISTAR,
-            'three_black_crows': talib.CDL3BLACKCROWS,
-            'three_inside_up_down': talib.CDL3INSIDE,
-            'three_line_strike': talib.CDL3LINESTRIKE,
-            'thee_stars_in_the_south': talib.CDL3OUTSIDE,
-            'three_advancing_white_soldiers': talib.CDL3WHITESOLDIERS,
-            'abandoned_baby': talib.CDLABANDONEDBABY,
-            'advance_block': talib.CDLADVANCEBLOCK,
-            'belt_hold': talib.CDLADVANCEBLOCK,
-            'breakaway': talib.CDLBREAKAWAY,
-            'closing_marubozu': talib.CDLCLOSINGMARUBOZU,
-            'concealing_baby_swallow': talib.CDLCONCEALBABYSWALL,
-            'counterattack': talib.CDLCOUNTERATTACK,
-            'dark_cloud_cover': talib.CDLDARKCLOUDCOVER,
-            'doji': talib.CDLDOJI,
-            'doji_star': talib.CDLDOJISTAR,
-            'dragonfly_doji': talib.CDLDRAGONFLYDOJI,
-            'engulfing_pattern': talib.CDLENGULFING,
-            'evening_doji_star': talib.CDLEVENINGDOJISTAR,
-            'evening_star': talib.CDLEVENINGSTAR,
-            'gap_sidesidewhite': talib.CDLGAPSIDESIDEWHITE,
-            'gravestone_doji': talib.CDLGRAVESTONEDOJI,
-            'hammer': talib.CDLHAMMER,
-            'haning_man': talib.CDLHANGINGMAN,
-            'harami_pattern': talib.CDLHARAMI,
-            'harami_cross_patern': talib.CDLHARAMICROSS,
-            'high_wave_candle': talib.CDLHIGHWAVE,
-            'modified_hikkake_pattern': talib.CDLHIKKAKEMOD,
-            'homing_pigeon': talib.CDLHOMINGPIGEON,
-            'identical_three_crows': talib.CDLIDENTICAL3CROWS,
-            'in_neck_pattern': talib.CDLINNECK,
-            'inverted_hammer': talib.CDLINVERTEDHAMMER,
-            'kicking': talib.CDLKICKING,
-            'kicking_bb': talib.CDLKICKINGBYLENGTH,
-            'ladder_bottom': talib.CDLLADDERBOTTOM,
-            'long_legged_doji': talib.CDLLONGLEGGEDDOJI,
-            'long_line_candle': talib.CDLLONGLINE,
-            'marubozu': talib.CDLMARUBOZU,
-            'matching_low': talib.CDLMATCHINGLOW,
-            'mat_hold': talib.CDLMATHOLD,
-            'morning_doji_star': talib.CDLMORNINGDOJISTAR,
-            'morning_star': talib.CDLMORNINGSTAR,
-            'on_neck_pattern': talib.CDLONNECK,
-            'piercing_pattern': talib.CDLPIERCING,
-            'rickshaw_man': talib.CDLRICKSHAWMAN,
-            'risfall_three_methods': talib.CDLRISEFALL3METHODS,
-            'seperating_lines': talib.CDLSEPARATINGLINES,
-            'shooting_star': talib.CDLSHOOTINGSTAR,
-            'short_line_candle': talib.CDLSHORTLINE,
-            'spinning_top': talib.CDLSPINNINGTOP,
-            'stalled_pattern': talib.CDLSTALLEDPATTERN,
-            'stick_sandwich': talib.CDLSTICKSANDWICH,
-            'takuri': talib.CDLTAKURI,
-            'tasuki_gap': talib.CDLTASUKIGAP,
-            'thrusting_pattern': talib.CDLTHRUSTING,
-            'tristar_pattern': talib.CDLTRISTAR,
-            'unique_three_river': talib.CDLUNIQUE3RIVER,
-            'upside_gap_two_crows': talib.CDLUPSIDEGAP2CROWS,
-            'xside_gap_three_methods': talib.CDLXSIDEGAP3METHODS
+'two_crows': talib.CDLTRISTAR
+'three_black_crows': talib.CDL3BLACKCROWS
+'three_inside_up_down': talib.CDL3INSIDE
+'three_line_strike': talib.CDL3LINESTRIKE
+'thee_stars_in_the_south': talib.CDL3OUTSIDE
+'three_advancing_white_soldiers': talib.CDL3WHITESOLDIERS
+'abandoned_baby': talib.CDLABANDONEDBABY
+'advance_block': talib.CDLADVANCEBLOCK
+'belt_hold': talib.CDLADVANCEBLOCK
+'breakaway': talib.CDLBREAKAWAY
+'closing_marubozu': talib.CDLCLOSINGMARUBOZU
+'concealing_baby_swallow': talib.CDLCONCEALBABYSWALL
+'counterattack': talib.CDLCOUNTERATTACK
+'dark_cloud_cover': talib.CDLDARKCLOUDCOVER
+'doji': talib.CDLDOJI
+'doji_star': talib.CDLDOJISTAR
+'dragonfly_doji': talib.CDLDRAGONFLYDOJI
+'engulfing_pattern': talib.CDLENGULFING
+'evening_doji_star': talib.CDLEVENINGDOJISTAR
+'evening_star': talib.CDLEVENINGSTAR
+'gap_sidesidewhite': talib.CDLGAPSIDESIDEWHITE
+'gravestone_doji': talib.CDLGRAVESTONEDOJI
+'hammer': talib.CDLHAMMER
+'haning_man': talib.CDLHANGINGMAN
+'harami_pattern': talib.CDLHARAMI
+'harami_cross_patern': talib.CDLHARAMICROSS
+'high_wave_candle': talib.CDLHIGHWAVE
+'modified_hikkake_pattern': talib.CDLHIKKAKEMOD
+'homing_pigeon': talib.CDLHOMINGPIGEON
+'identical_three_crows': talib.CDLIDENTICAL3CROWS
+'in_neck_pattern': talib.CDLINNECK
+'inverted_hammer': talib.CDLINVERTEDHAMMER
+'kicking': talib.CDLKICKING
+'kicking_bb': talib.CDLKICKINGBYLENGTH
+'ladder_bottom': talib.CDLLADDERBOTTOM
+'long_legged_doji': talib.CDLLONGLEGGEDDOJI
+'long_line_candle': talib.CDLLONGLINE
+'marubozu': talib.CDLMARUBOZU
+'matching_low': talib.CDLMATCHINGLOW
+'mat_hold': talib.CDLMATHOLD
+'morning_doji_star': talib.CDLMORNINGDOJISTAR
+'morning_star': talib.CDLMORNINGSTAR
+'on_neck_pattern': talib.CDLONNECK
+'piercing_pattern': talib.CDLPIERCING
+'rickshaw_man': talib.CDLRICKSHAWMAN
+'risfall_three_methods': talib.CDLRISEFALL3METHODS
+'seperating_lines': talib.CDLSEPARATINGLINES
+'shooting_star': talib.CDLSHOOTINGSTAR
+'short_line_candle': talib.CDLSHORTLINE
+'spinning_top': talib.CDLSPINNINGTOP
+'stalled_pattern': talib.CDLSTALLEDPATTERN
+'stick_sandwich': talib.CDLSTICKSANDWICH
+'takuri': talib.CDLTAKURI
+'tasuki_gap': talib.CDLTASUKIGAP
+'thrusting_pattern': talib.CDLTHRUSTING
+'tristar_pattern': talib.CDLTRISTAR
+'unique_three_river': talib.CDLUNIQUE3RIVER
+'upside_gap_two_crows': talib.CDLUPSIDEGAP2CROWS
+'xside_gap_three_methods': talib.CDLXSIDEGAP3METHODS
 </details>
 
 ```
