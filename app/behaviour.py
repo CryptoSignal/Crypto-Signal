@@ -235,14 +235,21 @@ class Behaviour():
                     if indicator == 'bollinger' or indicator == 'bbp':
                         analysis_args['std_dev'] = indicator_conf['std_dev'] if 'std_dev' in indicator_conf else 2
 
+                    if indicator == 'klinger_oscillator':
+                        analysis_args['ema_short_period'] = indicator_conf['vf_ema_short'] if 'vf_ema_short' in indicator_conf else 32
+                        analysis_args['ema_long_period'] = indicator_conf['vf_ema_long'] if 'vf_ema_long' in indicator_conf else 55
+                        analysis_args['signal_period'] = indicator_conf['kvo_signal'] if 'kvo_signal' in indicator_conf else 13
+
                     if indicator == 'ichimoku':
-                        analysis_args['tenkansen_period'] = indicator_conf['tenkansen_period'] if 'tenkansen_period' in indicator_conf else 20                       
+                        analysis_args['tenkansen_period'] = indicator_conf['tenkansen_period'] if 'tenkansen_period' in indicator_conf else 20
                         analysis_args['kijunsen_period'] = indicator_conf['kijunsen_period'] if 'kijunsen_period' in indicator_conf else 60
                         analysis_args['senkou_span_b_period'] = indicator_conf['senkou_span_b_period'] if 'senkou_span_b_period' in indicator_conf else 120
 
                     if indicator == 'candle_recognition':
                         analysis_args['candle_check'] = indicator_conf['candle_check'] if 'candle_check' in indicator_conf else 1
                         analysis_args['notification'] = indicator_conf['notification'] if 'notification' in indicator_conf else 'hot'
+                    if indicator == 'aroon_oscillator':
+                        analysis_args['sma_vol_period'] = indicator_conf['sma_vol_period'] if 'sma_vol_period' in indicator_conf else 50
 
                     results[indicator].append({
                         'result': self._get_analysis_result(

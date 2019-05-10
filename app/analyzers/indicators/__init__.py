@@ -1,5 +1,7 @@
 __all__ = [
     'candle_recognition',
+    'aroon_oscillator',
+    'klinger_oscillator',
     'adx',
     'ichimoku',
     'macd',
