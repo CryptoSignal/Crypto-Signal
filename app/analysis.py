@@ -29,6 +29,7 @@ class StrategyAnalyzer():
         """
 
         dispatcher = {
+            'candle_recognition': candle_recognition.Candle_recognition().analyze,
             'adx': adx.Adx().analyze,
             'ichimoku': ichimoku.Ichimoku().analyze,
             'macd': macd.MACD().analyze,
