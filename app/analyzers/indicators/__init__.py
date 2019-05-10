@@ -1,4 +1,5 @@
 __all__ = [
+    'candle_recognition',
     'adx',
     'ichimoku',
     'macd',
