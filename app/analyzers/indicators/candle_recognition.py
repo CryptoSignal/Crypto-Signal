@@ -8,7 +8,7 @@ from analyzers.utils import IndicatorUtils
 
 class Candle_recognition(IndicatorUtils):
     def analyze(self, historical_data, signal, notification='hot', candle_check=1, hot_thresh=None, cold_thresh=None):
-        """Performs an ichimoku cloud analysis on the historical data
+        """Performs an candle pattern analysis on the historical data
 
         Args:
             historical_data (list): A matrix of historical OHCLV data.
