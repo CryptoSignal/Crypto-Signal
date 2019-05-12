@@ -21,7 +21,6 @@ class Candle_recognition(IndicatorUtils):
         Returns:
             pandas.DataFrame: A dataframe containing the indicators and hot/cold values.
         """
-
         dataframe = self.convert_to_dataframe(historical_data)
 
         open = dataframe['open']
@@ -98,8 +97,10 @@ class Candle_recognition(IndicatorUtils):
             if candle in candle_functions.keys():
                 candles_values[candle] = candle_functions[candle](**candle_args)
 
+
         candles_values['is_hot'] = False
         candles_values['is_cold'] = False
+
 
         to_check = 0 - candle_check
         for candle in signal:
@@ -108,6 +109,9 @@ class Candle_recognition(IndicatorUtils):
                     candles_values['is_hot'][-1] = True
                 elif notification == 'cold':
                     candles_values['is_cold'][-1] = True
+
+        for candle in signal:
+            candles_values[candle] = candles_values[candle].astype(float)
 
         return candles_values
 
