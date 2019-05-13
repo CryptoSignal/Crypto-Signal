@@ -7,6 +7,8 @@ import os
 import copy
 import talib
 
+import traceback
+
 import pandas as pd
 import numpy as np
 
@@ -730,7 +732,7 @@ class Notifier(IndicatorUtils):
 
         return chart_file
 
-    def candlestick_ohlc(self, ax, quotes, width=0.2, colorup='k', colordown='r',
+    def candlestick_ohlc(self, ax, quotes, cdl=None, width=0.2, colorup='k', colordown='r',
                     alpha=1.0, ochl=False):
         """
         Plot the time, open, high, low, close as a vertical line ranging
@@ -765,23 +767,45 @@ class Notifier(IndicatorUtils):
             added and patches is a list of the rectangle patches added
 
         """
+        if isinstance(cdl, pd.DataFrame):
+            cdl_pattern = True
+            print(cdl)
+        else:
+            cdl_pattern = False
 
         OFFSET = width / 2.0
-
+        colors = ['k', 'c', 'b', 'b', 'm']
+        index = 0
         lines = []
         patches = []
+
         for q in quotes:
             if ochl:
                 t, open, close, high, low = q[:5]
             else:
                 t, open, high, low, close = q[:5]
-
             if close >= open:
-                color = colorup
+                if cdl_pattern:
+                    for column in cdl:
+                        if cdl[column][index]!= 0:
+                            color = colors[cdl.columns.get_loc(column)]
+                            break
+                        else:
+                            color = colorup
+                else:
+                    color = colorup
                 lower = open
                 height = close - open
             else:
-                color = colordown
+                if cdl_pattern:
+                    for column in cdl:
+                        if cdl[column][index] != 0:
+                            color = colors[cdl.columns.get_loc(column)]
+                            break
+                        else:
+                            color = colordown
+                else:
+                    color = colordown
                 lower = close
                 height = open - close
 
@@ -806,6 +830,8 @@ class Notifier(IndicatorUtils):
             patches.append(rect)
             ax.add_line(vline)
             ax.add_patch(rect)
+
+            index += 1
 
         ax.autoscale_view()
 
@@ -864,13 +890,17 @@ class Notifier(IndicatorUtils):
         ax.set_ymargin(0.2)
         ax.ticklabel_format(axis='y', style='plain')
 
-        self.candlestick_ohlc(ax, zip(_time, df['open'], df['high'], df['low'], df['close']),
-                    width=stick_width, colorup='olivedrab', colordown='crimson')
 
+        try:
+            self.candlestick_ohlc(ax, zip(_time, df['open'], df['high'], df['low'], df['close']), cdl=candle_pattern,
+                    width=stick_width, colorup='olivedrab', colordown='crimson')
+        except:
+            print(traceback.print_exc())
+        '''
         if len(candle_pattern) != 0:
             for column in candle_pattern:
                 self.plot_candlepattern(ax, zip(_time, df['open'], df['high'], df['low'], df['close'], candle_pattern[column]), column)
-
+        '''
         ax.plot(df.index, ma7, color='darkorange', lw=0.8, label='EMA (7)')
         ax.plot(df.index, ma25, color='mediumslateblue', lw=0.8, label='EMA (25)')
         ax.plot(df.index, ma99, color='firebrick', lw=0.8, label='EMA (99)')
