@@ -171,7 +171,7 @@ https://github.com/mrjbq7/ta-lib
 'gap_sidesidewhite': talib.CDLGAPSIDESIDEWHITE
 'gravestone_doji': talib.CDLGRAVESTONEDOJI
 'hammer': talib.CDLHAMMER
-'haning_man': talib.CDLHANGINGMAN
+'hanging_man': talib.CDLHANGINGMAN
 'harami_pattern': talib.CDLHARAMI
 'harami_cross_patern': talib.CDLHARAMICROSS
 'high_wave_candle': talib.CDLHIGHWAVE
