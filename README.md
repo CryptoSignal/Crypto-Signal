@@ -143,6 +143,10 @@ https://github.com/mrjbq7/ta-lib
 * Set up `candle_check` for how many candles you want to check. (default = 1 = checks last candle for pattern)
     For example your bot runs every 4 hours, but you want to check the candles of 1 hour, you can set it to trigger if the pattern happened on the last 4 candles
 * Set up `notification` for what kind of notification you want when triggered, depending on what candle you check for. (default = hot)
+* Possible to enable coloring on candle chart: allows for 5 different candles, priority coloring from up to down
+* `Candle_check` allows for checking multiple candles for a pattern. [1=last candle, 2=last 2 candles etc]
+    For example, if the program runs every 4 hours but you setup a candle recognition for 1 hour you can get a notification if there was a candle found in
+    the last 4 candles by setting `candle_check:4`.
 
 <details>
     <summary>possible signals</summary>
@@ -221,6 +225,9 @@ indicators:
       candle_check: 1
       notification: hot
       candle_period: 1d
+      hot: 0
+      cold: 0
+      chart: true
 ```
 
 #### Aroon Oscillator - aroon_oscillator
