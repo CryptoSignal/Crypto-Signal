@@ -749,6 +749,7 @@ class Notifier(IndicatorUtils):
             (time, open, high, low, close, ...) vs
             (time, open, close, high, low, ...)
             set by `ochl`
+        cdl : candle pattern recognition from analysis if enabled
         width : float
             fraction of a day for the rectangle width
         colorup : color
@@ -767,14 +768,18 @@ class Notifier(IndicatorUtils):
             added and patches is a list of the rectangle patches added
 
         """
+
         if isinstance(cdl, pd.DataFrame):
-            cdl_pattern = True
-            print(cdl)
+            if pd.DataFrame(cdl).empty:
+                cdl_pattern = False
+            else:
+                cdl_pattern = True
         else:
             cdl_pattern = False
 
         OFFSET = width / 2.0
-        colors = ['k', 'c', 'b', 'b', 'm']
+        # colors used for candle patterns
+        colors = ['c', 'm', 'y', 'k', 'b']
         index = 0
         lines = []
         patches = []
@@ -838,6 +843,11 @@ class Notifier(IndicatorUtils):
         return lines, patches
 
     def candle_check(self, df, candle_period):
+        """
+        df : dataframe with ohlcv values
+        candle_period : period for candles
+        return : dataframe with candle patterns
+        """
         try:
             indicator_conf = {}
 
@@ -890,17 +900,12 @@ class Notifier(IndicatorUtils):
         ax.set_ymargin(0.2)
         ax.ticklabel_format(axis='y', style='plain')
 
-
         try:
             self.candlestick_ohlc(ax, zip(_time, df['open'], df['high'], df['low'], df['close']), cdl=candle_pattern,
                     width=stick_width, colorup='olivedrab', colordown='crimson')
         except:
             print(traceback.print_exc())
-        '''
-        if len(candle_pattern) != 0:
-            for column in candle_pattern:
-                self.plot_candlepattern(ax, zip(_time, df['open'], df['high'], df['low'], df['close'], candle_pattern[column]), column)
-        '''
+
         ax.plot(df.index, ma7, color='darkorange', lw=0.8, label='EMA (7)')
         ax.plot(df.index, ma25, color='mediumslateblue', lw=0.8, label='EMA (25)')
         ax.plot(df.index, ma99, color='firebrick', lw=0.8, label='EMA (99)')
@@ -909,20 +914,6 @@ class Notifier(IndicatorUtils):
         ax.text(0.24, 0.94, 'EMA (25, close)', color='mediumslateblue', transform=ax.transAxes,  fontsize=textsize, va='top')
         ax.text(0.46, 0.94, 'EMA (99, close)', color='firebrick', transform=ax.transAxes,  fontsize=textsize, va='top')
 
-    def plot_candlepattern(self, ax, quotes, candle_name):
-        colors = ['black', 'blue', 'brown', 'green', 'indigo', 'magenta', 'gold', 'red', 'sienna', 'silver']
-        index = 0
-        for period in quotes:
-            color = colors[0]
-            if period[5] == 100:
-                x = period[0]
-                y = period[2]
-                try:
-                    text = ax.annotate(candle_name, xy=(x, y), xytext=(x, y+(y*.05)),arrowprops=dict(arrowstyle='-', facecolor=color))
-                    text.set_fontsize(5)
-                except:
-                    print(sys.exc_info()[0])
-            index += 1
     def plot_rsi(self, ax, df):
         textsize = 11
         fillcolor = 'darkmagenta'
