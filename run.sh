@@ -3,6 +3,10 @@ cat /dev/null > result_h.log
 cat /dev/null > result_d.log
 cat /dev/null > result_w.log
 
+#update emails run locally
+#sh modifyEmail.sh  lfz.carlos@gmail.com,502118525@QQ.com
+#rm -rf *filename
+
 python3 app/updateCoinList.py bittrex.sh bittrex_1h.yml
 sleep 5
 python3 app/updateCoinList.py bittrex.sh bittrex_1d.yml

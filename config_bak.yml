@@ -339,7 +339,7 @@ notifiers:
     required:
       username: null
       password: null
-      destination_emails: null
+      destination_emails : [lfz.carlos@gmail.com,502118525@QQ.com]
     optional:
       template: "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
   telegram:

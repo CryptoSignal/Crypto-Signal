@@ -244,6 +244,12 @@ class Behaviour():
                     if (narrowedBoll):
                         self.printResult(new_result, exchange, market_pair, output_mode, "narrowedBoll:" + str(test_arr))
                     
+                    if (goldenForkKdj and goldenForkMacd):
+                        self.printResult(new_result, exchange, market_pair, output_mode, "kdjFork|goldenFork")
+                        
+                    if (goldenForkKdj and lastNDMIIsPositive):
+                        self.printResult(new_result, exchange, market_pair, output_mode, "kdjFork|DMI")
+                        
 #                     if (bollCross):
 #                         self.printResult(new_result, exchange, market_pair, output_mode, "bollCrossUp")
                      ######################################################   

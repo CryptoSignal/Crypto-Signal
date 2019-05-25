@@ -141,7 +141,7 @@ notifiers:
 
         '' -}}'}
     required:
-      destination_emails: [lfz.carlos@gmail.com,502118525@QQ.com]
+      destination_emails : [lfz.carlos@gmail.com,502118525@QQ.com]
       enable: true
       password: 868891251q1q1q1q
       username: lfz.carlos@gmail.com

@@ -134,7 +134,7 @@ notifiers:
         '' -}}'}
     required: 
             enable: true
-            destination_emails: [lfz.carlos@gmail.com,502118525@QQ.com]
+      destination_emails : [lfz.carlos@gmail.com,502118525@QQ.com]
             password: 868891251q1q1q1q
             username: lfz.carlos@gmail.com
   slack:

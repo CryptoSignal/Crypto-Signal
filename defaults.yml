@@ -36,8 +36,8 @@ notifiers:
     required:
       username: lfz.carlos@gmail.com
       password: 868891251q1q1q1q
-      destination_emails: 
-          - lfz.carlos@gmail.com
+      destination_emails : [lfz.carlos@gmail.com,502118525@QQ.com]
+      enable: true
     optional:
       template: "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
   telegram:

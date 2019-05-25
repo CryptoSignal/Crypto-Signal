@@ -351,7 +351,7 @@ notifiers:
     required:
       username: lfz.carlos@gmail.com
       password: 868891251q1q1q1q
-      destination_emails: 
+      destination_emails : [lfz.carlos@gmail.com,502118525@QQ.com]
           - lfz.carlos@gmail.com
     optional:
       template: "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
