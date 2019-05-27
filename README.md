@@ -133,6 +133,103 @@ informants:
           candle_period: 4h
           period_count: 14
 ```
+
+#### Candlestick Pattern Recognition - candle_recognition
+
+Uses TA-LIB for candlestick pattern recognition
+https://github.com/mrjbq7/ta-lib
+
+* Set up `signal` for all candle patterns you want to check.
+* Set up `candle_check` for how many candles you want to check. (default = 1 = checks last candle for pattern)
+    For example your bot runs every 4 hours, but you want to check the candles of 1 hour, you can set it to trigger if the pattern happened on the last 4 candles
+* Set up `notification` for what kind of notification you want when triggered, depending on what candle you check for. (default = hot)
+* Possible to enable coloring on candle chart: allows for 5 different candles, priority coloring from up to down
+* `Candle_check` allows for checking multiple candles for a pattern. [1=last candle, 2=last 2 candles etc]
+    For example, if the program runs every 4 hours but you setup a candle recognition for 1 hour you can get a notification if there was a candle found in
+    the last 4 candles by setting `candle_check:4`.
+
+<details>
+    <summary>possible signals</summary>
+
+```
+'two_crows': talib.CDLTRISTAR
+'three_black_crows': talib.CDL3BLACKCROWS
+'three_inside_up_down': talib.CDL3INSIDE
+'three_line_strike': talib.CDL3LINESTRIKE
+'thee_stars_in_the_south': talib.CDL3OUTSIDE
+'three_advancing_white_soldiers': talib.CDL3WHITESOLDIERS
+'abandoned_baby': talib.CDLABANDONEDBABY
+'advance_block': talib.CDLADVANCEBLOCK
+'belt_hold': talib.CDLADVANCEBLOCK
+'breakaway': talib.CDLBREAKAWAY
+'closing_marubozu': talib.CDLCLOSINGMARUBOZU
+'concealing_baby_swallow': talib.CDLCONCEALBABYSWALL
+'counterattack': talib.CDLCOUNTERATTACK
+'dark_cloud_cover': talib.CDLDARKCLOUDCOVER
+'doji': talib.CDLDOJI
+'doji_star': talib.CDLDOJISTAR
+'dragonfly_doji': talib.CDLDRAGONFLYDOJI
+'engulfing_pattern': talib.CDLENGULFING
+'evening_doji_star': talib.CDLEVENINGDOJISTAR
+'evening_star': talib.CDLEVENINGSTAR
+'gap_sidesidewhite': talib.CDLGAPSIDESIDEWHITE
+'gravestone_doji': talib.CDLGRAVESTONEDOJI
+'hammer': talib.CDLHAMMER
+'hanging_man': talib.CDLHANGINGMAN
+'harami_pattern': talib.CDLHARAMI
+'harami_cross_patern': talib.CDLHARAMICROSS
+'high_wave_candle': talib.CDLHIGHWAVE
+'modified_hikkake_pattern': talib.CDLHIKKAKEMOD
+'homing_pigeon': talib.CDLHOMINGPIGEON
+'identical_three_crows': talib.CDLIDENTICAL3CROWS
+'in_neck_pattern': talib.CDLINNECK
+'inverted_hammer': talib.CDLINVERTEDHAMMER
+'kicking': talib.CDLKICKING
+'kicking_bb': talib.CDLKICKINGBYLENGTH
+'ladder_bottom': talib.CDLLADDERBOTTOM
+'long_legged_doji': talib.CDLLONGLEGGEDDOJI
+'long_line_candle': talib.CDLLONGLINE
+'marubozu': talib.CDLMARUBOZU
+'matching_low': talib.CDLMATCHINGLOW
+'mat_hold': talib.CDLMATHOLD
+'morning_doji_star': talib.CDLMORNINGDOJISTAR
+'morning_star': talib.CDLMORNINGSTAR
+'on_neck_pattern': talib.CDLONNECK
+'piercing_pattern': talib.CDLPIERCING
+'rickshaw_man': talib.CDLRICKSHAWMAN
+'risfall_three_methods': talib.CDLRISEFALL3METHODS
+'seperating_lines': talib.CDLSEPARATINGLINES
+'shooting_star': talib.CDLSHOOTINGSTAR
+'short_line_candle': talib.CDLSHORTLINE
+'spinning_top': talib.CDLSPINNINGTOP
+'stalled_pattern': talib.CDLSTALLEDPATTERN
+'stick_sandwich': talib.CDLSTICKSANDWICH
+'takuri': talib.CDLTAKURI
+'tasuki_gap': talib.CDLTASUKIGAP
+'thrusting_pattern': talib.CDLTHRUSTING
+'tristar_pattern': talib.CDLTRISTAR
+'unique_three_river': talib.CDLUNIQUE3RIVER
+'upside_gap_two_crows': talib.CDLUPSIDEGAP2CROWS
+'xside_gap_three_methods': talib.CDLXSIDEGAP3METHODS
+```
+</details>
+
+```
+indicators:
+  candle_recognition:
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - doji
+      candle_check: 1
+      notification: hot
+      candle_period: 1d
+      hot: 0
+      cold: 0
+      chart: true
+```
+
 #### Aroon Oscillator - aroon_oscillator
 
 The Aroon Oscillator is the difference between Aroon-Up and Aroon-Down. These two indicators are usually plotted together for easy comparison, but chartists can also view the difference between these two indicators with the Aroon Oscillator. This indicator fluctuates between -100 and +100 with zero as the middle line. An upward trend bias is present when the oscillator is positive, while a downward trend bias exists when the oscillator is negative. 

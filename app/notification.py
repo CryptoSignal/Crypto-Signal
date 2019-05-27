@@ -7,6 +7,8 @@ import os
 import copy
 import talib
 
+import traceback
+
 import pandas as pd
 import numpy as np
 
@@ -36,7 +38,9 @@ from notifiers.stdout_client import StdoutNotifier
 
 from analyzers.utils import IndicatorUtils
 from analyzers.indicators import ichimoku
+from analyzers.indicators import candle_recognition
 
+import sys
 
 class Notifier(IndicatorUtils):
     """Handles sending notifications via the configured notifiers
@@ -655,9 +659,12 @@ class Notifier(IndicatorUtils):
                     try:
                         self.create_chart(exchange, market_pair, candle_period, candles_data)
                     except Exception :
-                        self.logger.info('Error creating chart for %s %s', market_pair, candle_period)                    
+                        self.logger.info('Error creating chart for %s %s', market_pair, candle_period)
 
     def create_chart(self, exchange, market_pair, candle_period, candles_data):
+
+        self.logger.info("Beginning creation of charts: {} - {} - {}".format(exchange, market_pair, candle_period))
+
         now = datetime.now(timezone(self.timezone))
         creation_date = now.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -682,7 +689,9 @@ class Notifier(IndicatorUtils):
         ax4 = fig.add_axes(rect4, facecolor=axescolor)
 
         # Plot Candles chart
-        self.plot_candlestick(ax1, df, candle_period)
+        candle_pattern = self.candle_check(candles_data, candle_period)
+        self.plot_candlestick(ax1, df, candle_period, candle_pattern)
+
 
         # Plot RSI (14)
         self.plot_rsi(ax2, df)
@@ -723,7 +732,7 @@ class Notifier(IndicatorUtils):
 
         return chart_file
 
-    def candlestick_ohlc(self, ax, quotes, width=0.2, colorup='k', colordown='r',
+    def candlestick_ohlc(self, ax, quotes, cdl=None, width=0.2, colorup='k', colordown='r',
                     alpha=1.0, ochl=False):
         """
         Plot the time, open, high, low, close as a vertical line ranging
@@ -740,6 +749,7 @@ class Notifier(IndicatorUtils):
             (time, open, high, low, close, ...) vs
             (time, open, close, high, low, ...)
             set by `ochl`
+        cdl : candle pattern recognition from analysis if enabled
         width : float
             fraction of a day for the rectangle width
         colorup : color
@@ -759,22 +769,48 @@ class Notifier(IndicatorUtils):
 
         """
 
-        OFFSET = width / 2.0
+        if isinstance(cdl, pd.DataFrame):
+            if pd.DataFrame(cdl).empty:
+                cdl_pattern = False
+            else:
+                cdl_pattern = True
+        else:
+            cdl_pattern = False
 
+        OFFSET = width / 2.0
+        # colors used for candle patterns
+        colors = ['c', 'm', 'y', 'k', 'b']
+        index = 0
         lines = []
         patches = []
+
         for q in quotes:
             if ochl:
                 t, open, close, high, low = q[:5]
             else:
                 t, open, high, low, close = q[:5]
-
             if close >= open:
-                color = colorup
+                if cdl_pattern:
+                    for column in cdl:
+                        if cdl[column][index]!= 0:
+                            color = colors[cdl.columns.get_loc(column)]
+                            break
+                        else:
+                            color = colorup
+                else:
+                    color = colorup
                 lower = open
                 height = close - open
             else:
-                color = colordown
+                if cdl_pattern:
+                    for column in cdl:
+                        if cdl[column][index] != 0:
+                            color = colors[cdl.columns.get_loc(column)]
+                            break
+                        else:
+                            color = colordown
+                else:
+                    color = colordown
                 lower = close
                 height = open - close
 
@@ -800,22 +836,60 @@ class Notifier(IndicatorUtils):
             ax.add_line(vline)
             ax.add_patch(rect)
 
+            index += 1
+
         ax.autoscale_view()
 
         return lines, patches
 
-    def plot_candlestick(self, ax, df, candle_period):
+    def candle_check(self, df, candle_period):
+        """
+        df : dataframe with ohlcv values
+        candle_period : period for candles
+        return : dataframe with candle patterns
+        """
+        try:
+            indicator_conf = {}
+
+            if 'candle_recognition' in self.indicator_config:
+                for config in self.indicator_config['candle_recognition']:
+                    if config['enabled'] and config['candle_period'] == candle_period and config['chart']:
+                        indicator_conf = config
+                        break
+
+            if bool(indicator_conf):
+                signal = indicator_conf['signal']
+                notification = indicator_conf['notification'] if 'notification' in indicator_conf else 'hot'
+                candle_check = indicator_conf['candle_check'] if 'candle_check' in indicator_conf else 1
+                hot_tresh = indicator_conf['hot']
+                cold_tresh = indicator_conf['cold']
+
+                historical_data = df
+                cdl = candle_recognition.Candle_recognition()
+                candle_pattern = cdl.analyze(historical_data, signal, notification, candle_check, hot_tresh, cold_tresh)
+                candle_pattern = candle_pattern.drop(['is_hot', 'is_cold'], axis=1)
+            else:
+                candle_pattern = pd.DataFrame()
+
+        except Exception:
+            self.logger.info('error in indicator config for candle pattern: {}'.format(sys.exc_info()[0]))
+
+        return candle_pattern
+
+    def plot_candlestick(self, ax, df, candle_period, candle_pattern):
         textsize = 11
 
         ma7  = self.EMA(df, 7)
         ma25 = self.EMA(df, 25)
         ma99 = self.EMA(df, 99)
 
+
         if(df['close'].count() > 120):
             df   = df.iloc[-120:]
             ma7  = ma7.iloc[-120:]
             ma25 = ma25.iloc[-120:]
             ma99 = ma99.iloc[-120:]
+            candle_pattern = candle_pattern.iloc[-120:]
 
         _time = mdates.date2num(df.index.to_pydatetime())
         min_x = np.nanmin(_time)
@@ -826,9 +900,11 @@ class Notifier(IndicatorUtils):
         ax.set_ymargin(0.2)
         ax.ticklabel_format(axis='y', style='plain')
 
-        self.candlestick_ohlc(ax, zip(_time, df['open'], df['high'], df['low'], df['close']),
+        try:
+            self.candlestick_ohlc(ax, zip(_time, df['open'], df['high'], df['low'], df['close']), cdl=candle_pattern,
                     width=stick_width, colorup='olivedrab', colordown='crimson')
-                    
+        except:
+            print(traceback.print_exc())
 
         ax.plot(df.index, ma7, color='darkorange', lw=0.8, label='EMA (7)')
         ax.plot(df.index, ma25, color='mediumslateblue', lw=0.8, label='EMA (25)')
