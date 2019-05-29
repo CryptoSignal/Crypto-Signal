@@ -149,7 +149,7 @@ class Notifier(IndicatorUtils):
         self.notify_gmail(new_analysis)
         self.notify_telegram(messages)
         self.notify_webhook(messages)
-        self.notify_stdout(new_analysis)
+        self.notify_stdout(messages)
 
     def notify_discord(self, messages):
         """Send a notification via the discord notifier
@@ -297,7 +297,7 @@ class Notifier(IndicatorUtils):
 
                     self.webhook_client.notify(exchange, market_pair, candle_period, _messages[candle_period], self.enable_charts)          
 
-    def notify_stdout(self, new_analysis):
+    def notify_stdout(self, messages):
         """Send a notification via the stdout notifier
 
         Args:
@@ -305,12 +305,31 @@ class Notifier(IndicatorUtils):
         """
 
         if self.stdout_configured:
+            message_template = Template(self.notifier_config['stdout']['optional']['template'])
+
+        for exchange in messages:
+            for market_pair in messages[exchange]:
+                _messages = messages[exchange][market_pair]
+                                    
+                for candle_period in _messages:
+                    if not isinstance(_messages[candle_period], list) or len (_messages[candle_period]) == 0:
+                        continue
+
+                    self.notify_stdout_message(_messages[candle_period], message_template)             
+            """
             message = self._indicator_message_templater(
                 new_analysis,
                 self.notifier_config['stdout']['optional']['template']
             )
             if message.strip():
                 self.stdout_client.notify(message)
+                """
+    def notify_stdout_message(self, messages, message_template):
+        for message in messages:
+            formatted_message = message_template.render(message)
+            
+            #self.discord_client.notify(formatted_message.strip())
+            self.stdout_client.notify(formatted_message.strip())
 
     def _validate_required_config(self, notifier, notifier_config):
         """Validate the required configuration items are present for a notifier.
@@ -457,7 +476,7 @@ class Notifier(IndicatorUtils):
             self.last_analysis = new_analysis
             self.first_run = True
 
-        self.logger.info('Is first run: {}'.format(self.first_run))
+        #self.logger.info('Is first run: {}'.format(self.first_run))
 
         now = datetime.now(timezone(self.timezone))
         creation_date = now.strftime("%Y-%m-%d %H:%M:%S")
@@ -570,9 +589,10 @@ class Notifier(IndicatorUtils):
 
                                 should_alert = True
 
-                                if self.first_run:
-                                    self.logger.info('Alert once for %s %s %s', market_pair, indicator, candle_period)
-                                else:
+                                #if self.first_run:
+                                    #self.logger.info('Alert once for %s %s %s', market_pair, indicator, candle_period)
+                                    
+                                if not self.first_run:
                                     if analysis['config']['alert_frequency'] == 'once':
                                         if last_status == status:
                                             self.logger.info('Alert frecuency once. Dont alert. %s %s %s', 
