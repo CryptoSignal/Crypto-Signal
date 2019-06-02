@@ -41,7 +41,7 @@ class GmailNotifier(NotifierUtils):
         header = 'From: %s\n' % self.username
         header += 'To: %s\n' % self.destination_addresses
         header += 'Content-Type: text/plain\n'
-        header += 'Subject: signal alert!\n\n'
+        header += 'Subject: 侦测到虚拟货币买入指标信号!\n\n'
         message = header + message
 
         smtp_handler = smtplib.SMTP(self.smtp_server)
@@ -49,6 +49,6 @@ class GmailNotifier(NotifierUtils):
         smtp_handler.starttls()
         smtp_handler.login(self.username, self.password)
         addressList = self.destination_addresses.split(",")   
-        result = smtp_handler.sendmail(self.username, addressList, message)
+        result = smtp_handler.sendmail(self.username, addressList, message.encode("utf-8"))
         smtp_handler.quit()
         return result

@@ -15,7 +15,7 @@ from analysis import StrategyAnalyzer
 from outputs import Output
 from symbol import except_clause
 import numpy as np
-
+from collections import defaultdict
 
 import sys
 from _ast import Or
@@ -34,7 +34,6 @@ class Behaviour():
             notifier (Notifier): Instance of the notifier class for informing a user when a
                 threshold has been crossed.
         """
-
         self.logger = structlog.get_logger()
         self.indicator_conf = config.indicators
         self.informant_conf = config.informants
@@ -82,6 +81,9 @@ class Behaviour():
             market_data (dict): A dictionary containing the market data of the symbols to analyze.
             output_mode (str): Which console output mode to use.
         """
+        f = open(sys.argv[2],'a')
+        indicatorModes = sys.argv[3]
+        indicatorTypeCoinMap = defaultdict(list)
         new_result = dict()
         for exchange in market_data:
             if exchange not in new_result:
@@ -207,56 +209,73 @@ class Behaviour():
                     lastNDMIIsPositive = goldenForkKdj and (self.lastNDMIIsPositive(delta_di, 2) or self.lastNDMIIsPositive(delta_di, 3) or self.lastNDMIIsPositive(delta_di, 4)) 
                     
                     #bottomDivergence
-                    
                    
                     #bollCross
-#                     bollCross = False
-#                     if (len(middleband) != 0):
-#                         delta_close_middleband = close - middleband;
-#                         delta_low_middleband = low - middleband;
-#                         if ((delta_close_middleband.iloc[-1] > 0 and delta_low_middleband.iloc[-1] < 0) or
-#                             (delta_close_middleband.iloc[-2] > 0 and delta_low_middleband.iloc[-2] < 0) 
-#                             ):
-#                             bollCross = True
+                    bollCross = False
+                    if (len(middleband) != 0):
+                        delta_close_middleband = close - middleband;
+                        delta_low_middleband = low - middleband;
+                        if ((delta_close_middleband.iloc[-1] > 0 and delta_low_middleband.iloc[-1] < 0) or
+                            (delta_close_middleband.iloc[-2] > 0 and delta_low_middleband.iloc[-2] < 0) 
+                            ):
+                            bollCross = True
                     
                     #narrowedBoll
-                    (narrowedBoll, test_arr) = self.lastNBoolIsNarrowed((upperband/lowerband)**10, 5) # counts of narrowed points
+#                     (narrowedBoll, test_arr) = self.lastNBoolIsNarrowed((upperband/lowerband)**10, 5) # counts of narrowed points
 
 ########################################Filter coins by indicators
-                    if (goldenForkMacd):
-                        self.printResult(new_result, exchange, market_pair, output_mode, ("positive:" if intersectionValueAndMin[0]>0 else "") + "goldenFork" + ":"
-                                          + (str(round(intersectionValueAndMin[0],5)) + ":" +str(round(intersectionValueAndMin[1],5)) + ":" + str(round(intersectionValueAndMin[0]/intersectionValueAndMin[1], 2))
+                    if(indicatorModes == 'easy'):
+                        if (goldenForkKdj):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "kdj金叉信号", indicatorTypeCoinMap)
+                        
+                        if (goldenForkMacd):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "macd金叉信号", indicatorTypeCoinMap)
+                            
+                        if (bollCross):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "布林中轨信号", indicatorTypeCoinMap)
+                        
+                    if(indicatorModes == 'custom'):
+                        if (goldenForkMacd):
+                            self.printResult(new_result, exchange, market_pair, output_mode, ("positive:" if intersectionValueAndMin[0]>0 else "") + "goldenFork" + ":"
+                                              + (str(round(intersectionValueAndMin[0],5)) + ":" +str(round(intersectionValueAndMin[1],5)) + ":" + str(round(intersectionValueAndMin[0]/intersectionValueAndMin[1], 2))
+                                                ), indicatorTypeCoinMap
                                             )
-                                        )
+                        
+                        if (lastNDMIIsPositive):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "DMI", indicatorTypeCoinMap)
+                            
+                        if (goldenForkKdj):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "kdjFork", indicatorTypeCoinMap)
+                        
+#                         if (narrowedBoll):
+#                             self.printResult(new_result, exchange, market_pair, output_mode, "narrowedBoll:" + str(test_arr), indicatorTypeCoinMap)
+                        
+                        if (goldenForkKdj and goldenForkMacd):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "kdjFork|goldenFork", indicatorTypeCoinMap)
+                            
+                        if (goldenForkKdj and lastNDMIIsPositive):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "kdjFork|DMI", indicatorTypeCoinMap)
+                        
+#                     if (bollCross):
+#                         self.printResult(new_result, exchange, market_pair, output_mode, "bollCrossUp")
                         
 #                     if (flatMacd):
 #                         self.printResult(new_result, exchange, market_pair, output_mode, "flatMacd")
                         
 #                     if (macdVolumeMinusIsDecreased):
 #                         self.printResult(new_result, exchange, market_pair, output_mode, "macdVolumeMinusIsDecreased")
-                        
-                    if (lastNDMIIsPositive):
-                        self.printResult(new_result, exchange, market_pair, output_mode, "DMI")
-                        
-                    if (goldenForkKdj):
-                        self.printResult(new_result, exchange, market_pair, output_mode, "kdjFork")
-                    
-                    if (narrowedBoll):
-                        self.printResult(new_result, exchange, market_pair, output_mode, "narrowedBoll:" + str(test_arr))
-                    
-                    if (goldenForkKdj and goldenForkMacd):
-                        self.printResult(new_result, exchange, market_pair, output_mode, "kdjFork|goldenFork")
-                        
-                    if (goldenForkKdj and lastNDMIIsPositive):
-                        self.printResult(new_result, exchange, market_pair, output_mode, "kdjFork|DMI")
-                        
-#                     if (bollCross):
-#                         self.printResult(new_result, exchange, market_pair, output_mode, "bollCrossUp")
-                     ######################################################   
-                        
+######################################################        
                 except Exception as e:
                     print("An exception occurred for " + market_pair + ":" + exchange)
                     print(e)
+
+        #write everything to the email
+        for indicator in indicatorTypeCoinMap:
+            f.write(indicator + "\n");
+            for coin in indicatorTypeCoinMap[indicator]:
+                f.write("    币种:" + "https://www.tradingview.com/symbols/" + coin.replace('/','') + '\n' );
+        f.close();
+        
         # Print an empty line when complete
         return new_result
 
@@ -314,12 +333,12 @@ class Behaviour():
             
         return (theOneBefore < 0);
         
-    def printResult(self, new_result, exchange, market_pair, output_mode, criteriaType):
+    def printResult(self, new_result, exchange, market_pair, output_mode, criteriaType, indicatorTypeCoinMap):
         output_data = deepcopy(new_result[exchange][market_pair])
         print(
                                 exchange,
                                 criteriaType,
-                                self.output[output_mode](output_data, criteriaType, market_pair, exchange),
+                                self.output[output_mode](output_data, criteriaType, market_pair, exchange, indicatorTypeCoinMap),
                                 end=''
             )
     

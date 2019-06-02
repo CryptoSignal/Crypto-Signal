@@ -1,52 +1,56 @@
 kill -9 `ps -ef | grep app.py | awk '{print $1}'`
-cat /dev/null > result_h.log
-cat /dev/null > result_d.log
-cat /dev/null > result_w.log
+cat /dev/null > h${modes[i]}.log
+cat /dev/null > d${modes[i]}.log
+cat /dev/null > w${modes[i]}.log
 
 #update emails run locally
-#sh modifyEmail.sh  lfz.carlos@gmail.com,502118525@QQ.com
-#rm -rf *filename
+#python3 app/updateCoinList.py binance.sh easy/binance_1h_easy.yml 
+#rm -rf *easyFileName
 
-python3 app/updateCoinList.py bittrex.sh bittrex_1h.yml
-sleep 5
-python3 app/updateCoinList.py bittrex.sh bittrex_1d.yml
-sleep 5
-python3 app/updateCoinList.py bitfinex.sh bitfinex_1h.yml
-sleep 5
-python3 app/updateCoinList.py bitfinex.sh bitfinex_6h.yml
-sleep 5
-python3 app/updateCoinList.py bitfinex.sh bitfinex_d.yml
-sleep 5
-python3 app/updateCoinList.py bitfinex.sh bitfinex_w.yml
-sleep 5
-python3 app/updateCoinList.py binance.sh binance_1h.yml
-sleep 5
-python3 app/updateCoinList.py binance.sh binance_4h.yml
-sleep 5
-python3 app/updateCoinList.py binance.sh binance_d.yml
-sleep 5
-python3 app/updateCoinList.py binance.sh binance_w.yml
-sleep 5
-python3 app/updateCoinList.py huobi.sh huobi_1h.yml
-sleep 5
-python3 app/updateCoinList.py huobi.sh huobi_d.yml
-sleep 5
-python3 app/updateCoinList.py huobi.sh huobi_w.yml
-sleep 5
+export modes=(easy custom)
+for(( i=0;i<${#modes[@]};i++)); do
 
-python3 app/app.py  bittrex_1h.yml result_bittrex_1h.log &
-python3 app/app.py  bittrex_1d.yml result_bittrex_1d.log &
+    python3 app/updateCoinList.py bittrex.sh ${modes[i]}/bittrex_1h_${modes[i]}.yml
+    sleep 5
+    python3 app/updateCoinList.py bittrex.sh ${modes[i]}/bittrex_1d_${modes[i]}.yml
+    sleep 5
+    python3 app/updateCoinList.py bitfinex.sh ${modes[i]}/bitfinex_1h_${modes[i]}.yml
+    sleep 5
+    python3 app/updateCoinList.py bitfinex.sh ${modes[i]}/bitfinex_6h_${modes[i]}.yml
+    sleep 5
+    python3 app/updateCoinList.py bitfinex.sh ${modes[i]}/bitfinex_d_${modes[i]}.yml
+    sleep 5
+    python3 app/updateCoinList.py bitfinex.sh ${modes[i]}/bitfinex_w_${modes[i]}.yml
+    sleep 5
+    python3 app/updateCoinList.py binance.sh ${modes[i]}/binance_1h_${modes[i]}.yml
+    sleep 5
+    python3 app/updateCoinList.py binance.sh ${modes[i]}/binance_4h_${modes[i]}.yml
+    sleep 5
+    python3 app/updateCoinList.py binance.sh ${modes[i]}/binance_d_${modes[i]}.yml
+    sleep 5
+    python3 app/updateCoinList.py binance.sh ${modes[i]}/binance_w_${modes[i]}.yml
+    sleep 5
+    python3 app/updateCoinList.py huobi.sh ${modes[i]}/huobi_1h_${modes[i]}.yml
+    sleep 5
+    python3 app/updateCoinList.py huobi.sh ${modes[i]}/huobi_d_${modes[i]}.yml
+    sleep 5
+    python3 app/updateCoinList.py huobi.sh ${modes[i]}/huobi_w_${modes[i]}.yml
+    sleep 5
+   
+    python3 app/app.py  ${modes[i]}/bittrex_1h_${modes[i]}.yml ${modes[i]}/bittrex_1h.log ${modes[i]} &
+    python3 app/app.py  ${modes[i]}/bittrex_1d_${modes[i]}.yml ${modes[i]}/bittrex_1d.log ${modes[i]} &
 
-python3 app/app.py  bitfinex_1h.yml result_bitfinex_1h.log &
-python3 app/app.py  bitfinex_6h.yml result_bitfinex_6h.log &
-python3 app/app.py  bitfinex_d.yml  result_bitfinex_d.log &
-python3 app/app.py  bitfinex_w.yml result_bitfinex_w.log &
+    python3 app/app.py  ${modes[i]}/bitfinex_1h_${modes[i]}.yml ${modes[i]}/bitfinex_1h.log ${modes[i]} &
+    python3 app/app.py  ${modes[i]}/bitfinex_6h_${modes[i]}.yml ${modes[i]}/bitfinex_6h.log ${modes[i]} &
+    python3 app/app.py  ${modes[i]}/bitfinex_d_${modes[i]}.yml  ${modes[i]}/bitfinex_d.log ${modes[i]} &
+    python3 app/app.py  ${modes[i]}/bitfinex_w_${modes[i]}.yml ${modes[i]}/bitfinex_w.log ${modes[i]} &
 
-python3 app/app.py  binance_1h.yml result_binance_1h.log &
-python3 app/app.py  binance_4h.yml result_binance_4h.log &
-python3 app/app.py  binance_d.yml result_binance_d.log &
-python3 app/app.py  binance_w.yml result_binance_w.log &
+    python3 app/app.py  ${modes[i]}/binance_1h_${modes[i]}.yml ${modes[i]}/binance_1h.log ${modes[i]} &
+    python3 app/app.py  ${modes[i]}/binance_4h_${modes[i]}.yml ${modes[i]}/binance_4h.log ${modes[i]} &
+    python3 app/app.py  ${modes[i]}/binance_d_${modes[i]}.yml ${modes[i]}/binance_d.log ${modes[i]} &
+    python3 app/app.py  ${modes[i]}/binance_w_${modes[i]}.yml ${modes[i]}/binance_w.log ${modes[i]} &
 
-python3 app/app.py  huobi_1h.yml result_huobi_1h.log &
-python3 app/app.py  huobi_d.yml result_huobi_d.log &
-python3 app/app.py  huobi_w.yml result_huobi_w.log &
+    python3 app/app.py  ${modes[i]}/huobi_1h_${modes[i]}.yml ${modes[i]}/huobi_1h.log ${modes[i]} &
+    python3 app/app.py  ${modes[i]}/huobi_d_${modes[i]}.yml ${modes[i]}/huobi_d.log ${modes[i]} &
+    python3 app/app.py  ${modes[i]}/huobi_w_${modes[i]}.yml ${modes[i]}/huobi_w.log ${modes[i]} &
+done

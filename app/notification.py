@@ -11,7 +11,6 @@ from notifiers.twilio_client import TwilioNotifier
 from notifiers.slack_client import SlackNotifier
 from notifiers.discord_client import DiscordNotifier
 from notifiers.gmail_client import GmailNotifier
-#from notifiers.telegram_client import TelegramNotifier
 from notifiers.webhook_client import WebhookNotifier
 from notifiers.stdout_client import StdoutNotifier
 
@@ -19,13 +18,14 @@ class Notifier():
     """Handles sending notifications via the configured notifiers
     """
 
+    exchangeMap = {"binance":"币安","bitfinex":"bitfinex","huobi":"火币全球","bittrex":"bittrex"}
+    periodMap = {"1h":"1小时", "1d":"日线", "d":"日线", "4h":"4小时", "6h":"6小时", "w":"周线"}
     def __init__(self, notifier_config):
         """Initializes Notifier class
 
         Args:
             notifier_config (dict): A dictionary containing configuration for the notifications.
         """
-
         self.logger = structlog.get_logger()
         self.notifier_config = notifier_config
         self.last_analysis = dict()
@@ -241,6 +241,12 @@ class Notifier():
         return notifier_configured
 
 
+    def convertTitle(self):
+        temp = sys.argv[2].split("_")
+        exchange = temp[0].split("/")[1];
+        period = temp[1].split(".")[0];
+        return self.exchangeMap[exchange], self.periodMap[period]
+    
     def _indicator_message_templater(self, new_analysis, template):
         """Creates a message from a user defined template
 
@@ -261,7 +267,8 @@ class Notifier():
         #extractCoins.matchCoinPairsToUsdt(sys.argv[2]);
         file = open(sys.argv[2], mode='r')
         text = file.read()
-        new_message = new_message + sys.argv[2] + "\n"
+        (exchange, period) = self.convertTitle();
+        new_message = new_message + exchange + "  " + period + "\n"
         new_message = new_message + text
         file.close()
         
@@ -295,6 +302,7 @@ class Notifier():
                                         values[signal] = analysis['result'].iloc[-1][signal]
                                         if isinstance(values[signal], float):
                                             values[signal] = format(values[signal], '.8f')
+                                            
                             elif indicator_type == 'crossovers':
                                 latest_result = analysis['result'].iloc[-1]
 

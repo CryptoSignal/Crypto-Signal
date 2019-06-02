@@ -13,7 +13,6 @@ class Output():
     def __init__(self):
         """Initializes Output class.
         """
-
         self.logger = structlog.get_logger()
         self.dispatcher = {
             'cli': self.to_cli,
@@ -22,7 +21,7 @@ class Output():
         }
 
 
-    def to_cli(self, results, criteriaType, market_pair, exchange):
+    def to_cli(self, results, criteriaType, market_pair, exchange, indicatorTypeCoinMap):
         """Creates the message to output to the CLI
    
         Args:
@@ -32,7 +31,6 @@ class Output():
         Returns:
             str: Completed cli message
         """
-        f = open(sys.argv[2],'a')
         normal_colour = '\u001b[0m'
         hot_colour = '\u001b[31m'
         cold_colour = '\u001b[36m'
@@ -103,8 +101,7 @@ class Output():
                         )
 
         output += '\n\n'
-        f.write(exchange+ " " + criteriaType + " " + "https://www.tradingview.com/symbols/" + market_pair.replace('/','') + '\n' );
-        f.close();
+        indicatorTypeCoinMap[criteriaType].append(market_pair)
         return output
 
 
