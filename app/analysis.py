@@ -29,6 +29,9 @@ class StrategyAnalyzer():
         """
 
         dispatcher = {
+            'candle_recognition': candle_recognition.Candle_recognition().analyze,
+            'aroon_oscillator': aroon_oscillator.Aroon_oscillator().analyze,
+            'klinger_oscillator': klinger_oscillator.Klinger_oscillator().analyze,
             'adx': adx.Adx().analyze,
             'ichimoku': ichimoku.Ichimoku().analyze,
             'macd': macd.MACD().analyze,

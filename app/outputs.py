@@ -2,7 +2,7 @@
 """
 
 import json
-
+import numpy as np
 import structlog
 
 
@@ -88,7 +88,7 @@ class Output():
                         formatted_values = list()
                         for signal in analysis['config']['signal']:
                             value = analysis['result'].iloc[-1][signal]
-                            if isinstance(value, float):
+                            if isinstance(value, float) or isinstance(value, np.int32):
                                 formatted_values.append(format(value, '.8f'))
                             else:
                                 formatted_values.append(value)
