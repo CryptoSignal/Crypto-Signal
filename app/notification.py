@@ -304,8 +304,10 @@ class Notifier(IndicatorUtils):
             new_analysis (dict): The new_analysis to send.
         """
 
-        if self.stdout_configured:
-            message_template = Template(self.notifier_config['stdout']['optional']['template'])
+        if not self.stdout_configured:
+            return 
+
+        message_template = Template(self.notifier_config['stdout']['optional']['template'])
 
         for exchange in messages:
             for market_pair in messages[exchange]:
@@ -316,14 +318,7 @@ class Notifier(IndicatorUtils):
                         continue
 
                     self.notify_stdout_message(_messages[candle_period], message_template)             
-            """
-            message = self._indicator_message_templater(
-                new_analysis,
-                self.notifier_config['stdout']['optional']['template']
-            )
-            if message.strip():
-                self.stdout_client.notify(message)
-                """
+
     def notify_stdout_message(self, messages, message_template):
         for message in messages:
             formatted_message = message_template.render(message)
