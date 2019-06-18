@@ -271,7 +271,6 @@ class Notifier(IndicatorUtils):
     def notify_telegram_message(self, messages, message_template):
         try:
             for message in messages:
-                self.logger.info(message)
                 formatted_message = message_template.render(message)
                 self.telegram_client.notify(formatted_message.strip())
         except (TelegramTimedOut) as e:
