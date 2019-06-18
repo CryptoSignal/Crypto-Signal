@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 
 export emails=$2
+export sender=$3
 if [ "$1" = "easy" ]
 then
     rm -rf easy/*
@@ -15,6 +16,7 @@ then
 
     for easyFileName in easy/*.yml; do
       sed  -i '$easyFileName' '/destination_emails/s/.*/      destination_emails : ['$emails']/g' $easyFileName
+      sed  -i '$easyFileName' '/username/s/.*/      username: '$sender'/g' $easyFileName
     done
 
 rm -rf easy/*easyFileName
@@ -35,6 +37,7 @@ then
 
     for customFileName in custom/*.yml; do
       sed  -i '$customFileName' '/destination_emails/s/.*/      destination_emails : ['$emails']/g' $customFileName
+      sed  -i '$customFileName' '/username/s/.*/      username: '$sender'/g' $customFileName
     done
 
 rm -rf custom/*customFileName

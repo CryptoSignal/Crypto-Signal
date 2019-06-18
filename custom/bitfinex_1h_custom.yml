@@ -134,7 +134,7 @@ notifiers:
         is {{status}}!{{ ''
 
         '' -}}'}
-    required: {username: null, webhook: null}
+      username: cryptalsender@gmail.com
   gmail:
     optional: {template: '{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}}
         is {{status}}!{{ ''
@@ -144,7 +144,7 @@ notifiers:
       destination_emails : [lfz.carlos@gmail.com]
       enable: true
       password: 868891251q1q1q1q
-      username: lfz.carlos@gmail.com
+      username: cryptalsender@gmail.com
   slack:
     optional: {template: '{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}}
         is {{status}}!{{ ''
@@ -170,7 +170,7 @@ notifiers:
         '' -}}'}
     required: {key: null, receiver_number: null, secret: null, sender_number: null}
   webhook:
-    optional: {password: null, username: null}
+      username: cryptalsender@gmail.com
     required: {url: null}
 settings:
   log_level: INFO

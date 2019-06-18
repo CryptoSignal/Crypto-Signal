@@ -301,7 +301,7 @@ notifiers:
   discord:
     required:
       webhook: null
-      username: null
+      username: cryptalsender@gmail.com
     optional:
       avatar: null
       template: "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
@@ -312,7 +312,7 @@ notifiers:
       template: "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
   gmail:
     required:
-      username: null
+      username: cryptalsender@gmail.com
       password: null
       destination_emails : [lfz.carlos@gmail.com]
     optional:
@@ -328,7 +328,7 @@ notifiers:
     required:
       url: null
     optional:
-      username: null
+      username: cryptalsender@gmail.com
       password: null
   stdout:
     required:

@@ -1,0 +1,28 @@
+docker run --rm -ti jfloff/alpine-python:3.7-onbuild -a openssl
+
+apk update && apk add --no-cache curl
+apk update && apk add --no-cache git
+
+git clone https://github.com/lfzCarlosC/crypto-signal.git
+cd crypto-signal/
+git remote add fangzhou https://github.com/lfzCarlosC/crypto-signal.git
+git fetch fangzhou 
+git checkout fangzhou/apply-my-strate
+
+
+pip3 install pyyaml
+pip3 install structlog
+pip3 install python-json-logger
+pip3 install ccxt
+
+apk update && apk add --no-cache gcc g++ make libffi-dev openssl-dev
+pip3 install ccxt
+pip3 install tenacity
+pip3 install jinja2
+pip3 install twilio
+pip3 install slackweb
+pip3 install webcord
+pip3 install pandas
+pip3 install ta-lib
+
+

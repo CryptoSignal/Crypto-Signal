@@ -27,7 +27,7 @@ notifiers:
   discord:
     required:
       webhook: null
-      username: null
+      username: cryptalsender@gmail.com
     optional:
       avatar: null
       template: "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
@@ -38,9 +38,9 @@ notifiers:
       template: "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
   gmail:
     required:
-      username: lfz.carlos@gmail.com
+      username: cryptalsender@gmail.com
       password: 868891251q1q1q1q
-      destination_emails : [502118525@QQ.com]
+      destination_emails : [670683310@qq.com,498012743@qq.com,liuzhe_0507@163.com,2902526853@QQ.com,252796475@qq.com,renkaiw@126.com,1075629140@qq.com,514056@qq.com,53745514@qq.com,312501698@qq.com,794250430@qq.com,yuanyang18@qq.com,jttllz@163.com,18165700516@189.cn,985297559@qq.com,hushh1995@gmail.com,120773442@qq.com,349332206@qq.com,751634436@qq.com,847109590@qq.com,18951138515@163.com,289472670@qq.com,534672034@qq.com,249130409@qq.com,744183462@qq.com,87832607@qq.com,26854245@qq.com,441760687@qq.com,419850226@qq.com,475311336@qq.com,228570926@qq.com,762859841@qq.com,386591702@qq.com,634177652@qq.com,6286936@qq.com,1820504580@qq.com,3013535607@qq.com,1055388948@qq.com,502118525@QQ.com,lfz_carlos@hotmail.com]
           - lfz.carlos@gmail.com
     optional:
       template: "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
@@ -56,7 +56,7 @@ notifiers:
     required:
       url: null
     optional:
-      username: null
+      username: cryptalsender@gmail.com
       password: null
   stdout:
     required:

@@ -11,7 +11,7 @@ for coin in coinStream:
     if coin.find('/') >= 0:
         newList.append(coin.split('-')[1].strip())    
 stream = open(sys.argv[2], "r")
-data = yaml.load(stream)
+data = yaml.safe_load(stream)
 data['settings']['market_pairs'] = newList
 
 with open(sys.argv[2], 'w') as f:

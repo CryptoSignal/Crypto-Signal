@@ -161,17 +161,8 @@ class Behaviour():
 #                         )
                         ##################################################
                         
-                     #core algorithm 2:
-                    
-#                     yiZiChangShe 
-#                     fluatuateFlag = (delta_macd[len(delta_macd)-1] >= 0 and delta_macd[len(delta_macd)-1] <= 0.0001) and 
-#                            (delta_macd[len(delta_macd)-2] >= 0 and delta_macd[len(delta_macd)-2] <= 0.0001) and
-#                            macd_history[len(delta_macd)-1] >= 0; 
-#                     if( market_pair.endswith("BTC") ):
-#                         lowPositionFluctuateFlag = fluatuateFlag and (macd_history[len(delta_macd)-1] <= 0.0001);
-#                     elif( market_pair.endswith("USDT") or market_pair.endswith("USD") ):
-#                         lowPositionFluctuateFlag = fluatuateFlag and (macd_history[len(delta_macd)-1] <= 0.0005);
-#                          
+                    #core algorithm 2:
+                          
                     # goldenFork
                     intersectionValueAndMin = [0,0]
                     goldenForkMacd = (
@@ -208,8 +199,12 @@ class Behaviour():
                     #dmi
                     lastNDMIIsPositive = goldenForkKdj and (self.lastNDMIIsPositive(delta_di, 2) or self.lastNDMIIsPositive(delta_di, 3) or self.lastNDMIIsPositive(delta_di, 4)) 
                     
-                    #bottomDivergence
-                   
+                    #macdBottomDivergence
+                    #input: data
+                    #output: boolean
+                    #detectBottomDivergence(detectMacdNegativeSlots(data))
+                    macdBottomDivergence = self.detectBottomDivergence(delta_macd, low, self.detectLastMacdNegativeSlots(delta_macd))
+
                     #bollCross
                     bollCross = False
                     if (len(middleband) != 0):
@@ -236,7 +231,7 @@ class Behaviour():
                         
                     if(indicatorModes == 'custom'):
                         if (goldenForkMacd):
-                            self.printResult(new_result, exchange, market_pair, output_mode, ("positive:" if intersectionValueAndMin[0]>0 else "") + "goldenFork" + ":"
+                            self.printResult(new_result, exchange, market_pair, output_mode, ("0轴上:" if intersectionValueAndMin[0]>0 else "") + "macd金叉信号" + ":"
                                               + (str(round(intersectionValueAndMin[0],5)) + ":" +str(round(intersectionValueAndMin[1],5)) + ":" + str(round(intersectionValueAndMin[0]/intersectionValueAndMin[1], 2))
                                                 ), indicatorTypeCoinMap
                                             )
@@ -245,16 +240,19 @@ class Behaviour():
                             self.printResult(new_result, exchange, market_pair, output_mode, "DMI", indicatorTypeCoinMap)
                             
                         if (goldenForkKdj):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "kdjFork", indicatorTypeCoinMap)
+                            self.printResult(new_result, exchange, market_pair, output_mode, "kdj金叉信号", indicatorTypeCoinMap)
                         
+                        if (macdBottomDivergence):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "macd底背离", indicatorTypeCoinMap)
+                            
 #                         if (narrowedBoll):
 #                             self.printResult(new_result, exchange, market_pair, output_mode, "narrowedBoll:" + str(test_arr), indicatorTypeCoinMap)
                         
                         if (goldenForkKdj and goldenForkMacd):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "kdjFork|goldenFork", indicatorTypeCoinMap)
+                            self.printResult(new_result, exchange, market_pair, output_mode, "kdj金叉信号|macd金叉信号", indicatorTypeCoinMap)
                             
                         if (goldenForkKdj and lastNDMIIsPositive):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "kdjFork|DMI", indicatorTypeCoinMap)
+                            self.printResult(new_result, exchange, market_pair, output_mode, "kdj金叉信号|DMI", indicatorTypeCoinMap)
                         
 #                     if (bollCross):
 #                         self.printResult(new_result, exchange, market_pair, output_mode, "bollCrossUp")
@@ -279,6 +277,44 @@ class Behaviour():
         # Print an empty line when complete
         return new_result
 
+###############################################################
+    #Test: a=[1,2,3,4,5,6,-1,-2]
+    def detectLastMacdNegativeSlots(self, macd):
+        flag = False;
+        for i in range(len(macd)-1, -1, -1):
+            if (macd[i] > 0):
+                if(flag == True):
+                    return i+1;
+            elif (flag == False):
+                flag = True;
+                
+    def getIndexOfMacdValley(self, macd, start):
+        index = start
+        minIndex = start
+        min = macd[start]
+        for value in macd[start:]:
+            if(min > value):
+                min = value;
+                minIndex = index
+            index = index + 1
+        return minIndex
+    
+    def detectBottomDivergence(self, macd, data, start):
+        minIndex = self.getIndexOfMacdValley(macd, start)
+        min = data[(minIndex-len(macd))]
+        loc = minIndex
+        for value in data[(minIndex-len(macd)):]:
+            if(value < min):
+#                 print("(((((" + str(start))
+#                 print("......" + str(minIndex))
+#                 print("<<<<<<" + str(loc))
+#                 print(str(value) + "====" + str(min))
+                return True;
+#             print("<<<<<<" + str(value) + "<<<" + str(loc))
+            loc = loc + 1
+        return False;
+ ################################################################
+    
     def isTheIntersectionPointCloseToBePositive(self, macd, macd_signal, n, intersectionValueAndMin):
         return self.calIntersectionPointRate(self.GetIntersectPointofLines(self.organizeDataPoint(macd, macd_signal, n))[0], macd, intersectionValueAndMin) is not None ;
     
@@ -291,7 +327,6 @@ class Behaviour():
         intersectionValueAndMin[1] = min;
         return intersectionValueAndMin;
        
-    
     def GeneralEquation(self, first_x,first_y,second_x,second_y):
         A=second_y-first_y
         B=first_x-second_x
@@ -417,6 +452,7 @@ class Behaviour():
             list: A list of dictinaries containing the results of the analysis.
         """
 
+        print("=============" + str(market_pair))
         indicator_dispatcher = self.strategy_analyzer.indicator_dispatcher()
         results = { indicator: list() for indicator in self.indicator_conf.keys() }
         historical_data_cache = dict()

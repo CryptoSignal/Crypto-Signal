@@ -27,15 +27,18 @@ class Momentum(IndicatorUtils):
 
         Returns:
             pandas.DataFrame: A dataframe containing the indicators and hot/cold values.
-        """
-
+        """    
         dataframe = self.convert_to_dataframe(historical_data)
+        print("dataframe:\n")
+        print(dataframe)
         mom_values = abstract.MOM(dataframe, period_count).to_frame()
+        print("mom_values:\n")
+        print(mom_values)
         mom_values.dropna(how='all', inplace=True)
         mom_values.rename(columns={mom_values.columns[0]: 'momentum'}, inplace=True)
-
+ 
         if mom_values[signal[0]].shape[0]:
             mom_values['is_hot'] = mom_values[signal[0]] > hot_thresh
             mom_values['is_cold'] = mom_values[signal[0]] < cold_thresh
-
+ 
         return mom_values
