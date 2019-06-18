@@ -525,3 +525,46 @@ So, in the message template the "hot_cold_label" variable will have one of the t
 ```
 template: "[{{indicator_label}}] **{{hot_cold_label}}** {{market}}  Prices: [{{prices}}]"  
 ```
+
+
+### Price Values
+
+To use this feature it is necessary to configure "ohlcv" informant for each candle period of your indicators. For example, this config is used to get High, Low and Close prices for 1h and 4h indicators.
+
+```
+informants:
+    ....
+    bollinger_bands:
+        - enabled: false
+    ohlcv:
+        - enabled: true
+          signal:
+            - high
+            - low
+            - close
+          candle_period: 1h
+          period_count: 14
+        - enabled: true
+          signal:
+            - high
+            - low
+            - close
+          candle_period: 4h
+          period_count: 14
+          
+```
+
+Then you can use the "price_value" variable to have the values of prices and be able to do some operations on them.
+
+```
+notifiers:
+    telegram:
+        required:
+            token: 580514307:AAETsNsxs4QCdyEZ59vVROLlBxxxxx
+            chat_id: 2073900000
+        optional:
+            parse_mode: html
+            template: "{{ market }} BUY {{ price_value.close }} SL: {{ decimal_format|format(price_value.low * 0.9) }} TP: {{ decimal_format|format(price_value.close * 1.02) }} {{ decimal_format|format(price_value.close * 1.04) }} "
+```
+
+The code for "decimal_format" and "format" is necessary to obtain the prices formatted with the corresponding zeros.
