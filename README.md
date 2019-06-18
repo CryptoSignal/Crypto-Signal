@@ -564,7 +564,10 @@ notifiers:
             chat_id: 2073900000
         optional:
             parse_mode: html
-            template: "{{ market }} BUY {{ price_value.close }} SL: {{ decimal_format|format(price_value.low * 0.9) }} TP: {{ decimal_format|format(price_value.close * 1.02) }} {{ decimal_format|format(price_value.close * 1.04) }} "
+            template: "{{ market }} 
+            BUY {{ price_value.close }} 
+            SL: {{ decimal_format|format(price_value.low * 0.9) }} 
+            TP: {{ decimal_format|format(price_value.close * 1.02) }} {{ decimal_format|format(price_value.close * 1.04) }} "
 ```
 
 The code for "decimal_format" and "format" is necessary to obtain the prices formatted with the corresponding zeros.
