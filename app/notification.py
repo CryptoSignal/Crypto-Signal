@@ -271,6 +271,7 @@ class Notifier(IndicatorUtils):
     def notify_telegram_message(self, messages, message_template):
         try:
             for message in messages:
+                self.logger.info(message)
                 formatted_message = message_template.render(message)
                 self.telegram_client.notify(formatted_message.strip())
         except (TelegramTimedOut) as e:
@@ -607,13 +608,18 @@ class Notifier(IndicatorUtils):
                                     decimal_format = '.{}f'.format(precision['price'])
 
                                     prices = ''
+                                    price_value = {}
                                     candle_period = analysis['config']['candle_period']
                                     candle_values = ohlcv_values[exchange][market_pair]
 
                                     if candle_period in candle_values :
                                         for key, value in candle_values[candle_period].items():
+                                            price_value[key] = value
+
                                             value = format(value, decimal_format)
-                                            prices = '{} {}: {}' . format(prices, key.title(), value)                                   
+                                            prices = '{} {}: {}' . format(prices, key.title(), value)
+
+                                    decimal_format = '%' + decimal_format
 
                                     lrsi = ''
                                     if candle_period in lrsi_values[exchange][market_pair]:
@@ -637,7 +643,7 @@ class Notifier(IndicatorUtils):
                                         quote_currency=quote_currency, indicator=indicator, indicator_number=index,
                                         analysis=analysis, status=status, last_status=last_status, 
                                         prices=prices, lrsi=lrsi, creation_date=creation_date, hot_cold_label=hot_cold_label,
-                                        indicator_label=indicator_label)                                    
+                                        indicator_label=indicator_label, price_value = price_value, decimal_format=decimal_format)                                    
 
                                     new_messages[exchange][market_pair][candle_period].append(new_message)
 
