@@ -16,6 +16,7 @@ from outputs import Output
 from symbol import except_clause
 import numpy as np
 from collections import defaultdict
+import traceback
 
 import sys
 from _ast import Or
@@ -123,7 +124,7 @@ class Behaviour():
                     kt = new_result[exchange][market_pair]['indicators']['kdj'][0]['result']['k'];
                     dt = new_result[exchange][market_pair]['indicators']['kdj'][0]['result']['d'];
                     jt = new_result[exchange][market_pair]['indicators']['kdj'][0]['result']['j'];
-                    
+                
                     #core algorithm 1:
 #                     if (len(upperband) != 0) and (len(middleband) != 0):
 #                         delta_close_middleband = close - middleband;
@@ -203,7 +204,7 @@ class Behaviour():
                     #input: data
                     #output: boolean
                     #detectBottomDivergence(detectMacdNegativeSlots(data))
-                    macdBottomDivergence = self.detectBottomDivergence(delta_macd, low, self.detectLastMacdNegativeSlots(delta_macd))
+                    macdBottomDivergence = delta_macd[len(delta_macd)-1] <= 0 and self.detectBottomDivergence(delta_macd, low, self.detectLastMacdNegativeSlots(delta_macd))
 
                     #bollCross
                     bollCross = False
@@ -266,7 +267,8 @@ class Behaviour():
                 except Exception as e:
                     print("An exception occurred for " + market_pair + ":" + exchange)
                     print(e)
-
+                    traceback.print_exc()
+                
         #write everything to the email
         for indicator in indicatorTypeCoinMap:
             f.write(indicator + "\n");
@@ -452,7 +454,6 @@ class Behaviour():
             list: A list of dictinaries containing the results of the analysis.
         """
 
-        print("=============" + str(market_pair))
         indicator_dispatcher = self.strategy_analyzer.indicator_dispatcher()
         results = { indicator: list() for indicator in self.indicator_conf.keys() }
         historical_data_cache = dict()

@@ -16,7 +16,7 @@ pip3 install python-json-logger
 pip3 install ccxt
 
 apk update && apk add --no-cache gcc g++ make libffi-dev openssl-dev
-pip3 install ccxt
+pip3 install ccxt==1.17.416
 pip3 install tenacity
 pip3 install jinja2
 pip3 install twilio

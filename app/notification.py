@@ -22,8 +22,8 @@ class Notifier():
     """Handles sending notifications via the configured notifiers
     """
 
-    exchangeMap = {"binance":"币安","bitfinex":"bitfinex","huobi":"火币全球","bittrex":"bittrex"}
-    periodMap = {"1h":"1小时", "1d":"日线", "d":"日线", "4h":"4小时", "6h":"6小时", "w":"周线"}
+    exchangeMap = {"binance":"币安","bitfinex":"bitfinex","huobi":"火币全球","bittrex":"bittrex","okex":"ok交易所","zb":"zb交易所"}
+    periodMap = {"1h":"1小时", "1d":"日线", "d":"日线", "4h":"4小时", "6h":"6小时", "12h":"12小时", "w":"周线"}
     cst_tz = timezone('Asia/Shanghai')  
     utc_tz = timezone('UTC')  
     
@@ -258,7 +258,7 @@ class Notifier():
         utcnow = datetime.utcnow()  
         utcnow = utcnow.replace(tzinfo=self.utc_tz)  
         china = utcnow.astimezone(self.cst_tz)  
-        return "结果发送时间: 时区: 亚洲/上海(GMT+08:00)  %s"%utcnow.strftime('%Y-%m-%d %H:%M:%S')
+        return "   发送时间: 时区: 亚洲/上海(GMT+08:00)  %s"%china.strftime('%Y-%m-%d %H:%M:%S')
         
     def _indicator_message_templater(self, new_analysis, template):
         """Creates a message from a user defined template
@@ -281,7 +281,9 @@ class Notifier():
         file = open(sys.argv[2], mode='r')
         text = file.read()
         (exchange, period) = self.convertTitle();
-        new_message = new_message + exchange + "  " + period + self.getLocalizeTime() + "\n"
+        title = 'Subject: 侦测到信号： '+ exchange + "  " + period +'\n\n'
+        new_message = new_message + title
+        new_message = new_message + self.getLocalizeTime() + "\n"
         
         new_message = new_message + text
         

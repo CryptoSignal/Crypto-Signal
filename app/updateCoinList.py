@@ -13,6 +13,7 @@ for coin in coinStream:
 stream = open(sys.argv[2], "r")
 data = yaml.safe_load(stream)
 data['settings']['market_pairs'] = newList
+print(newList)
 
 with open(sys.argv[2], 'w') as f:
     yaml.dump(data, f)
