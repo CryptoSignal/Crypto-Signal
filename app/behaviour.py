@@ -225,9 +225,6 @@ class Behaviour():
                         
                         if (goldenForkMacd):
                             self.printResult(new_result, exchange, market_pair, output_mode, "macd金叉信号", indicatorTypeCoinMap)
-                            
-                        if (bollCross):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "布林中轨信号", indicatorTypeCoinMap)
                         
                     if(indicatorModes == 'custom'):
                         if (goldenForkMacd):
@@ -253,7 +250,10 @@ class Behaviour():
                             
                         if (goldenForkKdj and lastNDMIIsPositive):
                             self.printResult(new_result, exchange, market_pair, output_mode, "kdj金叉信号|DMI", indicatorTypeCoinMap)
-                        
+                                                
+                        if (bollCross):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "布林中轨信号", indicatorTypeCoinMap)
+                            
 #                     if (bollCross):
 #                         self.printResult(new_result, exchange, market_pair, output_mode, "bollCrossUp")
                         
@@ -271,7 +271,7 @@ class Behaviour():
         for indicator in indicatorTypeCoinMap:
             f.write(indicator + "\n");
             for coin in indicatorTypeCoinMap[indicator]:
-                f.write("    币种:" + "https://www.tradingview.com/symbols/" + coin.replace('/','') + '\n' );
+                f.write("    币种/交易对:" + coin.replace('/','') + '\n' );
         f.close();
         
         # Print an empty line when complete

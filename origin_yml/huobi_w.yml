@@ -229,4 +229,4 @@ settings:
     EGCC/ETH, BFT/ETH, REQ/ETH, LUN/ETH, NCASH/ETH, QSP/ETH, MEET/ETH, REN/ETH, LSK/ETH,
     PROPY/ETH, RCN/ETH]
   output_mode: cli
-  update_interval: 86400
+  update_interval: 400000

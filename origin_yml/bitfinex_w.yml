@@ -185,4 +185,4 @@ settings:
     GOT/USD, OMN/USD, AIO/USD, EOS/ETH, NEO/ETH, VET/ETH, TRX/ETH, XLM/ETH, QTUM/ETH,
     ETP/ETH, XRA/ETH, AIO/ETH, GOT/ETH, XVG/ETH, ANT/ETH]
   output_mode: cli
-  update_interval: 86400
+  update_interval: 400000

@@ -212,4 +212,4 @@ settings:
     IOTX/ETH, SNM/ETH, CDT/ETH, BTG/ETH, LEND/ETH, RCN/ETH, KEY/ETH, BCPT/ETH, NAV/ETH,
     FUN/ETH, QSP/ETH, SNGLS/ETH, YOYO/ETH, GXS/ETH, NXS/ETH, DNT/ETH, BRD/ETH]
   output_mode: cli
-  update_interval: 14400
+  update_interval: 3600

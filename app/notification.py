@@ -14,12 +14,19 @@ from notifiers.gmail_client import GmailNotifier
 from notifiers.webhook_client import WebhookNotifier
 from notifiers.stdout_client import StdoutNotifier
 
+from pytz import utc  
+from pytz import timezone  
+from datetime import datetime
+
 class Notifier():
     """Handles sending notifications via the configured notifiers
     """
 
     exchangeMap = {"binance":"币安","bitfinex":"bitfinex","huobi":"火币全球","bittrex":"bittrex"}
     periodMap = {"1h":"1小时", "1d":"日线", "d":"日线", "4h":"4小时", "6h":"6小时", "w":"周线"}
+    cst_tz = timezone('Asia/Shanghai')  
+    utc_tz = timezone('UTC')  
+    
     def __init__(self, notifier_config):
         """Initializes Notifier class
 
@@ -247,6 +254,12 @@ class Notifier():
         period = temp[1].split(".")[0];
         return self.exchangeMap[exchange], self.periodMap[period]
     
+    def getLocalizeTime(self):
+        utcnow = datetime.utcnow()  
+        utcnow = utcnow.replace(tzinfo=self.utc_tz)  
+        china = utcnow.astimezone(self.cst_tz)  
+        return "结果发送时间: 时区: 亚洲/上海(GMT+08:00)  %s"%utcnow.strftime('%Y-%m-%d %H:%M:%S')
+        
     def _indicator_message_templater(self, new_analysis, template):
         """Creates a message from a user defined template
 
@@ -268,8 +281,11 @@ class Notifier():
         file = open(sys.argv[2], mode='r')
         text = file.read()
         (exchange, period) = self.convertTitle();
-        new_message = new_message + exchange + "  " + period + "\n"
+        new_message = new_message + exchange + "  " + period + self.getLocalizeTime() + "\n"
+        
         new_message = new_message + text
+        
+        new_message = new_message + "\n本分析结果只涉及买涨信号, 由于投资理念各异不涉及买跌信号, 仅供分析参考 :-> \n"
         file.close()
         
         for exchange in new_analysis:

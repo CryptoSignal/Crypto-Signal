@@ -134,7 +134,7 @@ notifiers:
         is {{status}}!{{ ''
 
         '' -}}'}
-      username: cryptalsender@gmail.com
+    required: {username: null, webhook: null}
   gmail:
     optional: {template: '{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}}
         is {{status}}!{{ ''
@@ -170,7 +170,7 @@ notifiers:
         '' -}}'}
     required: {key: null, receiver_number: null, secret: null, sender_number: null}
   webhook:
-      username: cryptalsender@gmail.com
+    optional: {password: null, username: null}
     required: {url: null}
 settings:
   log_level: INFO
@@ -185,4 +185,4 @@ settings:
     GOT/USD, OMN/USD, AIO/USD, EOS/ETH, NEO/ETH, VET/ETH, TRX/ETH, XLM/ETH, QTUM/ETH,
     ETP/ETH, XRA/ETH, AIO/ETH, GOT/ETH, XVG/ETH, ANT/ETH]
   output_mode: cli
-  update_interval: 86400
+  update_interval: 400000

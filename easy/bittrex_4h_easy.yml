@@ -126,7 +126,7 @@ notifiers:
         is {{status}}!{{ ''
 
         '' -}}'}
-      username: cryptalsender@gmail.com
+    required: {username: null, webhook: null}
   gmail:
     optional: {template: '{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}}
         is {{status}}!{{ ''
@@ -162,7 +162,7 @@ notifiers:
         '' -}}'}
     required: {key: null, receiver_number: null, secret: null, sender_number: null}
   webhook:
-      username: cryptalsender@gmail.com
+    optional: {password: null, username: null}
     required: {url: null}
 settings:
   log_level: INFO
@@ -203,4 +203,4 @@ settings:
     BSV/USDT, OMG/USDT, ZEC/USDT, ZRX/USDT, DASH/USDT, XMR/USDT, SC/USDT, DCR/USDT,
     DOGE/USDT, BTT/USDT, GRIN/USDT, PAX/USDT, NPXS/USDT, PMA/USDT, NXT/USDT]
   output_mode: cli
-  update_interval: 3600
+  update_interval: 14400

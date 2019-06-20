@@ -134,7 +134,7 @@ notifiers:
         is {{status}}!{{ ''
 
         '' -}}'}
-      username: cryptalsender@gmail.com
+    required: {username: null, webhook: null}
   gmail:
     optional: {template: '{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}}
         is {{status}}!{{ ''
@@ -170,7 +170,7 @@ notifiers:
         '' -}}'}
     required: {key: null, receiver_number: null, secret: null, sender_number: null}
   webhook:
-      username: cryptalsender@gmail.com
+    optional: {password: null, username: null}
     required: {url: null}
 settings:
   log_level: INFO
