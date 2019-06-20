@@ -31,7 +31,7 @@ class StochasticRSI(IndicatorUtils):
         """
 
         dataframe = self.convert_to_dataframe(historical_data)
-        rsi_period_count = period_count * 2
+        rsi_period_count = period_count
         rsi_values = abstract.RSI(dataframe, rsi_period_count).to_frame()
         rsi_values.dropna(how='all', inplace=True)
         rsi_values.rename(columns={0: 'rsi'}, inplace=True)

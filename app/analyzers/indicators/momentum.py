@@ -29,11 +29,11 @@ class Momentum(IndicatorUtils):
             pandas.DataFrame: A dataframe containing the indicators and hot/cold values.
         """    
         dataframe = self.convert_to_dataframe(historical_data)
-        print("dataframe:\n")
-        print(dataframe)
+#         print("dataframe:\n")
+#         print(dataframe)
         mom_values = abstract.MOM(dataframe, period_count).to_frame()
-        print("mom_values:\n")
-        print(mom_values)
+#         print("mom_values:\n")
+#         print(mom_values)
         mom_values.dropna(how='all', inplace=True)
         mom_values.rename(columns={mom_values.columns[0]: 'momentum'}, inplace=True)
  
