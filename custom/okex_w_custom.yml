@@ -5,7 +5,7 @@ crossovers:
     enabled: true, key_indicator: ohlcv, key_indicator_index: 0, key_indicator_type: informants,
     key_signal: close}
 exchanges:
-  okex:
+  okex3:
     required: {enabled: true}
 indicators:
   adx:

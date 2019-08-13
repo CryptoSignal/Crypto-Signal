@@ -130,7 +130,7 @@ class Behaviour():
                     kt = new_result[exchange][market_pair]['indicators']['kdj'][0]['result']['k'];
                     dt = new_result[exchange][market_pair]['indicators']['kdj'][0]['result']['d'];
                     jt = new_result[exchange][market_pair]['indicators']['kdj'][0]['result']['j'];
-                
+
                     #core algorithm 1:
 #                     if (len(upperband) != 0) and (len(middleband) != 0):
 #                         delta_close_middleband = close - middleband;
@@ -169,7 +169,7 @@ class Behaviour():
                         ##################################################
                         
                     #core algorithm 2:
-                          
+
                     # goldenFork
                     intersectionValueAndMin = [0,0]
                     goldenForkMacd = (
@@ -184,7 +184,12 @@ class Behaviour():
                          and delta_macd[len(delta_macd)-4] <= 0 
                          and self.isTheIntersectionPointCloseToBePositive(macd, macd_signal, 3, intersectionValueAndMin))
                     )
-                    
+
+                    #deadForkMacd
+                    deadForkMacd = (
+                        delta_macd[len(delta_macd) - 1] <= 0 and delta_macd[len(delta_macd) - 2] >= 0
+                    )
+
                     #flatMacd
 #                     flatMacd = (self.lastNMacdsArePositive(delta_macd, macd, 7))
 
@@ -202,17 +207,27 @@ class Behaviour():
                         and 
                         ((dt[len_d-1] <= kt[len_k-1]) and (kt[len_k-1] <= jt[len_j-1]))  
                     )
-                    
+
+                    #deadForkKdj
+                    deadForkKdj = (
+                        ((dt[len_d - 2] <= kt[len_k - 2]) and (kt[len_k - 2] <= jt[len_j - 2]))
+                        and
+                        ((dt[len_d - 1] >= kt[len_k - 1]) and (kt[len_k - 1] >= jt[len_j - 1]))
+                    )
+
                     #dmi
-                    lastNDMIIsPositive = goldenForkKdj and (self.lastNDMIIsPositive(delta_di, 2) or self.lastNDMIIsPositive(delta_di, 3) or self.lastNDMIIsPositive(delta_di, 4)) 
+                    lastNDMIIsPositive = (self.lastNDMIIsPositive(delta_di, 1) or self.lastNDMIIsPositive(delta_di, 2) or self.lastNDMIIsPositive(delta_di, 3))
                     
                     #macdBottomDivergence
                     #input: data
                     #output: boolean
                     #detectBottomDivergence(detectMacdNegativeSlots(data))
-                    macdBottomDivergence = delta_macd[len(delta_macd)-1] <= 0 and self.detectBottomDivergence(delta_macd, low, self.detectLastMacdNegativeSlots(delta_macd))
+                    macdBottomDivergence = self.detectBottomDivergence(delta_macd, low, self.detectLastMacdNegativeSlots(delta_macd))
                     
                     macdBottomDivergenceIsPositiveMacd = self.detectBottomDivergenceIsPositiveMacd(delta_macd, low, self.detectLastMacdNegativeSlots(delta_macd))
+
+                    macdIsDecreased = (delta_macd[len(delta_macd)-1] < 0  and delta_macd[len(delta_macd)-2] < 0
+                                       and delta_macd[len(delta_macd)-1] > delta_macd[len(delta_macd)-2])
 
                     #bollCross
                     bollCross = False
@@ -233,6 +248,9 @@ class Behaviour():
                     #rsi < 30
                     rsiIsLessThan30 = (rsi[len(rsi)-1] <= 30)
 
+                    #detectMacdVolumeIsShrinked
+                    detectMacdVolumeIsShrinked = self.detectMacdVolumeShrinked(delta_macd, self.detectFirstMacdPositiveSlotPosition(delta_macd))
+
                     #stochrsi
                     len_sd = len(stoch_slow_d)
                     len_sk = len(stoch_slow_k)
@@ -242,18 +260,22 @@ class Behaviour():
                         (stoch_slow_d[len_sd-1] <= stoch_slow_k[len_sk-1])
                     )
 
+                    stochrsi_deadfork = (
+                        (stoch_slow_d[len_sd - 2] <= stoch_slow_k[len_sk - 2])
+                        and
+                        (stoch_slow_d[len_sd - 1] >= stoch_slow_k[len_sk - 1])
+                    )
+
                     #volume is 3 times greater than before
                     len_volume = len(volume)
                     volumeIsGreater = volume[len_volume-1] >= 3 * volume[len_volume-2]
+
 ########################################Filter coins by indicators
                     if(indicatorModes == 'easy'):
 
-                        # if (goldenForkKdj):
-                        #     self.printResult(new_result, exchange, market_pair, output_mode, "kdj金叉信号", indicatorTypeCoinMap)
-                        
-                        #if (goldenForkMacd):
-                        #    self.printResult(new_result, exchange, market_pair, output_mode, "macd金叉信号", indicatorTypeCoinMap)
-         
+                        if (goldenForkMacd and intersectionValueAndMin[0]>0):
+                           self.printResult(new_result, exchange, market_pair, output_mode, "0轴上macd金叉信号", indicatorTypeCoinMap)
+
                         # if (goldenForkMacd):
                         #     self.printResult(new_result, exchange, market_pair, output_mode, ("0轴上:" if intersectionValueAndMin[0]>0 else "") + "macd金叉信号" + ":"
                         #                       + (str(round(intersectionValueAndMin[0],5)) + ":" +str(round(intersectionValueAndMin[1],5)) + ":" + str(round(intersectionValueAndMin[0]/intersectionValueAndMin[1], 2))
@@ -275,38 +297,58 @@ class Behaviour():
                         # if (lastNKPositive):
                         #     self.printResult(new_result, exchange, market_pair, output_mode, "连续3根k阳线", indicatorTypeCoinMap)
 
-                        # if (stochrsi_goldenfork):
-                        #     self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉", indicatorTypeCoinMap)
+                        if (stochrsi_goldenfork and goldenForkMacd):
+                            self.printResult(new_result, exchange, market_pair, output_mode,"stochrsi强弱指标金叉 + macd金叉信号", indicatorTypeCoinMap)
 
-                        if (stochrsi_goldenfork and goldenForkKdj):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + kdj金叉信号", indicatorTypeCoinMap)
+                        if (macdBottomDivergence and lastNDMIIsPositive):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "macd底背离 + DMI", indicatorTypeCoinMap)
+
+                        if (macdBottomDivergence and stochrsi_goldenfork):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "macd底背离 + stochrsi强弱指标金叉", indicatorTypeCoinMap)
 
                         if (volumeIsGreater):
                             self.printResult(new_result, exchange, market_pair, output_mode, "volume放量涨幅超过3倍",
                                              indicatorTypeCoinMap)
 
+                        #contract market
+                        if (market_pair[-1:].isdigit()):
+
+                            if (goldenForkKdj):
+                                self.printResult(new_result, exchange, market_pair, output_mode, "kdj金叉信号", indicatorTypeCoinMap)
+
+                            if (deadForkKdj):
+                                self.printResult(new_result, exchange, market_pair, output_mode, "kdj死叉信号", indicatorTypeCoinMap)
+
+                            if (detectMacdVolumeIsShrinked and stochrsi_deadfork):
+                                    self.printResult(new_result, exchange, market_pair, output_mode, "macd量能萎缩 + stochrsi强弱指标死叉", indicatorTypeCoinMap)
+
+                            #stochrsi_deadfork and deadForkMacd
+
                     if(indicatorModes == 'custom'):
                         if (goldenForkMacd):
-                            self.printResult(new_result, exchange, market_pair, output_mode, ("0轴上:" if intersectionValueAndMin[0]>0 else "") + "macd金叉信号" + ":"
-                                              + (str(round(intersectionValueAndMin[0],5)) + ":" +str(round(intersectionValueAndMin[1],5)) + ":" + str(round(intersectionValueAndMin[0]/intersectionValueAndMin[1], 2))
-                                                ), indicatorTypeCoinMap
-                                            )
+                            self.printResult(new_result, exchange, market_pair, output_mode, ("0轴上" if intersectionValueAndMin[0] > 0 else "") + "macd金叉信号", indicatorTypeCoinMap)
+
+                        if (goldenForkMacd and (intersectionValueAndMin[0] > 0.2 * 2 * delta_macd[self.getIndexOfMacdValley(delta_macd, self.detectLastMacdNegativeSlots(delta_macd))]) ):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "接近0轴的macd金叉信号", indicatorTypeCoinMap)
 
                         if (lastNDMIIsPositive):
                             self.printResult(new_result, exchange, market_pair, output_mode, "DMI", indicatorTypeCoinMap)
                             
-                        if (goldenForkKdj):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "kdj金叉信号", indicatorTypeCoinMap)
+                        # if (goldenForkKdj):
+                        #     self.printResult(new_result, exchange, market_pair, output_mode, "kdj金叉信号", indicatorTypeCoinMap)
 
-                        if (rsiIsLessThan30 and goldenForkKdj):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "rsi小于30 + kdj金叉信号", indicatorTypeCoinMap)
+                        if (goldenForkMacd and stochrsi_goldenfork):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + macd金叉信号", indicatorTypeCoinMap)
 
-                        if (rsiIsLessThan30 and goldenForkMacd):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "macd金叉信号 + rsi小于30",
+                        if (lastNDMIIsPositive and goldenForkMacd):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "macd金叉信号 + DMI",
                                              indicatorTypeCoinMap)
 
-                        if (macdBottomDivergence):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "macd底背离", indicatorTypeCoinMap)
+                        if (macdBottomDivergence and lastNDMIIsPositive):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "macd底背离 + DMI", indicatorTypeCoinMap)
+
+                        if (macdBottomDivergence and stochrsi_goldenfork):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "macd底背离 + stochrsi强弱指标金叉", indicatorTypeCoinMap)
 
                         if (goldenForkKdj and goldenForkMacd):
                             self.printResult(new_result, exchange, market_pair, output_mode, "kdj金叉信号 + macd金叉信号", indicatorTypeCoinMap)
@@ -314,12 +356,19 @@ class Behaviour():
                         if (goldenForkKdj and lastNDMIIsPositive):
                             self.printResult(new_result, exchange, market_pair, output_mode, "kdj金叉信号 + DMI", indicatorTypeCoinMap)
 
+                        if (stochrsi_goldenfork and lastNDMIIsPositive):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + DMI", indicatorTypeCoinMap)
+
                         # compound indicator
                         if (macdBottomDivergenceIsPositiveMacd):
                             self.printResult(new_result, exchange, market_pair, output_mode, "macd底背离最低点为macd正值:强烈信号", indicatorTypeCoinMap)
 
                         if (stochrsi_goldenfork and goldenForkKdj):
                             self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + kdj金叉信号", indicatorTypeCoinMap)
+
+                        if (stochrsi_goldenfork and macdIsDecreased):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + macd下跌量能减弱",
+                                             indicatorTypeCoinMap)
 
                         #if (bollCross):
                         # self.printResult(new_result, exchange, market_pair, output_mode, "布林中轨信号", indicatorTypeCoinMap)
@@ -365,7 +414,32 @@ class Behaviour():
                     return i+1;
             elif (flag == False):
                 flag = True;
-                
+
+    def detectFirstMacdPositiveSlotPosition(self, macd):
+        flag = False;
+        for i in range(len(macd)-1, -1, -1):
+            if (macd[i] > 0):
+                if (flag == True):
+                    return i + 1;
+                else:
+                    flag = True;
+
+                if(i == 0):
+                    return 0;
+            elif (flag == True) :
+                return i;
+
+    def getIndexOfMacdPeak(self, macd, start):
+        index = start
+        maxIndex = start
+        max = macd[start]
+        for value in macd[start:]:
+            if (max < value):
+                max = value;
+                maxIndex = index
+            index = index + 1
+        return maxIndex
+
     def getIndexOfMacdValley(self, macd, start):
         index = start
         minIndex = start
@@ -376,7 +450,17 @@ class Behaviour():
                 minIndex = index
             index = index + 1
         return minIndex
-    
+
+    def detectMacdVolumeShrinked(self, macd, start):
+        maxIndex = self.getIndexOfMacdPeak(macd, start)
+        max = macd[(maxIndex-len(macd))]
+        loc = maxIndex
+        for index, value in enumerate(macd[(maxIndex - len(macd)):]):
+            if(value < max):
+                return True;
+            loc = loc + 1
+        return False;
+
     def detectBottomDivergenceIsPositiveMacd(self, macd, data, start):
         minIndex = self.getIndexOfMacdValley(macd, start)
         min = data[(minIndex-len(macd))]

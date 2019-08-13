@@ -6,6 +6,7 @@ import structlog
 from jinja2 import Template
 import sys 
 import extractCoins
+import requests,json
 
 from notifiers.twilio_client import TwilioNotifier
 from notifiers.slack_client import SlackNotifier
@@ -23,9 +24,10 @@ class Notifier():
     """
 
     exchangeMap = {"binance":"币安","bitfinex":"bitfinex","huobi":"火币全球","bittrex":"bittrex","okex":"ok交易所","zb":"zb交易所"}
-    periodMap = {"1h":"1小时", "1d":"日线", "d":"日线", "4h":"4小时", "6h":"6小时", "12h":"12小时", "w":"周线"}
+    periodMap = {"15min":"15分钟","30min":"30分钟","1h":"1小时", "1d":"日线", "d":"日线", "4h":"4小时", "6h":"6小时", "12h":"12小时", "w":"周线"}
     cst_tz = timezone('Asia/Shanghai')  
-    utc_tz = timezone('UTC')  
+    utc_tz = timezone('UTC')
+    webhook = 'https://oapi.dingtalk.com/robot/send?access_token=86546fe72b329fa2fac6f133dd6d6db318c4a12b13dd03b2d5df8c2375f73124'
     
     def __init__(self, notifier_config):
         """Initializes Notifier class
@@ -174,9 +176,20 @@ class Notifier():
                 new_analysis,
                 self.notifier_config['gmail']['optional']['template']
             )
+
+            indicatorModes = sys.argv[3]
             if message.strip():
+                if(indicatorModes == 'easy'):
+                    self.dingtalk(message, self.webhook)
+
                 self.gmail_client.notify(message)
 
+    def dingtalk(self, msg, webhook):
+        headers = {'Content-Type': 'application/json; charset=utf-8'}
+        data = {'msgtype': 'text', 'text': {'content': msg}, 'at': {'atMobiles': [], 'isAtAll': False}}
+        post_data = json.dumps(data)
+        response = requests.post(webhook, headers=headers, data=post_data)
+        return response.text
 
     def notify_telegram(self, new_analysis):
         """Send a notification via the telegram notifier
@@ -252,7 +265,13 @@ class Notifier():
         temp = sys.argv[2].split("_")
         exchange = temp[0].split("/")[1];
         period = temp[1].split(".")[0];
-        return self.exchangeMap[exchange], self.periodMap[period]
+        type = ""
+        if temp[len(temp)-1].split(".")[0] == "contract" :
+            type = "合约"
+            # [BTC - USD - 190927, ETC - USD - 190927, ETH - USD - 190927, LTC - USD - 190927, BSV - USD - 190927,
+            #  BSV - USD - 190927, XRP - USD - 190927, TRX - USD - 190927,
+            #  EOS - USD - 190927]
+        return self.exchangeMap[exchange], self.periodMap[period], type
     
     def getLocalizeTime(self):
         utcnow = datetime.utcnow()  
@@ -280,8 +299,8 @@ class Notifier():
         #extractCoins.matchCoinPairsToUsdt(sys.argv[2]);
         file = open(sys.argv[2], mode='r')
         text = file.read()
-        (exchange, period) = self.convertTitle();
-        title = 'Subject: 侦测到信号： '+ exchange + "  " + period +'\n\n'
+        (exchange, period, type) = self.convertTitle();
+        title = 'Subject: 侦测到信号： '+ exchange + "  " + period + "    " + type + '\n\n'
         new_message = new_message + title
         new_message = new_message + self.getLocalizeTime() + "\n"
         
