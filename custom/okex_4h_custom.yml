@@ -5,7 +5,7 @@ crossovers:
     enabled: true, key_indicator: ohlcv, key_indicator_index: 0, key_indicator_type: informants,
     key_signal: close}
 exchanges:
-  okex3:
+  okex:
     required: {enabled: true}
 indicators:
   adx:
@@ -141,7 +141,7 @@ notifiers:
 
         '' -}}'}
     required:
-      destination_emails : [cryptalreceiver@gmail.com]
+      destination_emails : [cryptalreceiver@gmail.com,175390235@qq.com]
       enable: true
       password: 868891251q1q1q1q
       username: cryptalsender1@gmail.com
