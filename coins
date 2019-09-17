@@ -1,333 +1,349 @@
-    - RVN/BTC
-    - MONA/BTC
-    - SERV/BTC
-    - SIB/BTC
-    - META/BTC
-    - TRX/BTC
-    - SOLVE/BTC
-    - OK/BTC
-    - SPND/BTC
-    - XRP/BTC
-    - BSV/BTC
-    - SYNX/BTC
-    - ADA/BTC
-    - ORBS/BTC
-    - ETH/BTC
-    - CMCT/BTC
-    - BCH/BTC
-    - OCN/BTC
-    - DOGE/BTC
-    - DENT/BTC
-    - GUP/BTC
-    - KMD/BTC
-    - PMA/BTC
-    - XMR/BTC
-    - FTC/BTC
-    - VBK/BTC
-    - DGB/BTC
-    - DTA/BTC
-    - NGC/BTC
-    - VDX/BTC
-    - LTC/BTC
-    - XLM/BTC
-    - XVG/BTC
-    - NPXS/BTC
-    - NLC2/BTC
-    - PIVX/BTC
-    - CLOAK/BTC
-    - PAX/BTC
-    - ETC/BTC
-    - QTUM/BTC
-    - SYS/BTC
-    - BTT/BTC
-    - BOXX/BTC
-    - WAX/BTC
-    - NXS/BTC
-    - UPP/BTC
-    - ENJ/BTC
-    - XEM/BTC
-    - EDG/BTC
-    - RCN/BTC
-    - EMC2/BTC
-    - IHT/BTC
-    - MFT/BTC
-    - SPHR/BTC
-    - UP/BTC
-    - WAVES/BTC
-    - GO/BTC
-    - RLC/BTC
-    - BAT/BTC
-    - EMC/BTC
-    - ZEN/BTC
-    - VRC/BTC
-    - LSK/BTC
-    - PAY/BTC
-    - GAME/BTC
-    - DYN/BTC
-    - IOP/BTC
-    - TUSD/BTC
-    - BURST/BTC
-    - XZC/BTC
-    - FCT/BTC
-    - AID/BTC
-    - BLOCK/BTC
-    - RDD/BTC
-    - ATOM/BTC
-    - BTS/BTC
-    - ARDR/BTC
-    - CRO/BTC
-    - VIB/BTC
-    - ARK/BTC
-    - RVR/BTC
-    - BITB/BTC
-    - NEO/BTC
-    - DASH/BTC
-    - BLT/BTC
-    - SC/BTC
-    - MANA/BTC
-    - IOST/BTC
-    - MEME/BTC
-    - PTOY/BTC
-    - XNK/BTC
-    - CVC/BTC
-    - MUE/BTC
-    - POLY/BTC
-    - ION/BTC
-    - MTL/BTC
-    - OMG/BTC
-    - VIA/BTC
-    - TTC/BTC
-    - AMP/BTC
-    - MCO/BTC
-    - ZCL/BTC
-    - CRW/BTC
-    - XHV/BTC
-    - LOOM/BTC
-    - NKN/BTC
-    - SWT/BTC
-    - PAL/BTC
-    - ZIL/BTC
-    - STRAT/BTC
-    - TUBE/BTC
-    - HST/BTC
-    - VTC/BTC
-    - ZEC/BTC
-    - NXT/BTC
-    - IOTX/BTC
-    - GNT/BTC
-    - RFR/BTC
-    - TX/BTC
-    - DNT/BTC
-    - GRS/BTC
-    - FSN/BTC
-    - SNT/BTC
-    - EXP/BTC
-    - LBC/BTC
-    - DMT/BTC
-    - NAV/BTC
-    - PRO/BTC
-    - QRL/BTC
-    - BKX/BTC
-    - EXCL/BTC
-    - OCEAN/BTC
-    - MOBI/BTC
-    - LBA/BTC
-    - ZRX/BTC
-    - EDR/BTC
-    - ANKR/BTC
-    - BAY/BTC
-    - HMQ/BTC
-    - BSD/BTC
-    - KORE/BTC
-    - STEEM/BTC
-    - UKG/BTC
-    - AEON/BTC
-    - XDN/BTC
-    - GTO/BTC
-    - SRN/BTC
-    - DCR/BTC
-    - LRC/BTC
-    - ADT/BTC
-    - JNT/BTC
-    - SPC/BTC
-    - BNT/BTC
-    - DRGN/BTC
-    - BCPT/BTC
-    - ANT/BTC
-    - MEDX/BTC
-    - IGNIS/BTC
-    - ADX/BTC
-    - QNT/BTC
-    - ENG/BTC
-    - MOC/BTC
-    - SHIFT/BTC
-    - REP/BTC
-    - POWR/BTC
-    - NCASH/BTC
-    - FLO/BTC
-    - AERGO/BTC
-    - GBYTE/BTC
-    - SALT/BTC
-    - ELF/BTC
-    - LUN/BTC
-    - PI/BTC
-    - BLK/BTC
-    - GRIN/BTC
-    - HYDRO/BTC
-    - STORJ/BTC
-    - XCP/BTC
-    - VEE/BTC
-    - XEL/BTC
-    - PPC/BTC
-    - BTU/BTC
-    - BTM/BTC
-    - COVAL/BTC
-    - UBQ/BTC
-    - BORA/BTC
-    - FX/BTC
-    - CTXC/BTC
-    - STORM/BTC
-    - ONT/BTC
-    - BFT/BTC
-    - GNO/BTC
-    - THC/BTC
-    - NLG/BTC
-    - BWX/BTC
-    - PART/BTC
-    - TIX/BTC
-    - CND/BTC
-    - MER/BTC
-    - DCT/BTC
-    - PTON/BTC
-    - MUSIC/BTC
-    - POT/BTC
-    - TRAC/BTC
-    - VITE/BTC
-    - ONG/BTC
-    - NMR/BTC
-    - XST/BTC
-    - SLS/BTC
-    - SBD/BTC
-    - INCNT/BTC
-    - WINGS/BTC
-    - GLC/BTC
-    - MLN/BTC
-    - MAID/BTC
-    - RADS/BTC
-    - OST/BTC
-    - SNX/BTC
-    - DMD/BTC
-    - XYO/BTC
-    - ABY/BTC
-    - PINK/BTC
-    - XWC/BTC
-    - MET/BTC
-    - SEQ/BTC
-    - FLDC/BTC
-    - MORE/BTC
-    - ART/BTC
-    - HXRO/BTC
-    - SLR/BTC
-    - XMY/BTC
-    - IOC/BTC
-    - NEOS/BTC
-    - SUSD/BTC
-    - TKS/BTC
-    - QWARK/BTC
-    - GRC/BTC
-    - COSM/BTC
-    - CURE/BTC
-    - SLT/BTC
-    - GEO/BTC
-    - USDS/BTC
-    - FUN/BTC
-    - TRIO/BTC
-    - PLA/BTC
-    - WIB/BTC
-    - 
-    - 
-    - TRX/ETH
-    - ADA/ETH
-    - ETC/ETH
-    - XRP/ETH
-    - BCH/ETH
-    - NPXS/ETH
-    - LTC/ETH
-    - WAX/ETH
-    - MANA/ETH
-    - XLM/ETH
-    - NEO/ETH
-    - OMG/ETH
-    - BAT/ETH
-    - QTUM/ETH
-    - OCN/ETH
-    - WAVES/ETH
-    - SC/ETH
-    - SOLVE/ETH
-    - ZEC/ETH
-    - ATOM/ETH
-    - POLY/ETH
-    - DASH/ETH
-    - DGB/ETH
-    - XMR/ETH
-    - XEM/ETH
-    - MCO/ETH
-    - CVC/ETH
-    - PAY/ETH
-    - GNO/ETH
-    - GNT/ETH
-    - BSV/ETH
-    - REP/ETH
-    - FX/ETH
-    - DMT/ETH
-    - TUSD/ETH
-    - ENG/ETH
-    - ZRX/ETH
-    - VIB/ETH
-    - ANT/ETH
-    - SNT/ETH
-    - VDX/ETH
-    - POWR/ETH
-    - UKG/ETH
-    - STRAT/ETH
-    - STORM/ETH
-    - ADX/ETH
-    - SRN/ETH
-    - BNT/ETH
-    - ANKR/ETH
-    - BTC/USDT
-    - ETH/USDT
-    - XRP/USDT
-    - TRX/USDT
-    - ADA/USDT
-    - LTC/USDT
-    - NEO/USDT
-    - ETC/USDT
-    - RVN/USDT
-    - BSV/USDT
-    - BTT/USDT
-    - BCH/USDT
-    - XLM/USDT
-    - OMG/USDT
-    - XMR/USDT
-    - DOGE/USDT
-    - XVG/USDT
-    - BAT/USDT
-    - ZEC/USDT
-    - PMA/USDT
-    - ENJ/USDT
-    - DASH/USDT
-    - OCEAN/USDT
-    - TUSD/USDT
-    - SC/USDT
-    - DGB/USDT
-    - DCR/USDT
-    - NXT/USDT
-    - VDX/USDT
-    - ONT/USDT
-    - ATOM/USDT
-    - GRIN/USDT
-    - NPXS/USDT
-    - ZRX/USDT
-    - PAX/USDT
-    - 
+BSV
+ETC
+RBTC
+ATOM
+OMG
+IRIS
+ELF
+RUFF
+ONT
+RIF
+UGAS
+BTT
+SEAL
+XMX
+SNT
+LBTC
+ANKR
+TERA
+COVA
+
+BTC
+ETH
+BCH
+EOS
+XRP
+LTC
+BSV
+TRX
+ETC
+ZEC
+QTUM
+XLM
+BNB
+GRIN
+LINK
+ATOM
+NEO
+ALGO
+OMG
+XTZ
+TUSD
+HT
+DCR
+RIF
+DASH
+PAX
+VET
+IRIS
+IOST
+AXE
+ZIP
+DOGE
+EKT
+ONT
+AMIO
+ELF
+ZEL
+XZC
+CELR
+AE
+SEAL
+FOR
+RVN
+IMG
+ADA
+VSYS
+UGAS
+LBTC
+BTT
+NKN
+GTC
+VIDY
+DOT
+FTM
+ANKR
+FET
+BTO
+ONG
+AERGO
+SNT
+XMX
+ZIL
+DAPPT
+DDD
+LAD
+PTT
+SERO
+PCX
+BPRO
+MTV
+DOS
+ETP
+ARPA
+OATH
+HPB
+AOA
+PVT
+VNT
+MBL
+BOOM
+PLG
+NNB
+LBA
+VOL
+TCT
+IOEX
+XPX
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+BTC
+ETH
+BCH
+EOS
+XRP
+LTC
+BSV
+TRX
+ETC
+ZEC
+QTUM
+XLM
+BNB
+GRIN
+LINK
+ATOM
+NEO
+ALGO
+OMG
+XTZ
+TUSD
+HT
+DCR
+RIF
+DASH
+PAX
+VET
+IRIS
+IOST
+AXE
+ZIP
+DOGE
+EKT
+ONT
+AMIO
+ELF
+ZEL
+XZC
+CELR
+AE
+SEAL
+FOR
+RVN
+IMG
+ADA
+VSYS
+UGAS
+LBTC
+BTT
+NKN
+GTC
+VIDY
+DOT
+FTM
+ANKR
+FET
+BTO
+ONG
+AERGO
+SNT
+XMX
+ZIL
+DAPPT
+DDD
+LAD
+PTT
+SERO
+PCX
+BPRO
+MTV
+DOS
+ETP
+ARPA
+OATH
+HPB
+AOA
+PVT
+VNT
+MBL
+BOOM
+PLG
+NNB
+LBA
+VOL
+TCT
+IOEX
+XPX
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OCEAN
+LAMB
+TRX
+HT
+BNB
+LINK
+ATOM
+NEX
+IOST
+GRIN
+ZEL
+OMG
+CELR
+MANA
+IRIS
+HOT
+ZRX
+UGAS
+VSYS
+ELF
+LOOM
+ONT
+RIF
+FTM
+FET
+KNC
+ONG
+RUFF
+FOR
+AERGO
+AE
+BTT
+TNB
+ZIL
+DAPPT
+QKC
+CVNT
+ANKR
+IOTX
+IMG
+BQT
+CSP
+COVA
+NEW
+NCASH
+LBTC
+MFT
+DOS
+TRTL
+TERA
+VNT
+NNB
+IOEX
+
+
+
+
+
+
+
+

@@ -1,8 +1,10 @@
-docker run --rm -ti jfloff/alpine-python:3.7-onbuild -a openssl
+docker run --rm -t jfloff/alpine-python:3.7-onbuild bash
 
 apk update && apk add --no-cache curl
 apk update && apk add --no-cache git
 
+mkdir /usr/app
+cd /usr/app
 git clone https://github.com/lfzCarlosC/crypto-signal.git
 cd crypto-signal/
 git remote add fangzhou https://github.com/lfzCarlosC/crypto-signal.git
@@ -14,15 +16,14 @@ pip3 install pyyaml
 pip3 install structlog
 pip3 install python-json-logger
 pip3 install ccxt
+pip3 install tulipy
 
 apk update && apk add --no-cache gcc g++ make libffi-dev openssl-dev
-pip3 install ccxt==1.17.416
 pip3 install tenacity
 pip3 install jinja2
 pip3 install twilio
 pip3 install slackweb
 pip3 install webcord
 pip3 install pandas
-pip3 install ta-lib
-
-
+pip3 install TA-lib
+#https://stackoverflow.com/questions/44757678/python-ta-lib-install-error-how-solve-it

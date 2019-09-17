@@ -8,7 +8,7 @@ kill -9 `ps -ef | grep app.py | awk '{print $1}'`
 #python3 app/updateCoinList.py binance.sh easy/binance_1h_easy.yml 
 #rm -rf *easyFileName
 
-export modes=(easy custom)
+export modes=(custom)
 cat /dev/null > h${modes[i]}.log
 cat /dev/null > d${modes[i]}.log
 cat /dev/null > w${modes[i]}.log

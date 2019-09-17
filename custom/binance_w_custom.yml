@@ -141,7 +141,7 @@ notifiers:
 
         '' -}}'}
     required:
-      destination_emails : [cryptalreceiver@gmail.com,175390235@qq.com]
+      destination_emails : [cryptalreceiver@gmail.com,renkaiw@126.com]
       enable: true
       password: 868891251q1q1q1q
       username: cryptalsender1@gmail.com
