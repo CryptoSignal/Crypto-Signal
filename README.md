@@ -58,7 +58,7 @@ There are a number of reasons why the information crypto-signal provides could b
 
 - tradingview uses a rolling 15 minute timeframe which means that the data they are analyzing can be more recent than ours by a factor of minutes or hours depending on what candlestick timeframe you are using.
 
-- tradingview may collect data in a way that means the timeperiods we have may not line up with theres, which can have an effect on the analysis. This seems unlikely to us, but stranger things have happened.
+- tradingview may collect data in a way that means the timeperiods we have may not line up with theirs, which can have an effect on the analysis. This seems unlikely to us, but stranger things have happened.
 
 ### So if it doesn't match Tradingview how do you know your information is accurate?
 Underpinning crypto-signal for most of our technical analysis is [TA-Lib](https://ta-lib.org/index.html) which is an open source technical analysis project started in 1999. This project has been used in a rather large number of technical analysis projects over the last two decades and is one of the most trusted open source libraries for analyzing candlestick data.
