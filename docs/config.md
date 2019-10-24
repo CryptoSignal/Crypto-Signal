@@ -417,6 +417,11 @@ BOL_BAND - upperband, middleband, lowerband
 OHLCV - open, high, low, close, volume
 ```
 
+**candle_period**\
+default: 1d\
+necessity: optional\
+description: Valid options vary by exchange, common options include 1m, 5m, 1h, 4h, 1d. This dictates what granularity of rollup to use for the analyzed candles, so a candle period of 1d will roll the candles up to 1 day blocks.
+
 **period_count**\
 default: An integer\
 necessity: optional\
