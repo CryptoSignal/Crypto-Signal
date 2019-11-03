@@ -59,6 +59,10 @@ class Behaviour():
         else:
             self.logger.info("No configured markets, using all available on exchange.")
 
+        if sys.argv[4:] and (sys.argv[4] == '-a'):
+            self.logger.info("Scan all flag set to true. using all available on exchange.")
+            market_pairs = None
+
         market_data = self.exchange_interface.get_exchange_markets(markets=market_pairs)
 
         self.logger.info("Using the following exchange(s): %s", list(market_data.keys()))
