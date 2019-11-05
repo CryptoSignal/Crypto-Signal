@@ -675,7 +675,11 @@ class Notifier(IndicatorUtils):
                 _messages = messages[exchange][market_pair]
                                     
                 for candle_period in _messages:
+                    if len(_messages[candle_period]) == 0:
+                        continue
+
                     candles_data = self.all_historical_data[exchange][market_pair][candle_period]
+
                     try:
                         self.create_chart(exchange, market_pair, candle_period, candles_data)
                     except Exception :
