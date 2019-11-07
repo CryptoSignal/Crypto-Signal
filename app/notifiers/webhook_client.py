@@ -19,19 +19,19 @@ class WebhookNotifier(NotifierUtils):
         self.password = password
 
 
-    def notify(self, exchange, market_pair, candle_period, messages, send_charts):
+    def notify(self, messages, chart_file):
         """Sends the notification messages.
 
         Args:
             messages (dict): A dict with the messages to send.
         """
 
-        market_pair = market_pair.replace('/', '_').lower()
-        chart_file = '{}/{}_{}_{}.png'.format('./charts', exchange, market_pair, candle_period)        
+        #market_pair = market_pair.replace('/', '_').lower()
+        #chart_file = '{}/{}_{}_{}.png'.format('./charts', exchange, market_pair, candle_period)        
 
         data = {'messages': json.dumps(messages)}
 
-        if send_charts == True and os.path.exists(chart_file):
+        if chart_file != None and os.path.exists(chart_file):
             files = {'chart': open(chart_file, 'rb')}
 
             if self.username and self.password:
