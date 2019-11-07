@@ -53,7 +53,7 @@ class TelegramNotifier(NotifierUtils):
         stop=stop_after_attempt(6),
         wait=wait_fixed(5)
     )
-    def send_chart(self, photo_url):
+    def send_chart_messages(self, photo_url, messages = []):
         """Send image chart
 
         Args:
@@ -61,3 +61,12 @@ class TelegramNotifier(NotifierUtils):
         """
 
         self.bot.send_photo(chat_id=self.chat_id, photo=photo_url, timeout=40)
+
+        if len(messages) > 0 :
+            for message in messages:
+                self.notify(message)
+
+    def send_messages(self, messages = []):
+        if len(messages) > 0 :
+            for message in messages:
+                self.notify(message)

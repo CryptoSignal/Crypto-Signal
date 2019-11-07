@@ -41,6 +41,7 @@ from analyzers.indicators import ichimoku
 from analyzers.indicators import candle_recognition
 
 import sys
+from time import sleep
 
 class Notifier(IndicatorUtils):
     """Handles sending notifications via the configured notifiers
@@ -141,28 +142,7 @@ class Notifier(IndicatorUtils):
             if not os.path.exists(charts_dir):
                 os.mkdir(charts_dir)
 
-            self.create_charts(messages)
-
-        self.notify_slack(new_analysis)
-        self.notify_discord(messages)
-        self.notify_twilio(new_analysis)
-        self.notify_gmail(new_analysis)
-        self.notify_telegram(messages)
-        self.notify_webhook(messages)
-        self.notify_stdout(messages)
-
-    def notify_discord(self, messages):
-        """Send a notification via the discord notifier
-
-        Args:
-            messages (dict): The notification messages to send.
-        """
-
-        if not self.discord_configured:
-            return
-
-        message_template = Template(self.notifier_config['discord']['optional']['template'])
-
+            #self.create_charts(messages)
         for exchange in messages:
             for market_pair in messages[exchange]:
                 _messages = messages[exchange][market_pair]
@@ -171,13 +151,44 @@ class Notifier(IndicatorUtils):
                     if not isinstance(_messages[candle_period], list) or len (_messages[candle_period]) == 0:
                         continue
 
-                    self.notify_discord_message(_messages[candle_period], message_template)                 
+                    self.notify_all_messages(exchange, market_pair, candle_period, _messages[candle_period])
+                    sleep(4)
 
-    def notify_discord_message(self, messages, message_template):
+    def notify_all_messages(self, exchange, market_pair, candle_period, messages):
+        chart_file = None
+
+        if self.enable_charts == True:
+            try:
+                candles_data = self.all_historical_data[exchange][market_pair][candle_period]                        
+                chart_file = self.create_chart(exchange, market_pair, candle_period, candles_data)
+                #self.logger.info('Chart file %s', chart_file)
+            except Exception :
+                self.logger.info('Error creating chart for %s %s', market_pair, candle_period)
+
+        #self.notify_slack(new_analysis)
+        self.notify_discord(messages)
+        self.notify_webhook(messages, chart_file)
+        #self.notify_twilio(new_analysis)
+        #self.notify_gmail(new_analysis)
+        self.notify_telegram(messages, chart_file)
+        self.notify_stdout(messages)
+    
+    def notify_discord(self, messages):
+        """Send a notification via the discord notifier
+
+        Args:
+            messages (list): List of messages to send for a specific Exchanche/Market Pair/Candle Period
+        """
+
+        if not self.discord_configured:
+            return
+
+        message_template = Template(self.notifier_config['discord']['optional']['template'])
+                                   
         for message in messages:
             formatted_message = message_template.render(message)
-            
-            self.discord_client.notify(formatted_message.strip())
+
+            self.discord_client.notify(formatted_message.strip())              
 
 
     def notify_slack(self, new_analysis):
@@ -228,11 +239,12 @@ class Notifier(IndicatorUtils):
                 self.gmail_client.notify(message)
 
 
-    def notify_telegram(self, messages):
+    def notify_telegram(self, messages, chart_file):
         """Send notifications via the telegram notifier
 
         Args:
-            messages (dict): The notification messages to send.
+            messages (list): List of messages to send for a specific Exchanche/Market Pair/Candle Period
+            chart_file (string): Path to chart file
         """
 
         if not self.telegram_configured:
@@ -240,68 +252,41 @@ class Notifier(IndicatorUtils):
 
         message_template = Template(self.notifier_config['telegram']['optional']['template'])
 
-        for exchange in messages:
-            for market_pair in messages[exchange]:
-                _messages = messages[exchange][market_pair]
-                                    
-                for candle_period in _messages:
-                    if not isinstance(_messages[candle_period], list) or len (_messages[candle_period]) == 0:
-                        continue
+        formatted_messages = []
 
-                    if self.enable_charts == True:
-                        self.notify_telegram_chart(exchange, market_pair, candle_period, _messages[candle_period], message_template)
-                    else:
-                        self.notify_telegram_message(_messages[candle_period], message_template)
-
-
-    def notify_telegram_chart(self, exchange, market_pair, candle_period, messages, message_template):
-        market_pair = market_pair.replace('/', '_').lower()
-        chart_file = '{}/{}_{}_{}.png'.format('./charts', exchange, market_pair, candle_period)
-
-        if os.path.exists(chart_file):
-            try:
-                self.telegram_client.send_chart(open(chart_file, 'rb'))
-                self.notify_telegram_message(messages, message_template)
-            except (IOError, SyntaxError) :
-                self.notify_telegram_message(messages, message_template)
+        for message in messages:
+            formatted_messages.append(message_template.render(message))
+            
+        if self.enable_charts == True:
+            if chart_file != None and os.path.exists(chart_file):
+                try:
+                    self.telegram_client.send_chart_messages(open(chart_file, 'rb'), formatted_messages)
+                except (IOError, SyntaxError) :
+                    self.telegram_client.send_messages(formatted_messages)
+            else:
+                self.logger.info('Chart file %s doesnt exist, sending text message.', chart_file)
+                self.telegram_client.send_messages(formatted_messages)
         else:
-            self.logger.info('Chart file %s doesnt exist, sending text message.', chart_file)
-            self.notify_telegram_message(messages, message_template)
+            self.telegram_client.send_messages(formatted_messages)
 
-    def notify_telegram_message(self, messages, message_template):
-        try:
-            for message in messages:
-                formatted_message = message_template.render(message)
-                self.telegram_client.notify(formatted_message.strip())
-        except (TelegramTimedOut) as e:
-            self.logger.info('Error TimeOut!')
-            self.logger.info(e)
-
-    def notify_webhook(self, messages):
+    def notify_webhook(self, messages, chart_file):
         """Send notifications via a new webhook notifier
 
         Args:
-            messages (dict): The notification messages to send.
+            messages (list): List of messages to send for a specific Exchanche/Market Pair/Candle Period
+            chart_file (string): Path to chart file
         """
 
         if not self.webhook_configured:
             return
 
-        for exchange in messages:
-            for market_pair in messages[exchange]:
-                _messages = messages[exchange][market_pair]
-                                    
-                for candle_period in _messages:
-                    if not isinstance(_messages[candle_period], list) or len (_messages[candle_period]) == 0:
-                        continue
-
-                    self.webhook_client.notify(exchange, market_pair, candle_period, _messages[candle_period], self.enable_charts)          
+        self.webhook_client.notify(messages, chart_file)
 
     def notify_stdout(self, messages):
         """Send a notification via the stdout notifier
 
         Args:
-            new_analysis (dict): The new_analysis to send.
+            messages (list): List of messages to send for a specific Exchanche/Market Pair/Candle Period
         """
 
         if not self.stdout_configured:
@@ -309,22 +294,11 @@ class Notifier(IndicatorUtils):
 
         message_template = Template(self.notifier_config['stdout']['optional']['template'])
 
-        for exchange in messages:
-            for market_pair in messages[exchange]:
-                _messages = messages[exchange][market_pair]
-                                    
-                for candle_period in _messages:
-                    if not isinstance(_messages[candle_period], list) or len (_messages[candle_period]) == 0:
-                        continue
-
-                    self.notify_stdout_message(_messages[candle_period], message_template)             
-
-    def notify_stdout_message(self, messages, message_template):
         for message in messages:
             formatted_message = message_template.render(message)
             
-            #self.discord_client.notify(formatted_message.strip())
             self.stdout_client.notify(formatted_message.strip())
+
 
     def _validate_required_config(self, notifier, notifier_config):
         """Validate the required configuration items are present for a notifier.
@@ -687,7 +661,7 @@ class Notifier(IndicatorUtils):
 
     def create_chart(self, exchange, market_pair, candle_period, candles_data):
 
-        self.logger.info("Beginning creation of charts: {} - {} - {}".format(exchange, market_pair, candle_period))
+        #self.logger.info("Beginning creation of charts: {} - {} - {}".format(exchange, market_pair, candle_period))
 
         now = datetime.now(timezone(self.timezone))
         creation_date = now.strftime("%Y-%m-%d %H:%M:%S")
