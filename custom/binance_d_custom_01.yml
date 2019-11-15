@@ -108,10 +108,35 @@ informants:
   - candle_period: 1d
     enabled: true
     signal: [upperband, middleband, lowerband]
-  ema:
+  ema7:
   - candle_period: 1d
     enabled: true
-    period_count: 15
+    period_count: 7
+    signal: [ema]
+  ema33:
+  - candle_period: 1d
+    enabled: true
+    period_count: 33
+    signal: [ema]
+  ema65:
+  - candle_period: 1d
+    enabled: true
+    period_count: 65
+    signal: [ema]
+  ema99:
+  - candle_period: 1d
+    enabled: true
+    period_count: 99
+    signal: [ema]
+  ema120:
+  - candle_period: 1d
+    enabled: true
+    period_count: 120
+    signal: [ema]
+  ema365:
+  - candle_period: 1d
+    enabled: true
+    period_count: 365
     signal: [ema]
   ohlcv:
   - candle_period: 1d
@@ -175,6 +200,6 @@ notifiers:
 settings:
   log_level: INFO
   log_mode: text
-  market_pairs: [EOS/ETH]
+  market_pairs: [EOS/USDT]
   output_mode: cli
   update_interval: 86400

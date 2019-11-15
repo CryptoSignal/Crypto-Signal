@@ -4,8 +4,9 @@
 import os
 
 import ccxt
-import yaml
+
 import sys
+import yaml
 
 class Configuration():
     """Parses the environment configuration to create the config objects.

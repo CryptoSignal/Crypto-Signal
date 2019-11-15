@@ -54,7 +54,12 @@ class StrategyAnalyzer():
 
         dispatcher = {
             'sma': sma.SMA().analyze,
-            'ema': ema.EMA().analyze,
+            'ema7': ema.EMA().analyze,
+            'ema33': ema.EMA().analyze,
+            'ema65': ema.EMA().analyze,
+            'ema99': ema.EMA().analyze,
+            'ema120': ema.EMA().analyze,
+            'ema365': ema.EMA().analyze,
             'vwap': vwap.VWAP().analyze,
             'bollinger_bands': bollinger_bands.Bollinger().analyze,
             'ohlcv': ohlcv.OHLCV().analyze

@@ -26,4 +26,5 @@ pip3 install slackweb
 pip3 install webcord
 pip3 install pandas
 pip3 install TA-lib
+brew install talib
 #https://stackoverflow.com/questions/44757678/python-ta-lib-install-error-how-solve-it

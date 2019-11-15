@@ -125,7 +125,13 @@ class Behaviour():
                     macd_signal = new_result[exchange][market_pair]['indicators']['macd'][0]['result']['macdsignal'];
                     delta_macd = new_result[exchange][market_pair]['indicators']['macd'][0]['result']['macdhist'];
 
-                    ema = new_result[exchange][market_pair]['informants']['ema'][0]['result'];
+                    ema7 = new_result[exchange][market_pair]['informants']['ema7'][0]['result'];
+                    ema33 = new_result[exchange][market_pair]['informants']['ema33'][0]['result'];
+                    ema65 = new_result[exchange][market_pair]['informants']['ema65'][0]['result'];
+                    ema99 = new_result[exchange][market_pair]['informants']['ema99'][0]['result'];
+                    ema120 = new_result[exchange][market_pair]['informants']['ema120'][0]['result'];
+                    ema365 = new_result[exchange][market_pair]['informants']['ema365'][0]['result'];
+
                     rsi = new_result[exchange][market_pair]['indicators']['rsi'][0]['result']['rsi'];
                     stoch_slow_k = new_result[exchange][market_pair]['indicators']['stoch_rsi'][0]['result']['slow_k'];
                     stoch_slow_d = new_result[exchange][market_pair]['indicators']['stoch_rsi'][0]['result']['slow_d'];
@@ -666,7 +672,7 @@ class Behaviour():
 
                     if 'period_count' in informant_conf:
                         analysis_args['period_count'] = informant_conf['period_count']
-                   
+
                     results[informant].append({
                         'result': self._get_analysis_result(
                             informant_dispatcher,
