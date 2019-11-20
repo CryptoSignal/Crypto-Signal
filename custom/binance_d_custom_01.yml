@@ -113,6 +113,11 @@ informants:
     enabled: true
     period_count: 7
     signal: [ema]
+  ema22:
+  - candle_period: 1d
+    enabled: true
+    period_count: 22
+    signal: [ema]
   ema33:
   - candle_period: 1d
     enabled: true
@@ -122,11 +127,6 @@ informants:
   - candle_period: 1d
     enabled: true
     period_count: 65
-    signal: [ema]
-  ema99:
-  - candle_period: 1d
-    enabled: true
-    period_count: 99
     signal: [ema]
   ema120:
   - candle_period: 1d
@@ -200,6 +200,6 @@ notifiers:
 settings:
   log_level: INFO
   log_mode: text
-  market_pairs: [EOS/USDT]
+  market_pairs: [BNB/USDT]
   output_mode: cli
   update_interval: 86400

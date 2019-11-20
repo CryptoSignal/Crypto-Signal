@@ -55,9 +55,9 @@ class StrategyAnalyzer():
         dispatcher = {
             'sma': sma.SMA().analyze,
             'ema7': ema.EMA().analyze,
+            'ema22': ema.EMA().analyze,
             'ema33': ema.EMA().analyze,
             'ema65': ema.EMA().analyze,
-            'ema99': ema.EMA().analyze,
             'ema120': ema.EMA().analyze,
             'ema365': ema.EMA().analyze,
             'vwap': vwap.VWAP().analyze,

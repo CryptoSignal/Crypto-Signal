@@ -76,6 +76,10 @@ class Behaviour():
         f = open(sys.argv[2],'r+')
         f.truncate()
 
+    def isCloseTo(self, start, actual, target):
+        if((target-actual)/(actual-start) < 0.05):
+            return True;
+
     def _test_strategies(self, market_data, output_mode):
         """Test the strategies and perform notifications as required
 
@@ -125,13 +129,6 @@ class Behaviour():
                     macd_signal = new_result[exchange][market_pair]['indicators']['macd'][0]['result']['macdsignal'];
                     delta_macd = new_result[exchange][market_pair]['indicators']['macd'][0]['result']['macdhist'];
 
-                    ema7 = new_result[exchange][market_pair]['informants']['ema7'][0]['result'];
-                    ema33 = new_result[exchange][market_pair]['informants']['ema33'][0]['result'];
-                    ema65 = new_result[exchange][market_pair]['informants']['ema65'][0]['result'];
-                    ema99 = new_result[exchange][market_pair]['informants']['ema99'][0]['result'];
-                    ema120 = new_result[exchange][market_pair]['informants']['ema120'][0]['result'];
-                    ema365 = new_result[exchange][market_pair]['informants']['ema365'][0]['result'];
-
                     rsi = new_result[exchange][market_pair]['indicators']['rsi'][0]['result']['rsi'];
                     stoch_slow_k = new_result[exchange][market_pair]['indicators']['stoch_rsi'][0]['result']['slow_k'];
                     stoch_slow_d = new_result[exchange][market_pair]['indicators']['stoch_rsi'][0]['result']['slow_d'];
@@ -139,8 +136,28 @@ class Behaviour():
                     dt = new_result[exchange][market_pair]['indicators']['kdj'][0]['result']['d'];
                     jt = new_result[exchange][market_pair]['indicators']['kdj'][0]['result']['j'];
 
+                    #ema indicator
+                    #now contains: ema7IsOverEma65 ema7IsOverEma22 ema7IsOverEma33
+                    try:
+                        ema7 = new_result[exchange][market_pair]['informants']['ema7'][0]['result']['ema'];
+                        ema22 = new_result[exchange][market_pair]['informants']['ema22'][0]['result']['ema'];
+                        ema33 = new_result[exchange][market_pair]['informants']['ema33'][0]['result']['ema'];
+                        ema65 = new_result[exchange][market_pair]['informants']['ema65'][0]['result']['ema'];
+
+                        ema7IsOverEma65 = self.ema7OverEma65(ema7, ema65);
+                        ema7IsOverEma22 = self.ema7OverEma22(ema7, ema22);
+                        ema7IsOverEma33 = self.ema7OverEma33(ema7, ema33);
+
+                        # candleOverEma
+                        if ema33 is not None:
+                            candleIsOverEma = self.candleOverEma(opened, close, ema33)
+
+                    except RuntimeError:
+                        print('ema data has errors')
+
+
                     # goldenFork
-                    intersectionValueAndMin = [0,0]
+                    intersectionValueAndMin = [0, 0]
                     goldenForkMacd = (
 
                         (delta_macd[len(delta_macd)-1] >= 0  and delta_macd[len(delta_macd)-2] <= 0
@@ -289,18 +306,36 @@ class Behaviour():
                         if (goldenForkMacd):
                             self.printResult(new_result, exchange, market_pair, output_mode, ("0轴上" if intersectionValueAndMin[0] > 0 else "") + "macd金叉信号", indicatorTypeCoinMap)
 
-                        if (goldenForkMacd and (intersectionValueAndMin[0] > 0.2 * 2 * delta_macd[self.getIndexOfMacdValley(delta_macd, self.detectLastMacdNegativeSlots(delta_macd))]) ):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "接近0轴的macd金叉信号", indicatorTypeCoinMap)
-
                         if (lastNDMIIsPositive):
                             self.printResult(new_result, exchange, market_pair, output_mode, "DMI", indicatorTypeCoinMap)
 
-                        if (goldenForkMacd and stochrsi_goldenfork):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + macd金叉信号", indicatorTypeCoinMap)
+                        if (ema7IsOverEma65):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "7日线上穿65日ema线", indicatorTypeCoinMap)
+
+                        if (ema7IsOverEma22):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "7日线上穿22日ema线", indicatorTypeCoinMap)
+
+                        if (ema7IsOverEma33):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "7日线上穿33日ema线", indicatorTypeCoinMap)
+
+                        if (candleIsOverEma):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "k线上穿33日ema线", indicatorTypeCoinMap)
+
+                        if (flatPositive):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "macd正值平滑", indicatorTypeCoinMap)
+
+                        if (goldenForkMacd and (intersectionValueAndMin[0] > 0.2 * 2 * delta_macd[
+                            self.getIndexOfMacdValley(delta_macd, self.detectLastMacdNegativeSlots(delta_macd))])):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "接近0轴的macd金叉信号",
+                                             indicatorTypeCoinMap)
 
                         if (lastNDMIIsPositive and goldenForkMacd):
                             self.printResult(new_result, exchange, market_pair, output_mode, "macd金叉信号 + DMI",
                                              indicatorTypeCoinMap)
+
+                        if (goldenForkMacd and stochrsi_goldenfork):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + macd金叉信号", indicatorTypeCoinMap)
+
 
                         if (macdBottomDivergence and lastNDMIIsPositive):
                             self.printResult(new_result, exchange, market_pair, output_mode, "macd底背离 + DMI", indicatorTypeCoinMap)
@@ -328,9 +363,6 @@ class Behaviour():
                             self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + macd下跌量能减弱",
                                              indicatorTypeCoinMap)
 
-                        if(flatPositive):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "macd正值平滑", indicatorTypeCoinMap)
-
 ######################################################
                 except Exception as e:
                     print("An exception occurred for " + market_pair + ":" + exchange)
@@ -347,6 +379,12 @@ class Behaviour():
         # Print an empty line when complete
         return new_result
 
+    def candleOverEma(self, opened, close, ema):
+        currentCandleOverEma = (opened[len(opened)-1] < ema[len(ema)-1]) and (ema[len(ema)-1] < close[len(close)-1])
+        previousCandleIsNotOverEma = not ((opened[len(opened)-2] < ema[len(ema)-2]) and (ema[len(ema)-2] < close[len(close)-2]))
+        if currentCandleOverEma and previousCandleIsNotOverEma:
+            return True;
+
     def getVariance(self, delta_macd, n):
         delta_max = np.max(np.abs(delta_macd));
         # maxMinNormalization = lambda x : (x - delta_min) / (delta_max - delta_min);
@@ -354,6 +392,42 @@ class Behaviour():
         variance = np.std(delta_macd[0 - n:], ddof=1);
         mean = np.mean(delta_macd[0 - n:]);
         return (variance, mean, delta_max)
+
+    #check if ema7 is crossing over ema65
+    def ema7OverEma65(self, ema7, ema65):
+        N = 5
+        #check 5 is below all lines
+        arr = []
+        for index in range(1, N):
+            arr.append((ema7[len(ema7)-index] > ema65[len(ema65)-index]))
+            if ((ema7[len(ema7)-index-1] < ema65[len(ema65)-index-1]) and (ema7[len(ema7)-index] > ema65[len(ema65)-index])):
+                if(all(flag == True for flag in arr)):
+                    return True;
+        return False;
+
+    #check if ema7 is crossing over ema22
+    def ema7OverEma22(self, ema7, ema22):
+        N = 5
+        #check 5 is below all lines
+        arr = []
+        for index in range(1, N):
+            arr.append((ema7[len(ema7)-index] > ema22[len(ema22)-index]))
+            if ((ema7[len(ema7)-index-1] < ema22[len(ema22)-index-1]) and (ema7[len(ema7)-index] > ema22[len(ema22)-index])):
+                if(all(flag == True for flag in arr)):
+                    return True;
+        return False;
+
+    #check if ema7 is crossing over ema33
+    def ema7OverEma33(self, ema7, ema33):
+        N = 5
+        #check 5 is below all lines
+        arr = []
+        for index in range(1, N):
+            arr.append((ema7[len(ema7)-index] > ema33[len(ema33)-index]))
+            if ((ema7[len(ema7)-index-1] < ema33[len(ema33)-index-1]) and (ema7[len(ema7)-index] > ema33[len(ema33)-index])):
+                if(all(flag == True for flag in arr)):
+                    return True;
+        return False;
 
     def lastNKIsPositive(self, distance_close_open):
         N = 3;
@@ -455,9 +529,9 @@ class Behaviour():
         return intersectionValueAndMin;
 
     def GeneralEquation(self, first_x,first_y,second_x,second_y):
-        A=second_y-first_y
-        B=first_x-second_x
-        C=second_x*first_y-first_x*second_y
+        A=second_y - first_y
+        B=first_x - second_x
+        C=second_x*first_y - first_x*second_y
         return A,B,C
 
     def GetIntersectPointofLines(self, vector):

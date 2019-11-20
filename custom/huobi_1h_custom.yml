@@ -108,11 +108,36 @@ informants:
   - candle_period: 1h
     enabled: true
     signal: [upperband, middleband, lowerband]
-  ema:
+  ema7:
   - candle_period: 1h
     enabled: true
-    period_count: 15
+    period_count: 7
     signal: [ema]
+  ema22:
+  - candle_period: 1h
+    enabled: true
+    period_count: 22
+    signal: [ema]
+  ema33:
+  - candle_period: 1h
+    enabled: true
+    period_count: 33
+    signal: [ema]
+  ema65:
+  - candle_period: 1h
+    enabled: true
+    period_count: 65
+    signal: [ema]
+  ema120:
+  - candle_period: 1h
+    enabled: true
+    period_count: 120
+    signal: [ema]
+  ema365:
+  - candle_period: 1h
+    enabled: true
+    period_count: 365
+    signal: [ema] 
   ohlcv:
   - candle_period: 1h
     enabled: true
