@@ -39,7 +39,8 @@ class StrategyAnalyzer():
             'minus_di': minus_di.MINUS_DI().analyze,
             'stoch_rsi': stoch_rsi.StochasticRSI().analyze,
             'obv': obv.OBV().analyze,
-            'kdj': kdj.KDJ().analyze
+            'kdj': kdj.KDJ().analyze,
+            'td': td.TD().analyze
         }
 
         return dispatcher

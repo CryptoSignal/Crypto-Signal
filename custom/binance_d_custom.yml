@@ -42,6 +42,15 @@ indicators:
     hot: 0
     period_count: 10
     signal: [mfi]
+  td:
+  - alert_enabled: true
+    alert_frequency: once
+    candle_period: 1d
+    cold: 0
+    enabled: true
+    hot: 0
+    period_count: 10
+    signal: [td]
   minus_di:
   - alert_enabled: true
     alert_frequency: once

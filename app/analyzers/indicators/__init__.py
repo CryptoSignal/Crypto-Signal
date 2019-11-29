@@ -9,5 +9,6 @@ __all__ = [
     'plus_di',
     'minus_di',
     'obv',
-    'kdj'
+    'kdj',
+    'td'
 ]

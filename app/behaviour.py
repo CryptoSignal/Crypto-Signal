@@ -96,6 +96,10 @@ class Behaviour():
                 new_result[exchange] = dict()
 
             for market_pair in market_data[exchange]:
+
+                if ((not market_pair.endswith("USDT")) and (not market_pair.endswith("USD"))):
+                    continue;
+
                 if market_pair not in new_result[exchange]:
                     new_result[exchange][market_pair] = dict()
 
@@ -155,6 +159,24 @@ class Behaviour():
                     except RuntimeError:
                         print('ema data has errors')
 
+                    #td indicator
+                    indicators = new_result[exchange][market_pair]['indicators']
+                    td9NegativeFlag = False
+                    td13NegativeFlag = False
+                    if('td' in indicators):
+                        td = indicators['td'][0]['result']['td'];
+
+                        if(td[len(td)-1] == 9):
+                            td9PositiveFlag = True;
+
+                        if(td[len(td)-1] == -9):
+                            td9NegativeFlag = True;
+
+                        if(td[len(td)-1] == 13):
+                            td13PositiveFlag = True;
+
+                        if(td[len(td)-1] == -13):
+                            td13NegativeFlag = True;
 
                     # goldenFork
                     intersectionValueAndMin = [0, 0]
@@ -302,6 +324,12 @@ class Behaviour():
                             #stochrsi_deadfork and deadForkMacd
 
                     if(indicatorModes == 'custom'):
+
+                        if (td9NegativeFlag):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "TD 底部 9位置", indicatorTypeCoinMap)
+
+                        if (td13NegativeFlag):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "TD 底部 13位置", indicatorTypeCoinMap)
 
                         if (goldenForkMacd):
                             self.printResult(new_result, exchange, market_pair, output_mode, ("0轴上" if intersectionValueAndMin[0] > 0 else "") + "macd金叉信号", indicatorTypeCoinMap)
