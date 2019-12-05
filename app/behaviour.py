@@ -193,6 +193,10 @@ class Behaviour():
                          and self.isTheIntersectionPointCloseToBePositive(macd, macd_signal, 3, intersectionValueAndMin))
                     )
 
+                    macdVolumeIncreasesSurprisingly = (delta_macd[len(delta_macd) - 1] >= 0) and (
+                                delta_macd[len(delta_macd) - 2] >= 0) and (delta_macd[len(delta_macd) - 1] >= (
+                                delta_macd[len(delta_macd) - 2] * 3))
+
                     #deadForkMacd
                     deadForkMacd = (
                         delta_macd[len(delta_macd) - 1] <= 0 and delta_macd[len(delta_macd) - 2] >= 0
@@ -324,6 +328,9 @@ class Behaviour():
                             #stochrsi_deadfork and deadForkMacd
 
                     if(indicatorModes == 'custom'):
+                        if (macdVolumeIncreasesSurprisingly):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "MACD 量能上涨异常",
+                                             indicatorTypeCoinMap)
 
                         if (td9NegativeFlag):
                             self.printResult(new_result, exchange, market_pair, output_mode, "TD 底部 9位置", indicatorTypeCoinMap)
