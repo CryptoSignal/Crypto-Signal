@@ -225,7 +225,9 @@ class Behaviour():
                     )
 
                     #dmi
-                    lastNDMIIsPositive = (self.lastNDMIIsPositive(delta_di, 1) or self.lastNDMIIsPositive(delta_di, 2) or self.lastNDMIIsPositive(delta_di, 3))
+                    lastNDMIIsPositiveVolume = (self.lastNDataIsPositive(delta_di, 3) > 0) or (self.lastNDataIsPositive(delta_di, 2) > 0) or (self.lastNDataIsPositive(delta_di, 1) > 0)
+
+                    lastNDMIIsPositiveFork = (self.lastNDMIIsPositive(delta_di, 1) or self.lastNDMIIsPositive(delta_di, 2) or self.lastNDMIIsPositive(delta_di, 3))
 
                     #macdBottomDivergence
                     #input: data
@@ -341,7 +343,7 @@ class Behaviour():
                         if (goldenForkMacd):
                             self.printResult(new_result, exchange, market_pair, output_mode, ("0轴上" if intersectionValueAndMin[0] > 0 else "") + "macd金叉信号", indicatorTypeCoinMap)
 
-                        if (lastNDMIIsPositive):
+                        if (lastNDMIIsPositiveFork):
                             self.printResult(new_result, exchange, market_pair, output_mode, "DMI", indicatorTypeCoinMap)
 
                         if (ema7IsOverEma65):
@@ -364,7 +366,7 @@ class Behaviour():
                             self.printResult(new_result, exchange, market_pair, output_mode, "接近0轴的macd金叉信号",
                                              indicatorTypeCoinMap)
 
-                        if (lastNDMIIsPositive and goldenForkMacd):
+                        if (lastNDMIIsPositiveFork and goldenForkMacd):
                             self.printResult(new_result, exchange, market_pair, output_mode, "macd金叉信号 + DMI",
                                              indicatorTypeCoinMap)
 
@@ -372,7 +374,7 @@ class Behaviour():
                             self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + macd金叉信号", indicatorTypeCoinMap)
 
 
-                        if (macdBottomDivergence and lastNDMIIsPositive):
+                        if (macdBottomDivergence and lastNDMIIsPositiveFork):
                             self.printResult(new_result, exchange, market_pair, output_mode, "macd底背离 + DMI", indicatorTypeCoinMap)
 
                         if (macdBottomDivergence and stochrsi_goldenfork):
@@ -381,18 +383,18 @@ class Behaviour():
                         if (goldenForkKdj and goldenForkMacd):
                             self.printResult(new_result, exchange, market_pair, output_mode, "kdj金叉信号 + macd金叉信号", indicatorTypeCoinMap)
 
-                        if (goldenForkKdj and lastNDMIIsPositive):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "kdj金叉信号 + DMI", indicatorTypeCoinMap)
+                        # if (goldenForkKdj and lastNDMIIsPositiveFork):
+                        #     self.printResult(new_result, exchange, market_pair, output_mode, "kdj金叉信号 + DMI", indicatorTypeCoinMap)
 
-                        if (stochrsi_goldenfork and lastNDMIIsPositive):
+                        if (stochrsi_goldenfork and lastNDMIIsPositiveFork):
                             self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + DMI", indicatorTypeCoinMap)
 
                         # compound indicator
                         if (macdBottomDivergenceIsPositiveMacd):
                             self.printResult(new_result, exchange, market_pair, output_mode, "macd底背离最低点为macd正值:强烈信号", indicatorTypeCoinMap)
 
-                        if (stochrsi_goldenfork and goldenForkKdj):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + kdj金叉信号", indicatorTypeCoinMap)
+                        if (stochrsi_goldenfork and goldenForkKdj and lastNDMIIsPositiveVolume and (delta_macd[len(delta_macd)-1] > delta_macd[len(delta_macd)-2])):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + kdj金叉信号 + DMI+ + macd量能减小", indicatorTypeCoinMap)
 
                         if (stochrsi_goldenfork and macdIsDecreased):
                             self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + macd下跌量能减弱",
