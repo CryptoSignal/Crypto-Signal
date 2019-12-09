@@ -26,6 +26,7 @@ class ExchangeInterface():
         self.exchanges = dict()
         self.base_markets = dict()
         self.top_pairs = None
+        self.exclude = []
 
         # Loads the exchanges using ccxt.
         for exchange in exchange_config:
@@ -45,6 +46,9 @@ class ExchangeInterface():
 
                     if 'top_pairs' in exchange_config[exchange]:
                         self.top_pairs = exchange_config[exchange]['top_pairs']
+
+                    if 'exclude' in exchange_config[exchange]:
+                        self.exclude = exchange_config[exchange]['exclude']
                 else:
                     self.logger.error("Unable to load exchange %s", new_exchange)
 
@@ -131,12 +135,16 @@ class ExchangeInterface():
             tickers = self.exchanges[exchange].fetch_tickers()
 
             for base_market in base_markets:
+                if len(self.exclude) > 0 :
+                    for pair_to_exclude in self.exclude:
+                        tickers.pop(pair_to_exclude + '/' + base_market, None)  
+
                 values = [ (k, int(v['quoteVolume'])) for k,v in tickers.items() if k.endswith(base_market) ]
 
                 values = np.array(values, dtype=[('market', 'U10'), ('volume', int)]) 
                 values = np.sort(values, order='volume')  
 
-                if (len (values) > self.top_pairs):
+                if isinstance(self.exclude, list) and len(self.exclude) > 0:    
                     limit = -self.top_pairs
                     values = values[limit:]['market'].tolist()
                 else:
@@ -192,6 +200,11 @@ class ExchangeInterface():
                         self.logger.info('Getting all %s market pairs for %s ' % (self.base_markets[exchange], exchange))
                         exchange_markets[exchange] = { key: curr_markets[key] for key in curr_markets 
                                                         if curr_markets[key]['quote'] in self.base_markets[exchange] }
+
+                        if isinstance(self.exclude, list) and len(self.exclude) > 0:
+                            for base_market in self.base_markets[exchange]:
+                                for pair_to_exclude in self.exclude:
+                                    exchange_markets[exchange].pop(pair_to_exclude + '/' + base_market, None)
 
 
             time.sleep(self.exchanges[exchange].rateLimit / 1000)
