@@ -97,7 +97,31 @@ exchanges:
         ....
 ```
 
-Finally, if you want prices in your notification messages, you can use a new variable "prices".
+When using all_pairs we can exclude some pairs in particular. For example, in the following config, we are tracking all USDT pairs in Binance, except the other stable coins.
+
+```
+exchanges:
+    binance:
+        required:
+            enabled: true
+        all_pairs:
+            - USDT
+        exclude: 
+          - USDC
+          - PAX
+          - BUSD            
+    bittrex:
+        required:
+            enabled: false
+        all_pairs:
+            - ETH
+        ....
+```
+
+
+#### Show me the price!
+
+If you want prices in your notification messages, you can use the "prices" variable.
 
 ```
 notifiers:
