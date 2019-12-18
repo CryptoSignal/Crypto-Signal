@@ -14,5 +14,6 @@ __all__ = [
     'ma_ribbon',
     'ma_crossover',
     'bollinger',
-    'bbp'
+    'bbp',
+    'macd_cross'
 ]
