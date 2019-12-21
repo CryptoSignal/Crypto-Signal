@@ -6,7 +6,7 @@
 
 Crypto Signals is a command line tool that automates your crypto currency Technical Analysis (TA).
 
-Track over 500 coins across Bittrex, Bitfinex, GDAX, Gemini and more!
+Track all coins across man stream exchanges Bittrex, Bitfinex, Binance, Huobipro, Okex, kucoin, ZB and more!
 
 Technical Analysis Automated:
 * Momentum
