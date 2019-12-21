@@ -420,7 +420,7 @@ class Behaviour():
             for coin in indicatorTypeCoinMap[indicator]:
                 f.write("    币种/交易对:" + coin.replace('/','') + '\n' );
         f.close();
-
+        
         # Print an empty line when complete
         return new_result
 
@@ -808,7 +808,7 @@ class Behaviour():
 
                     if 'period_count' in informant_conf:
                         analysis_args['period_count'] = informant_conf['period_count']
-
+                   
                     results[informant].append({
                         'result': self._get_analysis_result(
                             informant_dispatcher,
