@@ -4,26 +4,43 @@
 import json
 import structlog
 from jinja2 import Template
+import sys 
+import extractCoins
+import requests,json
 
 from notifiers.twilio_client import TwilioNotifier
 from notifiers.slack_client import SlackNotifier
 from notifiers.discord_client import DiscordNotifier
 from notifiers.gmail_client import GmailNotifier
-from notifiers.telegram_client import TelegramNotifier
 from notifiers.webhook_client import WebhookNotifier
 from notifiers.stdout_client import StdoutNotifier
+
+from pytz import utc  
+from pytz import timezone  
+from datetime import datetime
 
 class Notifier():
     """Handles sending notifications via the configured notifiers
     """
 
+    exchangeMap = {"binance": "币安",
+                   "bitfinex": "bitfinex交易所",
+                   "huobi": "火币全球",
+                   "bittrex": "bittrex",
+                   "okex": "ok交易所",
+                   "zb": "zb交易所",
+                   "kucoin": "kucoin交易所"}
+    periodMap = {"15min":"15分钟","30min":"30分钟","1h":"1小时", "1d":"日线", "d":"日线", "3d":"3日", "4h":"4小时", "6h":"6小时", "12h":"12小时", "w":"周线"}
+    cst_tz = timezone('Asia/Shanghai')  
+    utc_tz = timezone('UTC')
+    webhook = 'https://oapi.dingtalk.com/robot/send?access_token=86546fe72b329fa2fac6f133dd6d6db318c4a12b13dd03b2d5df8c2375f73124'
+    
     def __init__(self, notifier_config):
         """Initializes Notifier class
 
         Args:
             notifier_config (dict): A dictionary containing configuration for the notifications.
         """
-
         self.logger = structlog.get_logger()
         self.notifier_config = notifier_config
         self.last_analysis = dict()
@@ -66,14 +83,14 @@ class Notifier():
             enabled_notifiers.append('gmail')
 
         self.telegram_configured = self._validate_required_config('telegram', notifier_config)
-        if self.telegram_configured:
-            self.telegram_client = TelegramNotifier(
-                token=notifier_config['telegram']['required']['token'],
-                chat_id=notifier_config['telegram']['required']['chat_id'],
-                parse_mode=notifier_config['telegram']['optional']['parse_mode']
-            )
-            enabled_notifiers.append('telegram')
-
+#        if self.telegram_configured:
+#            self.telegram_client = TelegramNotifier(
+#                token=notifier_config['telegram']['required']['token'],
+#                chat_id=notifier_config['telegram']['required']['chat_id'],
+#                parse_mode=notifier_config['telegram']['optional']['parse_mode']
+#            )
+#           enabled_notifiers.append('telegram')
+#
         self.webhook_configured = self._validate_required_config('webhook', notifier_config)
         if self.webhook_configured:
             self.webhook_client = WebhookNotifier(
@@ -88,7 +105,7 @@ class Notifier():
             self.stdout_client = StdoutNotifier()
             enabled_notifiers.append('stdout')
 
-        self.logger.info('enabled notifers: %s', enabled_notifiers)
+        self.logger.info('enabled notifiers: %s', enabled_notifiers)
 
 
     def notify_all(self, new_analysis):
@@ -160,15 +177,25 @@ class Notifier():
         Args:
             new_analysis (dict): The new_analysis to send.
         """
-
         if self.gmail_configured:
             message = self._indicator_message_templater(
                 new_analysis,
                 self.notifier_config['gmail']['optional']['template']
             )
+
+            indicatorModes = sys.argv[3]
             if message.strip():
+                if(indicatorModes == 'easy'):
+                    self.dingtalk(message, self.webhook)
+
                 self.gmail_client.notify(message)
 
+    def dingtalk(self, msg, webhook):
+        headers = {'Content-Type': 'application/json; charset=utf-8'}
+        data = {'msgtype': 'text', 'text': {'content': msg}, 'at': {'atMobiles': [], 'isAtAll': False}}
+        post_data = json.dumps(data)
+        response = requests.post(webhook, headers=headers, data=post_data)
+        return response.text
 
     def notify_telegram(self, new_analysis):
         """Send a notification via the telegram notifier
@@ -240,6 +267,25 @@ class Notifier():
         return notifier_configured
 
 
+    def convertTitle(self):
+        temp = sys.argv[2].split("_")
+        items = temp[0].split("/")
+        exchange = items[len(items)-1];
+        period = temp[1].split(".")[0];
+        type = ""
+        if temp[len(temp)-1].split(".")[0] == "contract" :
+            type = "合约"
+            # [BTC - USD - 190927, ETC - USD - 190927, ETH - USD - 190927, LTC - USD - 190927, BSV - USD - 190927,
+            #  BSV - USD - 190927, XRP - USD - 190927, TRX - USD - 190927,
+            #  EOS - USD - 190927]
+        return self.exchangeMap[exchange], self.periodMap[period], type
+    
+    def getLocalizeTime(self):
+        utcnow = datetime.utcnow()  
+        utcnow = utcnow.replace(tzinfo=self.utc_tz)  
+        china = utcnow.astimezone(self.cst_tz)  
+        return "   发送时间: 时区: 亚洲/上海(GMT+08:00)  %s"%china.strftime('%Y-%m-%d %H:%M:%S')
+        
     def _indicator_message_templater(self, new_analysis, template):
         """Creates a message from a user defined template
 
@@ -256,6 +302,20 @@ class Notifier():
 
         message_template = Template(template)
         new_message = str()
+        
+        #extractCoins.matchCoinPairsToUsdt(sys.argv[2]);
+        file = open(sys.argv[2], mode='r')
+        text = file.read()
+        (exchange, period, type) = self.convertTitle();
+        title = 'Subject: 侦测到信号： '+ exchange + "  " + period + "    " + type + '\n\n'
+        new_message = new_message + title
+        new_message = new_message + self.getLocalizeTime() + "\n"
+        
+        new_message = new_message + text
+        
+        new_message = new_message + "\n本分析结果只涉及买涨信号, 由于投资理念各异不涉及买跌信号, 仅供分析参考 :-> \n"
+        file.close()
+        
         for exchange in new_analysis:
             for market in new_analysis[exchange]:
                 for indicator_type in new_analysis[exchange][market]:
@@ -271,10 +331,21 @@ class Notifier():
                             if indicator_type == 'indicators':
                                 for signal in analysis['config']['signal']:
                                     latest_result = analysis['result'].iloc[-1]
-
-                                    values[signal] = analysis['result'].iloc[-1][signal]
-                                    if isinstance(values[signal], float):
-                                        values[signal] = format(values[signal], '.8f')
+                                    if signal == 'kdj':
+                                        values['k'] = analysis['result'].iloc[-1]['k']
+                                        values['d'] = analysis['result'].iloc[-1]['d']
+                                        values['j'] = analysis['result'].iloc[-1]['j']
+                                        if isinstance(values['k'], float):
+                                            values['k'] = format(values['k'], '.8f')
+                                        if isinstance(values['d'], float):
+                                            values['d'] = format(values['d'], '.8f')
+                                        if isinstance(values['j'], float):
+                                            values['j'] = format(values['j'], '.8f')
+                                    else:
+                                        values[signal] = analysis['result'].iloc[-1][signal]
+                                        if isinstance(values[signal], float):
+                                            values[signal] = format(values[signal], '.8f')
+                                            
                             elif indicator_type == 'crossovers':
                                 latest_result = analysis['result'].iloc[-1]
 
@@ -319,7 +390,7 @@ class Notifier():
                                 if not analysis['config']['alert_enabled']:
                                     should_alert = False
 
-                                if should_alert:
+                                if False and should_alert:
                                     base_currency, quote_currency = market.split('/')
                                     new_message += message_template.render(
                                         values=values,
@@ -333,7 +404,6 @@ class Notifier():
                                         status=status,
                                         last_status=last_status
                                     )
-
         # Merge changes from new analysis into last analysis
         self.last_analysis = {**self.last_analysis, **new_analysis}
         return new_message

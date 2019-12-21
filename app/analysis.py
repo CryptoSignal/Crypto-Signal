@@ -38,7 +38,11 @@ class StrategyAnalyzer():
             'plus_di': plus_di.PLUS_DI().analyze,
             'minus_di': minus_di.MINUS_DI().analyze,
             'stoch_rsi': stoch_rsi.StochasticRSI().analyze,
-            'obv': obv.OBV().analyze
+            'obv': obv.OBV().analyze,
+            'kdj': kdj.KDJ().analyze,
+            'td': td.TD().analyze,
+            'peak_loc': peak_loc.Peak_Loc().analyze,
+            'valley_loc': valley_loc.Valley_Loc().analyze
         }
 
         return dispatcher
@@ -53,7 +57,12 @@ class StrategyAnalyzer():
 
         dispatcher = {
             'sma': sma.SMA().analyze,
-            'ema': ema.EMA().analyze,
+            'ema7': ema.EMA().analyze,
+            'ema22': ema.EMA().analyze,
+            'ema33': ema.EMA().analyze,
+            'ema65': ema.EMA().analyze,
+            'ema120': ema.EMA().analyze,
+            'ema365': ema.EMA().analyze,
             'vwap': vwap.VWAP().analyze,
             'bollinger_bands': bollinger_bands.Bollinger().analyze,
             'ohlcv': ohlcv.OHLCV().analyze

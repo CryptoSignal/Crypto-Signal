@@ -33,6 +33,9 @@ class IndicatorUtils():
             lambda x: pandas.to_datetime(datetime.fromtimestamp(x / 1000).strftime('%c'))
         )
 
+        dataframe['volume'] = dataframe.volume.apply(
+            lambda x: float(x)
+        )
         dataframe.set_index('datetime', inplace=True, drop=True)
         dataframe.drop('timestamp', axis=1, inplace=True)
 

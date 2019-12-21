@@ -4,6 +4,8 @@
 import os
 
 import ccxt
+
+import sys
 import yaml
 
 class Configuration():
@@ -17,8 +19,8 @@ class Configuration():
         with open('defaults.yml', 'r') as config_file:
             default_config = yaml.load(config_file)
 
-        if os.path.isfile('config.yml'):
-            with open('config.yml', 'r') as config_file:
+        if os.path.isfile(sys.argv[1]):
+            with open(sys.argv[1], 'r') as config_file:
                 user_config = yaml.load(config_file)
         else:
             user_config = dict()

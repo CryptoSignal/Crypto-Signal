@@ -4,7 +4,7 @@
 import json
 
 import structlog
-
+import sys
 
 class Output():
     """ Handles outputting results to the terminal.
@@ -13,7 +13,6 @@ class Output():
     def __init__(self):
         """Initializes Output class.
         """
-
         self.logger = structlog.get_logger()
         self.dispatcher = {
             'cli': self.to_cli,
@@ -22,7 +21,7 @@ class Output():
         }
 
 
-    def to_cli(self, results, market_pair):
+    def to_cli(self, results, criteriaType, market_pair, exchange, indicatorTypeCoinMap):
         """Creates the message to output to the CLI
    
         Args:
@@ -32,8 +31,6 @@ class Output():
         Returns:
             str: Completed cli message
         """
-        
-        f = open('result.log','a')
         normal_colour = '\u001b[0m'
         hot_colour = '\u001b[31m'
         cold_colour = '\u001b[36m'
@@ -88,12 +85,13 @@ class Output():
                     else:
                         formatted_values = list()
                         for signal in analysis['config']['signal']:
-                            value = analysis['result'].iloc[-1][signal]
-                            if isinstance(value, float):
-                                formatted_values.append(format(value, '.8f'))
-                            else:
-                                formatted_values.append(value)
-                            formatted_string = '/'.join(formatted_values)
+                            if signal != 'kdj': 
+                                value = analysis['result'].iloc[-1][signal]
+                                if isinstance(value, float):
+                                    formatted_values.append(format(value, '.8f'))
+                                else:
+                                    formatted_values.append(value)
+                                formatted_string = '/'.join(formatted_values)
 
                         output += "{}{}: {}{} \t".format(
                             colour_code,
@@ -103,8 +101,7 @@ class Output():
                         )
 
         output += '\n\n'
-        f.write(market_pair + '\n' );
-        f.close();
+        indicatorTypeCoinMap[criteriaType].append(market_pair)
         return output
 
 
