@@ -1,5 +1,6 @@
 # Crypto Signals
 
+![Image description](https://thecryptotribune.com/wp-content/uploads/2019/07/17646/trump-trade-adviser-says-two-catalysts-could-send-the-dow-to-30000-1000x438.jpg)
 ### Development state: Beta (Code is stable, documentation is often lagging)
 
 ### Join our community [Discord](https://discord.gg/MWTJVFf) channel!
