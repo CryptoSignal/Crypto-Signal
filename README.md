@@ -1,8 +1,8 @@
-# Crypto Ark
+# Cryptal Ark
 
 ![Image description](https://thecryptotribune.com/wp-content/uploads/2019/07/17646/trump-trade-adviser-says-two-catalysts-could-send-the-dow-to-30000-1000x438.jpg)
 
-Crypto Signals is a command line tool that automates your crypto currency Technical Analysis (TA).
+Cryptal Signals is a command line tool that automates your crypto currency Technical Analysis (TA).
 
 Track all coins across man stream exchanges Bittrex, Bitfinex, Binance, Huobipro, Okex, kucoin, ZB and more!
 
