@@ -18,6 +18,13 @@ Technical Analysis Automated:
 * MFI
 * OBV
 * VWAP
+* KDJ
+* DMI
+* TD
+* RSI
+* Triangle breakthrough(super-advanced for trending analysis)
+
+* Strategies by combining/tweaking certain indicators.
 
 Alerts:
 * SMS via Twilio
@@ -42,6 +49,8 @@ The commands listed below are intended to be run in a terminal.
 1. In a terminal run the application. `docker run --rm -v $PWD/config.yml:/app/config.yml shadowreaver/crypto-signal:master`.
 
 1. When you want to update the application run `docker pull shadowreaver/crypto-signal:master`
+
+(you have to update the latest ccxt version)
 
 ### Configuring config.yml
 
