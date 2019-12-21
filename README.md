@@ -22,7 +22,7 @@ Technical Analysis Automated:
 * DMI
 * TD
 * RSI
-* Triangle breakthrough(super-advanced for trending analysis)
+* Triangle breakthrough(super-advanced for trending analysis) :)
 
 * Strategies by combining/tweaking certain indicators.
 
