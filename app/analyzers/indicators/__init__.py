@@ -10,5 +10,7 @@ __all__ = [
     'minus_di',
     'obv',
     'kdj',
-    'td'
+    'td',
+    'peak_loc',
+    'valley_loc'
 ]

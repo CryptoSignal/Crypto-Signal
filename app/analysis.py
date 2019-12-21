@@ -40,7 +40,9 @@ class StrategyAnalyzer():
             'stoch_rsi': stoch_rsi.StochasticRSI().analyze,
             'obv': obv.OBV().analyze,
             'kdj': kdj.KDJ().analyze,
-            'td': td.TD().analyze
+            'td': td.TD().analyze,
+            'peak_loc': peak_loc.Peak_Loc().analyze,
+            'valley_loc': valley_loc.Valley_Loc().analyze
         }
 
         return dispatcher

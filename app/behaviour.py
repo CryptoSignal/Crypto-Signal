@@ -140,6 +140,14 @@ class Behaviour():
                     dt = new_result[exchange][market_pair]['indicators']['kdj'][0]['result']['d'];
                     jt = new_result[exchange][market_pair]['indicators']['kdj'][0]['result']['j'];
 
+                    peakLoc = new_result[exchange][market_pair]['indicators']['peak_loc'][0]['result']['peak_loc'];
+                    valleysLoc = new_result[exchange][market_pair]['indicators']['valley_loc'][0]['result']['valley_loc'];
+
+                    print(peakLoc)
+                    print("+++++++++++++++++++++++++++++++++")
+                    print(valleysLoc)
+                    print("---------------------------------")
+
                     #ema indicator
                     #now contains: ema7IsOverEma65 ema7IsOverEma22 ema7IsOverEma33
                     try:
@@ -415,6 +423,23 @@ class Behaviour():
 
         # Print an empty line when complete
         return new_result
+
+    def isOverceedingTriangleLine(self, loc_ids, ohclv):
+        loc_ids
+        slope = getSlope()
+        slopedPrice = calculatePriceAtGivenPlace(slope, ohlcv)
+        return isGreaterThanSlopedPrice(slopedPrice)
+
+    def isGreaterThanSlopedPrice(self):
+        # close[0] > open[0] && close[0] > estimatedValue && close[-1] <= estimatedValue
+        if (ohlcv[0] > slopedPrice):
+            return True;
+        return False;
+
+    def calculatePriceAtGivenPlace(self, slope):
+
+
+    def getSlope(self, x1, x2):
 
     def candleOverEma(self, opened, close, ema):
         currentCandleOverEma = (opened[len(opened)-1] < ema[len(ema)-1]) and (ema[len(ema)-1] < close[len(close)-1])

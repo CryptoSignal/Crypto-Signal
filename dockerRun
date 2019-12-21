@@ -28,3 +28,5 @@ pip3 install pandas
 pip3 install TA-lib
 brew install talib
 #https://stackoverflow.com/questions/44757678/python-ta-lib-install-error-how-solve-it
+pip3 install scipy
+pip3 install matplotlib

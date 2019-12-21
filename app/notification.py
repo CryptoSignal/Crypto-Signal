@@ -330,7 +330,6 @@ class Notifier():
 
                             if indicator_type == 'indicators':
                                 for signal in analysis['config']['signal']:
-                                    
                                     latest_result = analysis['result'].iloc[-1]
                                     if signal == 'kdj':
                                         values['k'] = analysis['result'].iloc[-1]['k']

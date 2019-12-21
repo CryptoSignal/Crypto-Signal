@@ -33,6 +33,24 @@ indicators:
     enabled: true
     hot: 0
     signal: [macd]
+  peak_loc:
+  - alert_enabled: true
+    alert_frequency: once
+    candle_period: 1d
+    cold: 0
+    enabled: true
+    hot: 0
+    period_count: 10
+    signal: [peak_loc]
+  valley_loc:
+  - alert_enabled: true
+    alert_frequency: once
+    candle_period: 1d
+    cold: 0
+    enabled: true
+    hot: 0
+    period_count: 10
+    signal: [valley_loc]
   mfi:
   - alert_enabled: true
     alert_frequency: once
