@@ -18,7 +18,7 @@ Technical Analysis Automated:
 * VWAP
 * KDJ
 * DMI
-* TD
+* TD（Demark sequence)
 * RSI
 * Triangle breakthrough(super-advanced for trending analysis) :)
 
