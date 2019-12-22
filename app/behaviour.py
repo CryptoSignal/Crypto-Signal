@@ -117,15 +117,17 @@ class Behaviour():
                 di_flag_waiver = False
                 try:
 
+                    ohlcv = new_result[exchange][market_pair]['informants']['ohlcv'][0]['result']
+
                     upperband = new_result[exchange][market_pair]['informants']['bollinger_bands'][0]['result']['upperband'] ;
                     middleband = new_result[exchange][market_pair]['informants']['bollinger_bands'][0]['result']['middleband'] ;
                     lowerband = new_result[exchange][market_pair]['informants']['bollinger_bands'][0]['result']['lowerband'] ;
-                    opened = new_result[exchange][market_pair]['informants']['ohlcv'][0]['result']['open'];
-                    close = new_result[exchange][market_pair]['informants']['ohlcv'][0]['result']['close'] ;
+                    opened = ohlcv['open'];
+                    close = ohlcv['close'] ;
                     distance_close_open = close - opened;
-                    low = new_result[exchange][market_pair]['informants']['ohlcv'][0]['result']['low'];
-                    high = new_result[exchange][market_pair]['informants']['ohlcv'][0]['result']['high'] ;
-                    volume = new_result[exchange][market_pair]['informants']['ohlcv'][0]['result']['volume'] ;
+                    low = ohlcv['low'];
+                    high = ohlcv['high'] ;
+                    volume = ohlcv['volume'] ;
                     plus_di = new_result[exchange][market_pair]['indicators']['plus_di'][0]['result']['plus_di'] ;
                     minus_di = new_result[exchange][market_pair]['indicators']['minus_di'][0]['result']['minus_di'] ;
                     delta_di = plus_di - minus_di
@@ -142,11 +144,6 @@ class Behaviour():
 
                     peakLoc = new_result[exchange][market_pair]['indicators']['peak_loc'][0]['result']['peak_loc'];
                     valleysLoc = new_result[exchange][market_pair]['indicators']['valley_loc'][0]['result']['valley_loc'];
-
-                    print(peakLoc)
-                    print("+++++++++++++++++++++++++++++++++")
-                    print(valleysLoc)
-                    print("---------------------------------")
 
                     #ema indicator
                     #now contains: ema7IsOverEma65 ema7IsOverEma22 ema7IsOverEma33
@@ -338,6 +335,11 @@ class Behaviour():
                             #stochrsi_deadfork and deadForkMacd
 
                     if(indicatorModes == 'custom'):
+
+                        # if(self.isOverceedingTriangleLine(peakLoc, ohlcv)):
+                        #     self.printResult(new_result, exchange, market_pair, output_mode, "上升突破三角形",
+                        #                      indicatorTypeCoinMap)
+
                         if (macdVolumeIncreasesSurprisingly):
                             self.printResult(new_result, exchange, market_pair, output_mode, "MACD 量能上涨异常",
                                              indicatorTypeCoinMap)
@@ -424,22 +426,27 @@ class Behaviour():
         # Print an empty line when complete
         return new_result
 
-    def isOverceedingTriangleLine(self, loc_ids, ohclv):
-        loc_ids
-        slope = getSlope()
-        slopedPrice = calculatePriceAtGivenPlace(slope, ohlcv)
-        return isGreaterThanSlopedPrice(slopedPrice)
+    def isOverceedingTriangleLine(self, loc_ids, ohlcv):
+        indexX1 = loc_ids[0]
+        indexX2 = loc_ids[1]
+        priceX1 = ohlcv['close'][indexX1] if ohlcv['close'][indexX1] > ohlcv['open'][indexX1] else ohlcv['open'][indexX1];
+        priceX2 = ohlcv['close'][indexX2] if ohlcv['close'][indexX2] > ohlcv['open'][indexX1] else ohlcv['open'][indexX2];
+        slope = self.getSlope(priceX1, indexX1, priceX2, indexX2);
+        slopedPrice = self.calculatePriceAtGivenPlace(slope, indexX1, priceX1);
+        return self.isGreaterThanSlopedPrice(slopedPrice);
 
-    def isGreaterThanSlopedPrice(self):
+    def isGreaterThanSlopedPrice(self, slopedPrice):
         # close[0] > open[0] && close[0] > estimatedValue && close[-1] <= estimatedValue
         if (ohlcv[0] > slopedPrice):
             return True;
-        return False;
+        else:
+            return False;
 
-    def calculatePriceAtGivenPlace(self, slope):
+    def calculatePriceAtGivenPlace(self, slope, indexX2, x2):
+        return slope * indexX2 + x2;
 
-
-    def getSlope(self, x1, x2):
+    def getSlope(self, x1, indexX1, x2, indexX2):
+        return (x2 - x1) / (indexX2 - indexX1);
 
     def candleOverEma(self, opened, close, ema):
         currentCandleOverEma = (opened[len(opened)-1] < ema[len(ema)-1]) and (ema[len(ema)-1] < close[len(close)-1])

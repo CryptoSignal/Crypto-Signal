@@ -14,6 +14,9 @@ class Peak_Loc(IndicatorUtils):
         dataframe = self.convert_to_dataframe(historical_data)
         maxValues = list(map(lambda x, y: x if (x > y) else y, dataframe['close'], dataframe['open']))
         peaks = scipySignal.argrelextrema(np.asarray(maxValues), np.greater)[0]
+
+        # peaks = list(map(lambda x: (100-x), peaks))
+
         peak_loc_id = np.append(peaks, np.zeros(len(maxValues) - len(peaks)))
 
         peak_loc = dataframe.copy()
