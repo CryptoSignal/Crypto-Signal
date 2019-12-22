@@ -92,7 +92,7 @@ class Output():
                             if isinstance(value, float):
                                 formatted_values.append(format(value, '.8f'))
                             else:
-                                formatted_values.append(value)
+                                formatted_values.append(format(value))
                             formatted_string = '/'.join(formatted_values)
 
                         output += "{}{}: {}{} \t".format(
