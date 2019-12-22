@@ -1,0 +1,223 @@
+crossovers:
+  std_crossover:
+  - {alert_enabled: true, alert_frequency: once, crossed_indicator: bollinger_bands,
+    crossed_indicator_index: 0, crossed_indicator_type: informants, crossed_signal: middleband,
+    enabled: true, key_indicator: ohlcv, key_indicator_index: 0, key_indicator_type: informants,
+    key_signal: close}
+exchanges:
+  huobipro:
+    required: {enabled: true}
+indicators:
+  adx:
+  - alert_enabled: true
+    alert_frequency: once
+    candle_period: 30m
+    cold: 0
+    enabled: true
+    hot: 0
+    period_count: 10
+    signal: [adx]
+  ichimoku:
+  - alert_enabled: true
+    alert_frequency: once
+    candle_period: 30m
+    cold: true
+    enabled: true
+    hot: true
+    signal: [leading_span_a, leading_span_b]
+  macd:
+  - alert_enabled: true
+    alert_frequency: once
+    candle_period: 30m
+    cold: 0
+    enabled: true
+    hot: 0
+    signal: [macd]
+  mfi:
+  - alert_enabled: true
+    alert_frequency: once
+    candle_period: 30m
+    cold: 0
+    enabled: true
+    hot: 0
+    period_count: 10
+    signal: [mfi]
+  minus_di:
+  - alert_enabled: true
+    alert_frequency: once
+    candle_period: 30m
+    cold: 0
+    enabled: true
+    hot: 0
+    period_count: 10
+    signal: [minus_di]
+  momentum:
+  - alert_enabled: true
+    alert_frequency: once
+    candle_period: 30m
+    cold: 0
+    enabled: true
+    hot: 0
+    period_count: 10
+    signal: [momentum]
+  obv:
+  - alert_enabled: true
+    alert_frequency: once
+    candle_period: 30m
+    cold: 0
+    enabled: true
+    hot: 0
+    signal: [obv]
+  plus_di:
+  - alert_enabled: true
+    alert_frequency: once
+    candle_period: 30m
+    cold: 0
+    enabled: true
+    hot: 0
+    period_count: 10
+    signal: [plus_di]
+  rsi:
+  - alert_enabled: true
+    alert_frequency: once
+    candle_period: 30m
+    cold: 70
+    enabled: true
+    hot: 30
+    period_count: 14
+    signal: [rsi]
+  stoch_rsi:
+  - alert_enabled: true
+    alert_frequency: once
+    candle_period: 30m
+    cold: 80
+    enabled: true
+    hot: 20
+    period_count: 14
+    signal: [stoch_rsi]
+informants:
+  bollinger_bands:
+  - candle_period: 30m
+    enabled: true
+    signal: [upperband, middleband, lowerband]
+  ema:
+  - candle_period: 30m
+    enabled: true
+    period_count: 15
+    signal: [ema]
+  ohlcv:
+  - candle_period: 30m
+    enabled: true
+    period_count: 15
+    signal: [close]
+  sma:
+  - candle_period: 30m
+    enabled: true
+    period_count: 15
+    signal: [sma]
+  vwap:
+  - candle_period: 30m
+    enabled: true
+    period_count: 15
+    signal: [vwap]
+notifiers:
+  discord:
+    optional: {avatar: null, template: '{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}}
+        is {{status}}!{{ ''
+
+        '' -}}'}
+    required: {username: null, webhook: null}
+  gmail:
+    optional: {template: '{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}}
+        is {{status}}!{{ ''
+
+        '' -}}'}
+    required: 
+            enable: true
+      destination_emails : [3013535607@qq.com,lfz_carlos@hotmail.com]
+            password: 868891251q1q1q1q
+      username: cryptalsender1@gmail.com
+  slack:
+    optional: {template: '{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}}
+        is {{status}}!{{ ''
+
+        '' -}}'}
+    required: {webhook: null}
+  stdout:
+    optional: {template: '{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}}
+        is {{status}}!{{ ''
+
+        '' -}}'}
+    required: {enable: null}
+  telegram:
+    optional: {parse_mode: html, template: '{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}}
+        is {{status}}!{{ ''
+
+        '' -}}'}
+    required: {chat_id: null, token: null}
+  twilio:
+    optional: {template: '{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}}
+        is {{status}}!{{ ''
+
+        '' -}}'}
+    required: {key: null, receiver_number: null, secret: null, sender_number: null}
+  webhook:
+    optional: {password: null, username: null}
+    required: {url: null}
+settings:
+  log_level: INFO
+  log_mode: text
+  market_pairs: [ETH/BTC, LTC/BTC, EOS/BTC, ZEC/BTC, XRP/BTC, DASH/BTC, TRX/BTC, BCH/BTC,
+    DAC/BTC, HT/BTC, BKBT/BTC, ADA/BTC, PROPY/BTC, NEO/BTC, EDU/BTC, MTL/BTC, OMG/BTC,
+    ETC/BTC, XLM/BTC, SSP/BTC, BSV/BTC, GXC/BTC, CTXC/BTC, PAI/BTC, HC/BTC, ADX/BTC,
+    QTUM/BTC, MEET/BTC, CVC/BTC, AIDOC/BTC, ITC/BTC, HPT/BTC, ZIL/BTC, LINK/BTC, ONT/BTC,
+    RTE/BTC, BTM/BTC, ZRX/BTC, IOST/BTC, LAMB/BTC, DBC/BTC, BCV/BTC, EKT/BTC, CVCOIN/BTC,
+    MTN/BTC, POLY/BTC, BIX/BTC, XEM/BTC, CHAT/BTC, YEE/BTC, XMR/BTC, WPR/BTC, SWFTC/BTC,
+    COVA/BTC, FTI/BTC, THETA/BTC, OCN/BTC, UTK/BTC, SHE/BTC, LET/BTC, KAN/BTC, AE/BTC,
+    WAVES/BTC, YCC/BTC, QUN/BTC, PAY/BTC, TOPC/BTC, EVX/BTC, GNX/BTC, UC/BTC, DATX/BTC,
+    CNN/BTC, SNC/BTC, STEEM/BTC, TNB/BTC, ELF/BTC, CMT/BTC, RBTC/BTC, GRS/BTC, MT/BTC,
+    GTC/BTC, ELA/BTC, GNT/BTC, IOTA/BTC, MCO/BTC, BAT/BTC, FAIR/BTC, ZLA/BTC, MANA/BTC,
+    WAX/BTC, SNT/BTC, NANO/BTC, LXT/BTC, APPC/BTC, TRIO/BTC, NAS/BTC, STK/BTC, BTS/BTC,
+    SRN/BTC, DCR/BTC, ABT/BTC, IDT/BTC, BUT/BTC, NULS/BTC, WAN/BTC, LSK/BTC, MAN/BTC,
+    CVNT/BTC, BTG/BTC, BLZ/BTC, DTA/BTC, STORJ/BTC, QASH/BTC, UIP/BTC, LUN/BTC, LBA/BTC,
+    SOC/BTC, SMT/BTC, ZEN/BTC, WTC/BTC, UUU/BTC, KNC/BTC, ICX/BTC, VET/BTC, XVG/BTC,
+    RUFF/BTC, NCC/BTC, REQ/BTC, DAT/BTC, GAS/BTC, WICC/BTC, OST/BTC, AST/BTC, MTX/BTC,
+    BOX/BTC, POWR/BTC, GET/BTC, ARDR/BTC, DGD/BTC, DOCK/BTC, SBTC/BTC, PHX/BTC, PNT/BTC,
+    ENG/BTC, MDS/BTC, GVE/BTC, HOT/BTC, IIC/BTC, XZC/BTC, HIT/BTC, DGB/BTC, BCD/BTC,
+    MXC/BTC, TOS/BTC, XTZ/BTC, REN/BTC, TNT/BTC, BFT/BTC, SALT/BTC, ACT/BTC, NCASH/BTC,
+    GSC/BTC, SEELE/BTC, RDN/BTC, BCX/BTC, BIFI/BTC, XMX/BTC, MEX/BTC, KCASH/BTC, LYM/BTC,
+    RCN/BTC, EKO/BTC, EGCC/BTC, AAC/BTC, QSP/BTC, PC/BTC, BTC/USDT, LTC/USDT, ETH/USDT,
+    EOS/USDT, BCH/USDT, TRX/USDT, XRP/USDT, HT/USDT, ETC/USDT, OMG/USDT, ZEC/USDT,
+    DASH/USDT, ADA/USDT, BSV/USDT, ONT/USDT, NEO/USDT, HC/USDT, QTUM/USDT, IOST/USDT,
+    PAI/USDT, ZIL/USDT, BTM/USDT, THETA/USDT, IOTA/USDT, XLM/USDT, CVC/USDT, CTXC/USDT,
+    AE/USDT, HPT/USDT, LINK/USDT, HIT/USDT, WICC/USDT, XMR/USDT, ELF/USDT, NAS/USDT,
+    GNT/USDT, VET/USDT, WAVES/USDT, MDS/USDT, STORJ/USDT, XEM/USDT, RUFF/USDT, ITC/USDT,
+    SNT/USDT, STEEM/USDT, CMT/USDT, LET/USDT, BTS/USDT, ELA/USDT, OCN/USDT, SOC/USDT,
+    DTA/USDT, ZRX/USDT, GXC/USDT, SMT/USDT, ACT/USDT, BIX/USDT, NANO/USDT, DCR/USDT,
+    BTC/USDT, LTC/USDT, ETH/USDT, EOS/USDT, BCH/USDT, TRX/USDT, XRP/USDT, HT/USDT,
+    ETC/USDT, OMG/USDT, ZEC/USDT, DASH/USDT, ADA/USDT, BSV/USDT, ONT/USDT, NEO/USDT,
+    HC/USDT, QTUM/USDT, IOST/USDT, PAI/USDT, ZIL/USDT, BTM/USDT, THETA/USDT, IOTA/USDT,
+    XLM/USDT, CVC/USDT, CTXC/USDT, AE/USDT, HPT/USDT, LINK/USDT, HIT/USDT, WICC/USDT,
+    XMR/USDT, ELF/USDT, NAS/USDT, GNT/USDT, VET/USDT, WAVES/USDT, MDS/USDT, STORJ/USDT,
+    XEM/USDT, RUFF/USDT, ITC/USDT, SNT/USDT, STEEM/USDT, CMT/USDT, LET/USDT, BTS/USDT,
+    ELA/USDT, OCN/USDT, SOC/USDT, DTA/USDT, ZRX/USDT, GXC/USDT, SMT/USDT, ACT/USDT,
+    BIX/USDT, NANO/USDT, DCR/USDT, EOS/ETH, OMG/ETH, DAC/ETH, TRX/ETH, HT/ETH, EDU/ETH,
+    SSP/ETH, BOX/ETH, BKBT/ETH, GSC/ETH, MTN/ETH, RTE/ETH, WPR/ETH, HC/ETH, TRIO/ETH,
+    ADA/ETH, BIX/ETH, CHAT/ETH, YEE/ETH, ITC/ETH, LET/ETH, SHE/ETH, TOPC/ETH, FTI/ETH,
+    EKT/ETH, VET/ETH, YCC/ETH, CTXC/ETH, LINK/ETH, QUN/ETH, STK/ETH, UTK/ETH, UUU/ETH,
+    UC/ETH, AE/ETH, TNB/ETH, MT/ETH, GNX/ETH, ZIL/ETH, LXT/ETH, PAI/ETH, IDT/ETH,
+    BTM/ETH, ONT/ETH, POLY/ETH, CNN/ETH, KAN/ETH, IIC/ETH, CVNT/ETH, XLM/ETH, APPC/ETH,
+    SNC/ETH, FAIR/ETH, EKO/ETH, IOST/ETH, ZLA/ETH, DATX/ETH, CVCOIN/ETH, CVC/ETH,
+    LAMB/ETH, BUT/ETH, EVX/ETH, WAVES/ETH, QTUM/ETH, ELA/ETH, THETA/ETH, CMT/ETH,
+    DCR/ETH, PNT/ETH, ELF/ETH, MDS/ETH, XMR/ETH, AST/ETH, NAS/ETH, GXC/ETH, NULS/ETH,
+    GTC/ETH, PAY/ETH, ADX/ETH, OCN/ETH, ABT/ETH, RUFF/ETH, SMT/ETH, LBA/ETH, MAN/ETH,
+    WAX/ETH, IOTA/ETH, GRS/ETH, HIT/ETH, BLZ/ETH, SOC/ETH, WICC/ETH, MCO/ETH, DGD/ETH,
+    DTA/ETH, WAN/ETH, ZRX/ETH, BAT/ETH, DAT/ETH, SRN/ETH, KNC/ETH, SWFTC/ETH, GNT/ETH,
+    QASH/ETH, NCASH/ETH, STEEM/ETH, DGB/ETH, MANA/ETH, TOS/ETH, NANO/ETH, XMX/ETH,
+    COVA/ETH, WTC/ETH, LUN/ETH, BTS/ETH, MTX/ETH, HOT/ETH, GVE/ETH, ICX/ETH, KCASH/ETH,
+    XTZ/ETH, MEET/ETH, AIDOC/ETH, LSK/ETH, DOCK/ETH, SEELE/ETH, BCV/ETH, GET/ETH,
+    ACT/ETH, AAC/ETH, NCC/ETH, REN/ETH, MEX/ETH, RDN/ETH, SALT/ETH, XZC/ETH, XVG/ETH,
+    UIP/ETH, BFT/ETH, POWR/ETH, ZEN/ETH, REQ/ETH, DBC/ETH, ARDR/ETH, PROPY/ETH, TNT/ETH,
+    LYM/ETH, ENG/ETH, QSP/ETH, OST/ETH, GAS/ETH, RCN/ETH, PC/ETH, EGCC/ETH]
+  output_mode: cli
+  update_interval: 1800

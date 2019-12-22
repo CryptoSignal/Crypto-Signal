@@ -1,12 +1,10 @@
-# Crypto Signals
+# Cryptal Ark
 
-### Development state: Beta (Code is stable, documentation is often lagging)
+![Image description](https://thecryptotribune.com/wp-content/uploads/2019/07/17646/trump-trade-adviser-says-two-catalysts-could-send-the-dow-to-30000-1000x438.jpg)
 
-### Join our community [Discord](https://discord.gg/MWTJVFf) channel!
+Cryptal Ark is a trend detecting tool for your crypto currency Technical Analysis (TA).
 
-Crypto Signals is a command line tool that automates your crypto currency Technical Analysis (TA).
-
-Track over 500 coins across Bittrex, Bitfinex, GDAX, Gemini and more!
+Track all coins across man stream exchanges Bittrex, Bitfinex, Binance, Huobipro, Okex, kucoin, ZB and more!
 
 Technical Analysis Automated:
 * Momentum
@@ -18,6 +16,13 @@ Technical Analysis Automated:
 * MFI
 * OBV
 * VWAP
+* KDJ
+* DMI
+* TD（Demark sequence)
+* RSI
+* Triangle breakthrough(super-advanced for trending analysis) :)
+
+* Strategies by combining/tweaking certain indicators.
 
 Alerts:
 * SMS via Twilio
@@ -43,6 +48,8 @@ The commands listed below are intended to be run in a terminal.
 
 1. When you want to update the application run `docker pull shadowreaver/crypto-signal:master`
 
+(you have to update the latest ccxt version)
+
 ### Configuring config.yml
 
 For a list of all possible options for config.yml and some example configurations look [here](docs/config.md)
@@ -65,3 +72,5 @@ Underpinning crypto-signal for most of our technical analysis is [TA-Lib](https:
 
 # Liability
 I am not your financial adviser, nor is this tool. Use this program as an educational tool, and nothing more. None of the contributors to this project are liable for any losses you may incur. Be wise and always do your own research.
+This project just uses CryptoSignal/crypto-signal(which has MTL license) to retrieve ohlcv data.
+It also keeps those indicators in CryptoSignal/crypto-signal but they are not used.
