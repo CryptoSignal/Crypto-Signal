@@ -142,8 +142,8 @@ class Behaviour():
                     dt = new_result[exchange][market_pair]['indicators']['kdj'][0]['result']['d'];
                     jt = new_result[exchange][market_pair]['indicators']['kdj'][0]['result']['j'];
 
-                    peakLoc = new_result[exchange][market_pair]['indicators']['peak_loc'][0]['result']['peak_loc'];
-                    valleysLoc = new_result[exchange][market_pair]['indicators']['valley_loc'][0]['result']['valley_loc'];
+                    # peakLoc = new_result[exchange][market_pair]['indicators']['peak_loc'][0]['result']['peak_loc'];
+                    # valleysLoc = new_result[exchange][market_pair]['indicators']['valley_loc'][0]['result']['valley_loc'];
 
                     #ema indicator
                     #now contains: ema7IsOverEma65 ema7IsOverEma22 ema7IsOverEma33
