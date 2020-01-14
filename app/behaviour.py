@@ -97,9 +97,6 @@ class Behaviour():
 
             for market_pair in market_data[exchange]:
 
-                if ((not market_pair.endswith("USDT")) and (not market_pair.endswith("USD"))):
-                    continue;
-
                 if market_pair not in new_result[exchange]:
                     new_result[exchange][market_pair] = dict()
 
