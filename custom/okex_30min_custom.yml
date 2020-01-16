@@ -5,7 +5,7 @@ crossovers:
     enabled: true, key_indicator: ohlcv, key_indicator_index: 0, key_indicator_type: informants,
     key_signal: close}
 exchanges:
-  binance:
+  okex:
     required: {enabled: true}
 indicators:
   adx:
@@ -25,14 +25,6 @@ indicators:
     enabled: true
     hot: true
     signal: [leading_span_a, leading_span_b]
-  macd:
-  - alert_enabled: true
-    alert_frequency: once
-    candle_period: 30m
-    cold: 0
-    enabled: true
-    hot: 0
-    signal: [macd]
   td:
   - alert_enabled: true
     alert_frequency: once
@@ -42,6 +34,14 @@ indicators:
     hot: 0
     period_count: 10
     signal: [td]
+  macd:
+  - alert_enabled: true
+    alert_frequency: once
+    candle_period: 30m
+    cold: 0
+    enabled: true
+    hot: 0
+    signal: [macd]
   mfi:
   - alert_enabled: true
     alert_frequency: once

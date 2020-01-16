@@ -74,6 +74,7 @@ for(( i=0;i<${#modes[@]};i++)); do
     #python3 app/app.py  ${modes[i]}/bitfinex_d_${modes[i]}.yml  ${modes[i]}/bitfinex_d.log ${modes[i]} -a &
     #python3 app/app.py  ${modes[i]}/bitfinex_w_${modes[i]}.yml ${modes[i]}/bitfinex_w.log ${modes[i]} -a &
 
+    python3 app/app.py  ${modes[i]}/binance_30min_${modes[i]}.yml ${modes[i]}/binance_30min.log ${modes[i]} -a &
     python3 app/app.py  ${modes[i]}/binance_1h_${modes[i]}.yml ${modes[i]}/binance_1h.log ${modes[i]} -a &
     python3 app/app.py  ${modes[i]}/binance_4h_${modes[i]}.yml ${modes[i]}/binance_4h.log ${modes[i]} -a &
     python3 app/app.py  ${modes[i]}/binance_6h_${modes[i]}.yml ${modes[i]}/binance_6h.log ${modes[i]} -a &
@@ -81,11 +82,13 @@ for(( i=0;i<${#modes[@]};i++)); do
     python3 app/app.py  ${modes[i]}/binance_3d_${modes[i]}.yml ${modes[i]}/binance_3d.log ${modes[i]} -a &
     python3 app/app.py  ${modes[i]}/binance_w_${modes[i]}.yml ${modes[i]}/binance_w.log ${modes[i]} -a &
 
+    python3 app/app.py  ${modes[i]}/huobi_30min_${modes[i]}.yml ${modes[i]}/huobi_30min.log ${modes[i]} -a &
     python3 app/app.py  ${modes[i]}/huobi_1h_${modes[i]}.yml ${modes[i]}/huobi_1h.log ${modes[i]} -a &
     python3 app/app.py  ${modes[i]}/huobi_4h_${modes[i]}.yml ${modes[i]}/huobi_4h.log ${modes[i]} -a &
     python3 app/app.py  ${modes[i]}/huobi_d_${modes[i]}.yml ${modes[i]}/huobi_d.log ${modes[i]} -a &
     python3 app/app.py  ${modes[i]}/huobi_w_${modes[i]}.yml ${modes[i]}/huobi_w.log ${modes[i]} -a &
 
+    python3 app/app.py  ${modes[i]}/okex_30min_${modes[i]}.yml ${modes[i]}/okex_30min.log ${modes[i]} -a &
     python3 app/app.py  ${modes[i]}/okex_1h_${modes[i]}.yml ${modes[i]}/okex_1h.log ${modes[i]} -a &
     python3 app/app.py  ${modes[i]}/okex_4h_${modes[i]}.yml ${modes[i]}/okex_4h.log ${modes[i]} -a &
     python3 app/app.py  ${modes[i]}/okex_6h_${modes[i]}.yml ${modes[i]}/okex_6h.log ${modes[i]} -a &
