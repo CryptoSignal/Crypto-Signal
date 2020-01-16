@@ -25,6 +25,15 @@ indicators:
     enabled: true
     hot: true
     signal: [leading_span_a, leading_span_b]
+  td:
+  - alert_enabled: true
+    alert_frequency: once
+    candle_period: 4h
+    cold: 0
+    enabled: true
+    hot: 0
+    period_count: 10
+    signal: [td]
   macd:
   - alert_enabled: true
     alert_frequency: once
