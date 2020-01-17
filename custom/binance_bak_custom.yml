@@ -351,7 +351,7 @@ notifiers:
     required:
       username: cryptalsender1@gmail.com
       password: 868891251q1q1q1q
-      destination_emails : [cryptalreceiver@gmail.com,renkaiw@126.com]
+      destination_emails : [cryptalreceiver@gmail.com,cryptolfz@hotmail.com]
           - lfz.carlos@gmail.com
     optional:
       template: "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"

@@ -1,0 +1,1 @@
+ grep renkaiw@126.com -rl ./* |xargs sed -i "" "s/renkaiw@126.com/cryptolfz@hotmail.com/g"
