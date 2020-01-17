@@ -28,7 +28,7 @@ indicators:
   td:
   - alert_enabled: true
     alert_frequency: once
-    candle_period: w
+    candle_period: 1w
     cold: 0
     enabled: true
     hot: 0
