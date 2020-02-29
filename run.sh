@@ -67,12 +67,12 @@ cat /dev/null > w${modes[i]}.log
 
 for(( i=0;i<${#modes[@]};i++)); do
     #python3 app/app.py  ${modes[i]}/bittrex_1h_${modes[i]}.yml ${modes[i]}/bittrex_1h.log ${modes[i]} -a &
-    python3 app/app.py  ${modes[i]}/bittrex_1d_${modes[i]}.yml ${modes[i]}/bittrex_1d.log ${modes[i]} -a &
+#    python3 app/app.py  ${modes[i]}/bittrex_1d_${modes[i]}.yml ${modes[i]}/bittrex_1d.log ${modes[i]} -a &
 
-    #python3 app/app.py  ${modes[i]}/bitfinex_1h_${modes[i]}.yml ${modes[i]}/bitfinex_1h.log ${modes[i]} -a &
-    #python3 app/app.py  ${modes[i]}/bitfinex_6h_${modes[i]}.yml ${modes[i]}/bitfinex_6h.log ${modes[i]} -a &
-    #python3 app/app.py  ${modes[i]}/bitfinex_d_${modes[i]}.yml  ${modes[i]}/bitfinex_d.log ${modes[i]} -a &
-    #python3 app/app.py  ${modes[i]}/bitfinex_w_${modes[i]}.yml ${modes[i]}/bitfinex_w.log ${modes[i]} -a &
+#    #python3 app/app.py  ${modes[i]}/bitfinex_1h_${modes[i]}.yml ${modes[i]}/bitfinex_1h.log ${modes[i]} -a &
+#    #python3 app/app.py  ${modes[i]}/bitfinex_6h_${modes[i]}.yml ${modes[i]}/bitfinex_6h.log ${modes[i]} -a &
+#    #python3 app/app.py  ${modes[i]}/bitfinex_d_${modes[i]}.yml  ${modes[i]}/bitfinex_d.log ${modes[i]} -a &
+#    #python3 app/app.py  ${modes[i]}/bitfinex_w_${modes[i]}.yml ${modes[i]}/bitfinex_w.log ${modes[i]} -a &
 
     python3 app/app.py  ${modes[i]}/binance_30min_${modes[i]}.yml ${modes[i]}/binance_30min.log ${modes[i]} -a &
     python3 app/app.py  ${modes[i]}/binance_1h_${modes[i]}.yml ${modes[i]}/binance_1h.log ${modes[i]} -a &
@@ -96,16 +96,16 @@ for(( i=0;i<${#modes[@]};i++)); do
     python3 app/app.py  ${modes[i]}/okex_d_${modes[i]}.yml ${modes[i]}/okex_d.log ${modes[i]} -a &
     python3 app/app.py  ${modes[i]}/okex_w_${modes[i]}.yml ${modes[i]}/okex_w.log ${modes[i]} -a &
 
-    python3 app/app.py  ${modes[i]}/zb_1h_${modes[i]}.yml ${modes[i]}/zb_1h.log ${modes[i]} -a &
-    python3 app/app.py  ${modes[i]}/zb_4h_${modes[i]}.yml ${modes[i]}/zb_4h.log ${modes[i]} -a &
+#    python3 app/app.py  ${modes[i]}/zb_1h_${modes[i]}.yml ${modes[i]}/zb_1h.log ${modes[i]} -a &
+#    python3 app/app.py  ${modes[i]}/zb_4h_${modes[i]}.yml ${modes[i]}/zb_4h.log ${modes[i]} -a &
 #   python3 app/app.py  ${modes[i]}/zb_6h_${modes[i]}.yml ${modes[i]}/zb_6h.log ${modes[i]} -a &
-    python3 app/app.py  ${modes[i]}/zb_d_${modes[i]}.yml ${modes[i]}/zb_d.log ${modes[i]} -a &
-    python3 app/app.py  ${modes[i]}/zb_w_${modes[i]}.yml ${modes[i]}/zb_w.log ${modes[i]} -a &
+#    python3 app/app.py  ${modes[i]}/zb_d_${modes[i]}.yml ${modes[i]}/zb_d.log ${modes[i]} -a &
+#    python3 app/app.py  ${modes[i]}/zb_w_${modes[i]}.yml ${modes[i]}/zb_w.log ${modes[i]} -a &
 
-    python3 app/app.py  ${modes[i]}/kucoin_1h_${modes[i]}.yml ${modes[i]}/kucoin_1h.log ${modes[i]} -a &
-    python3 app/app.py  ${modes[i]}/kucoin_4h_${modes[i]}.yml ${modes[i]}/kucoin_4h.log ${modes[i]} -a &
-    python3 app/app.py  ${modes[i]}/kucoin_d_${modes[i]}.yml ${modes[i]}/kucoin_d.log ${modes[i]}  -a &
-    python3 app/app.py  ${modes[i]}/kucoin_w_${modes[i]}.yml ${modes[i]}/kucoin_w.log ${modes[i]} -a & 
+#    python3 app/app.py  ${modes[i]}/kucoin_1h_${modes[i]}.yml ${modes[i]}/kucoin_1h.log ${modes[i]} -a &
+#    python3 app/app.py  ${modes[i]}/kucoin_4h_${modes[i]}.yml ${modes[i]}/kucoin_4h.log ${modes[i]} -a &
+#    python3 app/app.py  ${modes[i]}/kucoin_d_${modes[i]}.yml ${modes[i]}/kucoin_d.log ${modes[i]}  -a &
+#    python3 app/app.py  ${modes[i]}/kucoin_w_${modes[i]}.yml ${modes[i]}/kucoin_w.log ${modes[i]} -a & 
 
     #contract
  #   python3 app/app.py  ${modes[i]}/okex_1h_${modes[i]}_contract.yml ${modes[i]}/okex_1h_contract.log ${modes[i]} &
