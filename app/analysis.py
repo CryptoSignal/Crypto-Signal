@@ -6,7 +6,7 @@ import structlog
 from analyzers.informants import *
 from analyzers import *
 
-from analyzers.indicators import ichimoku, macd, rsi, momentum, mfi, adx, plus_di, minus_di, stoch_rsi, obv, kdj, td
+from analyzers.indicators import ichimoku, macd, rsi, momentum, mfi, adx, plus_di, minus_di, stoch_rsi, obv, kdj, td, valley_loc
 
 
 class StrategyAnalyzer():
@@ -38,7 +38,6 @@ class StrategyAnalyzer():
             'obv': obv.OBV().analyze,
             'kdj': kdj.KDJ().analyze,
             'td': td.TD().analyze
-            #,
             # 'peak_loc': peak_loc.Peak_Loc().analyze,
             # 'valley_loc': valley_loc.Valley_Loc().analyze
         }

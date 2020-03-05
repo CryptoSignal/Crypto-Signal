@@ -1,4 +1,4 @@
-""" ADX Indicator
+""" valley points Indicator
 """
 
 import scipy.signal as scipySignal
