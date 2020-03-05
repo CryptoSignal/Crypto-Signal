@@ -110,8 +110,7 @@ class Behaviour():
                     market_pair
                 )
 
-                band_flag_waiver = False
-                di_flag_waiver = False
+                ################################# Indicator data retrieving and strategy
                 try:
 
                     ohlcv = new_result[exchange][market_pair]['informants']['ohlcv'][0]['result']
@@ -139,48 +138,50 @@ class Behaviour():
                     dt = new_result[exchange][market_pair]['indicators']['kdj'][0]['result']['d'];
                     jt = new_result[exchange][market_pair]['indicators']['kdj'][0]['result']['j'];
 
-                    # peakLoc = new_result[exchange][market_pair]['indicators']['peak_loc'][0]['result']['peak_loc'];
-                    # valleysLoc = new_result[exchange][market_pair]['indicators']['valley_loc'][0]['result']['valley_loc'];
-
-                    #ema indicator
+                    ######################################### ema indicator
                     #now contains: ema7IsOverEma65 ema7IsOverEma22 ema7IsOverEma33
-                    try:
-                        ema7 = new_result[exchange][market_pair]['informants']['ema7'][0]['result']['ema'];
-                        ema22 = new_result[exchange][market_pair]['informants']['ema22'][0]['result']['ema'];
-                        ema33 = new_result[exchange][market_pair]['informants']['ema33'][0]['result']['ema'];
-                        ema65 = new_result[exchange][market_pair]['informants']['ema65'][0]['result']['ema'];
+                    # try:
+                    #     ema7 = new_result[exchange][market_pair]['informants']['ema7'][0]['result']['ema'];
+                    #     ema22 = new_result[exchange][market_pair]['informants']['ema22'][0]['result']['ema'];
+                    #     ema33 = new_result[exchange][market_pair]['informants']['ema33'][0]['result']['ema'];
+                    #     ema65 = new_result[exchange][market_pair]['informants']['ema65'][0]['result']['ema'];
+                    #
+                    #     ema7IsOverEma65 = self.ema7OverEma65(ema7, ema65);
+                    #     ema7IsOverEma22 = self.ema7OverEma22(ema7, ema22);
+                    #     ema7IsOverEma33 = self.ema7OverEma33(ema7, ema33);
+                    #
+                    #     # candleOverEma
+                    #     if ema33 is not None:
+                    #         candleIsOverEma = self.candleOverEma(opened, close, ema33)
+                    #
+                    # except RuntimeError:
+                    #     print('ema data has errors')
 
-                        ema7IsOverEma65 = self.ema7OverEma65(ema7, ema65);
-                        ema7IsOverEma22 = self.ema7OverEma22(ema7, ema22);
-                        ema7IsOverEma33 = self.ema7OverEma33(ema7, ema33);
-
-                        # candleOverEma
-                        if ema33 is not None:
-                            candleIsOverEma = self.candleOverEma(opened, close, ema33)
-
-                    except RuntimeError:
-                        print('ema data has errors')
-
-                    #td indicator
+                    ###################################### td indicator
                     indicators = new_result[exchange][market_pair]['indicators']
+                    td9PositiveFlag = False
+                    td13PositiveFlag = False
                     td9NegativeFlag = False
                     td13NegativeFlag = False
+
+                    td9PositiveFlag42B = False
+                    td13PositiveFlag42B = False
+                    td9NegativeFlag42B = False
+                    td13NegativeFlag42B = False
                     if('td' in indicators):
                         td = indicators['td'][0]['result']['td'];
+                        (td9PositiveFlag, td9NegativeFlag, td13PositiveFlag, td13NegativeFlag) = self.tdDeteminator(2, td)
 
-                        if(td[len(td)-1] == 9):
-                            td9PositiveFlag = True;
+                        ###################################### 2B indicator
+                        # This 2B is based on TD bottom point. It pick ups the 2B point near/at TD 9 point.
+                        # argrelextrema is not very useful due to massive but not distinguished valley points.
+                        # peakIndex = new_result[exchange][market_pair]['indicators']['peak_loc'][0]['result']['peak_loc']
+                        # valleyIndex = new_result[exchange][market_pair]['indicators']['valley_loc'][0]['result']['valley_loc']
 
-                        if(td[len(td)-1] == -9):
-                            td9NegativeFlag = True;
+                        #- bottom 2B for later use
+                        (td9PositiveFlag42B, td9NegativeFlag42B, td13PositiveFlag42B, td13NegativeFlag42B) = self.tdDeteminator(3, td)
 
-                        if(td[len(td)-1] == 13):
-                            td13PositiveFlag = True;
-
-                        if(td[len(td)-1] == -13):
-                            td13NegativeFlag = True;
-
-                    # goldenFork
+                    ########################################## goldenMacdFork
                     intersectionValueAndMin = [0, 0]
                     goldenForkMacd = (
 
@@ -199,39 +200,39 @@ class Behaviour():
                                 delta_macd[len(delta_macd) - 2] >= 0) and (delta_macd[len(delta_macd) - 1] >= (
                                 delta_macd[len(delta_macd) - 2] * 3))
 
-                    #deadForkMacd
-                    deadForkMacd = (
-                        delta_macd[len(delta_macd) - 1] <= 0 and delta_macd[len(delta_macd) - 2] >= 0
-                    )
+                    ############################################## deadForkMacd
+                    # deadForkMacd = (
+                    #     delta_macd[len(delta_macd) - 1] <= 0 and delta_macd[len(delta_macd) - 2] >= 0
+                    # )
+                    #
+                    # macdVolumeMinusIsDecreased = False
+                    # (macdVolumeMinus,min) = self.lastNMinusMacdVolume(delta_macd[0:len(delta_macd)-1])
+                    # if( len(macdVolumeMinus) != 0 and self.lastNMinusDecreased(macdVolumeMinus,min) ):
+                    #     macdVolumeMinusIsDecreased = True
 
-                    macdVolumeMinusIsDecreased = False
-                    (macdVolumeMinus,min) = self.lastNMinusMacdVolume(delta_macd[0:len(delta_macd)-1])
-                    if( len(macdVolumeMinus) != 0 and self.lastNMinusDecreased(macdVolumeMinus,min) ):
-                        macdVolumeMinusIsDecreased = True
+                    ############################################## goldenForkKdj
+                    # len_k = len(kt)
+                    # len_d = len(dt)
+                    # len_j = len(jt)
+                    # goldenForkKdj = (
+                    #     ((dt[len_d-2] >= kt[len_k-2]) and (kt[len_k-2] >= jt[len_j-2]))
+                    #     and
+                    #     ((dt[len_d-1] <= kt[len_k-1]) and (kt[len_k-1] <= jt[len_j-1]))
+                    # )
 
-                    #goldenForkKdj
-                    len_k = len(kt)
-                    len_d = len(dt)
-                    len_j = len(jt)
-                    goldenForkKdj = (
-                        ((dt[len_d-2] >= kt[len_k-2]) and (kt[len_k-2] >= jt[len_j-2]))
-                        and
-                        ((dt[len_d-1] <= kt[len_k-1]) and (kt[len_k-1] <= jt[len_j-1]))
-                    )
+                    ############################################# deadForkKdj
+                    # deadForkKdj = (
+                    #     ((dt[len_d - 2] <= kt[len_k - 2]) and (kt[len_k - 2] <= jt[len_j - 2]))
+                    #     and
+                    #     ((dt[len_d - 1] >= kt[len_k - 1]) and (kt[len_k - 1] >= jt[len_j - 1]))
+                    # )
 
-                    #deadForkKdj
-                    deadForkKdj = (
-                        ((dt[len_d - 2] <= kt[len_k - 2]) and (kt[len_k - 2] <= jt[len_j - 2]))
-                        and
-                        ((dt[len_d - 1] >= kt[len_k - 1]) and (kt[len_k - 1] >= jt[len_j - 1]))
-                    )
-
-                    #dmi
+                    ############################################# dmi
                     lastNDMIIsPositiveVolume = (self.lastNDataIsPositive(delta_di, 3) > 0) or (self.lastNDataIsPositive(delta_di, 2) > 0) or (self.lastNDataIsPositive(delta_di, 1) > 0)
 
                     lastNDMIIsPositiveFork = (self.lastNDMIIsPositive(delta_di, 1) or self.lastNDMIIsPositive(delta_di, 2) or self.lastNDMIIsPositive(delta_di, 3))
 
-                    #macdBottomDivergence
+                    ############################################# macdBottomDivergence
                     #input: data
                     #output: boolean
                     #detectBottomDivergence(detectMacdNegativeSlots(data))
@@ -242,29 +243,23 @@ class Behaviour():
                     macdIsDecreased = (delta_macd[len(delta_macd)-1] < 0  and delta_macd[len(delta_macd)-2] < 0
                                        and delta_macd[len(delta_macd)-1] > delta_macd[len(delta_macd)-2])
 
-                    #bollCross
-                    bollCross = False
-                    if (len(middleband) != 0):
-                        delta_close_middleband = close - middleband;
-                        delta_low_middleband = low - middleband;
-                        if ((delta_close_middleband.iloc[-1] > 0 and delta_low_middleband.iloc[-1] < 0) or
-                            (delta_close_middleband.iloc[-2] > 0 and delta_low_middleband.iloc[-2] < 0)
-                            ):
-                            bollCross = True
+                    ############################################# bollCross
+                    # bollCross = False
+                    # if (len(middleband) != 0):
+                    #     delta_close_middleband = close - middleband;
+                    #     delta_low_middleband = low - middleband;
+                    #     if ((delta_close_middleband.iloc[-1] > 0 and delta_low_middleband.iloc[-1] < 0) or
+                    #         (delta_close_middleband.iloc[-2] > 0 and delta_low_middleband.iloc[-2] < 0)
+                    #         ):
+                    #         bollCross = True
 
-                    #narrowedBoll
-#                     (narrowedBoll, test_arr) = self.lastNBoolIsNarrowed((upperband/lowerband)**10, 5) # counts of narrowed points
+                    ########################################### rsi < 30
+                    # rsiIsLessThan30 = (rsi[len(rsi)-1] <= 30)
 
-                    #continuousKRise
-                    lastNKPositive = self.lastNKIsPositive(distance_close_open)
+                    ########################################### detectMacdVolumeIsShrinked
+                    # detectMacdVolumeIsShrinked = self.detectMacdVolumeShrinked(delta_macd, self.detectFirstMacdPositiveSlotPosition(delta_macd))
 
-                    #rsi < 30
-                    rsiIsLessThan30 = (rsi[len(rsi)-1] <= 30)
-
-                    #detectMacdVolumeIsShrinked
-                    detectMacdVolumeIsShrinked = self.detectMacdVolumeShrinked(delta_macd, self.detectFirstMacdPositiveSlotPosition(delta_macd))
-
-                    #stochrsi
+                    ########################################### stochrsi
                     len_sd = len(stoch_slow_d)
                     len_sk = len(stoch_slow_k)
                     stochrsi_goldenfork = (
@@ -279,10 +274,11 @@ class Behaviour():
                         (stoch_slow_d[len_sd - 1] >= stoch_slow_k[len_sk - 1])
                     )
 
-                    #volume is 3 times greater than before
-                    len_volume = len(volume)
-                    volumeIsGreater = volume[len_volume-1] >= 3 * volume[len_volume-2]
+                    ########################################## volume is 3 times greater than before
+                    # len_volume = len(volume)
+                    # volumeIsGreater = volume[len_volume-1] >= 3 * volume[len_volume-2]
 
+                    ############################################ macd正值平滑
                     #c(macd+)>5 + D<0.1
                     #counts: 10,
                     flatPositive = False
@@ -292,7 +288,12 @@ class Behaviour():
                         # print(market_pair + "===" + str(variance) + "===" + str(mean) + "===" + str(max))
                         flatPositive = self.lastNDataIsPositive(delta_macd, 10) and (variance <= 0.01) and (mean/max <= 0.2)
 
-########################################Filter coins by indicators
+                    #narrowedBoll
+                    #(narrowedBoll, test_arr) = self.lastNBoolIsNarrowed((upperband/lowerband)**10, 5) # counts of narrowed points
+                    #continuousKRise
+                    lastNKPositive = self.lastNKIsPositive(distance_close_open)
+
+                    ######################################## report coins that match indicators
                     if(indicatorModes == 'easy'):
 
                         if (goldenForkMacd and intersectionValueAndMin[0]>0):
@@ -326,8 +327,8 @@ class Behaviour():
                             if (deadForkKdj):
                                 self.printResult(new_result, exchange, market_pair, output_mode, "kdj死叉信号", indicatorTypeCoinMap)
 
-                            if (detectMacdVolumeIsShrinked and stochrsi_deadfork):
-                                    self.printResult(new_result, exchange, market_pair, output_mode, "macd量能萎缩 + stochrsi强弱指标死叉", indicatorTypeCoinMap)
+                            # if (detectMacdVolumeIsShrinked and stochrsi_deadfork):
+                            #         self.printResult(new_result, exchange, market_pair, output_mode, "macd量能萎缩 + stochrsi强弱指标死叉", indicatorTypeCoinMap)
 
                             #stochrsi_deadfork and deadForkMacd
 
@@ -347,23 +348,27 @@ class Behaviour():
                         if (td13NegativeFlag):
                             self.printResult(new_result, exchange, market_pair, output_mode, "TD 底部 13位置", indicatorTypeCoinMap)
 
+                        if (td13NegativeFlag42B or td9NegativeFlag42B):
+                            if (self.isBottom2B(volume, opened, close)):
+                                self.printResult(new_result, exchange, market_pair, output_mode, "TD+底部2B信号", indicatorTypeCoinMap)
+
                         if (goldenForkMacd):
                             self.printResult(new_result, exchange, market_pair, output_mode, ("0轴上" if intersectionValueAndMin[0] > 0 else "") + "macd金叉信号", indicatorTypeCoinMap)
 
-                        if (lastNDMIIsPositiveFork):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "DMI", indicatorTypeCoinMap)
-
-                        if (ema7IsOverEma65):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "7日线上穿65日ema线", indicatorTypeCoinMap)
-
-                        if (ema7IsOverEma22):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "7日线上穿22日ema线", indicatorTypeCoinMap)
-
-                        if (ema7IsOverEma33):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "7日线上穿33日ema线", indicatorTypeCoinMap)
-
-                        if (candleIsOverEma):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "k线上穿33日ema线", indicatorTypeCoinMap)
+                        # if (lastNDMIIsPositiveFork):
+                        #     self.printResult(new_result, exchange, market_pair, output_mode, "DMI", indicatorTypeCoinMap)
+                        #
+                        # if (ema7IsOverEma65):
+                        #     self.printResult(new_result, exchange, market_pair, output_mode, "7日线上穿65日ema线", indicatorTypeCoinMap)
+                        #
+                        # if (ema7IsOverEma22):
+                        #     self.printResult(new_result, exchange, market_pair, output_mode, "7日线上穿22日ema线", indicatorTypeCoinMap)
+                        #
+                        # if (ema7IsOverEma33):
+                        #     self.printResult(new_result, exchange, market_pair, output_mode, "7日线上穿33日ema线", indicatorTypeCoinMap)
+                        #
+                        # if (candleIsOverEma):
+                        #     self.printResult(new_result, exchange, market_pair, output_mode, "k线上穿33日ema线", indicatorTypeCoinMap)
 
                         if (flatPositive):
                             self.printResult(new_result, exchange, market_pair, output_mode, "macd正值平滑", indicatorTypeCoinMap)
@@ -373,12 +378,12 @@ class Behaviour():
                             self.printResult(new_result, exchange, market_pair, output_mode, "接近0轴的macd金叉信号",
                                              indicatorTypeCoinMap)
 
-                        if (lastNDMIIsPositiveFork and goldenForkMacd):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "macd金叉信号 + DMI",
-                                             indicatorTypeCoinMap)
-
-                        if (goldenForkMacd and stochrsi_goldenfork):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + macd金叉信号", indicatorTypeCoinMap)
+                        # if (lastNDMIIsPositiveFork and goldenForkMacd):
+                        #     self.printResult(new_result, exchange, market_pair, output_mode, "macd金叉信号 + DMI",
+                        #                      indicatorTypeCoinMap)
+                        #
+                        # if (goldenForkMacd and stochrsi_goldenfork):
+                        #     self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + macd金叉信号", indicatorTypeCoinMap)
 
 
                         if (macdBottomDivergence and lastNDMIIsPositiveFork):
@@ -387,25 +392,25 @@ class Behaviour():
                         if (macdBottomDivergence and stochrsi_goldenfork):
                             self.printResult(new_result, exchange, market_pair, output_mode, "macd底背离 + stochrsi强弱指标金叉", indicatorTypeCoinMap)
 
-                        if (goldenForkKdj and goldenForkMacd):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "kdj金叉信号 + macd金叉信号", indicatorTypeCoinMap)
+                        # if (goldenForkKdj and goldenForkMacd):
+                        #     self.printResult(new_result, exchange, market_pair, output_mode, "kdj金叉信号 + macd金叉信号", indicatorTypeCoinMap)
 
                         # if (goldenForkKdj and lastNDMIIsPositiveFork):
                         #     self.printResult(new_result, exchange, market_pair, output_mode, "kdj金叉信号 + DMI", indicatorTypeCoinMap)
 
-                        if (stochrsi_goldenfork and lastNDMIIsPositiveFork):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + DMI", indicatorTypeCoinMap)
+                        # if (stochrsi_goldenfork and lastNDMIIsPositiveFork):
+                        #     self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + DMI", indicatorTypeCoinMap)
 
                         # compound indicator
-                        if (macdBottomDivergenceIsPositiveMacd):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "macd底背离最低点为macd正值:强烈信号", indicatorTypeCoinMap)
-
-                        if (stochrsi_goldenfork and goldenForkKdj and lastNDMIIsPositiveVolume and (delta_macd[len(delta_macd)-1] > delta_macd[len(delta_macd)-2])):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + kdj金叉信号 + DMI+ + macd量能减小", indicatorTypeCoinMap)
-
-                        if (stochrsi_goldenfork and macdIsDecreased):
-                            self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + macd下跌量能减弱",
-                                             indicatorTypeCoinMap)
+                        # if (macdBottomDivergenceIsPositiveMacd):
+                        #     self.printResult(new_result, exchange, market_pair, output_mode, "macd底背离最低点为macd正值:强烈信号", indicatorTypeCoinMap)
+                        #
+                        # if (stochrsi_goldenfork and goldenForkKdj and lastNDMIIsPositiveVolume and (delta_macd[len(delta_macd)-1] > delta_macd[len(delta_macd)-2])):
+                        #     self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + kdj金叉信号 + DMI+ + macd量能减小", indicatorTypeCoinMap)
+                        #
+                        # if (stochrsi_goldenfork and macdIsDecreased):
+                        #     self.printResult(new_result, exchange, market_pair, output_mode, "stochrsi强弱指标金叉 + macd下跌量能减弱",
+                        #                      indicatorTypeCoinMap)
 
 ######################################################
                 except Exception as e:
@@ -422,6 +427,33 @@ class Behaviour():
         
         # Print an empty line when complete
         return new_result
+
+    def isBottom2B(self, volume, opened, close):
+        # -- price
+        priceMatches2BPattern = (opened[-2] > close[-2]) and (opened[-2] > opened[-3]) and (close[-2] < close[-3])
+        # -- volume
+        volumeMatches2BPattern = (volume[-3] < volume[-2])
+        # --indicator
+        return (priceMatches2BPattern and volumeMatches2BPattern)
+
+    def tdDeteminator(self, gap, td):
+        td9PositiveFlag = False
+        td9NegativeFlag = False
+        td13PositiveFlag = False
+        td13NegativeFlag = False
+        if (td[len(td) - gap] == 9):
+            td9PositiveFlag = True;
+
+        if (td[len(td) - gap] == -9):
+            td9NegativeFlag = True;
+
+        if (td[len(td) - gap] == 13):
+            td13PositiveFlag = True;
+
+        if (td[len(td) - gap] == -13):
+            td13NegativeFlag = True;
+
+        return td9PositiveFlag, td9NegativeFlag, td13PositiveFlag, td13NegativeFlag;
 
     def isOverceedingTriangleLine(self, loc_ids, ohlcv):
         indexX1 = loc_ids[0]

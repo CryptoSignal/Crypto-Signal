@@ -1,4 +1,4 @@
-""" ADX Indicator
+""" peak points Indicator
 """
 
 import scipy
