@@ -6,7 +6,7 @@ import structlog
 from analyzers.informants import *
 from analyzers import *
 
-from analyzers.indicators import ichimoku, macd, rsi, momentum, mfi, adx, plus_di, minus_di, stoch_rsi, obv, kdj, td, valley_loc
+from analyzers.indicators import ichimoku, macd, rsi, momentum, mfi, adx, plus_di, minus_di, stoch_rsi, obv, kdj, td
 
 
 class StrategyAnalyzer():

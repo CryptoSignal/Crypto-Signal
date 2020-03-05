@@ -33,15 +33,6 @@ indicators:
     enabled: true
     hot: 0
     signal: [macd]
-  valley_loc:
-  - alert_enabled: true
-    alert_frequency: once
-    candle_period: 1h
-    cold: 0
-    enabled: true
-    hot: 0
-    period_count: 10
-    signal: [valley_loc]
   td:
   - alert_enabled: true
     alert_frequency: once

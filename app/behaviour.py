@@ -348,6 +348,12 @@ class Behaviour():
                         if (td13NegativeFlag):
                             self.printResult(new_result, exchange, market_pair, output_mode, "TD 底部 13位置", indicatorTypeCoinMap)
 
+                        if (td9PositiveFlag):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "TD 顶部 9位置", indicatorTypeCoinMap)
+
+                        if (td13PositiveFlag):
+                            self.printResult(new_result, exchange, market_pair, output_mode, "TD 顶部 13位置", indicatorTypeCoinMap)
+
                         if (td13NegativeFlag42B or td9NegativeFlag42B):
                             if (self.isBottom2B(volume, opened, close)):
                                 self.printResult(new_result, exchange, market_pair, output_mode, "TD+底部2B信号", indicatorTypeCoinMap)
