@@ -2,9 +2,9 @@
 
 ### Development state: Beta (Code is stable, documentation is often lagging)
 
-### Join our community [Discord](https://discord.gg/MWTJVFf) channel!
+### Join our community [Discord](https://discord.gg/MWTJVFf) channel! (2,100+ members)
 
-Crypto Signals is a command line tool that automates your crypto currency Technical Analysis (TA).
+Crypto Signals is a command line tool that automates your crypto currency Technical Analysis (TA). It is maintained by a community of traders, engineers, data scientists, PMs, & countless generous individuals who wish to democratize the equal & open access to the greatest wealth re-distribution experiment in human and monetary policy history - Bitcoin
 
 Track over 500 coins across Bittrex, Bitfinex, GDAX, Gemini and more!
 
@@ -65,3 +65,5 @@ Underpinning crypto-signal for most of our technical analysis is [TA-Lib](https:
 
 # Liability
 I am not your financial adviser, nor is this tool. Use this program as an educational tool, and nothing more. None of the contributors to this project are liable for any losses you may incur. Be wise and always do your own research.
+
+We recommend you begin by learning the core principles used in traditional asset classes since they are less volatile & apply your knowledge in simulated trading before liquidating your dreams.
