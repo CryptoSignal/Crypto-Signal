@@ -571,7 +571,7 @@ class Notifier(IndicatorUtils):
                                 if not analysis['config']['alert_enabled']:
                                     should_alert = False
 
-                                if 'mute_cold' in analysis['config'] and latest_result['is_cold'] == analysis['config']['mute_cold']:
+                                if 'mute_cold' in analysis['config'] and analysis['config']['mute_cold'] == True and latest_result['is_cold'] == True:
                                     self.logger.info('Skiping cold notification for %s %s %s', market_pair, indicator, candle_period)
                                     should_alert = False                                    
 
