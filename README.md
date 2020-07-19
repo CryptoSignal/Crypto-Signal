@@ -1,6 +1,6 @@
 # Crypto Signals
 
-Development branch to testing new features. If you are looking for the latest stable version check the master branch.
+Development branch to testing new features. This develop version has a lot of improvements and fixes over master branch. The recommendation is that you use the code in this branch.
 
 ## Notable Changes
 - It creates candle bar charts with MAs, RSI and MACD. These images can be sent as part of a Telegram notification or a Webhook call.
