@@ -204,6 +204,7 @@ class ExchangeInterface():
                         if isinstance(self.exclude, list) and len(self.exclude) > 0:
                             for base_market in self.base_markets[exchange]:
                                 for pair_to_exclude in self.exclude:
+                                    exchange_markets[exchange].pop(pair_to_exclude, None)
                                     exchange_markets[exchange].pop(pair_to_exclude + '/' + base_market, None)
 
 
