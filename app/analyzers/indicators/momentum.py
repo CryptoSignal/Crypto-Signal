@@ -32,7 +32,8 @@ class Momentum(IndicatorUtils):
         dataframe = self.convert_to_dataframe(historical_data)
         mom_values = abstract.MOM(dataframe, period_count).to_frame()
         mom_values.dropna(how='all', inplace=True)
-        mom_values.rename(columns={mom_values.columns[0]: 'momentum'}, inplace=True)
+        mom_values.rename(
+            columns={mom_values.columns[0]: 'momentum'}, inplace=True)
 
         if mom_values[signal[0]].shape[0]:
             mom_values['is_hot'] = mom_values[signal[0]] > hot_thresh

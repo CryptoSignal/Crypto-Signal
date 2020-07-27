@@ -2,6 +2,7 @@
 """
 
 import json
+import time
 
 import telegram
 import structlog
@@ -47,6 +48,7 @@ class TelegramNotifier(NotifierUtils):
         #exit()
         for message_chunk in message_chunks:
             self.bot.send_message(chat_id=self.chat_id, text=message_chunk, parse_mode=self.parse_mode)
+            time.sleep(0.5)
 
     @retry(
         retry=retry_if_exception_type(telegram.error.TimedOut),

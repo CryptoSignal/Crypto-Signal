@@ -4,13 +4,14 @@
 import math
 from datetime import datetime
 
-import structlog
 import pandas
+import structlog
 from talib import abstract
 
+from analyzers import *
 from analyzers.indicators import *
 from analyzers.informants import *
-from analyzers import *
+
 
 class StrategyAnalyzer():
     """Contains all the methods required for analyzing strategies.
@@ -19,7 +20,6 @@ class StrategyAnalyzer():
     def __init__(self):
         """Initializes StrategyAnalyzer class """
         self.logger = structlog.get_logger()
-
 
     def indicator_dispatcher(self):
         """Returns a dictionary for dynamic anaylsis selector
@@ -49,7 +49,6 @@ class StrategyAnalyzer():
 
         return dispatcher
 
-
     def informant_dispatcher(self):
         """Returns a dictionary for dynamic informant selector
 
@@ -67,7 +66,6 @@ class StrategyAnalyzer():
         }
 
         return dispatcher
-
 
     def crossover_dispatcher(self):
         """Returns a pandas.DataFrame for dynamic crossover selector

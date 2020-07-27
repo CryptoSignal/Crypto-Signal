@@ -1,11 +1,12 @@
 """Configure application logger
 """
 
-import sys
 import logging
+import sys
 
 import structlog
 from pythonjsonlogger import jsonlogger
+
 
 def configure_logging(loglevel, log_mode):
     """Configure the application logger

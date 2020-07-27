@@ -3,11 +3,10 @@
 Bollinger Bands indicator
 """
 
-from talib import BBANDS
-from talib import abstract
+import math
 
 import pandas
-import math
+from talib import BBANDS, abstract
 
 from analyzers.utils import IndicatorUtils
 
@@ -35,20 +34,21 @@ class BBP(IndicatorUtils):
 
         mfi = abstract.MFI(dataframe, period_count=14)
 
-        #Required to avoid getting same values for low, middle, up
+        # Required to avoid getting same values for low, middle, up
         dataframe['close_10k'] = dataframe['close'] * 10000
-        
-        up_band, mid_band, low_band = BBANDS(dataframe['close_10k'], timeperiod=period_count, nbdevup=std_dev, nbdevdn=std_dev, matype=0)
+
+        up_band, mid_band, low_band = BBANDS(
+            dataframe['close_10k'], timeperiod=period_count, nbdevup=std_dev, nbdevdn=std_dev, matype=0)
 
         bbp = (dataframe['close_10k'] - low_band) / (up_band - low_band)
 
         bollinger = pandas.concat([dataframe, bbp, mfi], axis=1)
         bollinger.rename(columns={0: 'bbp', 1: 'mfi'}, inplace=True)
 
-        bollinger['is_hot']  = False
+        bollinger['is_hot'] = False
         bollinger['is_cold'] = False
 
-        bollinger['is_hot'].iloc[-1]  = bollinger['bbp'].iloc[-2] <= hot_thresh and bollinger['bbp'].iloc[-2] < bollinger['bbp'].iloc[-1]
+        bollinger['is_hot'].iloc[-1] = bollinger['bbp'].iloc[-2] <= hot_thresh and bollinger['bbp'].iloc[-2] < bollinger['bbp'].iloc[-1]
         bollinger['is_cold'].iloc[-1] = bollinger['bbp'].iloc[-1] >= cold_thresh
 
         return bollinger

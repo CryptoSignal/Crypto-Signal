@@ -25,7 +25,8 @@ class VWAP(IndicatorUtils):
 
         dataframe = self.convert_to_dataframe(historical_data)
 
-        vwap_values = pandas.DataFrame(numpy.nan, index=dataframe.index, columns=['vwap'])
+        vwap_values = pandas.DataFrame(
+            numpy.nan, index=dataframe.index, columns=['vwap'])
 
         for index in range(period_count, vwap_values.shape[0]):
             start_index = index - period_count
@@ -42,5 +43,3 @@ class VWAP(IndicatorUtils):
 
         vwap_values.dropna(how='all', inplace=True)
         return vwap_values
-
-

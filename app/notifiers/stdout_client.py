@@ -2,9 +2,11 @@
 """
 
 import structlog
-#from tenacity import retry, retry_if_exception_type, stop_after_attempt
 
 from notifiers.utils import NotifierUtils
+
+#from tenacity import retry, retry_if_exception_type, stop_after_attempt
+
 
 class StdoutNotifier(NotifierUtils):
     """Class for handling stdout notifications
@@ -14,7 +16,6 @@ class StdoutNotifier(NotifierUtils):
         """Initialize StdoutNotifier class
         """
 
-
     def notify(self, message):
         """stdout send the message.
 
@@ -23,4 +24,3 @@ class StdoutNotifier(NotifierUtils):
         """
 
         print(message)
-
