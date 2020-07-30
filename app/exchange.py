@@ -144,7 +144,7 @@ class ExchangeInterface():
                 values = np.array(values, dtype=[('market', 'U10'), ('volume', int)]) 
                 values = np.sort(values, order='volume')  
 
-                if isinstance(self.exclude, list) and len(self.exclude) > 0:    
+                if self.top_pairs and (len (values) > self.top_pairs):
                     limit = -self.top_pairs
                     values = values[limit:]['market'].tolist()
                 else:
