@@ -44,7 +44,7 @@ def main():
 
     for exchange in market_data:
         num = 1
-        for chunk in split_market_data(market_data[exchange]):
+        for chunk in split_market_data(market_data[exchange], settings['market_data_chunk_size']):
             market_data_chunk = dict()
             market_data_chunk[exchange] = {
                 key: market_data[exchange][key] for key in chunk}
@@ -69,9 +69,9 @@ def main():
         worker.join()
 
 
-def split_market_data(market_data):
-    if len(market_data.keys()) > 20:
-        return list(chunks(list(market_data.keys()), 20))
+def split_market_data(market_data, chunk_size):
+    if len(market_data.keys()) > chunk_size:
+        return list(chunks(list(market_data.keys()), chunk_size))
     else:
         return [list(market_data.keys())]
 

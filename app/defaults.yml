@@ -8,6 +8,7 @@ settings:
   enable_charts: false
   output_mode: cli
   update_interval: 300
+  market_data_chunk_size: 20
   market_pairs: null
   timezone: UTC
 
