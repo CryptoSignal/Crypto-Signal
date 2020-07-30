@@ -3,10 +3,9 @@
 
 import math
 
-import tulipy
 import numpy
 import pandas
-#from talib import abstract
+import tulipy
 
 from analyzers.utils import IndicatorUtils
 

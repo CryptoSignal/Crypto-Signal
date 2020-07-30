@@ -8,6 +8,7 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt
 
 from notifiers.utils import NotifierUtils
 
+
 class GmailNotifier(NotifierUtils):
     """Class for handling gmail notifications
     """
@@ -26,7 +27,6 @@ class GmailNotifier(NotifierUtils):
         self.username = username
         self.password = password
         self.destination_addresses = ','.join(destination_addresses)
-
 
     @retry(stop=stop_after_attempt(3))
     def notify(self, message):
@@ -48,6 +48,7 @@ class GmailNotifier(NotifierUtils):
         smtp_handler = smtplib.SMTP(self.smtp_server)
         smtp_handler.starttls()
         smtp_handler.login(self.username, self.password)
-        result = smtp_handler.sendmail(self.username, self.destination_addresses, message)
+        result = smtp_handler.sendmail(
+            self.username, self.destination_addresses, message)
         smtp_handler.quit()
         return result

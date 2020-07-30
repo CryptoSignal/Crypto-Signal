@@ -1,10 +1,11 @@
 """Notify a user via slack
 """
 
-import structlog
 import slackweb
+import structlog
 
 from notifiers.utils import NotifierUtils
+
 
 class SlackNotifier(NotifierUtils):
     """Class for handling slack notifications
@@ -21,7 +22,6 @@ class SlackNotifier(NotifierUtils):
         self.slack_name = "crypto-signal"
         self.slack_client = slackweb.Slack(url=slack_webhook)
 
-
     def notify(self, message):
         """Sends the message.
 
@@ -30,7 +30,8 @@ class SlackNotifier(NotifierUtils):
         """
 
         max_message_size = 4096
-        message_chunks = self.chunk_message(message=message, max_message_size=max_message_size)
+        message_chunks = self.chunk_message(
+            message=message, max_message_size=max_message_size)
 
         for message_chunk in message_chunks:
             self.slack_client.notify(text=message_chunk)

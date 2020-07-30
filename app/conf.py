@@ -6,6 +6,7 @@ import os
 import ccxt
 import yaml
 
+
 class Configuration():
     """Parses the environment configuration to create the config objects.
     """
@@ -24,27 +25,32 @@ class Configuration():
             user_config = dict()
 
         if 'settings' in user_config:
-            self.settings = {**default_config['settings'], **user_config['settings']}
+            self.settings = {
+                **default_config['settings'], **user_config['settings']}
         else:
             self.settings = default_config['settings']
 
         if 'notifiers' in user_config:
-            self.notifiers = {**default_config['notifiers'], **user_config['notifiers']}
+            self.notifiers = {
+                **default_config['notifiers'], **user_config['notifiers']}
         else:
             self.notifiers = default_config['notifiers']
 
         if 'indicators' in user_config:
-            self.indicators = {**default_config['indicators'], **user_config['indicators']}
+            self.indicators = {
+                **default_config['indicators'], **user_config['indicators']}
         else:
             self.indicators = default_config['indicators']
 
         if 'informants' in user_config:
-            self.informants = {**default_config['informants'], **user_config['informants']}
+            self.informants = {
+                **default_config['informants'], **user_config['informants']}
         else:
             self.informants = default_config['informants']
 
         if 'crossovers' in user_config:
-            self.crossovers = {**default_config['crossovers'], **user_config['crossovers']}
+            self.crossovers = {
+                **default_config['crossovers'], **user_config['crossovers']}
         else:
             self.crossovers = default_config['crossovers']
 
