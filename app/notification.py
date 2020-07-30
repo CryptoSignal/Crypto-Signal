@@ -1,47 +1,41 @@
 """Handles sending notifications via the configured notifiers
 """
 
-import json
-import structlog
-import os
 import copy
-import talib
-
+import json
+import os
+import sys
 import traceback
-
-import pandas as pd
-import numpy as np
+from datetime import datetime
+from time import sleep
 
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as mticker
-
+import numpy as np
+import pandas as pd
+import structlog
+import talib
+from jinja2 import Template
 from matplotlib.dates import DateFormatter
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
-
-from datetime import datetime
 from pytz import timezone
 from stockstats import StockDataFrame
-from jinja2 import Template
 from telegram.error import TimedOut as TelegramTimedOut
 
-from notifiers.twilio_client import TwilioNotifier
-from notifiers.slack_client import SlackNotifier
+from analyzers.indicators import candle_recognition, ichimoku
+from analyzers.utils import IndicatorUtils
 from notifiers.discord_client import DiscordNotifier
 from notifiers.gmail_client import GmailNotifier
-from notifiers.telegram_client import TelegramNotifier
-from notifiers.webhook_client import WebhookNotifier
+from notifiers.slack_client import SlackNotifier
 from notifiers.stdout_client import StdoutNotifier
+from notifiers.telegram_client import TelegramNotifier
+from notifiers.twilio_client import TwilioNotifier
+from notifiers.webhook_client import WebhookNotifier
 
-from analyzers.utils import IndicatorUtils
-from analyzers.indicators import ichimoku
-from analyzers.indicators import candle_recognition
-
-import sys
-from time import sleep
 
 class Notifier(IndicatorUtils):
     """Handles sending notifications via the configured notifiers
@@ -66,7 +60,8 @@ class Notifier(IndicatorUtils):
 
         enabled_notifiers = list()
         self.logger = structlog.get_logger()
-        self.twilio_configured = self._validate_required_config('twilio', notifier_config)
+        self.twilio_configured = self._validate_required_config(
+            'twilio', notifier_config)
         if self.twilio_configured:
             self.twilio_client = TwilioNotifier(
                 twilio_key=notifier_config['twilio']['required']['key'],
@@ -76,7 +71,8 @@ class Notifier(IndicatorUtils):
             )
             enabled_notifiers.append('twilio')
 
-        self.discord_configured = self._validate_required_config('discord', notifier_config)
+        self.discord_configured = self._validate_required_config(
+            'discord', notifier_config)
         if self.discord_configured:
             self.discord_client = DiscordNotifier(
                 webhook=notifier_config['discord']['required']['webhook'],
@@ -85,14 +81,16 @@ class Notifier(IndicatorUtils):
             )
             enabled_notifiers.append('discord')
 
-        self.slack_configured = self._validate_required_config('slack', notifier_config)
+        self.slack_configured = self._validate_required_config(
+            'slack', notifier_config)
         if self.slack_configured:
             self.slack_client = SlackNotifier(
                 slack_webhook=notifier_config['slack']['required']['webhook']
             )
             enabled_notifiers.append('slack')
 
-        self.gmail_configured = self._validate_required_config('gmail', notifier_config)
+        self.gmail_configured = self._validate_required_config(
+            'gmail', notifier_config)
         if self.gmail_configured:
             self.gmail_client = GmailNotifier(
                 username=notifier_config['gmail']['required']['username'],
@@ -101,7 +99,8 @@ class Notifier(IndicatorUtils):
             )
             enabled_notifiers.append('gmail')
 
-        self.telegram_configured = self._validate_required_config('telegram', notifier_config)
+        self.telegram_configured = self._validate_required_config(
+            'telegram', notifier_config)
         if self.telegram_configured:
             self.telegram_client = TelegramNotifier(
                 token=notifier_config['telegram']['required']['token'],
@@ -110,7 +109,8 @@ class Notifier(IndicatorUtils):
             )
             enabled_notifiers.append('telegram')
 
-        self.webhook_configured = self._validate_required_config('webhook', notifier_config)
+        self.webhook_configured = self._validate_required_config(
+            'webhook', notifier_config)
         if self.webhook_configured:
             self.webhook_client = WebhookNotifier(
                 url=notifier_config['webhook']['required']['url'],
@@ -119,13 +119,13 @@ class Notifier(IndicatorUtils):
             )
             enabled_notifiers.append('webhook')
 
-        self.stdout_configured = self._validate_required_config('stdout', notifier_config)
+        self.stdout_configured = self._validate_required_config(
+            'stdout', notifier_config)
         if self.stdout_configured:
             self.stdout_client = StdoutNotifier()
             enabled_notifiers.append('stdout')
 
         self.logger.info('enabled notifers: %s', enabled_notifiers)
-
 
     def notify_all(self, new_analysis):
         """Trigger a notification for all notification options.
@@ -142,16 +142,17 @@ class Notifier(IndicatorUtils):
             if not os.path.exists(charts_dir):
                 os.mkdir(charts_dir)
 
-            #self.create_charts(messages)
+            # self.create_charts(messages)
         for exchange in messages:
             for market_pair in messages[exchange]:
                 _messages = messages[exchange][market_pair]
-                                    
+
                 for candle_period in _messages:
-                    if not isinstance(_messages[candle_period], list) or len (_messages[candle_period]) == 0:
+                    if not isinstance(_messages[candle_period], list) or len(_messages[candle_period]) == 0:
                         continue
 
-                    self.notify_all_messages(exchange, market_pair, candle_period, _messages[candle_period])
+                    self.notify_all_messages(
+                        exchange, market_pair, candle_period, _messages[candle_period])
                     sleep(4)
 
     def notify_all_messages(self, exchange, market_pair, candle_period, messages):
@@ -159,20 +160,22 @@ class Notifier(IndicatorUtils):
 
         if self.enable_charts == True:
             try:
-                candles_data = self.all_historical_data[exchange][market_pair][candle_period]                        
-                chart_file = self.create_chart(exchange, market_pair, candle_period, candles_data)
+                candles_data = self.all_historical_data[exchange][market_pair][candle_period]
+                chart_file = self.create_chart(
+                    exchange, market_pair, candle_period, candles_data)
                 #self.logger.info('Chart file %s', chart_file)
-            except Exception :
-                self.logger.info('Error creating chart for %s %s', market_pair, candle_period)
+            except Exception:
+                self.logger.info('Error creating chart for %s %s',
+                                 market_pair, candle_period)
 
-        #self.notify_slack(new_analysis)
+        # self.notify_slack(new_analysis)
         self.notify_discord(messages)
         self.notify_webhook(messages, chart_file)
-        #self.notify_twilio(new_analysis)
-        #self.notify_gmail(new_analysis)
+        # self.notify_twilio(new_analysis)
+        # self.notify_gmail(new_analysis)
         self.notify_telegram(messages, chart_file)
         self.notify_stdout(messages)
-    
+
     def notify_discord(self, messages):
         """Send a notification via the discord notifier
 
@@ -183,13 +186,13 @@ class Notifier(IndicatorUtils):
         if not self.discord_configured:
             return
 
-        message_template = Template(self.notifier_config['discord']['optional']['template'])
-                                   
+        message_template = Template(
+            self.notifier_config['discord']['optional']['template'])
+
         for message in messages:
             formatted_message = message_template.render(message)
 
-            self.discord_client.notify(formatted_message.strip())              
-
+            self.discord_client.notify(formatted_message.strip())
 
     def notify_slack(self, new_analysis):
         """Send a notification via the slack notifier
@@ -206,7 +209,6 @@ class Notifier(IndicatorUtils):
             if message.strip():
                 self.slack_client.notify(message)
 
-
     def notify_twilio(self, new_analysis):
         """Send a notification via the twilio notifier
 
@@ -221,7 +223,6 @@ class Notifier(IndicatorUtils):
             )
             if message.strip():
                 self.twilio_client.notify(message)
-
 
     def notify_gmail(self, new_analysis):
         """Send a notification via the gmail notifier
@@ -238,7 +239,6 @@ class Notifier(IndicatorUtils):
             if message.strip():
                 self.gmail_client.notify(message)
 
-
     def notify_telegram(self, messages, chart_file):
         """Send notifications via the telegram notifier
 
@@ -250,21 +250,24 @@ class Notifier(IndicatorUtils):
         if not self.telegram_configured:
             return
 
-        message_template = Template(self.notifier_config['telegram']['optional']['template'])
+        message_template = Template(
+            self.notifier_config['telegram']['optional']['template'])
 
         formatted_messages = []
 
         for message in messages:
             formatted_messages.append(message_template.render(message))
-            
+
         if self.enable_charts == True:
             if chart_file != None and os.path.exists(chart_file):
                 try:
-                    self.telegram_client.send_chart_messages(open(chart_file, 'rb'), formatted_messages)
-                except (IOError, SyntaxError) :
+                    self.telegram_client.send_chart_messages(
+                        open(chart_file, 'rb'), formatted_messages)
+                except (IOError, SyntaxError):
                     self.telegram_client.send_messages(formatted_messages)
             else:
-                self.logger.info('Chart file %s doesnt exist, sending text message.', chart_file)
+                self.logger.info(
+                    'Chart file %s doesnt exist, sending text message.', chart_file)
                 self.telegram_client.send_messages(formatted_messages)
         else:
             self.telegram_client.send_messages(formatted_messages)
@@ -290,15 +293,15 @@ class Notifier(IndicatorUtils):
         """
 
         if not self.stdout_configured:
-            return 
+            return
 
-        message_template = Template(self.notifier_config['stdout']['optional']['template'])
+        message_template = Template(
+            self.notifier_config['stdout']['optional']['template'])
 
         for message in messages:
             formatted_message = message_template.render(message)
-            
-            self.stdout_client.notify(formatted_message.strip())
 
+            self.stdout_client.notify(formatted_message.strip())
 
     def _validate_required_config(self, notifier, notifier_config):
         """Validate the required configuration items are present for a notifier.
@@ -316,7 +319,6 @@ class Notifier(IndicatorUtils):
             if not val:
                 notifier_configured = False
         return notifier_configured
-
 
     def _indicator_message_templater(self, new_analysis, template):
         """Creates a message from a user defined template
@@ -352,7 +354,8 @@ class Notifier(IndicatorUtils):
 
                                     values[signal] = analysis['result'].iloc[-1][signal]
                                     if isinstance(values[signal], float):
-                                        values[signal] = format(values[signal], '.8f')
+                                        values[signal] = format(
+                                            values[signal], '.8f')
                             elif indicator_type == 'crossovers':
                                 latest_result = analysis['result'].iloc[-1]
 
@@ -368,11 +371,13 @@ class Notifier(IndicatorUtils):
 
                                 values[key_signal] = analysis['result'].iloc[-1][key_signal]
                                 if isinstance(values[key_signal], float):
-                                        values[key_signal] = format(values[key_signal], '.8f')
+                                    values[key_signal] = format(
+                                        values[key_signal], '.8f')
 
                                 values[crossed_signal] = analysis['result'].iloc[-1][crossed_signal]
                                 if isinstance(values[crossed_signal], float):
-                                        values[crossed_signal] = format(values[crossed_signal], '.8f')
+                                    values[crossed_signal] = format(
+                                        values[crossed_signal], '.8f')
 
                             status = 'neutral'
                             if latest_result['is_hot']:
@@ -383,14 +388,15 @@ class Notifier(IndicatorUtils):
                             if 'indicator_label' in analysis['config']:
                                 indicator_label = analysis['config']['indicator_label']
                             else:
-                                indicator_label = '{} {}'.format(indicator, analysis['config']['candle_period'])
+                                indicator_label = '{} {}'.format(
+                                    indicator, analysis['config']['candle_period'])
 
                             # Save status of indicator's new analysis
                             new_analysis[exchange][market][indicator_type][indicator][index]['status'] = status
 
                             if latest_result['is_hot'] or latest_result['is_cold']:
 
-                                #Custom 'hot' or 'cold' labels
+                                # Custom 'hot' or 'cold' labels
                                 hot_cold_label = ''
                                 if latest_result['is_hot'] and 'hot_label' in analysis['config']:
                                     hot_cold_label = analysis['config']['hot_label']
@@ -398,7 +404,8 @@ class Notifier(IndicatorUtils):
                                     hot_cold_label = analysis['config']['cold_label']
 
                                 try:
-                                    last_status = self.last_analysis[exchange][market][indicator_type][indicator][index]['status']
+                                    last_status = self.last_analysis[exchange][market][
+                                        indicator_type][indicator][index]['status']
                                 except:
                                     last_status = str()
 
@@ -411,7 +418,8 @@ class Notifier(IndicatorUtils):
                                     should_alert = False
 
                                 if should_alert:
-                                    base_currency, quote_currency = market.split('/')
+                                    base_currency, quote_currency = market.split(
+                                        '/')
                                     new_message += message_template.render(
                                         values=values,
                                         exchange=exchange,
@@ -441,7 +449,7 @@ class Notifier(IndicatorUtils):
             list: A list with the plain message data for the notifier.
         """
 
-        if not self.last_analysis: #is the first run
+        if not self.last_analysis:  # is the first run
             self.last_analysis = new_analysis
             self.first_run = True
 
@@ -465,24 +473,26 @@ class Notifier(IndicatorUtils):
                 ohlcv_values[exchange][market_pair] = dict()
                 lrsi_values[exchange][market_pair] = dict()
 
-                #Getting price values for each market pair and candle period
+                # Getting price values for each market pair and candle period
                 for indicator_type in new_analysis[exchange][market_pair]:
                     if indicator_type == 'informants':
-                        #Getting OHLC prices
+                        # Getting OHLC prices
                         for index, analysis in enumerate(new_analysis[exchange][market_pair]['informants']['ohlcv']):
                             values = dict()
                             for signal in analysis['config']['signal']:
                                 values[signal] = analysis['result'].iloc[-1][signal]
-                                ohlcv_values[exchange][market_pair][analysis['config']['candle_period']] = values
+                                ohlcv_values[exchange][market_pair][analysis['config']
+                                                                    ['candle_period']] = values
 
-                        #Getting LRSI values
+                        # Getting LRSI values
                         if 'lrsi' in new_analysis[exchange][market_pair]['informants']:
                             for index, analysis in enumerate(new_analysis[exchange][market_pair]['informants']['lrsi']):
                                 values = dict()
                                 for signal in analysis['config']['signal']:
                                     values[signal] = analysis['result'].iloc[-1][signal]
-                            
-                                lrsi_values[exchange][market_pair][analysis['config']['candle_period']] = values                                 
+
+                                lrsi_values[exchange][market_pair][analysis['config']
+                                                                   ['candle_period']] = values
 
                 for indicator_type in new_analysis[exchange][market_pair]:
                     if indicator_type == 'informants':
@@ -498,7 +508,8 @@ class Notifier(IndicatorUtils):
                                 candle_period = analysis['config']['candle_period']
 
                                 if not candle_period in new_messages[exchange][market_pair]:
-                                    new_messages[exchange][market_pair][candle_period] = list()
+                                    new_messages[exchange][market_pair][candle_period] = list(
+                                    )
 
                             if indicator_type == 'indicators':
                                 for signal in analysis['config']['signal']:
@@ -506,7 +517,8 @@ class Notifier(IndicatorUtils):
 
                                     values[signal] = analysis['result'].iloc[-1][signal]
                                     if isinstance(values[signal], float):
-                                        values[signal] = format(values[signal], '.2f')
+                                        values[signal] = format(
+                                            values[signal], '.2f')
                             elif indicator_type == 'crossovers':
                                 latest_result = analysis['result'].iloc[-1]
 
@@ -522,11 +534,13 @@ class Notifier(IndicatorUtils):
 
                                 values[key_signal] = analysis['result'].iloc[-1][key_signal]
                                 if isinstance(values[key_signal], float):
-                                        values[key_signal] = format(values[key_signal], '.2f')
+                                    values[key_signal] = format(
+                                        values[key_signal], '.2f')
 
                                 values[crossed_signal] = analysis['result'].iloc[-1][crossed_signal]
                                 if isinstance(values[crossed_signal], float):
-                                        values[crossed_signal] = format(values[crossed_signal], '.2f')
+                                    values[crossed_signal] = format(
+                                        values[crossed_signal], '.2f')
 
                             status = 'neutral'
                             if latest_result['is_hot']:
@@ -544,7 +558,7 @@ class Notifier(IndicatorUtils):
 
                             if latest_result['is_hot'] or latest_result['is_cold']:
 
-                                #Custom 'hot' / 'cold' labels
+                                # Custom 'hot' / 'cold' labels
                                 hot_cold_label = ''
                                 if latest_result['is_hot'] and 'hot_label' in analysis['config']:
                                     hot_cold_label = analysis['config']['hot_label']
@@ -552,45 +566,51 @@ class Notifier(IndicatorUtils):
                                     hot_cold_label = analysis['config']['cold_label']
 
                                 try:
-                                    last_status = self.last_analysis[exchange][market_pair][indicator_type][indicator][index]['status']
+                                    last_status = self.last_analysis[exchange][market_pair][
+                                        indicator_type][indicator][index]['status']
                                 except:
                                     last_status = str()
 
                                 should_alert = True
 
-                                #if self.first_run:
-                                    #self.logger.info('Alert once for %s %s %s', market_pair, indicator, candle_period)
-                                    
+                                # if self.first_run:
+                                #self.logger.info('Alert once for %s %s %s', market_pair, indicator, candle_period)
+
                                 if not self.first_run:
                                     if analysis['config']['alert_frequency'] == 'once':
                                         if last_status == status:
-                                            self.logger.info('Alert frecuency once. Dont alert. %s %s %s', 
-                                            market_pair, indicator, candle_period)
+                                            self.logger.info('Alert frecuency once. Dont alert. %s %s %s',
+                                                             market_pair, indicator, candle_period)
                                             should_alert = False
 
                                 if not analysis['config']['alert_enabled']:
                                     should_alert = False
 
                                 if 'mute_cold' in analysis['config'] and analysis['config']['mute_cold'] == True and latest_result['is_cold'] == True:
-                                    self.logger.info('Skiping cold notification for %s %s %s', market_pair, indicator, candle_period)
-                                    should_alert = False                                    
+                                    self.logger.info(
+                                        'Skiping cold notification for %s %s %s', market_pair, indicator, candle_period)
+                                    should_alert = False
 
                                 if should_alert:
-                                    base_currency, quote_currency = market_pair.split('/')
+                                    base_currency, quote_currency = market_pair.split(
+                                        '/')
                                     precision = self.market_data[exchange][market_pair]['precision']
-                                    decimal_format = '.{}f'.format(precision['price'])
+                                    decimal_format = '.{}f'.format(
+                                        precision['price'])
 
                                     prices = ''
                                     price_value = {}
                                     candle_period = analysis['config']['candle_period']
                                     candle_values = ohlcv_values[exchange][market_pair]
 
-                                    if candle_period in candle_values :
+                                    if candle_period in candle_values:
                                         for key, value in candle_values[candle_period].items():
                                             price_value[key] = value
 
-                                            value = format(value, decimal_format)
-                                            prices = '{} {}: {}' . format(prices, key.title(), value)
+                                            value = format(
+                                                value, decimal_format)
+                                            prices = '{} {}: {}' . format(
+                                                prices, key.title(), value)
 
                                     decimal_format = '%' + decimal_format
 
@@ -607,18 +627,19 @@ class Notifier(IndicatorUtils):
                                         prices=prices, lrsi=lrsi, creation_date=creation_date, indicator_label=indicator_label)
                                     """
 
-                                    #save some memory removing unused data
+                                    # save some memory removing unused data
                                     if 'result' in analysis:
                                         del analysis['result']
 
                                     new_message = dict(
                                         values=values, exchange=exchange, market=market_pair, base_currency=base_currency,
                                         quote_currency=quote_currency, indicator=indicator, indicator_number=index,
-                                        analysis=analysis, status=status, last_status=last_status, 
+                                        analysis=analysis, status=status, last_status=last_status,
                                         prices=prices, lrsi=lrsi, creation_date=creation_date, hot_cold_label=hot_cold_label,
-                                        indicator_label=indicator_label, price_value = price_value, decimal_format=decimal_format)                                    
+                                        indicator_label=indicator_label, price_value=price_value, decimal_format=decimal_format)
 
-                                    new_messages[exchange][market_pair][candle_period].append(new_message)
+                                    new_messages[exchange][market_pair][candle_period].append(
+                                        new_message)
 
         # Merge changes from new analysis into last analysis
         self.last_analysis = {**self.last_analysis, **new_analysis}
@@ -627,13 +648,13 @@ class Notifier(IndicatorUtils):
             self.first_run = False
 
         return new_messages
-    
+
     def set_timezone(self, timezone):
         self.timezone = timezone
 
     def set_enable_charts(self, enable_charts):
         self.enable_charts = enable_charts
-    
+
     def set_all_historical_data(self, all_historical_data):
         self.all_historical_data = all_historical_data
 
@@ -647,7 +668,7 @@ class Notifier(IndicatorUtils):
         for exchange in messages:
             for market_pair in messages[exchange]:
                 _messages = messages[exchange][market_pair]
-                                    
+
                 for candle_period in _messages:
                     if len(_messages[candle_period]) == 0:
                         continue
@@ -655,9 +676,11 @@ class Notifier(IndicatorUtils):
                     candles_data = self.all_historical_data[exchange][market_pair][candle_period]
 
                     try:
-                        self.create_chart(exchange, market_pair, candle_period, candles_data)
-                    except Exception :
-                        self.logger.info('Error creating chart for %s %s', market_pair, candle_period)
+                        self.create_chart(
+                            exchange, market_pair, candle_period, candles_data)
+                    except Exception:
+                        self.logger.info(
+                            'Error creating chart for %s %s', market_pair, candle_period)
 
     def create_chart(self, exchange, market_pair, candle_period, candles_data):
 
@@ -681,7 +704,8 @@ class Notifier(IndicatorUtils):
         fig.set_size_inches(8, 18, forward=True)
         axescolor = '#f6f6f6'  # the axes background color
 
-        ax1 = fig.add_axes(rect1, facecolor=axescolor)  # left, bottom, width, height
+        # left, bottom, width, height
+        ax1 = fig.add_axes(rect1, facecolor=axescolor)
         ax2 = fig.add_axes(rect2, facecolor=axescolor, sharex=ax1)
         ax3 = fig.add_axes(rect3, facecolor=axescolor, sharex=ax1)
         ax4 = fig.add_axes(rect4, facecolor=axescolor)
@@ -689,7 +713,6 @@ class Notifier(IndicatorUtils):
         # Plot Candles chart
         candle_pattern = self.candle_check(candles_data, candle_period)
         self.plot_candlestick(ax1, df, candle_period, candle_pattern)
-
 
         # Plot RSI (14)
         self.plot_rsi(ax2, df)
@@ -719,11 +742,13 @@ class Notifier(IndicatorUtils):
 
         fig.autofmt_xdate()
 
-        title = '{} {} {} - {}'.format(exchange, market_pair, candle_period, creation_date).upper()
+        title = '{} {} {} - {}'.format(exchange, market_pair,
+                                       candle_period, creation_date).upper()
         fig.suptitle(title, fontsize=14)
 
         market_pair = market_pair.replace('/', '_').lower()
-        chart_file = '{}/{}_{}_{}.png'.format('./charts', exchange, market_pair, candle_period)
+        chart_file = '{}/{}_{}_{}.png'.format('./charts',
+                                              exchange, market_pair, candle_period)
 
         plt.savefig(chart_file)
         plt.close(fig)
@@ -731,7 +756,7 @@ class Notifier(IndicatorUtils):
         return chart_file
 
     def candlestick_ohlc(self, ax, quotes, cdl=None, width=0.2, colorup='k', colordown='r',
-                    alpha=1.0, ochl=False):
+                         alpha=1.0, ochl=False):
         """
         Plot the time, open, high, low, close as a vertical line ranging
         from low to high.  Use a rectangular bar to represent the
@@ -790,7 +815,7 @@ class Notifier(IndicatorUtils):
             if close >= open:
                 if cdl_pattern:
                     for column in cdl:
-                        if cdl[column][index]!= 0:
+                        if cdl[column][index] != 0:
                             color = colors[cdl.columns.get_loc(column)]
                             break
                         else:
@@ -864,27 +889,29 @@ class Notifier(IndicatorUtils):
 
                 historical_data = df
                 cdl = candle_recognition.Candle_recognition()
-                candle_pattern = cdl.analyze(historical_data, signal, notification, candle_check, hot_tresh, cold_tresh)
-                candle_pattern = candle_pattern.drop(['is_hot', 'is_cold'], axis=1)
+                candle_pattern = cdl.analyze(
+                    historical_data, signal, notification, candle_check, hot_tresh, cold_tresh)
+                candle_pattern = candle_pattern.drop(
+                    ['is_hot', 'is_cold'], axis=1)
             else:
                 candle_pattern = pd.DataFrame()
 
         except Exception:
-            self.logger.info('error in indicator config for candle pattern: {}'.format(sys.exc_info()[0]))
+            self.logger.info(
+                'error in indicator config for candle pattern: {}'.format(sys.exc_info()[0]))
 
         return candle_pattern
 
     def plot_candlestick(self, ax, df, candle_period, candle_pattern):
         textsize = 11
 
-        ma7  = self.EMA(df, 7)
+        ma7 = self.EMA(df, 7)
         ma25 = self.EMA(df, 25)
         ma99 = self.EMA(df, 99)
 
-
         if(df['close'].count() > 120):
-            df   = df.iloc[-120:]
-            ma7  = ma7.iloc[-120:]
+            df = df.iloc[-120:]
+            ma7 = ma7.iloc[-120:]
             ma25 = ma25.iloc[-120:]
             ma99 = ma99.iloc[-120:]
             candle_pattern = candle_pattern.iloc[-120:]
@@ -893,24 +920,28 @@ class Notifier(IndicatorUtils):
         min_x = np.nanmin(_time)
         max_x = np.nanmax(_time)
 
-        stick_width = ((max_x - min_x) / _time.size )             
+        stick_width = ((max_x - min_x) / _time.size)
 
         ax.set_ymargin(0.2)
         ax.ticklabel_format(axis='y', style='plain')
 
         try:
             self.candlestick_ohlc(ax, zip(_time, df['open'], df['high'], df['low'], df['close']), cdl=candle_pattern,
-                    width=stick_width, colorup='olivedrab', colordown='crimson')
+                                  width=stick_width, colorup='olivedrab', colordown='crimson')
         except:
             print(traceback.print_exc())
 
         ax.plot(df.index, ma7, color='darkorange', lw=0.8, label='EMA (7)')
-        ax.plot(df.index, ma25, color='mediumslateblue', lw=0.8, label='EMA (25)')
+        ax.plot(df.index, ma25, color='mediumslateblue',
+                lw=0.8, label='EMA (25)')
         ax.plot(df.index, ma99, color='firebrick', lw=0.8, label='EMA (99)')
 
-        ax.text(0.04, 0.94, 'EMA (7, close)', color='darkorange', transform=ax.transAxes, fontsize=textsize, va='top')
-        ax.text(0.24, 0.94, 'EMA (25, close)', color='mediumslateblue', transform=ax.transAxes,  fontsize=textsize, va='top')
-        ax.text(0.46, 0.94, 'EMA (99, close)', color='firebrick', transform=ax.transAxes,  fontsize=textsize, va='top')
+        ax.text(0.04, 0.94, 'EMA (7, close)', color='darkorange',
+                transform=ax.transAxes, fontsize=textsize, va='top')
+        ax.text(0.24, 0.94, 'EMA (25, close)', color='mediumslateblue',
+                transform=ax.transAxes,  fontsize=textsize, va='top')
+        ax.text(0.46, 0.94, 'EMA (99, close)', color='firebrick',
+                transform=ax.transAxes,  fontsize=textsize, va='top')
 
     def plot_rsi(self, ax, df):
         textsize = 11
@@ -920,7 +951,7 @@ class Notifier(IndicatorUtils):
 
         if(df['close'].count() > 120):
             df = df.iloc[-120:]
-            rsi = rsi[-120:]     
+            rsi = rsi[-120:]
 
         ax.plot(df.index, rsi, color=fillcolor, linewidth=0.5)
         ax.axhline(70, color='darkmagenta', linestyle='dashed', alpha=0.6)
@@ -931,7 +962,8 @@ class Notifier(IndicatorUtils):
                         facecolor=fillcolor, edgecolor=fillcolor)
         ax.set_ylim(0, 100)
         ax.set_yticks([30, 70])
-        ax.text(0.024, 0.94, 'RSI (14)', va='top',transform=ax.transAxes, fontsize=textsize)
+        ax.text(0.024, 0.94, 'RSI (14)', va='top',
+                transform=ax.transAxes, fontsize=textsize)
 
     def plot_macd(self, ax, df, candle_period):
         textsize = 11
@@ -945,37 +977,39 @@ class Notifier(IndicatorUtils):
         min_y = df.macd.min()
         max_y = df.macd.max()
 
-        #Reduce Macd Histogram values to have a better visualization
+        # Reduce Macd Histogram values to have a better visualization
         macd_h = df.macdh * 0.5
 
         if (macd_h.min() < min_y):
             min_y = macd_h.min()
 
         if (macd_h.max() > max_y):
-            max_y = macd_h.max() 
+            max_y = macd_h.max()
 
-        #Adding some extra space at bottom/top
+        # Adding some extra space at bottom/top
         min_y = min_y * 1.2
         max_y = max_y * 1.2
 
-        #Define candle bar width
+        # Define candle bar width
         _time = mdates.date2num(df.index.to_pydatetime())
         min_x = np.nanmin(_time)
         max_x = np.nanmax(_time)
 
-        bar_width = ((max_x - min_x) / _time.size ) * 0.8            
+        bar_width = ((max_x - min_x) / _time.size) * 0.8
 
-        ax.bar(x=_time, bottom=[0 for _ in macd_h.index], height=macd_h, width=bar_width, color="red", alpha = 0.4)
+        ax.bar(x=_time, bottom=[0 for _ in macd_h.index],
+               height=macd_h, width=bar_width, color="red", alpha=0.4)
         ax.plot(_time, df.macd, color='blue', lw=0.6)
         ax.plot(_time, df.macds, color='red', lw=0.6)
         ax.set_ylim((min_y, max_y))
-    
+
         ax.yaxis.set_major_locator(mticker.MaxNLocator(nbins=5, prune='upper'))
-        ax.text(0.024, 0.94, 'MACD (12, 26, close, 9)', va='top', transform=ax.transAxes, fontsize=textsize) 
+        ax.text(0.024, 0.94, 'MACD (12, 26, close, 9)', va='top',
+                transform=ax.transAxes, fontsize=textsize)
 
     def plot_ppsr(self, ax, df, candle_period):
         """Calculate Pivot Points, Supports and Resistances for given data
-        
+
         :param df: pandas.DataFrame
         :return: pandas.DataFrame
         """
@@ -986,7 +1020,8 @@ class Notifier(IndicatorUtils):
         S2 = pd.Series(PP - df['high'] + df['low'])
         R3 = pd.Series(df['high'] + 2 * (PP - df['low']))
         S3 = pd.Series(df['low'] - 2 * (df['high'] - PP))
-        psr = {'PP': PP, 'R1': R1, 'S1': S1, 'R2': R2, 'S2': S2, 'R3': R3, 'S3': S3}
+        psr = {'PP': PP, 'R1': R1, 'S1': S1,
+               'R2': R2, 'S2': S2, 'R3': R3, 'S3': S3}
         PSR = pd.DataFrame(psr)
         df = df.join(PSR)
         return df
@@ -1024,7 +1059,6 @@ class Notifier(IndicatorUtils):
 
         return rsi
 
-
     def moving_average(self, x, n, type='simple'):
         """
         compute an n period moving average.
@@ -1044,10 +1078,8 @@ class Notifier(IndicatorUtils):
         a[:n] = a[n]
         return a
 
-
-    def EMA(self, df, n, field = 'close'):
-        return pd.Series(talib.EMA(df[field].astype('f8').values, n), name = 'EMA_' + field.upper() + '_' + str(n), index = df.index)        
-
+    def EMA(self, df, n, field='close'):
+        return pd.Series(talib.EMA(df[field].astype('f8').values, n), name='EMA_' + field.upper() + '_' + str(n), index=df.index)
 
     def plot_ichimoku(self, ax, df, historical_data, candle_period):
         indicator_conf = {}
@@ -1058,12 +1090,13 @@ class Notifier(IndicatorUtils):
                     indicator_conf = config
                     break
 
-        tenkansen_period = indicator_conf['tenkansen_period'] if 'tenkansen_period' in indicator_conf else 20                       
+        tenkansen_period = indicator_conf['tenkansen_period'] if 'tenkansen_period' in indicator_conf else 20
         kijunsen_period = indicator_conf['kijunsen_period'] if 'kijunsen_period' in indicator_conf else 60
         senkou_span_b_period = indicator_conf['senkou_span_b_period'] if 'senkou_span_b_period' in indicator_conf else 120
-        
+
         textsize = 11
-        ichimoku_data = ichimoku.Ichimoku().analyze(historical_data, tenkansen_period, kijunsen_period , senkou_span_b_period, chart=True)
+        ichimoku_data = ichimoku.Ichimoku().analyze(historical_data, tenkansen_period,
+                                                    kijunsen_period, senkou_span_b_period, chart=True)
 
         if(df['close'].count() > 120):
             df = df.iloc[-120:]
@@ -1076,13 +1109,13 @@ class Notifier(IndicatorUtils):
         min_x = np.nanmin(_time)
         max_x = np.nanmax(_time)
 
-        stick_width = ((max_x - min_x) / _time.size )
+        stick_width = ((max_x - min_x) / _time.size)
 
         ax.set_ymargin(0.2)
         ax.ticklabel_format(axis='y', style='plain')
 
         self.candlestick_ohlc(ax, zip(_time, df['open'], df['high'], df['low'], df['close']),
-                    width=stick_width, colorup='olivedrab', colordown='crimson')
+                              width=stick_width, colorup='olivedrab', colordown='crimson')
 
         kijunsen = ichimoku_data.kijunsen
         tenkansen = ichimoku_data.tenkansen
@@ -1090,15 +1123,21 @@ class Notifier(IndicatorUtils):
         leading_span_b = ichimoku_data.leading_span_b
         ax.plot(_time2, kijunsen, color='red', lw=0.6)
         ax.plot(_time2, tenkansen, color='blue', lw=0.6)
-        ax.plot(_time2, leading_span_a, color='darkgreen', lw=0.6, linestyle='dashed')
-        ax.plot(_time2, leading_span_b, color='darkred', lw=0.6, linestyle='dashed')
+        ax.plot(_time2, leading_span_a, color='darkgreen',
+                lw=0.6, linestyle='dashed')
+        ax.plot(_time2, leading_span_b, color='darkred',
+                lw=0.6, linestyle='dashed')
 
-        ax.fill_between(_time2, leading_span_a, leading_span_b, where = leading_span_a > leading_span_b,
+        ax.fill_between(_time2, leading_span_a, leading_span_b, where=leading_span_a > leading_span_b,
                         facecolor='#008000', interpolate=True, alpha=0.25)
         ax.fill_between(_time2, leading_span_a, leading_span_b, where=leading_span_b > leading_span_a,
                         facecolor='#ff0000', interpolate=True, alpha=0.25)
 
-        ax.text(0.04, 0.94, 'kijunsen', color='red', transform=ax.transAxes, fontsize=textsize, va='top')
-        ax.text(0.20, 0.94, 'tenkansen', color='blue', transform=ax.transAxes, fontsize=textsize, va='top')
-        ax.text(0.44, 0.94, '-Senkou-Span-A-', color='darkgreen', transform=ax.transAxes, fontsize=textsize, va='top', fontstyle='italic')
-        ax.text(0.66, 0.94, '-Senkou-Span-B-', color='darkred', transform=ax.transAxes, fontsize=textsize, va='top', fontstyle='italic')
+        ax.text(0.04, 0.94, 'kijunsen', color='red',
+                transform=ax.transAxes, fontsize=textsize, va='top')
+        ax.text(0.20, 0.94, 'tenkansen', color='blue',
+                transform=ax.transAxes, fontsize=textsize, va='top')
+        ax.text(0.44, 0.94, '-Senkou-Span-A-', color='darkgreen',
+                transform=ax.transAxes, fontsize=textsize, va='top', fontstyle='italic')
+        ax.text(0.66, 0.94, '-Senkou-Span-B-', color='darkred',
+                transform=ax.transAxes, fontsize=textsize, va='top', fontstyle='italic')

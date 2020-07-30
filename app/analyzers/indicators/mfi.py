@@ -39,4 +39,3 @@ class MFI(IndicatorUtils):
             mfi_values['is_cold'] = mfi_values[signal[0]] > cold_thresh
 
         return mfi_values
-

@@ -3,8 +3,8 @@
 Average Directional Index indicator
 """
 
-import pandas
 import numpy
+import pandas
 
 from analyzers.utils import IndicatorUtils
 
@@ -84,7 +84,6 @@ class Adx(IndicatorUtils):
 
         return adx_values
 
-
     def TR(self, high, low, close, tr):
         """
         Calculates TR (True Range)
@@ -103,7 +102,6 @@ class Adx(IndicatorUtils):
             tr[index] = max(x, y, z)
 
         return tr
-
 
     def DM(self, high, low, pdm, ndm):
         """
@@ -130,7 +128,6 @@ class Adx(IndicatorUtils):
 
         return pdm, ndm
 
-
     def DMsmooth(self, pdm, ndm, pdm_smooth, ndm_smooth, period_count):
         """
         Smoothing positive and negative directional movement
@@ -145,11 +142,12 @@ class Adx(IndicatorUtils):
         pdm_smooth[period_count-1] = pdm[0:period_count].sum() / period_count
         ndm_smooth[period_count - 1] = ndm[0:period_count].sum() / period_count
         for index in range(period_count, pdm.shape[0]):
-            pdm_smooth[index] = (pdm[index-1] - (pdm_smooth[index-1]/period_count)) + pdm_smooth[index-1]
-            ndm_smooth[index] = (ndm[index - 1] - (ndm_smooth[index-1] / period_count)) + ndm_smooth[index-1]
+            pdm_smooth[index] = (
+                pdm[index-1] - (pdm_smooth[index-1]/period_count)) + pdm_smooth[index-1]
+            ndm_smooth[index] = (
+                ndm[index - 1] - (ndm_smooth[index-1] / period_count)) + ndm_smooth[index-1]
 
         return pdm_smooth, ndm_smooth
-
 
     def DI(self, pdm_smooth, ndm_smooth, tr, pdi, ndi):
         """
@@ -168,7 +166,6 @@ class Adx(IndicatorUtils):
 
         return pdi, ndi
 
-
     def ATR(self, tr, atr, period_count):
         """
         Calculates ATR (Average True Range)
@@ -183,10 +180,10 @@ class Adx(IndicatorUtils):
 
         atr[period_count-1] = tr[0:period_count].sum() / period_count
         for index in range(period_count, tr.shape[0]):
-            atr[index] = ((atr[index-1] * (period_count - 1)) + tr[index]) / period_count
+            atr[index] = ((atr[index-1] * (period_count - 1)) +
+                          tr[index]) / period_count
 
         return atr
-
 
     def ADX(self, pdi, ndi, dx, adx, period_count):
         """
@@ -200,11 +197,14 @@ class Adx(IndicatorUtils):
         """
 
         for index in range(0, pdi.shape[0]):
-            dx[index] = ((abs(pdi[index] - ndi[index])) / (abs(pdi[index] + ndi[index]))) * 100
+            dx[index] = ((abs(pdi[index] - ndi[index])) /
+                         (abs(pdi[index] + ndi[index]))) * 100
 
         period_count2 = period_count*2
-        adx[period_count2-1] = dx[period_count:period_count2].sum() / period_count
+        adx[period_count2-1] = dx[period_count:period_count2].sum() / \
+            period_count
         for index in range(period_count2, dx.shape[0]):
-            adx[index] = ((adx[index-1] * (period_count - 1)) + dx[index]) / period_count
+            adx[index] = ((adx[index-1] * (period_count - 1)) +
+                          dx[index]) / period_count
 
         return dx, adx

@@ -22,7 +22,7 @@ class LRSI(IndicatorUtils):
     l0, l1, l2, l3 = 0.0, 0.0, 0.0, 0.0
 
     def apply_filter(self, price, gamma):
-        l0_1 = self.l0  
+        l0_1 = self.l0
         l1_1 = self.l1
         l2_1 = self.l2
 
@@ -63,14 +63,15 @@ class LRSI(IndicatorUtils):
                 good to purchase.
             cold_thresh: Defaults to 0.8. The threshold at which this might be
                 good to sell.
-            
+
 
         Returns:
             pandas.DataFrame: A dataframe containing the indicator and hot/cold values.
         """
 
         dataframe = self.convert_to_dataframe(historical_data)
-        
-        dataframe['lrsi'] = dataframe.close.apply(lambda x: self.apply_filter(x, 0.4) )
+
+        dataframe['lrsi'] = dataframe.close.apply(
+            lambda x: self.apply_filter(x, 0.4))
 
         return dataframe
