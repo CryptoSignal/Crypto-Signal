@@ -16,7 +16,7 @@ class Configuration():
         """
 
         with open('defaults.yml', 'r') as config_file:
-            default_config = yaml.load(config_file)
+            default_config = yaml.load(config_file, Loader=yaml.FullLoader)
 
         if os.path.isfile('config.yml'):
             with open('config.yml', 'r') as config_file:

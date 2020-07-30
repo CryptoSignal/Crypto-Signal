@@ -60,7 +60,7 @@ def main():
             worker.daemon = True
             worker.start()
 
-            time.sleep(60)
+            time.sleep(settings['start_worker_interval'])
             num += 1
 
     logger.info('All workers are running!')
