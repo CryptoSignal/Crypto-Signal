@@ -1,4 +1,4 @@
-FROM python:3.6-jessie
+FROM python:3
 
 # TA-lib is required by the python TA-lib wrapper. This provides analysis.
 COPY lib/ta-lib-0.4.0-src.tar.gz /tmp/ta-lib-0.4.0-src.tar.gz
@@ -20,4 +20,4 @@ WORKDIR /app
 RUN pip install -r requirements-step-1.txt
 RUN pip install -r requirements-step-2.txt
 
-CMD ["/usr/local/bin/python","app.py"]
+CMD ["python","app.py"]

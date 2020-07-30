@@ -33,8 +33,9 @@ class CrossOver(IndicatorUtils):
             column_indexed_name = '{}_{}'.format(column, key_indicator_index)
             new_key_indicator.rename(columns={column: column_indexed_name}, inplace=True)
 
+        length = new_key_indicator.shape()
         crossed_indicator_name = '{}_{}'.format(crossed_signal, crossed_indicator_index)
-        new_crossed_indicator = crossed_indicator.copy(deep=True)
+        new_crossed_indicator = crossed_indicator[:length[1]].copy(deep=True)
         for column in new_crossed_indicator:
             column_indexed_name = '{}_{}'.format(column, crossed_indicator_index)
             new_crossed_indicator.rename(columns={column: column_indexed_name}, inplace=True)
