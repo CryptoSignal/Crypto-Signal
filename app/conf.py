@@ -20,7 +20,7 @@ class Configuration():
 
         if os.path.isfile('config.yml'):
             with open('config.yml', 'r') as config_file:
-                user_config = yaml.load(config_file)
+                user_config = yaml.load(config_file, Loader=yaml.FullLoader)
         else:
             user_config = dict()
 
