@@ -32,7 +32,7 @@ class WebhookNotifier(NotifierUtils):
 
         data = {'messages': json.dumps(messages)}
 
-        if chart_file != None and os.path.exists(chart_file):
+        if chart_file and os.path.exists(chart_file):
             files = {'chart': open(chart_file, 'rb')}
 
             if self.username and self.password:
