@@ -138,7 +138,7 @@ class Notifier(IndicatorUtils):
 
         messages = self.get_indicator_messages(new_analysis)
 
-        if self.enable_charts == True:
+        if self.enable_charts:
             if not os.path.exists(charts_dir):
                 os.mkdir(charts_dir)
 
@@ -158,7 +158,7 @@ class Notifier(IndicatorUtils):
     def notify_all_messages(self, exchange, market_pair, candle_period, messages):
         chart_file = None
 
-        if self.enable_charts == True:
+        if self.enable_charts:
             try:
                 candles_data = self.all_historical_data[exchange][market_pair][candle_period]
                 chart_file = self.create_chart(
@@ -258,8 +258,8 @@ class Notifier(IndicatorUtils):
         for message in messages:
             formatted_messages.append(message_template.render(message))
 
-        if self.enable_charts == True:
-            if chart_file != None and os.path.exists(chart_file):
+        if self.enable_charts:
+            if chart_file and os.path.exists(chart_file):
                 try:
                     self.telegram_client.send_chart_messages(
                         open(chart_file, 'rb'), formatted_messages)
@@ -644,7 +644,7 @@ class Notifier(IndicatorUtils):
         # Merge changes from new analysis into last analysis
         self.last_analysis = {**self.last_analysis, **new_analysis}
 
-        if self.first_run == True:
+        if self.first_run:
             self.first_run = False
 
         return new_messages
