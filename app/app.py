@@ -38,33 +38,31 @@ def main():
         logger.info("No configured markets, using all available on exchange.")
         market_data = exchange_interface.get_exchange_markets()
         
-#    notifier = Notifier(config.notifiers, market_data)
-
     thread_list = []
 
     for exchange in market_data:
-        num = 1
-        for chunk in split_market_data(market_data[exchange]):
+        for key in market_data[exchange].keys():
+
             market_data_chunk = dict()
-            market_data_chunk[exchange] = { key: market_data[exchange][key] for key in chunk }
+            market_data_chunk[exchange] = {key : market_data[exchange][key]}
+
+            workerName = "Worker-{}-{}".format(exchange, key)
 
             notifier = Notifier(config.notifiers, config.indicators, market_data_chunk)
-            behaviour = Behaviour(config, exchange_interface, notifier)
-
-            workerName = "Worker-{}".format(num)
+            behaviour = Behaviour(config, exchange_interface, notifier)            
+            
             worker = AnalysisWorker(workerName, behaviour, notifier, market_data_chunk, settings, logger)
             thread_list.append(worker)
             worker.daemon = True
             worker.start()
-
-            time.sleep(60)
-            num += 1
-
+            time.sleep(2)
+    
     logger.info('All workers are running!')
 
     for worker in thread_list:
         worker.join()
 
+"""
 def split_market_data(market_data):
     if len(market_data.keys()) > 20:
         return list(chunks(list(market_data.keys()), 20))
@@ -72,9 +70,9 @@ def split_market_data(market_data):
         return [list(market_data.keys())]
 
 def chunks(l, n):
-    """Yield successive n-sized chunks from l."""
     for i in range(0, len(l), n):
         yield l[i:i + n]
+"""
 
 class AnalysisWorker(Thread):
 
