@@ -60,26 +60,27 @@ class Ichimoku(IndicatorUtils):
             (ichimoku_values['tenkansen'] + ichimoku_values['kijunsen']) / 2)
         ichimoku_values['leading_span_b'] = (high_senkou + low_senkou) / 2
 
-        # add time period for cloud offset
-        ## if cloud discplacement changed the ichimuko plot will be off ##
-        cloud_displacement = 26
-        last_time = dataframe.index[-1]
-        timedelta = dataframe.index[1] - dataframe.index[0]
-        newindex = pandas.DatetimeIndex(start=last_time + timedelta,
-                                        freq=timedelta,
-                                        periods=cloud_displacement)
-        ichimoku_values = ichimoku_values.append(
-            pandas.DataFrame(index=newindex))
-        # cloud offset
-        ichimoku_values['leading_span_a'] = ichimoku_values['leading_span_a'].shift(
-            cloud_displacement)
-        ichimoku_values['leading_span_b'] = ichimoku_values['leading_span_b'].shift(
-            cloud_displacement)
-
         ichimoku_values['is_hot'] = False
         ichimoku_values['is_cold'] = False
 
         try:
+            # add time period for cloud offset
+            ## if cloud discplacement changed the ichimuko plot will be off ##
+            cloud_displacement = 26
+            last_time = dataframe.index[-1]
+            timedelta = dataframe.index[1] - dataframe.index[0]
+            newindex = pandas.DatetimeIndex(start=last_time + timedelta,
+                                            freq=timedelta,
+                                            periods=cloud_displacement)
+            ichimoku_values = ichimoku_values.append(
+                pandas.DataFrame(index=newindex))
+            # cloud offset
+            ichimoku_values['leading_span_a'] = ichimoku_values['leading_span_a'].shift(
+                cloud_displacement)
+            ichimoku_values['leading_span_b'] = ichimoku_values['leading_span_b'].shift(
+                cloud_displacement)
+
+        
             for index in range(0, ichimoku_values.index.shape[0]):
                 date = ichimoku_values.index[index]
 
@@ -97,8 +98,8 @@ class Ichimoku(IndicatorUtils):
                 else:
                     pass
 
-        except KeyError as e:
-            print('keyerror: {}'.format(e))
+        except Exception as e:
+            print('Error running ichimoku analysis: {}'.format(e))
 
         if chart == None:
             ichimoku_values.dropna(how='any', inplace=True)

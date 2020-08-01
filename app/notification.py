@@ -164,9 +164,10 @@ class Notifier(IndicatorUtils):
                 chart_file = self.create_chart(
                     exchange, market_pair, candle_period, candles_data)
                 #self.logger.info('Chart file %s', chart_file)
-            except Exception:
+            except Exception as e:
                 self.logger.info('Error creating chart for %s %s',
                                  market_pair, candle_period)
+                self.logger.exception(e)
 
         # self.notify_slack(new_analysis)
         self.notify_discord(messages)
@@ -678,9 +679,10 @@ class Notifier(IndicatorUtils):
                     try:
                         self.create_chart(
                             exchange, market_pair, candle_period, candles_data)
-                    except Exception:
+                    except Exception as e:
                         self.logger.info(
                             'Error creating chart for %s %s', market_pair, candle_period)
+                        self.logger.exception(e)                           
 
     def create_chart(self, exchange, market_pair, candle_period, candles_data):
 
