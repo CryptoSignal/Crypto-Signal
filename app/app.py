@@ -50,7 +50,7 @@ def main():
                 key: market_data[exchange][key] for key in chunk}
 
             notifier = Notifier(
-                config.notifiers, config.indicators, market_data_chunk)
+                config.notifiers, config.indicators, config.conditionals, market_data_chunk)
             behaviour = Behaviour(config, exchange_interface, notifier)
 
             workerName = "Worker-{}".format(num)
