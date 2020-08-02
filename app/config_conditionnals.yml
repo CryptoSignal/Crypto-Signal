@@ -1,0 +1,144 @@
+settings:
+  log_level: INFO
+  update_interval: 120
+  start_worker_interval: 2
+  market_data_chunk_size: 1
+  timezone: Europe/Paris
+
+exchanges:
+  kraken:
+    required:
+      enabled: true
+    all_pairs:
+      - EUR
+    exclude:
+      - XBTEUR.d
+      - ETHEUR.d
+      - USDC
+      - USDT
+      - MLN
+
+indicators:
+  rsi:
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: multi
+      signal:
+        - rsi
+      hot: 30
+      cold: 70
+      candle_period: 1h
+      period_count: 14
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: multi
+      signal:
+        - rsi
+      hot: 40
+      cold: 60
+      candle_period: 1d
+      period_count: 14
+  momentum:
+    - enabled: false
+      alert_enabled: false
+  mfi:
+    - enabled: false
+      alert_enabled: false
+  obv:
+    - enabled: false
+      alert_enabled: false
+  stoch_rsi:
+    - enabled: false
+      alert_enabled: false
+  macd:
+    - enabled: false
+      alert_enabled: false
+  ichimoku:
+    - enabled: false
+      alert_enabled: false
+  iiv:
+    - enabled: false
+      alert_enabled: false
+  ma_crossover:
+    - enabled: true
+      candle_period: 1d
+      alert_enabled: true
+      alert_frequency: always
+      exponential: true
+      ma_fast: 50
+      ma_slow: 120
+      signal:
+        - open
+        - close
+  bollinger:
+    - enabled: true
+      candle_period: 1h
+      alert_enabled: true
+      alert_frequency: always
+      period_count: 25
+      std_dev: 2.5
+      signal:
+        - low_band
+        - close
+        - up_band
+      mute_cold: false
+    - enabled: true
+      candle_period: 1d
+      alert_enabled: true
+      alert_frequency: always
+      period_count: 25
+      std_dev: 2.5
+      signal:
+        - low_band
+        - close
+        - up_band
+      mute_cold: false
+  aroon_oscillator:
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: always
+      sma_vol_period: 50
+      period_count: 14
+      signal:
+        - aroon
+      candle_period: 1h
+
+informants:
+    lrsi:
+        - enabled: false
+    vwap:
+        - enabled: false
+    sma:
+        - enabled: false
+    ema:
+        - enabled: false
+          alert_enabled: false
+    bollinger_bands:
+        - enabled: false
+    ohlcv:
+        - enabled: false
+
+conditionals:
+  - label: "Buy"
+    hot:
+      - rsi: 0
+      - rsi: 1
+      - bollinger: 1
+    cold:
+      - aroon_oscillator: 0
+  - label: "Sell"
+    cold:
+      - rsi: 0
+      - rsi: 1
+      - bollinger: 1
+    hot:
+      - aroon_oscillator: 0
+
+notifiers:
+    telegram:
+        required:
+            token: 1384797982:AAHVoB6AoHA2ptoWPKH_qZBjH2JBfMqivYE
+            chat_id: -373824531
+        optional:
+            parse_mode: html
+            template: "[{{market}}] {{indicator}} {{status}} {{values}} {{ '\n' -}}"
