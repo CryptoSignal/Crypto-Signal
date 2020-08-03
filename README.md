@@ -12,6 +12,7 @@ Development branch to testing new features. This develop version has a lot of im
 - New config values "hot_label" and "cold_label" for each indicator setup to set custom texts instead of the typical "hot" and "cold".
 - New indicator ADX (Average Directional Index)
 - New indicator Klinger Oscillator
+- New indicator MACD Cross
 
 
 ## Installing And Running
@@ -476,9 +477,26 @@ indicators:
           mute_cold: false
 ```
 
-Because this indicator is commonly used in conjunction with MFI indicator, such signal has been added as part of the configuration. This way, the values of both indicators can be read together. 
 
-Important: For this indicator the hot/cold config values are mandatory.
+#### MACD Cross
+
+The existing "macd" indicator always sends hot signals when the macd > 0, and cold signals when macd < 0. I repeat, always. Perhaps this is not the desired behavior and you only want to receive notifications when macd crosses the signal line, then this new MACD Cross indicator is the appropriate.
+
+```
+indicators:
+  macd_cross:
+    - enabled: true
+      candle_period: 4h
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - macd
+        - signal
+      hot_label: 'Uptrend is coming'
+      cold_label: 'Downtred is coming'
+      indicator_label: 'MACD Cross 4h'
+      mute_cold: false
+```
 
 #### Chart images on webhook
 
