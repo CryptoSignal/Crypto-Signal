@@ -2,6 +2,7 @@
 """
 
 import json
+
 import numpy as np
 import structlog
 
@@ -20,7 +21,6 @@ class Output():
             'csv': self.to_csv,
             'json': self.to_json
         }
-
 
     def to_cli(self, results, market_pair):
         """Creates the message to output to the CLI
@@ -77,7 +77,8 @@ class Output():
                         if isinstance(crossed_value, float):
                             crossed_value = format(crossed_value, '.8f')
 
-                        formatted_string = '{}/{}'.format(key_value, crossed_value)
+                        formatted_string = '{}/{}'.format(
+                            key_value, crossed_value)
                         output += "{}{}: {}{} \t".format(
                             colour_code,
                             '{} #{}'.format(indicator, i),
@@ -104,7 +105,6 @@ class Output():
         output += '\n\n'
         return output
 
-
     def to_csv(self, results, market_pair):
         """Creates the csv to output to the CLI
 
@@ -116,7 +116,8 @@ class Output():
             str: Completed CSV message
         """
 
-        logger.warn('WARNING: CSV output is deprecated and will be removed in a future version')
+        logger.warn(
+            'WARNING: CSV output is deprecated and will be removed in a future version')
 
         output = str()
         for indicator_type in results:
@@ -174,7 +175,6 @@ class Output():
 
         return output
 
-
     def to_json(self, results, market_pair):
         """Creates the JSON to output to the CLI
 
@@ -186,7 +186,8 @@ class Output():
             str: Completed JSON message
         """
 
-        logger.warn('WARNING: JSON output is deprecated and will be removed in a future version')
+        logger.warn(
+            'WARNING: JSON output is deprecated and will be removed in a future version')
 
         for indicator_type in results:
             for indicator in results[indicator_type]:
@@ -195,7 +196,7 @@ class Output():
                         orient='records'
                     )[-1]
 
-        formatted_results = { 'pair': market_pair, 'results': results }
+        formatted_results = {'pair': market_pair, 'results': results}
         output = json.dumps(formatted_results)
         output += '\n'
         return output

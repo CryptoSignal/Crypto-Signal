@@ -1,7 +1,7 @@
 
-import talib
 import numpy
 import pandas
+import talib
 
 from analyzers.utils import IndicatorUtils
 
@@ -28,7 +28,7 @@ class Candle_recognition(IndicatorUtils):
         low = dataframe['low']
         close = dataframe['close']
 
-        candle_functions= {
+        candle_functions = {
             'two_crows': talib.CDLTRISTAR,
             'three_black_crows': talib.CDL3BLACKCROWS,
             'three_inside_up_down': talib.CDL3INSIDE,
@@ -95,12 +95,11 @@ class Candle_recognition(IndicatorUtils):
         candle_args = {'open': open, 'high': high, 'low': low, 'close': close}
         for candle in signal:
             if candle in candle_functions.keys():
-                candles_values[candle] = candle_functions[candle](**candle_args)
-
+                candles_values[candle] = candle_functions[candle](
+                    **candle_args)
 
         candles_values['is_hot'] = False
         candles_values['is_cold'] = False
-
 
         to_check = 0 - candle_check
         for candle in signal:
@@ -114,4 +113,3 @@ class Candle_recognition(IndicatorUtils):
             candles_values[candle] = candles_values[candle].astype(float)
 
         return candles_values
-

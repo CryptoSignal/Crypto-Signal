@@ -3,8 +3,8 @@
 Aroon Oscillator
 """
 
-import pandas
 import numpy
+import pandas
 
 from analyzers.utils import IndicatorUtils
 
@@ -36,8 +36,8 @@ class Aroon_oscillator(IndicatorUtils):
         }
 
         aroon_values = pandas.DataFrame(aroon_columns,
-                                      index=dataframe.index
-                                      )
+                                        index=dataframe.index
+                                        )
 
         for index in range(0, dataframe.shape[0]-24):
             id = dataframe.shape[0]-index
@@ -47,16 +47,20 @@ class Aroon_oscillator(IndicatorUtils):
 
             periods_since_high = id - dataframe.index.get_loc(high_date) - 1
             periods_since_low = id - dataframe.index.get_loc(low_date) - 1
-            aroon_values['aroon_up'][id-1] = 100 * ((25 - periods_since_high) / 25)
+            aroon_values['aroon_up'][id-1] = 100 * \
+                ((25 - periods_since_high) / 25)
 
-            aroon_values['aroon_down'][id-1] = 100 * ((25 - periods_since_low) / 25)
+            aroon_values['aroon_down'][id-1] = 100 * \
+                ((25 - periods_since_low) / 25)
 
-        aroon_values['aroon'] = aroon_values['aroon_up'] - aroon_values['aroon_down']
+        aroon_values['aroon'] = aroon_values['aroon_up'] - \
+            aroon_values['aroon_down']
 
         aroon_values['is_hot'] = False
         aroon_values['is_cold'] = False
 
-        aroon_values['sma_volume'] = dataframe.volume.rolling(sma_vol_period).mean()
+        aroon_values['sma_volume'] = dataframe.volume.rolling(
+            sma_vol_period).mean()
         aroon = aroon_values['aroon'].iloc[-1]
         volume = dataframe['volume'].iloc[-1]
         volume_sma = aroon_values['sma_volume'].iloc[-1]

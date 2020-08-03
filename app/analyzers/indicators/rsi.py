@@ -6,8 +6,9 @@ import math
 import pandas
 from talib import abstract
 
-from analyzers.utils import IndicatorUtils
 from analyzers.informants.lrsi import LRSI
+from analyzers.utils import IndicatorUtils
+
 
 class RSI(IndicatorUtils):
     def analyze(self, historical_data, period_count=14,
@@ -33,21 +34,25 @@ class RSI(IndicatorUtils):
 
         if lrsi_filter and 'gamma' in lrsi_filter:
             lrsi = LRSI()
-            dataframe['lrsi'] = dataframe.close.apply(lambda x: lrsi.apply_filter(x, lrsi_filter['gamma']) )
+            dataframe['lrsi'] = dataframe.close.apply(
+                lambda x: lrsi.apply_filter(x, lrsi_filter['gamma']))
 
         rsi_values = abstract.RSI(dataframe, period_count).to_frame()
         rsi_values.dropna(how='all', inplace=True)
         rsi_values.rename(columns={rsi_values.columns[0]: 'rsi'}, inplace=True)
 
         if rsi_values[signal[0]].shape[0]:
-            rsi_values['is_hot'] = rsi_values.rsi.apply(lambda x: x > 20 and x < hot_thresh)
+            rsi_values['is_hot'] = rsi_values.rsi.apply(
+                lambda x: x > 20 and x < hot_thresh)
             rsi_values['is_cold'] = rsi_values[signal[0]] > cold_thresh
 
             if lrsi_filter and 'lower_values' in lrsi_filter:
                 lower_min = lrsi_filter['lower_values']['min']
                 lower_max = lrsi_filter['lower_values']['max']
 
-                idx = dataframe['lrsi'].apply(lambda x: x < lower_min or x > lower_max)
-                rsi_values.loc[ idx & (rsi_values['is_hot'] == True), 'is_hot' ] = False
-            
+                idx = dataframe['lrsi'].apply(
+                    lambda x: x < lower_min or x > lower_max)
+                rsi_values.loc[idx & (
+                    rsi_values['is_hot'] == True), 'is_hot'] = False
+
         return rsi_values

@@ -3,6 +3,7 @@
 
 from analyzers.utils import IndicatorUtils
 
+
 class OHLCV(IndicatorUtils):
     def analyze(self, historical_data, period_count=15):
         """Performs a SMA analysis on the historical data
