@@ -88,6 +88,13 @@ class ExchangeInterface():
                 'y': 'years'
             }
 
+            if time_period == 'M':
+                time_period = 'w'
+                time_quantity = 4
+            elif time_period == 'Y':
+                time_period = 'w'
+                time_quantity = 48
+
             timedelta_args = { timedelta_values[time_period]: int(time_quantity) }
 
             start_date_delta = timedelta(**timedelta_args)
