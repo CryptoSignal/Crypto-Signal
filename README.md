@@ -1,4 +1,4 @@
-# Crypto Signals
+# CryptoSignal - #1 Quant Trading & Technical Analysis Bot - 2,100 + stars, 580 + forks https://github.com/CryptoSignal/Crypto-Signal
 
 ### Development state: Beta (Code is stable, documentation is often lagging)
 
@@ -6,9 +6,9 @@
 
 Crypto Signals is a command line tool that automates your crypto currency Technical Analysis (TA). It is maintained by a community of traders, engineers, data scientists, PMs, & countless generous individuals who wish to democratize the equal & open access to the greatest wealth re-distribution experiment in human and monetary policy history - Bitcoin
 
-Track over 500 coins across Bittrex, Bitfinex, GDAX, Gemini and more!
+## Track over 500 coins across Bittrex, Binance, Bittrex, Bitfinex, Coinbase, Gemini and more!
 
-Technical Analysis Automated:
+## Technical Analysis Automated:
 * Momentum
 * Relative Strength Index (RSI)
 * Ichimoku Cloud (Leading Span A, Leading Span B, Conversion Line, Base Line)
@@ -19,18 +19,20 @@ Technical Analysis Automated:
 * OBV
 * VWAP
 
-Alerts:
+## Alerts:
 * SMS via Twilio
 * Email
 * Slack
 * Telegram
 * Discord
 
-Features:
+## Features:
 * Modular code for easy trading strategy implementation
 * Easy install with Docker
 
 You can build on top of this tool and implement algorithm trading and some machine learning models to experiment with predictive analysis.
+
+# Founded by Abenezer Mamo @ www.Mamo.io & www.linkedin.com/in/AbenezerMamo
 
 ## Installing And Running
 The commands listed below are intended to be run in a terminal.
