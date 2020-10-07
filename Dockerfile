@@ -13,8 +13,10 @@ RUN cd /tmp && \
 ADD app/ /app
 WORKDIR /app
 
-# numpy must be installed first for python TA-lib
-RUN pip install numpy==1.14.0
-RUN pip install -r requirements.txt
+# Pip doesn't install requirements sequentially.
+# To ensure pre-reqs are installed in the correct
+# order they have been split into two files
+RUN pip install -r requirements-step-1.txt
+RUN pip install -r requirements-step-2.txt
 
 CMD ["/usr/local/bin/python","app.py"]

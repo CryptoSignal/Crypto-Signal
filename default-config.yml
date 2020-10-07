@@ -1,0 +1,14 @@
+# Copy this file to config.yml to get started and then add your own configuration.
+# Full documentation here: https://github.com/CryptoSignal/crypto-signal/blob/master/docs/config.md
+
+settings:
+  update_interval: 300
+  market_pairs:
+    - ETH/BTC
+    - LTC/BTC
+    - XMR/BTC
+
+exchanges:
+  bittrex:
+    required:
+      enabled: true

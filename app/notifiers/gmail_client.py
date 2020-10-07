@@ -41,6 +41,7 @@ class GmailNotifier(NotifierUtils):
 
         header = 'From: %s\n' % self.username
         header += 'To: %s\n' % self.destination_addresses
+        header += 'Content-Type: text/plain\n'
         header += 'Subject: Crypto-signal alert!\n\n'
         message = header + message
 

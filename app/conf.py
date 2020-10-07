@@ -2,10 +2,9 @@
 """
 
 import os
-import distutils.util
-from string import whitespace
 
 import ccxt
+import yaml
 
 class Configuration():
     """Parses the environment configuration to create the config objects.
@@ -15,191 +14,49 @@ class Configuration():
         """Initializes the Configuration class
         """
 
-        self.settings = {
-            'log_mode': os.environ.get('SETTINGS_LOG_MODE', 'text'),
-            'log_level': os.environ.get('SETTINGS_LOG_LEVEL', 'INFO'),
-            'output_mode': os.environ.get('SETTINGS_OUTPUT_MODE', 'cli'),
-            'update_interval': int(os.environ.get('SETTINGS_UPDATE_INTERVAL', 300)),
-            'market_pairs': self._string_splitter(os.environ.get('SETTINGS_MARKET_PAIRS', None))
-        }
+        with open('defaults.yml', 'r') as config_file:
+            default_config = yaml.load(config_file)
 
-        self.notifiers = {
-            'twilio': {
-                'required': {
-                    'key': os.environ.get('NOTIFIERS_TWILIO_REQUIRED_KEY', None),
-                    'secret': os.environ.get('NOTIFIERS_TWILIO_REQUIRED_SECRET', None),
-                    'sender_number': os.environ.get('NOTIFIERS_TWILIO_REQUIRED_SENDER_NUMBER', None),
-                    'receiver_number': os.environ.get('NOTIFIERS_TWILIO_REQUIRED_RECEIVER_NUMBER', None)
-                }
-            },
-
-            'discord': {
-                'required': {
-                    'webhook': os.environ.get('NOTIFIERS_DISCORD_REQUIRED_WEBHOOK', None),
-                    'username': os.environ.get('NOTIFIERS_DISCORD_REQUIRED_USERNAME', None)
-                },
-                'optional':{
-                    'avatar': os.environ.get('NOTIFIERS_DISCORD_OPTIONAL_AVATAR', None)
-                }
-            },
-
-            'slack': {
-                'required': {
-                    'webhook': os.environ.get('NOTIFIERS_SLACK_REQUIRED_WEBHOOK', None)
-                }
-            },
-
-            'gmail': {
-                'required': {
-                    'username': os.environ.get('NOTIFIERS_GMAIL_REQUIRED_USERNAME', None),
-                    'password': os.environ.get('NOTIFIERS_GMAIL_REQUIRED_PASSWORD', None),
-                    'destination_emails': self._string_splitter(
-                        os.environ.get('NOTIFIERS_GMAIL_REQUIRED_DESTINATION_EMAILS', None)
-                    )
-                }
-            },
-
-            'telegram': {
-                'required': {
-                    'token': os.environ.get('NOTIFIERS_TELEGRAM_REQUIRED_TOKEN', None),
-                    'chat_id': os.environ.get('NOTIFIERS_TELEGRAM_REQUIRED_CHAT_ID', None)
-                }
-            }
-        }
-
-        self.behaviour = {
-            'momentum': {
-                'enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_MOMENTUM_ENABLED', 'True')
-                )),
-                'alert_enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_MOMENTUM_ALERT_ENABLED', 'True')
-                )),
-                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MOMENTUM_HOT', 0)),
-                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MOMENTUM_COLD', 0)),
-                'candle_period': os.environ.get('BEHAVIOUR_MOMENTUM_CANDLE_PERIOD', '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_MOMENTUM_PERIOD_COUNT', 10))
-            },
-
-            'rsi': {
-                'enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_RSI_ENABLED', 'True')
-                )),
-                'alert_enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_RSI_ALERT_ENABLED', 'True')
-                )),
-                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_RSI_HOT', 30)),
-                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_RSI_COLD', 70)),
-                'candle_period': os.environ.get('BEHAVIOUR_RSI_CANDLE_PERIOD', '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_RSI_PERIOD_COUNT', 14))
-            },
-
-            'stoch_rsi': {
-                'enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_ENABLED', 'True')
-                )),
-                'alert_enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_ALERT_ENABLED', 'True')
-                )),
-                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_HOT', 20)),
-                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_COLD', 80)),
-                'candle_period': os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_CANDLE_PERIOD', '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_STOCHASTIC_RSI_PERIOD_COUNT', 14))
-            },
-
-            'macd': {
-                'enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_MACD_ENABLED', 'True')
-                )),
-                'alert_enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_MACD_ALERT_ENABLED', 'True')
-                )),
-                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_HOT', 0)),
-                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_MACD_COLD', 0)),
-                'candle_period': os.environ.get('BEHAVIOUR_MACD_CANDLE_PERIOD', '1d')
-            },
-
-            'sma': {
-                'enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_SMA_ENABLED', 'True')
-                )),
-                'alert_enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_SMA_ALERT_ENABLED', 'True')
-                )),
-                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_HOT', 1)),
-                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_SMA_COLD', 1)),
-                'candle_period': os.environ.get('BEHAVIOUR_SMA_CANDLE_PERIOD', '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_SMA_PERIOD_COUNT', 15))
-            },
-
-            'ema': {
-                'enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_EMA_ENABLED', 'True')
-                )),
-                'alert_enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_EMA_ALERT_ENABLED', 'True')
-                )),
-                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_HOT', 1)),
-                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_EMA_COLD', 1)),
-                'candle_period': os.environ.get('BEHAVIOUR_EMA_CANDLE_PERIOD', '1d'),
-                'period_count': int(os.environ.get('BEHAVIOUR_EMA_PERIOD_COUNT', 11))
-            },
-
-            'ichimoku': {
-                'enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_ICHIMOKU_ENABLED', 'True')
-                )),
-                'alert_enabled': bool(distutils.util.strtobool(
-                    os.environ.get('BEHAVIOUR_ICHIMOKU_ALERT_ENABLED', 'True')
-                )),
-                'hot': self._hot_cold_typer(os.environ.get('BEHAVIOUR_ICHIMOKU_HOT', 'True')),
-                'cold': self._hot_cold_typer(os.environ.get('BEHAVIOUR_ICHIMOKU_COLD', 'True')),
-                'candle_period': os.environ.get('BEHAVIOUR_ICHIMOKU_CANDLE_PERIOD', '1d')
-            },
-        }
-
-        self.exchanges = {}
-        for exchange in ccxt.exchanges:
-            exchange_var_name = 'EXCHANGES_' + exchange.upper() + '_REQUIRED_ENABLED'
-            self.exchanges[exchange] = {
-                'required': {
-                    'enabled': bool(distutils.util.strtobool(
-                        os.environ.get(exchange_var_name, 'False')
-                    )),
-                }
-            }
-
-
-    def _string_splitter(self, string):
-        """Splits a string into a list.
-
-        Args:
-            string (str): A string that can potentially be split into a list.
-
-        Returns:
-            list: A list of strings
-        """
-
-        if string:
-            string = string.translate(str.maketrans('', '', whitespace)).split(",")
-        return string
-
-
-    def _hot_cold_typer(self, hot_cold):
-        """Attempt to infer the type of the hot or cold option.
-
-        Args:
-            hot_cold (float|string): A float, stringified float or stringified bool
-
-        Returns:
-            float|bool: Float or bool after type conversion.
-        """
-
-        if hot_cold == '':
-            hot_cold = None
+        if os.path.isfile('config.yml'):
+            with open('config.yml', 'r') as config_file:
+                user_config = yaml.load(config_file)
         else:
-            try:
-                hot_cold = float(hot_cold)
-            except ValueError:
-                hot_cold = bool(distutils.util.strtobool(hot_cold))
-        return hot_cold
+            user_config = dict()
+
+        if 'settings' in user_config:
+            self.settings = {**default_config['settings'], **user_config['settings']}
+        else:
+            self.settings = default_config['settings']
+
+        if 'notifiers' in user_config:
+            self.notifiers = {**default_config['notifiers'], **user_config['notifiers']}
+        else:
+            self.notifiers = default_config['notifiers']
+
+        if 'indicators' in user_config:
+            self.indicators = {**default_config['indicators'], **user_config['indicators']}
+        else:
+            self.indicators = default_config['indicators']
+
+        if 'informants' in user_config:
+            self.informants = {**default_config['informants'], **user_config['informants']}
+        else:
+            self.informants = default_config['informants']
+
+        if 'crossovers' in user_config:
+            self.crossovers = {**default_config['crossovers'], **user_config['crossovers']}
+        else:
+            self.crossovers = default_config['crossovers']
+
+        if 'exchanges' in user_config:
+            self.exchanges = user_config['exchanges']
+        else:
+            self.exchanges = dict()
+
+        for exchange in ccxt.exchanges:
+            if exchange not in self.exchanges:
+                self.exchanges[exchange] = {
+                    'required': {
+                        'enabled': False
+                    }
+                }

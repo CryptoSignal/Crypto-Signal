@@ -3,6 +3,7 @@
 """
 
 import time
+import sys
 
 import logs
 import conf
@@ -11,7 +12,6 @@ import structlog
 from conf import Configuration
 from exchange import ExchangeInterface
 from notification import Notifier
-from analysis import StrategyAnalyzer
 from behaviour import Behaviour
 
 def main():
@@ -27,13 +27,11 @@ def main():
 
     # Configure and run configured behaviour.
     exchange_interface = ExchangeInterface(config.exchanges)
-    strategy_analyzer = StrategyAnalyzer()
     notifier = Notifier(config.notifiers)
 
     behaviour = Behaviour(
-        config.behaviour,
+        config,
         exchange_interface,
-        strategy_analyzer,
         notifier
     )
 
@@ -43,4 +41,7 @@ def main():
         time.sleep(settings['update_interval'])
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.exit(0)

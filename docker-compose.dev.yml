@@ -5,5 +5,4 @@ services:
     image: shadowreaver/crypto-signal:latest
     volumes:
       - ./app:/app
-    env_file:
-      - settings.env
+      - ./config.yml:/app/config.yml

@@ -1,4 +1,3 @@
-
 """Notify a user via twilio
 """
 
