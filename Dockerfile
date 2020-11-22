@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:3.8-buster
 
 # TA-lib is required by the python TA-lib wrapper. This provides analysis.
 COPY lib/ta-lib-0.4.0-src.tar.gz /tmp/ta-lib-0.4.0-src.tar.gz
