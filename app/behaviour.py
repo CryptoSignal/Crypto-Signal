@@ -247,8 +247,13 @@ class Behaviour():
                     self.logger.debug("%s is disabled, skipping.", crossover)
                     continue
 
-                key_indicator = new_result[crossover_conf['key_indicator_type']][crossover_conf['key_indicator']][crossover_conf['key_indicator_index']]
-                crossed_indicator = new_result[crossover_conf['crossed_indicator_type']][crossover_conf['crossed_indicator']][crossover_conf['crossed_indicator_index']]
+                # An earlier error in fetching get_historical_data can lead to a hard crash due to`IndexError`, as the indicators will fail to populate `new_result`
+                # In that case, this should be a no-op and will leave results unchanged.
+                try:
+                    key_indicator = new_result[crossover_conf['key_indicator_type']][crossover_conf['key_indicator']][crossover_conf['key_indicator_index']]
+                    crossed_indicator = new_result[crossover_conf['crossed_indicator_type']][crossover_conf['crossed_indicator']][crossover_conf['crossed_indicator_index']]
+                except IndexError:
+                    return results
 
                 dispatcher_args = {
                     'key_indicator': key_indicator['result'],
@@ -279,6 +284,7 @@ class Behaviour():
         """
 
         historical_data = list()
+
         try:
             historical_data = self.exchange_interface.get_historical_data(
                 market_pair,
