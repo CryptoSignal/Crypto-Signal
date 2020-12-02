@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: "[BUG] ..."
+title: "[BUG]"
 labels: ''
 assignees: w1ld3r
 
@@ -21,7 +21,7 @@ Steps to reproduce the behavior:
 A clear and concise description of what you expected to happen.
 
 **config.yml**
-```
+```yml
 settings:
 log_level: INFO
 [...]
