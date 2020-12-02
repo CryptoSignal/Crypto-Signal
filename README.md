@@ -20,7 +20,7 @@ Because this is a development branch you need to build your custom Docker image.
 
 Be sure you have git installed in your system.
 
-1. Clone this repo `git clone https://github.com/CryptoSignal/crypto-signal.git`
+1. Clone this repo `git clone https://github.com/w1ld3r/crypto-signal.git`
 
 1. Enter to cripto-signal folder `cd crypto-signal`
 
