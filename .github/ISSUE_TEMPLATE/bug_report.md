@@ -28,8 +28,8 @@ log_level: INFO
 ```
 
 **Desktop**
- - OS Name and Version
- - Kernel Version
+ - OS name and version
+ - crypto-signal branch
  - Docker version
 
 **Additional context**
