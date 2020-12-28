@@ -512,6 +512,7 @@ indicators:
       smooth_k: 10
       smooth_d: 3
       signal:
+        - stoch_rsi
         - smooth_k
         - smooth_d
       hot_label: 'Uptrend is coming'
