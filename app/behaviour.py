@@ -236,6 +236,10 @@ class Behaviour():
                         analysis_args['ma_fast'] = indicator_conf['ma_fast'] if 'ma_fast' in indicator_conf else 13
                         analysis_args['ma_slow'] = indicator_conf['ma_slow'] if 'ma_slow' in indicator_conf else 30
 
+                    if indicator == 'stochrsi_cross':
+                        analysis_args['smooth_k'] = indicator_conf['smooth_k'] if 'smooth_k' in indicator_conf else 10
+                        analysis_args['smooth_d'] = indicator_conf['smooth_d'] if 'smooth_d' in indicator_conf else 3
+
                     if indicator == 'bollinger' or indicator == 'bbp':
                         analysis_args['std_dev'] = indicator_conf['std_dev'] if 'std_dev' in indicator_conf else 2
 

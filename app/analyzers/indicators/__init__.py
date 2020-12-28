@@ -15,5 +15,6 @@ __all__ = [
     'ma_crossover',
     'bollinger',
     'bbp',
-    'macd_cross'
+    'macd_cross',
+    'stochrsi_cross'
 ]
