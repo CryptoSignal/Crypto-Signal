@@ -45,7 +45,8 @@ class StrategyAnalyzer():
             'ma_crossover': ma_crossover.MACrossover().analyze,
             'bollinger': bollinger.Bollinger().analyze,
             'bbp': bbp.BBP().analyze,
-            'macd_cross': macd_cross.MACDCross().analyze
+            'macd_cross': macd_cross.MACDCross().analyze,
+            'stochrsi_cross': stochrsi_cross.StochRSICross().analyze
         }
 
         return dispatcher
