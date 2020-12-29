@@ -31,27 +31,25 @@ class StochasticRSI(IndicatorUtils):
         """
 
         dataframe = self.convert_to_dataframe(historical_data)
-        rsi_period_count = period_count * 2
-        rsi_values = abstract.RSI(dataframe, rsi_period_count).to_frame()
-        rsi_values.dropna(how='all', inplace=True)
-        rsi_values.rename(columns={0: 'rsi'}, inplace=True)
 
-        rsi_values = rsi_values.assign(stoch_rsi=numpy.nan)
-        for index in range(period_count, rsi_values.shape[0]):
-            start_index = index - period_count
-            last_index = index + 1
-            rsi_min = rsi_values['rsi'].iloc[start_index:last_index].min()
-            rsi_max = rsi_values['rsi'].iloc[start_index:last_index].max()
-            stoch_rsi = (
-                100 * ((rsi_values['rsi'][index] - rsi_min) / (rsi_max - rsi_min)))
-            rsi_values['stoch_rsi'][index] = stoch_rsi
+        rsi = abstract.RSI(dataframe, period_count)
 
-        rsi_values['slow_k'] = rsi_values['stoch_rsi'].rolling(window=3).mean()
-        rsi_values['slow_d'] = rsi_values['slow_k'].rolling(window=3).mean()
-        rsi_values.dropna(how='any', inplace=True)
+        stochrsi  = (rsi - rsi.rolling(period_count).min()) / (rsi.rolling(period_count).max() - rsi.rolling(period_count).min())
+        stochrsi_K = stochrsi.rolling(3).mean()
+        stochrsi_D = stochrsi_K.rolling(3).mean()
 
-        if rsi_values[signal[0]].shape[0]:
-            rsi_values['is_hot'] = rsi_values[signal[0]] < hot_thresh
-            rsi_values['is_cold'] = rsi_values[signal[0]] > cold_thresh
+        kd_values = pandas.DataFrame([stochrsi, stochrsi_K, stochrsi_D]).T.rename(
+            columns={0: "stoch_rsi", 1: "slow_k", 2: "slow_d"}).copy()
 
-        return rsi_values
+        kd_values['stoch_rsi'] = kd_values['stoch_rsi'].multiply(100)
+        kd_values['slow_k'] = kd_values['slow_k'].multiply(100)
+        kd_values['slow_d'] = kd_values['slow_d'].multiply(100)
+
+        stoch_rsi = pandas.concat([dataframe, kd_values], axis=1)
+        stoch_rsi.dropna(how='all', inplace=True)
+
+        if stoch_rsi[signal[0]].shape[0]:
+            stoch_rsi['is_hot'] = stoch_rsi[signal[0]] < hot_thresh
+            stoch_rsi['is_cold'] = stoch_rsi[signal[0]] > cold_thresh
+
+        return stoch_rsi
