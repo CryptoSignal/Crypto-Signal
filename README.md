@@ -13,6 +13,7 @@ Development branch to testing new features. This develop version has a lot of im
 - New indicator ADX (Average Directional Index)
 - New indicator Klinger Oscillator
 - New indicator MACD Cross
+- New indicator StochRSI Cross
 
 
 ## Installing And Running
@@ -495,6 +496,28 @@ indicators:
       hot_label: 'Uptrend is coming'
       cold_label: 'Downtred is coming'
       indicator_label: 'MACD Cross 4h'
+      mute_cold: false
+```
+#### StochRSI Cross
+
+This indicator is useful if you are interested in knowing when smooth K line crosses the smooth D line of the StochRSI. Unlike the StochRSI indicator, this new indicator allows you to set values ​​for K and D.
+
+```
+indicators:
+  stochrsi_cross:
+    - enabled: true
+      candle_period: 4h
+      alert_enabled: true
+      alert_frequency: always
+      smooth_k: 10
+      smooth_d: 3
+      signal:
+        - stoch_rsi
+        - smooth_k
+        - smooth_d
+      hot_label: 'Uptrend is coming'
+      cold_label: 'Downtred is coming'
+      indicator_label: 'StochRSI Cross 4h'
       mute_cold: false
 ```
 
