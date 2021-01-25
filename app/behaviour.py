@@ -16,6 +16,7 @@ from tenacity import RetryError
 
 from analysis import StrategyAnalyzer
 from outputs import Output
+from main_filter import MainFilter
 
 
 class Behaviour():
@@ -63,6 +64,12 @@ class Behaviour():
 
         self.all_historical_data = self.get_all_historical_data(market_data)
 
+        if 'main_filter' in self.indicator_conf:
+            main_filter = self.indicator_conf['main_filter']
+            if 'condition' in main_filter and main_filter['condition']:
+                self.logger.info("Applying main filter to reduce market pairs to analyze.")
+                market_data = self.filtered_market_data(market_data, main_filter['condition'])
+
         new_result = self._test_strategies(market_data, output_mode)
 
         self.notifier.set_timezone(self.timezone)
@@ -72,6 +79,37 @@ class Behaviour():
             self.notifier.set_all_historical_data(self.all_historical_data)
 
         self.notifier.notify_all(new_result)
+
+    def filtered_market_data(self, market_data, main_filter):
+        """Returns historical data for each exchange/market pair/candle period but only
+           for market pairs that meet main filter condition.
+
+        Args:
+            market_data (dict): A dictionary containing the market data of the symbols to get data.
+        """
+
+        filtered_market_data = deepcopy(market_data)
+        conditions = main_filter.split(' ')
+        filter_name = conditions[0]
+        filter_candle_period = conditions[1]
+        filter_condition = conditions[2]
+        filter = MainFilter()
+
+        for exchange in market_data:
+            self.logger.info("Applying (%s %s %s) main filter to %s",
+                filter_name, filter_candle_period, filter_condition, list(market_data[exchange].keys()))
+
+            for market_pair in market_data[exchange]:
+                if main_filter.startswith('macd'):
+                    filter_data = self._get_historical_data(market_pair, exchange, filter_candle_period)
+
+                    valid_condition = filter.macd(filter_data, filter_condition)
+
+                    if not valid_condition:
+                        self.logger.info("Removing %s from analysis due to main filter", market_pair)
+                        del filtered_market_data[exchange][market_pair]
+
+        return filtered_market_data
 
     def get_all_historical_data(self, market_data):
         """Get historical data for each exchange/market pair/candle period
@@ -96,6 +134,9 @@ class Behaviour():
                     data[exchange][market_pair] = dict()
 
                 for indicator in self.indicator_conf:
+                    if indicator == 'main_filter':
+                        continue;
+
                     if indicator not in indicator_dispatcher:
                         self.logger.warn(
                             "No such indicator %s, skipping.", indicator)
@@ -141,6 +182,9 @@ class Behaviour():
 
         new_result = dict()
         for exchange in market_data:
+            if len(market_data[exchange]) == 0:
+                continue;
+
             self.logger.info("Beginning analysis of %s", exchange)
             if exchange not in new_result:
                 new_result[exchange] = dict()
@@ -194,6 +238,9 @@ class Behaviour():
         historical_data_cache = self.all_historical_data[exchange][market_pair]
 
         for indicator in self.indicator_conf:
+            if indicator == 'main_filter':
+                continue;
+
             if indicator not in indicator_dispatcher:
                 self.logger.warn("No such indicator %s, skipping.", indicator)
                 continue
