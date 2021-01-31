@@ -59,6 +59,11 @@ class Configuration():
         else:
             self.exchanges = dict()
 
+        if 'global_filters' in user_config:
+            self.global_filters = user_config['global_filters']
+        else:
+            self.global_filters = dict()
+
         for exchange in ccxt.exchanges:
             if exchange not in self.exchanges:
                 self.exchanges[exchange] = {

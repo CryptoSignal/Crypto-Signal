@@ -48,6 +48,7 @@ class Behaviour():
 
         self.enable_charts = config.settings['enable_charts']
         self.timezone = config.settings['timezone']
+        self.global_filters = config.global_filters
 
     def run(self, market_data, output_mode):
         """The analyzer entrypoint
@@ -64,11 +65,17 @@ class Behaviour():
 
         self.all_historical_data = self.get_all_historical_data(market_data)
 
-        if 'main_filter' in self.indicator_conf:
-            main_filter = self.indicator_conf['main_filter']
-            if 'condition' in main_filter and main_filter['condition']:
-                self.logger.info("Applying main filter to reduce market pairs to analyze.")
-                market_data = self.filtered_market_data(market_data, main_filter['condition'])
+        self.logger.info(str(self.global_filters))
+
+        if 'first' in self.global_filters:
+            first_filter = self.global_filters['first']
+            self.logger.info("Applying (%s) filter to reduce market pairs to analyze.", first_filter)
+            market_data = self.filtered_market_data(market_data, first_filter)
+
+        if 'next' in self.global_filters:
+            next_filter = self.global_filters['next']
+            self.logger.info("Applying (%s) filter to reduce market pairs to analyze.", next_filter)
+            market_data = self.filtered_market_data(market_data, next_filter)
 
         new_result = self._test_strategies(market_data, output_mode)
 
@@ -93,17 +100,27 @@ class Behaviour():
         filter_name = conditions[0]
         filter_candle_period = conditions[1]
         filter_condition = conditions[2]
+        filter_indicator = conditions[3] if len(conditions) > 3 else False
+        filter_indicator_period = int(conditions[4]) if len(conditions) > 4 else 100
         filter = MainFilter()
+
+        "price 1d above EMA 100"
 
         for exchange in market_data:
             self.logger.info("Applying (%s %s %s) main filter to %s",
                 filter_name, filter_candle_period, filter_condition, list(market_data[exchange].keys()))
 
             for market_pair in market_data[exchange]:
-                if main_filter.startswith('macd'):
+                if main_filter.startswith('macd') or main_filter.startswith('price'):
+                    valid_condition = False
+
                     filter_data = self._get_historical_data(market_pair, exchange, filter_candle_period)
 
-                    valid_condition = filter.macd(filter_data, filter_condition)
+                    if main_filter.startswith('macd'):
+                        valid_condition = filter.macd(filter_data, filter_condition)
+
+                    if main_filter.startswith('price'): #Ex - price 4h above EMA 100
+                        valid_condition = filter.price(filter_data, filter_condition, filter_indicator, filter_indicator_period)
 
                     if not valid_condition:
                         self.logger.info("Removing %s from analysis due to main filter", market_pair)
