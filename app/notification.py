@@ -933,8 +933,8 @@ class Notifier(IndicatorUtils):
                 signal = indicator_conf['signal']
                 notification = indicator_conf['notification'] if 'notification' in indicator_conf else 'hot'
                 candle_check = indicator_conf['candle_check'] if 'candle_check' in indicator_conf else 1
-                hot_tresh = indicator_conf['hot']
-                cold_tresh = indicator_conf['cold']
+                hot_tresh = indicator_conf['hot'] if 'hot' in indicator_conf else 0
+                cold_tresh = indicator_conf['cold'] if 'cold' in indicator_conf else 0
 
                 historical_data = df
                 cdl = candle_recognition.Candle_recognition()
