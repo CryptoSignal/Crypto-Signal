@@ -10,9 +10,8 @@ from datetime import datetime
 from time import sleep
 
 import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
 import pandas as pd
@@ -36,12 +35,14 @@ from notifiers.telegram_client import TelegramNotifier
 from notifiers.twilio_client import TwilioNotifier
 from notifiers.webhook_client import WebhookNotifier
 
+matplotlib.use('Agg')
+
 
 class Notifier(IndicatorUtils):
     """Handles sending notifications via the configured notifiers
     """
 
-    def __init__(self, notifier_config, indicator_config, market_data):
+    def __init__(self, notifier_config, indicator_config, conditional_config, market_data):
         """Initializes Notifier class
 
         Args:
@@ -51,6 +52,7 @@ class Notifier(IndicatorUtils):
         self.logger = structlog.get_logger()
         self.notifier_config = notifier_config
         self.indicator_config = indicator_config
+        self.conditional_config = conditional_config
         self.market_data = market_data
         self.last_analysis = dict()
         self.enable_charts = False
@@ -147,13 +149,58 @@ class Notifier(IndicatorUtils):
             for market_pair in messages[exchange]:
                 _messages = messages[exchange][market_pair]
 
-                for candle_period in _messages:
-                    if not isinstance(_messages[candle_period], list) or len(_messages[candle_period]) == 0:
-                        continue
+                if self.conditional_config:
+                    self.notify_conditional(exchange, market_pair, _messages)
+                else:
+                    for candle_period in _messages:
+                        if not isinstance(_messages[candle_period], list) or len(_messages[candle_period]) == 0:
+                            continue
 
-                    self.notify_all_messages(
-                        exchange, market_pair, candle_period, _messages[candle_period])
-                    sleep(4)
+                        self.notify_all_messages(
+                            exchange, market_pair, candle_period, _messages[candle_period])
+                        sleep(4)
+
+    def notify_conditional(self, exchange, market_pair, messages):
+        status = ['hot', 'cold']
+
+        for condition in self.conditional_config:
+            x = 0
+            nb_conditions = 0
+            new_message = {}
+            new_message['values'] = []
+            new_message['indicator'] = []
+            for candle_period in messages:
+                if messages[candle_period]:
+                    new_message['exchange'] = messages[candle_period][0]['exchange']
+                    new_message['market'] = messages[candle_period][0]['market']
+                    new_message['base_currency'] = messages[candle_period][0]['base_currency']
+                    new_message['quote_currency'] = messages[candle_period][0]['quote_currency']
+                    for msg in messages[candle_period]:
+                        for stat in status:
+                            if msg['status'] == stat:
+                                try:
+                                    for indicator in condition[stat]:
+                                        if msg['indicator'] in indicator.keys():
+                                            if indicator[msg['indicator']] == msg['indicator_number']:
+                                                new_message['values'].append(
+                                                    msg['values'])
+                                                new_message['indicator'].append(
+                                                    msg['indicator'])
+                                                x += 1
+                                except:
+                                    pass
+            for stat in status:
+                try:
+                    nb_conditions += len(condition[stat])
+                except:
+                    pass
+
+            if x == nb_conditions and x != 0:
+                new_message['status'] = condition['label']
+                self.notify_discord([new_message])
+                self.notify_webhook([new_message], None)
+                self.notify_telegram([new_message], None)
+                self.notify_stdout([new_message])
 
     def notify_all_messages(self, exchange, market_pair, candle_period, messages):
         chart_file = None
@@ -682,7 +729,7 @@ class Notifier(IndicatorUtils):
                     except Exception as e:
                         self.logger.info(
                             'Error creating chart for %s %s', market_pair, candle_period)
-                        self.logger.exception(e)                           
+                        self.logger.exception(e)
 
     def create_chart(self, exchange, market_pair, candle_period, candles_data):
 

@@ -508,8 +508,125 @@ crossovers:
           crossed_signal: sma
 ```
 
+# 8) Conditionals
 
-# 8) Examples
+It's allowing you to receive notifications, only if one or more conditions are respected.
+
+Use case examples:
+- Receive a buy notification if rsi is cold and bollinger is hot and aroon is cold.
+- Receive a sell notification if 1d rsi is hot and 1h rsi is hot and bollinger is cold and aroon is hot.
+
+**You will not receive notifications if all conditions, of one conditionnal, are not met.**
+
+## Example
+
+```yml
+settings:
+  log_level: INFO
+  update_interval: 120
+  start_worker_interval: 2
+  market_data_chunk_size: 1
+  timezone: Europe/Paris
+
+exchanges:
+  kraken:
+    required:
+      enabled: true
+    all_pairs:
+      - USD
+
+indicators:
+  rsi:
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - rsi
+      hot: 30
+      cold: 70
+      candle_period: 1h
+      period_count: 14
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - rsi
+      hot: 40
+      cold: 60
+      candle_period: 1d
+      period_count: 14
+  bollinger:
+    - enabled: true
+      candle_period: 1h
+      alert_enabled: true
+      alert_frequency: always
+      period_count: 25
+      std_dev: 2.5
+      signal:
+        - low_band
+        - close
+        - up_band
+      mute_cold: false
+    - enabled: true
+      candle_period: 1d
+      alert_enabled: true
+      alert_frequency: always
+      period_count: 25
+      std_dev: 2.5
+      signal:
+        - low_band
+        - close
+        - up_band
+      mute_cold: false
+  aroon_oscillator:
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: always
+      sma_vol_period: 50
+      period_count: 14
+      signal:
+        - aroon
+      candle_period: 1h
+
+conditionals:
+  - label: "Signal to buy"
+    hot:
+      - rsi: 0
+      - rsi: 1
+    cold:
+      - bollinger: 0
+  - label: "Signal to buy"
+    hot:
+      - rsi: 1
+  - label: "Signal to sell"
+    cold:
+      - rsi: 1
+      - rsi: 0
+    hot:
+      - aroon_oscillator: 0
+
+notifiers:
+    telegram:
+        required:
+            token: X
+            chat_id: Y
+        optional:
+            parse_mode: html
+            template: "[{{market}}] {{indicator}} {{status}} {{values}} {{ '\n' -}}"
+```
+
+## Template value available
+ - values
+ - indicator
+ - exchange
+ - market
+ - base_currency
+ - quote_currency
+ - status
+
+ The `status` will be the string set in `label`.
+
+# 9) Examples
 Putting it all together an example config.yml might look like the config below if you want to use the default settings with bittrex
 
 ```yml
