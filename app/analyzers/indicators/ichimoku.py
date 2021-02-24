@@ -37,7 +37,8 @@ class Ichimoku(IndicatorUtils):
             'tenkansen': [numpy.nan] * dataframe.index.shape[0],
             'kijunsen': [numpy.nan] * dataframe.index.shape[0],
             'leading_span_a': [numpy.nan] * dataframe.index.shape[0],
-            'leading_span_b': [numpy.nan] * dataframe.index.shape[0]
+            'leading_span_b': [numpy.nan] * dataframe.index.shape[0],
+            'chikou_span' : [numpy.nan] * dataframe.index.shape[0]
         }
 
         ichimoku_values = pandas.DataFrame(ichimoku_columns,
@@ -54,6 +55,8 @@ class Ichimoku(IndicatorUtils):
         high_senkou = dataframe['high'].rolling(
             window=senkou_span_b_period).max()
 
+        chikou_span_delay = 26
+        ichimoku_values['chikou_span'] = dataframe['close'].shift(-chikou_span_delay)
         ichimoku_values['tenkansen'] = (low_tenkansen + high_tenkansen) / 2
         ichimoku_values['kijunsen'] = (low_kijunsen + high_kijunsen) / 2
         ichimoku_values['leading_span_a'] = (
