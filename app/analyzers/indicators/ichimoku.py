@@ -94,55 +94,43 @@ class Ichimoku(IndicatorUtils):
                     tk_cross_cold = False
                     tk_cross_enabled = (('tenkansen' and 'kijunsen') in signal)
                     leading_span_enabled = (('leading_span_a' and 'leading_span_b') in signal)
+                    date = dataframe.index[-1]
+                    leading_span_date = ichimoku_values.index[-1]
 
-                    for index in range(0, ichimoku_values.index.shape[0]):
-                        date = ichimoku_values.index[index]
-                        
-                        if date <= dataframe.index[-1]: 
-                            leading_span_date = ichimoku_values.index[index+cloud_displacement]  
+                    if tk_cross_enabled:
+                        tk_cross_hot = ichimoku_values['tenkansen'][date] > ichimoku_values['kijunsen'][date]
+                        tk_cross_cold = ichimoku_values['tenkansen'][date] < ichimoku_values['kijunsen'][date]
 
-                            if tk_cross_enabled:
-                                tk_cross_hot = ichimoku_values['tenkansen'][date] >= ichimoku_values['kijunsen'][date]
-                                tk_cross_cold = ichimoku_values['tenkansen'][date] <= ichimoku_values['kijunsen'][date]
+                    if leading_span_enabled:
+                        leading_span_hot = ichimoku_values['leading_span_a'][leading_span_date] > ichimoku_values['leading_span_b'][leading_span_date]
+                        leading_span_cold = ichimoku_values['leading_span_a'][leading_span_date] < ichimoku_values['leading_span_b'][leading_span_date]
 
-                            if leading_span_enabled:    
-                                leading_span_hot = ichimoku_values['leading_span_a'][leading_span_date] > ichimoku_values['leading_span_b'][leading_span_date]
-                                leading_span_cold = ichimoku_values['leading_span_a'][leading_span_date] < ichimoku_values['leading_span_b'][leading_span_date]
+                    if hot_thresh:
+                        ichimoku_values.at[date, 'is_hot'] = tk_cross_hot or leading_span_hot
 
-                            if hot_thresh:  
-                                ichimoku_values.at[date, 'is_hot'] = tk_cross_hot or leading_span_hot
-
-                            if cold_thresh:
-                                ichimoku_values.at[date, 'is_cold'] = tk_cross_cold or leading_span_cold
-                        else:
-                            pass
+                    if cold_thresh:
+                        ichimoku_values.at[date, 'is_cold'] = tk_cross_cold or leading_span_cold
                 else:
                     module = import_module("user_data.strategies." + custom_strategy)
                     attr = getattr(module, custom_strategy)  
 
-                    for index in range(0, ichimoku_values.index.shape[0]):
-                        date = ichimoku_values.index[index]
+                    custom_hot, custom_cold = attr.analyze(ichimoku_values, dataframe)
+                    date = dataframe.index[-1]
 
-                        if date <= dataframe.index[-1]: 
-                            custom_hot, custom_cold = attr.analyze(index, ichimoku_values, dataframe)
+                    if hot_thresh:
+                        ichimoku_values.at[date, 'is_hot'] = custom_hot
 
-                            if hot_thresh:  
-                                ichimoku_values.at[date, 'is_hot'] = custom_hot
+                    if cold_thresh:
+                        ichimoku_values.at[date, 'is_cold'] = custom_cold
 
-                            if cold_thresh:
-                                ichimoku_values.at[date, 'is_cold'] = custom_cold
-                        else:
-                            pass
+                # Undo shifting in order to have the values aligned for displaying
+                ichimoku_values['chikou_span'] = dataframe['close']
+                ichimoku_values['leading_span_a'] = ichimoku_values['leading_span_a'].shift(-cloud_displacement)
+                ichimoku_values['leading_span_b'] = ichimoku_values['leading_span_b'].shift(-cloud_displacement)
+  
+                ichimoku_values.dropna(how='any', inplace=True)
 
         except Exception as e:
             print('Error running ichimoku analysis: {}'.format(e))
-
-        if chart == None:
-            # Undo shifting in order to have the values aligned for displaying
-            ichimoku_values['chikou_span'] = dataframe['close']
-            ichimoku_values['leading_span_a'] = ichimoku_values['leading_span_a'].shift(-cloud_displacement)
-            ichimoku_values['leading_span_b'] = ichimoku_values['leading_span_b'].shift(-cloud_displacement)
-                
-            ichimoku_values.dropna(how='any', inplace=True)
 
         return ichimoku_values
