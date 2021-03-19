@@ -10,7 +10,7 @@ slackweb==1.0.5
 tenacity==4.8.0
 python-telegram-bot==10.0.1
 webcord==0.2
-jinja2==2.10
+jinja2==2.11.3
 requests==2.18.4
 PyYAML==3.12
 tulipy==0.2.1
