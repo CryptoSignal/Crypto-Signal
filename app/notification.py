@@ -1123,23 +1123,28 @@ class Notifier(IndicatorUtils):
         tenkansen = ichimoku_data.tenkansen
         leading_span_a = ichimoku_data.leading_span_a
         leading_span_b = ichimoku_data.leading_span_b
+        chikou_span = ichimoku_data.chikou_span
+
         ax.plot(_time2, kijunsen, color='red', lw=0.6)
         ax.plot(_time2, tenkansen, color='blue', lw=0.6)
         ax.plot(_time2, leading_span_a, color='darkgreen',
                 lw=0.6, linestyle='dashed')
         ax.plot(_time2, leading_span_b, color='darkred',
                 lw=0.6, linestyle='dashed')
+        ax.plot(_time2, chikou_span, color='purple', lw=0.6)
 
         ax.fill_between(_time2, leading_span_a, leading_span_b, where=leading_span_a > leading_span_b,
                         facecolor='#008000', interpolate=True, alpha=0.25)
         ax.fill_between(_time2, leading_span_a, leading_span_b, where=leading_span_b > leading_span_a,
                         facecolor='#ff0000', interpolate=True, alpha=0.25)
 
-        ax.text(0.04, 0.94, 'kijunsen', color='red',
+        ax.text(0.06, 0.94, 'kijunsen', color='red',
                 transform=ax.transAxes, fontsize=textsize, va='top')
-        ax.text(0.20, 0.94, 'tenkansen', color='blue',
+        ax.text(0.19, 0.94, 'tenkansen', color='blue',
                 transform=ax.transAxes, fontsize=textsize, va='top')
-        ax.text(0.44, 0.94, '-Senkou-Span-A-', color='darkgreen',
+        ax.text(0.35, 0.94, 'Senkou-Span-A', color='darkgreen',
                 transform=ax.transAxes, fontsize=textsize, va='top', fontstyle='italic')
-        ax.text(0.66, 0.94, '-Senkou-Span-B-', color='darkred',
+        ax.text(0.56, 0.94, 'Senkou-Span-B', color='darkred',
                 transform=ax.transAxes, fontsize=textsize, va='top', fontstyle='italic')
+        ax.text(0.78, 0.94, 'chikou_span', color='purple',
+                transform=ax.transAxes, fontsize=textsize, va='top')
