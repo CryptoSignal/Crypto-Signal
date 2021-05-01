@@ -175,6 +175,7 @@ class Notifier(IndicatorUtils):
                     new_message['market'] = messages[candle_period][0]['market']
                     new_message['base_currency'] = messages[candle_period][0]['base_currency']
                     new_message['quote_currency'] = messages[candle_period][0]['quote_currency']
+                    new_message['prices'] = messages[candle_period][0]['prices']
                     for msg in messages[candle_period]:
                         for stat in status:
                             if msg['status'] == stat:
