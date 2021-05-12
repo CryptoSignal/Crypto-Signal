@@ -28,7 +28,7 @@ from telegram.error import TimedOut as TelegramTimedOut
 from analyzers.indicators import candle_recognition, ichimoku
 from analyzers.utils import IndicatorUtils
 from notifiers.discord_client import DiscordNotifier
-from notifiers.gmail_client import GmailNotifier
+from notifiers.email_client import EmailNotifier
 from notifiers.slack_client import SlackNotifier
 from notifiers.stdout_client import StdoutNotifier
 from notifiers.telegram_client import TelegramNotifier
@@ -91,15 +91,16 @@ class Notifier(IndicatorUtils):
             )
             enabled_notifiers.append('slack')
 
-        self.gmail_configured = self._validate_required_config(
-            'gmail', notifier_config)
-        if self.gmail_configured:
-            self.gmail_client = GmailNotifier(
-                username=notifier_config['gmail']['required']['username'],
-                password=notifier_config['gmail']['required']['password'],
-                destination_addresses=notifier_config['gmail']['required']['destination_emails']
+        self.email_configured = self._validate_required_config(
+            'email', notifier_config)
+        if self.email_configured:
+            self.email_client = EmailNotifier(
+                smtp_server=notifier_config['email']['required']['smtp_server'],
+                username=notifier_config['email']['required']['username'],
+                password=notifier_config['email']['required']['password'],
+                destination_addresses=notifier_config['email']['required']['destination_emails']
             )
-            enabled_notifiers.append('gmail')
+            enabled_notifiers.append('email')
 
         self.telegram_configured = self._validate_required_config(
             'telegram', notifier_config)
@@ -221,7 +222,7 @@ class Notifier(IndicatorUtils):
         self.notify_discord(messages)
         self.notify_webhook(messages, chart_file)
         # self.notify_twilio(new_analysis)
-        # self.notify_gmail(new_analysis)
+        self.notify_email(messages)
         self.notify_telegram(messages, chart_file)
         self.notify_stdout(messages)
 
@@ -273,20 +274,21 @@ class Notifier(IndicatorUtils):
             if message.strip():
                 self.twilio_client.notify(message)
 
-    def notify_gmail(self, new_analysis):
-        """Send a notification via the gmail notifier
+    def notify_email(self, new_analysis):
+        """Send a notification via the email notifier
 
         Args:
             new_analysis (dict): The new_analysis to send.
         """
+        if not self.email_configured:
+            return
 
-        if self.gmail_configured:
-            message = self._indicator_message_templater(
-                new_analysis,
-                self.notifier_config['gmail']['optional']['template']
-            )
-            if message.strip():
-                self.gmail_client.notify(message)
+        message_template = Template(
+            self.notifier_config['email']['optional']['template'])
+
+        for message in new_analysis:
+            formatted_message = message_template.render(message)
+            self.email_client.notify(formatted_message.strip())
 
     def notify_telegram(self, messages, chart_file):
         """Send notifications via the telegram notifier
