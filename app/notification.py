@@ -169,6 +169,11 @@ class Notifier(IndicatorUtils):
             new_message = {}
             new_message['values'] = []
             new_message['indicator'] = []
+            new_message['price_value'] = {}
+
+            for stat in list(set(status)&set(condition.keys())):
+                nb_conditions += len(condition[stat])
+            
             for candle_period in messages:
                 if messages[candle_period]:
                     new_message['exchange'] = messages[candle_period][0]['exchange']
@@ -176,6 +181,7 @@ class Notifier(IndicatorUtils):
                     new_message['base_currency'] = messages[candle_period][0]['base_currency']
                     new_message['quote_currency'] = messages[candle_period][0]['quote_currency']
                     new_message['prices'] = messages[candle_period][0]['prices']
+                    new_message['price_value'][candle_period] = messages[candle_period][0]['price_value']
                     for msg in messages[candle_period]:
                         for stat in status:
                             if msg['status'] == stat:
@@ -190,12 +196,7 @@ class Notifier(IndicatorUtils):
                                                 x += 1
                                 except:
                                     pass
-            for stat in status:
-                try:
-                    nb_conditions += len(condition[stat])
-                except:
-                    pass
-
+            
             if x == nb_conditions and x != 0:
                 new_message['status'] = condition['label']
                 self.notify_discord([new_message])
@@ -240,7 +241,6 @@ class Notifier(IndicatorUtils):
 
         for message in messages:
             formatted_message = message_template.render(message)
-
             self.discord_client.notify(formatted_message.strip())
 
     def notify_slack(self, new_analysis):
@@ -306,7 +306,6 @@ class Notifier(IndicatorUtils):
 
         for message in messages:
             formatted_messages.append(message_template.render(message))
-
         if self.enable_charts:
             if chart_file and os.path.exists(chart_file):
                 try:
@@ -658,7 +657,7 @@ class Notifier(IndicatorUtils):
 
                                             value = format(
                                                 value, decimal_format)
-                                            prices = '{} {}: {}' . format(
+                                            prices = '{} {}: {}'.format(
                                                 prices, key.title(), value)
 
                                     decimal_format = '%' + decimal_format
