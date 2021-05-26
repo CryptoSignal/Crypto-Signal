@@ -641,8 +641,8 @@ notifiers:
             parse_mode: html
             template: "{{ market }} 
             BUY {{ price_value['1h'].close }} 
-            SL: {{ price_value['4h'].low * 0.9 }} 
-            TP: {{ price_value['1h'].close * 1.02 }} {{ price_value['4h'].close * 1.04 }} "
+            SL: {{ decimal_format|format(price_value['4h'].low * 0.9) }} 
+            TP: {{ decimal_format|format(price_value['1h'].close * 1.02) }} {{ decimal_format|format(price_value['4h'].close * 1.04) }} "
 ```
 
 The code for "decimal_format" and "format" is necessary to obtain the prices formatted with the corresponding zeros.
