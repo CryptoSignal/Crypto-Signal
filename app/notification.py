@@ -182,6 +182,7 @@ class Notifier(IndicatorUtils):
                     new_message['quote_currency'] = messages[candle_period][0]['quote_currency']
                     new_message['prices'] = messages[candle_period][0]['prices']
                     new_message['price_value'][candle_period] = messages[candle_period][0]['price_value']
+                    new_message['decimal_format'] = messages[candle_period][0]['decimal_format']
                     for msg in messages[candle_period]:
                         for stat in status:
                             if msg['status'] == stat:
@@ -306,6 +307,7 @@ class Notifier(IndicatorUtils):
 
         for message in messages:
             formatted_messages.append(message_template.render(message))
+
         if self.enable_charts:
             if chart_file and os.path.exists(chart_file):
                 try:
