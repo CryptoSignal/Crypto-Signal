@@ -145,20 +145,25 @@ notifiers:
             template: "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
 ```
 
-## Gmail
+## Email
+**smtp_server**\
+default: None\
+necessity: required for Email\
+description: Your smtp server hostname
+
 **username**\
 default: None\
-necessity: required for Gmail\
-description: Your gmail username which is required for sending emails.
+necessity: required for Email\
+description: Your email username which is required for sending emails.
 
 **password**\
 default: None\
-necessity: required for Gmail\
-description: Your gmail password which is required for sending emails.
+necessity: required for Email\
+description: Your email password which is required for sending emails.
 
 **destination_emails**\
 default: None\
-necessity: required for Gmail\
+necessity: required for Email\
 description: The email addresses to receive the emails that are sent.
 
 **template**\
@@ -166,13 +171,14 @@ default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!
 necessity: optional\
 description: See the notifier templating section.
 
-An example of notifier settings for gmail
+An example of notifier settings for email
 
 ```yml
 notifiers:
-    gmail:
+    email:
         required:
-            username: my_user@gmail.com
+            smtp_server: smtp.gmail.com:587
+            username: example@gmail.com
             password: abcd1234
             destination_emails:
                 - my_user@gmail.com

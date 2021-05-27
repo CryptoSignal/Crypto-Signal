@@ -1,4 +1,4 @@
-"""Notify a user via Gmail
+"""Notify a user via Email
 """
 
 import smtplib
@@ -9,21 +9,22 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt
 from notifiers.utils import NotifierUtils
 
 
-class GmailNotifier(NotifierUtils):
-    """Class for handling gmail notifications
+class EmailNotifier(NotifierUtils):
+    """Class for handling email notifications
     """
 
-    def __init__(self, username, password, destination_addresses):
-        """Initialize GmailNotifier class
+    def __init__(self, smtp_server, username, password, destination_addresses):
+        """Initialize EmailNotifier class
 
         Args:
-            username (str): Username of the gmail account to use for sending message.
-            password (str): Password of the gmail account to use for sending message.
+            smtp_server (str): Smtp server address in form host:port
+            username (str): Username of the email account to use for sending message.
+            password (str): Password of the email account to use for sending message.
             destination_addresses (list): A list of email addresses to notify.
         """
 
         self.logger = structlog.get_logger()
-        self.smtp_server = 'smtp.gmail.com:587'
+        self.smtp_server = smtp_server
         self.username = username
         self.password = password
         self.destination_addresses = ','.join(destination_addresses)
