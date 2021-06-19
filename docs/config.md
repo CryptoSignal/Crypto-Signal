@@ -7,7 +7,9 @@
 5) Indicators
 6) Informants
 7) Crossovers
-8) Examples
+8) Conditionals
+9) Advanced Settings
+10) Examples
 
 # 1) Configuration file structure
 The configuration file is YAML formatted and consists of the following top level keys.
@@ -624,15 +626,39 @@ notifiers:
 ## Template value available
  - values
  - indicator
+ - price_value
  - exchange
  - market
  - base_currency
  - quote_currency
  - status
+ - price_value
+ - decimal_format
 
  The `status` will be the string set in `label`.
+  
+# 9) Advanced Settings
+  ## `start_worker_interval`
+  The settings start_worker_interval allow to define the number of the seconds between each start of a worker (use of multi processing to manage chunk of pairs).
+  It's usefull to manage time between request to exchange servers.
+  ```yml
+  settings:
+    [...]
+    start_worker_interval: 2
+    [...]
+  ```
+  
+  ## `market_data_chunk_size`
+  The settings market_data_chunk_size allow to define the number of pairs a worker will work on.
+  Lower the chunk is, faster the worker end his work. But, lower the chunk is, more workers will be required.
+  ```yml
+  settings:
+    [...]
+    market_data_chunk_size: 1
+    [...]
+  ```
 
-# 9) Examples
+# 10) Examples
 Putting it all together an example config.yml might look like the config below if you want to use the default settings with bittrex
 
 ```yml
