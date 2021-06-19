@@ -639,8 +639,8 @@ notifiers:
   
 # 9) Advanced Settings
   ## `start_worker_interval`
-  The settings start_worker_interval allow to define the number of the seconds between each start of a worker (use of multi processing to manage chunk of pairs).
-  It's usefull to manage time between request to exchange servers.
+  `start_worker_interval` allows to define the number of the seconds between each start of a worker (use of multi processing to manage chunk of pairs).
+  It's usefull to manage time between requests to exchange servers.
   ```yml
   settings:
     [...]
@@ -649,7 +649,7 @@ notifiers:
   ```
   
   ## `market_data_chunk_size`
-  The settings market_data_chunk_size allow to define the number of pairs a worker will work on.
+  `market_data_chunk_size` allows to define the number of pairs a worker will work on.
   Lower the chunk is, faster the worker end his work. But, lower the chunk is, more workers will be required.
   ```yml
   settings:
