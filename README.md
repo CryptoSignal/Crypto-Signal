@@ -7,6 +7,7 @@
 Crypto Signals is a command line tool that automates your crypto currency Technical Analysis (TA). It is maintained by a community of traders, engineers, data scientists, PMs, & countless generous individuals who wish to democratize the equal & open access to the greatest wealth re-distribution experiment in human and monetary policy history - Bitcoin
 
 ## Track over 500 coins across Bittrex, Binance, Bittrex, Bitfinex, Coinbase, Gemini and more!
+(Subject to local financial regulations under the jurisdiction you and your financial activities are under. Marketing or enabling does not imply nor justify the facilitation or condoning of any activity - financial or otherwise. You assume and bare all risk. Be careful & act wisely.)
 
 ## Technical Analysis Automated:
 * Momentum
