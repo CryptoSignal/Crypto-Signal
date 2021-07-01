@@ -15,7 +15,7 @@ Steps to reproduce the behavior:
 1. git clone '...'
 2. docker build -t dev/crypto-signals:latest .
 3. docker run '....'
-4. See error
+4. Error
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
@@ -27,7 +27,7 @@ log_level: INFO
 [...]
 ```
 
-**Desktop**
+**Machine**
  - OS name and version
  - crypto-signal branch
  - Docker version
@@ -35,3 +35,4 @@ log_level: INFO
 **Additional context**
 Add any other context about the problem here.
 For example if any modification of the code as been made
+
