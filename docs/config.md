@@ -307,6 +307,28 @@ notifiers:
             template: "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
 ```
 
+## Mutiple Notifiers
+The same type of notifier can be used multiple times like bellow:
+```yml
+notifiers:
+    telegram_00:
+        required:
+            token: XXX
+            chat_id: YYY
+        optional:
+            parse_mode: html
+            template: "[{{market}}] {{indicator}} {{status}} {{values}} {{ '\n' -}}"
+    telegram_01:
+        required:
+            token: AAA
+            chat_id: BBB
+        optional:
+            parse_mode: html
+            template: "[{{market}}] {{prices}} {{ '\n' -}}"
+```
+
+Be careful of the request rate to external services.
+
 ## Notifier Templating
 The notifier templates are built with a templating language called [Jinja2](http://jinja.pocoo.org/docs/2.10/templates/) and anything that is a valid Jinja message is valid for crypto-signal. The options available are as follows:
 
