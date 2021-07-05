@@ -253,7 +253,8 @@ class Behaviour():
                         analysis_args['kijunsen_period'] = indicator_conf['kijunsen_period'] if 'kijunsen_period' in indicator_conf else 60
                         analysis_args['senkou_span_b_period'] = indicator_conf[
                             'senkou_span_b_period'] if 'senkou_span_b_period' in indicator_conf else 120
-
+                        analysis_args['custom_strategy'] = indicator_conf['custom_strategy'] if 'custom_strategy' in indicator_conf else None
+                            
                     if indicator == 'candle_recognition':
                         analysis_args['candle_check'] = indicator_conf['candle_check'] if 'candle_check' in indicator_conf else 1
                         analysis_args['notification'] = indicator_conf['notification'] if 'notification' in indicator_conf else 'hot'

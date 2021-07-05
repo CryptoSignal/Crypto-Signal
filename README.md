@@ -14,6 +14,7 @@ Development branch to testing new features. This develop version has a lot of im
 - New indicator Klinger Oscillator
 - New indicator MACD Cross
 - New indicator StochRSI Cross
+- New option to customize ichimoku strategies and added chikou span
 
 
 ## Installing And Running
@@ -574,6 +575,93 @@ If you have enable_charts: true, you will have a parameter "chart" in the same w
     cname = str(uuid.uuid4()) + extn
     fh = open(__UPLOADS__ + cname, 'wb')
     fh.write(fileinfo['body'])
+```
+
+### Ichimoku
+
+The default ichimoku strategy is replaced with TK cross and future cross. You can either select one of them or both. If you choose both, you will receive a signal when a TK cross or future cross happens. 
+
+```
+indicators:
+    ichimoku:
+        - enabled: true
+          alert_enabled: true
+          alert_frequency: once
+          signal:
+            - leading_span_a
+            - leading_span_b
+            - tenkansen
+            - kijunsen
+          hot: true
+          cold: true
+          hot_label: 'Uptrend is coming'
+          cold_label: 'Downtred is coming'
+          candle_period: 4h
+          indicator_label: 'Ichimoku'
+```
+
+If you want to add your own strategy, you could add your strategy to app/user_data/strategies folder (if it doesn't exist, create one). The name of your strategy should be the same name as the class name. Your custom strategy should use te following template:
+
+```
+class <name of your strategy>:
+    def analyze(ichimoku_values, dataframe):
+        """Custom Ichimoku strategy
+
+        Args:               
+            ichimoku_values (list, optional): historical list containg 'leading_span_a', 'leading_span_b', 'tenkansen', 'kijunsen' and 'chikou_span'
+            dataframe (float, optional): historical pandas dataframe containing 'timestamp', 'open', 'high', 'low', 'close' and 'volume' 
+
+        Returns:
+            is_hot, is_cold: A dataframe containing the indicators and hot/cold values.
+        """
+
+        return is_hot, is_cold
+```
+
+Then in your config.yaml, add the custom_strategy property, this will override the default behavior.
+
+```
+indicators:
+    ichimoku:
+        - enabled: true
+          custom_strategy: <name of your strategy>
+          alert_enabled: true
+          alert_frequency: once
+          signal:
+            - leading_span_a
+            - leading_span_b
+            - tenkansen
+            - kijunsen
+            - chikou_span
+          hot: true
+          cold: true
+          hot_label: 'Uptrend is coming'
+          cold_label: 'Downtred is coming'
+          candle_period: 4h
+          indicator_label: 'Ichimoku'
+```
+
+Example of a custom strategy:
+
+```
+class CustomStrategy:
+    def analyze(ichimoku_values, dataframe):
+        date = dataframe.index[-1]
+        leading_span_date = ichimoku_values.index[-1]
+
+        tk_cross_hot = ichimoku_values['tenkansen'][date] > ichimoku_values['kijunsen'][date]
+        cloud_breakout_hot = dataframe['close'][date] > ichimoku_values['leading_span_a'][date]
+        price_hot = dataframe['close'][date] > ichimoku_values['kijunsen'][date]
+        
+        is_hot = tk_cross_hot and price_hot and cloud_breakout_hot
+
+        tk_cross_cold = ichimoku_values['tenkansen'][date] < ichimoku_values['kijunsen'][date]
+        cloud_breakout_cold = dataframe['close'][date] < ichimoku_values['leading_span_a'][date]
+        price_cold = dataframe['close'][date] < ichimoku_values['kijunsen'][date]
+
+        is_cold = tk_cross_cold and price_cold and cloud_breakout_cold
+
+        return is_hot, is_cold
 ```
 
 ### Custom Hot/Cold labels

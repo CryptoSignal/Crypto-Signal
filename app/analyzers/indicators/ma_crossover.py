@@ -1,4 +1,4 @@
-""" Custom Indicator Increase In  Volume
+""" Moving Average Crossover
 """
 
 import math
@@ -12,7 +12,7 @@ from analyzers.utils import IndicatorUtils
 class MACrossover(IndicatorUtils):
 
     def analyze(self, historical_data, signal=['close'], hot_thresh=None, cold_thresh=None, exponential=True, ma_fast=10, ma_slow=50):
-        """Performs an analysis about the increase in volumen on the historical data
+        """Performs an analysis about a crossover in 2 moving averages
 
         Args:
             historical_data (list): A matrix of historical OHCLV data.
@@ -45,7 +45,7 @@ class MACrossover(IndicatorUtils):
         ma_crossover['is_hot'] = False
         ma_crossover['is_cold'] = False
 
-        ma_crossover['is_hot'].iloc[-1] = previous_fast < previous_slow and current_fast > current_slow
-        ma_crossover['is_cold'].iloc[-1] = previous_fast > previous_slow and current_fast < current_slow
+        ma_crossover.at[ma_crossover.index[-1], 'is_hot'] = previous_fast < previous_slow and current_fast > current_slow
+        ma_crossover.at[ma_crossover.index[-1], 'is_cold'] = previous_fast > previous_slow and current_fast < current_slow
 
         return ma_crossover

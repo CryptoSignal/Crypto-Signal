@@ -5,3 +5,4 @@ config.yml
 .idea/
 lib/ta-lib/
 app/charts
+app/user_data
