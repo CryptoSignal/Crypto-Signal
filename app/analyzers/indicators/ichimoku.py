@@ -133,11 +133,4 @@ class Ichimoku(IndicatorUtils):
         except Exception as e:
             print('Error running ichimoku analysis: {}'.format(e))
 
-<<<<<<< HEAD
-        if chart == None:
-            ichimoku_values.dropna(how='any', inplace=True)
-
         return ichimoku_values
-=======
-        return ichimoku_values
->>>>>>> a67f02b06376d8a7dc116d605649a99add32a559
