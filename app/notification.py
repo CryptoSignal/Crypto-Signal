@@ -667,8 +667,10 @@ class Notifier(IndicatorUtils):
                                     should_alert = False
 
                                 if should_alert:
-                                    base_currency, quote_currency = market_pair.split(
-                                        '/')
+                                    base_currency = market_pair.split('/')
+                                    quote_currency = ''
+                                    if len(base_currency) == 2:
+                                        base_currency, quote_currency = base_currency
                                     precision = self.market_data[exchange][market_pair]['precision']
                                     decimal_format = '.{}f'.format(
                                         precision['price'])
