@@ -52,6 +52,8 @@ class Notifier(IndicatorUtils):
         self.logger = structlog.get_logger()
         self.notifier_config = notifier_config
         self.indicator_config = indicator_config
+        if conditional_config:
+            self.conditional_mode = True
         self.conditional_config = conditional_config
         self.market_data = market_data
         self.last_analysis = dict()
@@ -165,7 +167,7 @@ class Notifier(IndicatorUtils):
             for market_pair in messages[exchange]:
                 _messages = messages[exchange][market_pair]
 
-                if self.conditional_config:
+                if self.conditional_mode:
                     self.notify_conditional(exchange, market_pair, _messages)
                 else:
                     for candle_period in _messages:
@@ -175,12 +177,17 @@ class Notifier(IndicatorUtils):
                         self.notify_all_messages(
                             exchange, market_pair, candle_period, _messages[candle_period])
                         sleep(4)
+        
+        if self.first_run:
+            self.first_run = False
 
     def notify_conditional(self, exchange, market_pair, messages):
         status = ['hot', 'cold']
 
         for condition in self.conditional_config:
-            x = 0
+            c_nb_conditions = 0
+            c_nb_once_muted = 0
+            c_nb_new_status = 0
             nb_conditions = 0
             new_message = {}
             new_message['values'] = []
@@ -210,16 +217,24 @@ class Notifier(IndicatorUtils):
                                                     msg['values'])
                                                 new_message['indicator'].append(
                                                     msg['indicator'])
-                                                x += 1
+                                                c_nb_conditions += 1
+                                                if msg['last_status'] == msg['last_status'] and msg['analysis']['config']['alert_frequency'] == 'once' and not self.first_run:
+                                                    c_nb_once_muted += 1
+                                                if msg['last_status'] != msg['last_status']:
+                                                    c_nb_new_status += 1
                                 except:
                                     pass
 
-            if x == nb_conditions and x != 0:
-                new_message['status'] = condition['label']
-                self.notify_discord([new_message])
-                self.notify_webhook([new_message], None)
-                self.notify_telegram([new_message], None)
-                self.notify_stdout([new_message])
+            if c_nb_conditions == nb_conditions and c_nb_conditions != 0:
+                if c_nb_once_muted > 0 and c_nb_new_status == 0:
+                    self.logger.info('Alert frecuency once. Dont alert. %s %s',
+                                    new_message['market'], new_message['indicator'])
+                else:
+                    new_message['status'] = condition['label']
+                    self.notify_discord([new_message])
+                    self.notify_webhook([new_message], None)
+                    self.notify_telegram([new_message], None)
+                    self.notify_stdout([new_message])
 
     def notify_all_messages(self, exchange, market_pair, candle_period, messages):
         chart_file = None
@@ -651,9 +666,8 @@ class Notifier(IndicatorUtils):
                                 # if self.first_run:
                                 # self.logger.info('Alert once for %s %s %s', market_pair, indicator, candle_period)
 
-                                if not self.first_run:
-                                    if analysis['config']['alert_frequency'] == 'once':
-                                        if last_status == status:
+                                if not self.first_run and not self.conditional_mode:
+                                    if analysis['config']['alert_frequency'] == 'once' and last_status == status:
                                             self.logger.info('Alert frecuency once. Dont alert. %s %s %s',
                                                              market_pair, indicator, candle_period)
                                             should_alert = False
@@ -720,9 +734,6 @@ class Notifier(IndicatorUtils):
 
         # Merge changes from new analysis into last analysis
         self.last_analysis = {**self.last_analysis, **new_analysis}
-
-        if self.first_run:
-            self.first_run = False
 
         return new_messages
 
