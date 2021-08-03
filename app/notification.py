@@ -52,6 +52,7 @@ class Notifier(IndicatorUtils):
         self.logger = structlog.get_logger()
         self.notifier_config = notifier_config
         self.indicator_config = indicator_config
+        self.conditional_mode = False
         if conditional_config:
             self.conditional_mode = True
         self.conditional_config = conditional_config
