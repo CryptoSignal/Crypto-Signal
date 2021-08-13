@@ -193,6 +193,7 @@ class Notifier(IndicatorUtils):
             new_message = {}
             new_message['values'] = []
             new_message['indicator'] = []
+            new_message['candle_period'] = []
             new_message['price_value'] = {}
 
             for stat in list(set(status) & set(condition.keys())):
@@ -218,6 +219,7 @@ class Notifier(IndicatorUtils):
                                                     msg['values'])
                                                 new_message['indicator'].append(
                                                     msg['indicator'])
+                                                new_message['candle_period'].append(candle_period)
                                                 c_nb_conditions += 1
                                                 if msg['last_status'] == msg['last_status'] and msg['analysis']['config']['alert_frequency'] == 'once' and not self.first_run:
                                                     c_nb_once_muted += 1
