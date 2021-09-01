@@ -48,8 +48,14 @@ class TelegramNotifier(NotifierUtils):
         # print(message_chunks)
         # exit()
         for message_chunk in message_chunks:
-            self.bot.send_message(
-                chat_id=self.chat_id, text=message_chunk, parse_mode=self.parse_mode)
+            try:
+                self.bot.send_message(
+                    chat_id=self.chat_id, text=message_chunk, parse_mode=self.parse_mode)
+            except Exception as e:
+                self.logger.info('Unable to send message using Telegram !')
+                self.logger.info('Check your configuration ...')
+                self.logger.debug(e)
+                exit(0)
 
     @retry(
         retry=retry_if_exception_type(telegram.error.TimedOut),
