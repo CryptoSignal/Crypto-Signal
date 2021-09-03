@@ -4,9 +4,10 @@
 import copy
 import json
 import os
+import re
 import sys
 import traceback
-from datetime import datetime
+import datetime
 from time import sleep
 
 import matplotlib
@@ -52,11 +53,9 @@ class Notifier(IndicatorUtils):
         self.logger = structlog.get_logger()
         self.notifier_config = notifier_config
         self.indicator_config = indicator_config
-        self.conditional_mode = False
-        if conditional_config:
-            self.conditional_mode = True
         self.conditional_config = conditional_config
         self.market_data = market_data
+        self.alert_frequencies = {}
         self.last_analysis = dict()
         self.enable_charts = False
         self.all_historical_data = False
@@ -168,7 +167,7 @@ class Notifier(IndicatorUtils):
             for market_pair in messages[exchange]:
                 _messages = messages[exchange][market_pair]
 
-                if self.conditional_mode:
+                if self.conditional_config:
                     self.notify_conditional(exchange, market_pair, _messages)
                 else:
                     for candle_period in _messages:
@@ -178,7 +177,7 @@ class Notifier(IndicatorUtils):
                         self.notify_all_messages(
                             exchange, market_pair, candle_period, _messages[candle_period])
                         sleep(4)
-        
+
         if self.first_run:
             self.first_run = False
 
@@ -193,7 +192,6 @@ class Notifier(IndicatorUtils):
             new_message = {}
             new_message['values'] = []
             new_message['indicator'] = []
-            new_message['candle_period'] = []
             new_message['price_value'] = {}
 
             for stat in list(set(status) & set(condition.keys())):
@@ -219,7 +217,6 @@ class Notifier(IndicatorUtils):
                                                     msg['values'])
                                                 new_message['indicator'].append(
                                                     msg['indicator'])
-                                                new_message['candle_period'].append(candle_period)
                                                 c_nb_conditions += 1
                                                 if msg['last_status'] == msg['last_status'] and msg['analysis']['config']['alert_frequency'] == 'once' and not self.first_run:
                                                     c_nb_once_muted += 1
@@ -228,10 +225,10 @@ class Notifier(IndicatorUtils):
                                 except:
                                     pass
 
-            if c_nb_conditions == nb_conditions and c_nb_conditions != 0:
-                if c_nb_once_muted > 0 and c_nb_new_status == 0:
+            if c_nb_conditions == nb_conditions and c_nb_conditions > 0:
+                if c_nb_once_muted and not c_nb_new_status:
                     self.logger.info('Alert frecuency once. Dont alert. %s %s',
-                                    new_message['market'], new_message['indicator'])
+                                     new_message['market'], new_message['indicator'])
                 else:
                     new_message['status'] = condition['label']
                     self.notify_discord([new_message])
@@ -258,7 +255,7 @@ class Notifier(IndicatorUtils):
         self.notify_webhook(messages, chart_file)
         # self.notify_twilio(new_analysis)
         self.notify_email(messages)
-        self.notify_telegram(messages, chart_file)
+        #self.notify_telegram(messages, chart_file)
         self.notify_stdout(messages)
 
     def notify_discord(self, messages):
@@ -277,7 +274,8 @@ class Notifier(IndicatorUtils):
 
             for message in messages:
                 formatted_message = message_template.render(message)
-                self.discord_clients[notifier].notify(formatted_message.strip())
+                self.discord_clients[notifier].notify(
+                    formatted_message.strip())
 
     def notify_slack(self, new_analysis):
         """Send a notification via the slack notifier
@@ -386,7 +384,7 @@ class Notifier(IndicatorUtils):
 
         if not self.stdout_configured:
             return
-        
+
         for notifier in self.stdout_clients:
             message_template = Template(
                 self.notifier_config[notifier]['optional']['template'])
@@ -532,6 +530,36 @@ class Notifier(IndicatorUtils):
         self.last_analysis = {**self.last_analysis, **new_analysis}
         return new_message
 
+    def parse_alert_fequency(self, alert_frequency):
+        now = datetime.datetime.now()
+        matches = re.findall(r'\d+[dhms]', alert_frequency)
+        if not matches:
+            return
+
+        for match in matches:
+            try:
+                value = int(match[:-1])
+            except Exception as e:
+                self.logger.info('Unable to parse alert_frequency "%s"', value)
+                self.logger.debug(e)
+                continue
+            if match.endswith('m'):
+                now += datetime.timedelta(minutes=value)
+            elif match.endswith('h'):
+                now += datetime.timedelta(hours=value)
+            elif match.endswith('s'):
+                now += datetime.timedelta(seconds=value)
+            elif match.endswith('d'):
+                now += datetime.timedelta(days=value)
+        return now
+
+    def should_i_alert(self, alert_frequency_key, alert_frequency):
+        if alert_frequency_key in self.alert_frequencies:
+            if self.alert_frequencies[alert_frequency_key] > datetime.datetime.now():
+                return False
+        self.alert_frequencies[alert_frequency_key] = self.parse_alert_fequency(alert_frequency)
+        return True
+
     def get_indicator_messages(self, new_analysis):
         """Creates a message list from a user defined template
 
@@ -548,7 +576,7 @@ class Notifier(IndicatorUtils):
 
         # self.logger.info('Is first run: {}'.format(self.first_run))
 
-        now = datetime.now(timezone(self.timezone))
+        now = datetime.datetime.now(timezone(self.timezone))
         creation_date = now.strftime("%Y-%m-%d %H:%M:%S")
 
         new_messages = dict()
@@ -612,6 +640,7 @@ class Notifier(IndicatorUtils):
                                     if isinstance(values[signal], float):
                                         values[signal] = format(
                                             values[signal], '.2f')
+
                             elif indicator_type == 'crossovers':
                                 latest_result = analysis['result'].iloc[-1]
 
@@ -666,14 +695,14 @@ class Notifier(IndicatorUtils):
 
                                 should_alert = True
 
-                                # if self.first_run:
-                                # self.logger.info('Alert once for %s %s %s', market_pair, indicator, candle_period)
-
-                                if not self.first_run and not self.conditional_mode:
+                                if not self.first_run and not self.conditional_config:
                                     if analysis['config']['alert_frequency'] == 'once' and last_status == status:
-                                            self.logger.info('Alert frecuency once. Dont alert. %s %s %s',
-                                                             market_pair, indicator, candle_period)
-                                            should_alert = False
+                                        self.logger.info('Alert frecuency once. Dont alert. %s %s %s',
+                                                         market_pair, indicator, candle_period)
+                                        should_alert = False
+                                    else:
+                                        should_alert = self.should_i_alert(''.join(
+                                            [market_pair, indicator, candle_period]), analysis['config']['alert_frequency'])
 
                                 if not analysis['config']['alert_enabled']:
                                     should_alert = False
@@ -769,16 +798,17 @@ class Notifier(IndicatorUtils):
                     try:
                         self.create_chart(
                             exchange, market_pair, candle_period, candles_data)
-                    except Exception as e:
+                    except telegram.error.Unauthorized as e:
                         self.logger.info(
                             'Error creating chart for %s %s', market_pair, candle_period)
-                        self.logger.exception(e)
+                        self.logger.exception(e.message)
+                        raise
 
     def create_chart(self, exchange, market_pair, candle_period, candles_data):
 
         # self.logger.info("Beginning creation of charts: {} - {} - {}".format(exchange, market_pair, candle_period))
 
-        now = datetime.now(timezone(self.timezone))
+        now = datetime.datetime.now(timezone(self.timezone))
         creation_date = now.strftime("%Y-%m-%d %H:%M:%S")
 
         df = self.convert_to_dataframe(candles_data)
