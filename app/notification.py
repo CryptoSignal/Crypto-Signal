@@ -211,6 +211,9 @@ class Notifier(IndicatorUtils):
                             if msg['status'] == stat:
                                 try:
                                     for indicator in condition[stat]:
+                                        if msg['alert_frequency'] != 'once':
+                                            should_alert += self.should_i_alert(''.join(
+                                            [msg['market'], msg['values'][0], candle_period]), msg['alert_frequency'])
                                         if msg['indicator'] in indicator.keys():
                                             if indicator[msg['indicator']] == msg['indicator_number']:
                                                 new_message['values'].append(
@@ -225,7 +228,7 @@ class Notifier(IndicatorUtils):
                                 except:
                                     pass
 
-            if c_nb_conditions == nb_conditions and c_nb_conditions > 0:
+            if c_nb_conditions == nb_conditions and c_nb_conditions and should_alert:
                 if c_nb_once_muted and not c_nb_new_status:
                     self.logger.info('Alert frecuency once. Dont alert. %s %s',
                                      new_message['market'], new_message['indicator'])
@@ -557,7 +560,9 @@ class Notifier(IndicatorUtils):
         if alert_frequency_key in self.alert_frequencies:
             if self.alert_frequencies[alert_frequency_key] > datetime.datetime.now():
                 return False
-        self.alert_frequencies[alert_frequency_key] = self.parse_alert_fequency(alert_frequency)
+        timedelta = self.parse_alert_fequency(alert_frequency)
+        if timedelta:
+            self.alert_frequencies[alert_frequency_key] = timedelta
         return True
 
     def get_indicator_messages(self, new_analysis):
