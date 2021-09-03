@@ -255,7 +255,7 @@ class Notifier(IndicatorUtils):
         self.notify_webhook(messages, chart_file)
         # self.notify_twilio(new_analysis)
         self.notify_email(messages)
-        #self.notify_telegram(messages, chart_file)
+        self.notify_telegram(messages, chart_file)
         self.notify_stdout(messages)
 
     def notify_discord(self, messages):
@@ -798,10 +798,10 @@ class Notifier(IndicatorUtils):
                     try:
                         self.create_chart(
                             exchange, market_pair, candle_period, candles_data)
-                    except telegram.error.Unauthorized as e:
+                    except Exception as e:
                         self.logger.info(
                             'Error creating chart for %s %s', market_pair, candle_period)
-                        self.logger.exception(e.message)
+                        self.logger.exception(e)
                         raise
 
     def create_chart(self, exchange, market_pair, candle_period, candles_data):
