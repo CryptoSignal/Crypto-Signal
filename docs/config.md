@@ -346,7 +346,7 @@ The notifier templates are built with a templating language called [Jinja2](http
 - analysis.result.is_cold - The raw boolean value of if the indicator is cold.
 - analysis.config.enabled - The raw config item of if this indicator is enabled. If you receive a message with a value other than True something has gone horribly wrong.
 - analysis.config.alert_enabled - The raw config item of if this indicator alert is enabled. If you receive a message with a value other than True something has gone horribly wrong.
-- analysis.config.alert_frequency - The raw config item of whether this alert is always sent or if it is only sent once per status change.
+- analysis.config.alert_frequency - The raw config item of whether this alert is always sent or if it is only sent once per status change. Can also define the sleep time of an alert.
 - analysis.config.hot - The raw config item of what the configured hot threshold is.
 - analysis.config.cold - The raw config item of what the configured cold threshold is.
 - analysis.config.candle_period - The raw config item of what time period of candles to gather.
@@ -372,6 +372,19 @@ description: Valid values are true or false. Whether to perform analysis on this
 default: True\
 necessity: optional\
 description: Valid values are true or false. Whether to send alerts for this particular indicator.
+
+**alert_frequency**\
+default: always\
+necessity: optional\
+description: Valid values are always, once or time period in the format described below. Whether to send alerts or frequency of alerts for this particular indicator.
+time period format: 
+  - `d` for number of days
+  - `h` for number of hours
+  - `m` for number of minutes
+  - `s` for number of seconds
+  ex 1: `1d12h20m10s`
+  ex 2: `15m`
+For conditional mode, if only one indicator of the condition has its alert frequency valid, the alert will be sent. (Should it stays like that ? Open an issue if you want to change that behaviour) 
 
 **signal**\
 default: A string\
