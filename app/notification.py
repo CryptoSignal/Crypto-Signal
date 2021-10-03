@@ -189,6 +189,7 @@ class Notifier(IndicatorUtils):
             c_nb_once_muted = 0
             c_nb_new_status = 0
             nb_conditions = 0
+            should_alert = False
             new_message = {}
             new_message['values'] = []
             new_message['indicator'] = []
@@ -207,26 +208,22 @@ class Notifier(IndicatorUtils):
                     new_message['price_value'][candle_period] = messages[candle_period][0]['price_value']
                     new_message['decimal_format'] = messages[candle_period][0]['decimal_format']
                     for msg in messages[candle_period]:
+                        alert_frequency = msg['analysis']['config']['alert_frequency']
                         for stat in status:
-                            if msg['status'] == stat:
-                                try:
-                                    for indicator in condition[stat]:
-                                        if msg['alert_frequency'] != 'once':
-                                            should_alert += self.should_i_alert(''.join(
-                                            [msg['market'], msg['values'][0], candle_period]), msg['alert_frequency'])
-                                        if msg['indicator'] in indicator.keys():
-                                            if indicator[msg['indicator']] == msg['indicator_number']:
-                                                new_message['values'].append(
-                                                    msg['values'])
-                                                new_message['indicator'].append(
-                                                    msg['indicator'])
-                                                c_nb_conditions += 1
-                                                if msg['last_status'] == msg['last_status'] and msg['analysis']['config']['alert_frequency'] == 'once' and not self.first_run:
-                                                    c_nb_once_muted += 1
-                                                if msg['last_status'] != msg['last_status']:
-                                                    c_nb_new_status += 1
-                                except:
-                                    pass
+                            if msg['status'] == stat and stat in condition.keys():
+                                for indicator in condition[stat]:
+                                    if msg['indicator'] in indicator.keys():
+                                        if indicator[msg['indicator']] == msg['indicator_number']:
+                                            new_message['values'].append(msg['values'])
+                                            new_message['indicator'].append(msg['indicator'])
+                                            c_nb_conditions += 1
+                                            if alert_frequency != 'once':
+                                                key = ''.join([msg['market'], list(msg['values'])[0], candle_period])
+                                                should_alert += self.should_i_alert(key, alert_frequency)
+                                            if msg['status'] == msg['last_status'] and alert_frequency == 'once' and not self.first_run:
+                                                c_nb_once_muted += 1
+                                            if msg['status'] != msg['last_status']:
+                                                c_nb_new_status += 1
 
             if c_nb_conditions == nb_conditions and c_nb_conditions and should_alert:
                 if c_nb_once_muted and not c_nb_new_status:
