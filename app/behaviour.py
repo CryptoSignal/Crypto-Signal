@@ -347,23 +347,25 @@ class Behaviour():
                 if not crossover_conf['enabled']:
                     self.logger.debug("%s is disabled, skipping.", crossover)
                     continue
+                try:
+                    key_indicator = new_result[crossover_conf['key_indicator_type']][crossover_conf['key_indicator']][crossover_conf['key_indicator_index']]
+                    crossed_indicator = new_result[crossover_conf['crossed_indicator_type']][crossover_conf['crossed_indicator']][crossover_conf['crossed_indicator_index']]
 
-                key_indicator = new_result[crossover_conf['key_indicator_type']
-                                           ][crossover_conf['key_indicator']][crossover_conf['key_indicator_index']]
-                crossed_indicator = new_result[crossover_conf['crossed_indicator_type']
-                                               ][crossover_conf['crossed_indicator']][crossover_conf['crossed_indicator_index']]
+                    crossover_conf['candle_period'] = crossover_conf['key_indicator'] + \
+                        str(crossover_conf['key_indicator_index'])
 
-                crossover_conf['candle_period'] = crossover_conf['key_indicator'] + \
-                    str(crossover_conf['key_indicator_index'])
-
-                dispatcher_args = {
-                    'key_indicator': key_indicator['result'],
-                    'key_signal': crossover_conf['key_signal'],
-                    'key_indicator_index': crossover_conf['key_indicator_index'],
-                    'crossed_indicator': crossed_indicator['result'],
-                    'crossed_signal': crossover_conf['crossed_signal'],
-                    'crossed_indicator_index': crossover_conf['crossed_indicator_index']
-                }
+                    dispatcher_args = {
+                        'key_indicator': key_indicator['result'],
+                        'key_signal': crossover_conf['key_signal'],
+                        'key_indicator_index': crossover_conf['key_indicator_index'],
+                        'crossed_indicator': crossed_indicator['result'],
+                        'crossed_signal': crossover_conf['crossed_signal'],
+                        'crossed_indicator_index': crossover_conf['crossed_indicator_index']
+                    }
+                except Exception as e:
+                    self.logger.warning(e)
+                    self.logger.warning(traceback.format_exc())
+                    continue
 
                 results[crossover].append({
                     'result': crossover_dispatcher[crossover](**dispatcher_args),
