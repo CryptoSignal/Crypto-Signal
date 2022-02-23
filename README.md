@@ -1,4 +1,4 @@
-# CryptoSignal - #1 Quant Trading & Technical Analysis Bot - 2,100 + stars, 580 + forks https://github.com/CryptoSignal/Crypto-Signal
+# CryptoSignal - #1 Quant Trading & Technical Analysis Bot - 3,800 + stars, 1100 + forks https://github.com/CryptoSignal/Crypto-Signal
 
 ### Development state: Beta (Code is stable, documentation is often lagging)
 
