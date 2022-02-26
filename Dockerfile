@@ -1,4 +1,4 @@
-FROM python:3.8-buster
+FROM python:latest
 
 # TA-lib is required by the python TA-lib wrapper. This provides analysis.
 COPY lib/ta-lib-0.4.0-src.tar.gz /tmp/ta-lib-0.4.0-src.tar.gz
@@ -10,13 +10,11 @@ RUN cd /tmp && \
   make && \
   make install
 
-ADD app/requirements-step-1.txt /app/requirements-step-1.txt
-ADD app/requirements-step-2.txt /app/requirements-step-2.txt
+COPY ./app /app
+
 WORKDIR /app
 
-# Pip doesn't install requirements sequentially.
-# To ensure pre-reqs are installed in the correct
-# order they have been split into two files
+RUN pip install --upgrade pip
 RUN pip install -r requirements-step-1.txt
 RUN pip install -r requirements-step-2.txt
 

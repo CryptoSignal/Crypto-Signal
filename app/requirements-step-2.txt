@@ -13,6 +13,6 @@ webcord>=0.2
 jinja2>=2.10
 requests>=2.20.0
 PyYAML>=5.1
-tulipy>=0.2.1
+newtulipy
 matplotlib>=3.0.1
 scipy>=1.1.0
