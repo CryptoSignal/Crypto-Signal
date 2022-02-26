@@ -18,7 +18,7 @@ Development branch to testing new features. This develop version has a lot of im
 
 
 ## Installing And Running
-Because this is a development branch you need to build your custom Docker image. The commands listed below are intended to be run in a terminal.
+The commands listed below are intended to be run in a terminal.
 
 Be sure you have git installed in your system.
 
@@ -30,11 +30,7 @@ Be sure you have git installed in your system.
  
 1. Create a config.yml file and put it into "app" folder.
 
-1. Build your own Docker image, for example, `docker build -t dev/crypto-signals:latest .`
-
-1. For testing and debugging run docker with "-t" option `docker run --rm -ti -v  $PWD/app:/app dev/crypto-signals:latest`
-
-1. For production run in daemon mode using "-d" option `docker run --rm -di -v  $PWD/app:/app dev/crypto-signals:latest`
+1. Build and run the docker container: `docker-compose up --build`
 
 
 ### Configuring config.yml
