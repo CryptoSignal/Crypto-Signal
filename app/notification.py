@@ -214,12 +214,16 @@ class Notifier(IndicatorUtils):
                                 for indicator in condition[stat]:
                                     if msg['indicator'] in indicator.keys():
                                         if indicator[msg['indicator']] == msg['indicator_number']:
-                                            new_message['values'].append(msg['values'])
-                                            new_message['indicator'].append(msg['indicator'])
+                                            new_message['values'].append(
+                                                msg['values'])
+                                            new_message['indicator'].append(
+                                                msg['indicator'])
                                             c_nb_conditions += 1
                                             if alert_frequency != 'once':
-                                                key = ''.join([msg['market'], list(msg['values'])[0], candle_period])
-                                                should_alert += self.should_i_alert(key, alert_frequency)
+                                                key = ''.join([msg['market'], list(
+                                                    msg['values'])[0], candle_period])
+                                                should_alert += self.should_i_alert(
+                                                    key, alert_frequency)
                                             if msg['status'] == msg['last_status'] and alert_frequency == 'once' and not self.first_run:
                                                 c_nb_once_muted += 1
                                             if msg['status'] != msg['last_status']:
@@ -231,7 +235,7 @@ class Notifier(IndicatorUtils):
                                      new_message['market'], new_message['indicator'])
                 else:
                     new_message['status'] = condition['label']
-                    self.notify_discord([new_message])
+                    self.notify_discord([new_message], None)
                     self.notify_webhook([new_message], None)
                     self.notify_telegram([new_message], None)
                     self.notify_stdout([new_message])
@@ -251,14 +255,14 @@ class Notifier(IndicatorUtils):
                 self.logger.exception(e)
 
         # self.notify_slack(new_analysis)
-        self.notify_discord(messages)
+        self.notify_discord(messages, chart_file)
         self.notify_webhook(messages, chart_file)
         # self.notify_twilio(new_analysis)
         self.notify_email(messages)
         self.notify_telegram(messages, chart_file)
         self.notify_stdout(messages)
 
-    def notify_discord(self, messages):
+    def notify_discord(self, messages, chart_file):
         """Send a notification via the discord notifier
 
         Args:
@@ -272,10 +276,20 @@ class Notifier(IndicatorUtils):
             message_template = Template(
                 self.notifier_config[notifier]['optional']['template'])
 
-            for message in messages:
-                formatted_message = message_template.render(message)
-                self.discord_clients[notifier].notify(
-                    formatted_message.strip())
+            formatted_messages = [message_template.render(
+                message) for message in messages]
+
+            if self.enable_charts:
+                if chart_file:
+                    self.discord_clients[notifier].send_chart_messages(chart_file, formatted_messages)
+                else:
+                    self.logger.info(
+                        'Chart file %s doesnt exist, sending text message.', chart_file)
+                    self.discord_clients[notifier].send_messages(
+                        formatted_messages)
+            else:
+                self.discord_clients[notifier].send_messages(
+                    formatted_messages)
 
     def notify_slack(self, new_analysis):
         """Send a notification via the slack notifier
