@@ -231,7 +231,7 @@ class Notifier(IndicatorUtils):
                                      new_message['market'], new_message['indicator'])
                 else:
                     new_message['status'] = condition['label']
-                    self.notify_discord([new_message])
+                    self.notify_discord([new_message], None)
                     self.notify_webhook([new_message], None)
                     self.notify_telegram([new_message], None)
                     self.notify_stdout([new_message])
@@ -251,14 +251,14 @@ class Notifier(IndicatorUtils):
                 self.logger.exception(e)
 
         # self.notify_slack(new_analysis)
-        self.notify_discord(messages)
+        self.notify_discord(messages, chart_file)
         self.notify_webhook(messages, chart_file)
         # self.notify_twilio(new_analysis)
         self.notify_email(messages)
         self.notify_telegram(messages, chart_file)
         self.notify_stdout(messages)
 
-    def notify_discord(self, messages):
+    def notify_discord(self, messages, chart_file):
         """Send a notification via the discord notifier
 
         Args:
@@ -272,10 +272,27 @@ class Notifier(IndicatorUtils):
             message_template = Template(
                 self.notifier_config[notifier]['optional']['template'])
 
+            formatted_messages = []
+
             for message in messages:
-                formatted_message = message_template.render(message)
-                self.discord_clients[notifier].notify(
-                    formatted_message.strip())
+                formatted_messages.append(message_template.render(message))
+
+            if self.enable_charts:
+                if chart_file and os.path.exists(chart_file):
+                    try:
+                        self.discord_clients[notifier].send_chart_messages(
+                            open(chart_file, 'rb'), formatted_messages)
+                    except (IOError, SyntaxError):
+                        self.discord_clients[notifier].send_messages(
+                            formatted_messages)
+                else:
+                    self.logger.info(
+                        'Chart file %s doesnt exist, sending text message.', chart_file)
+                    self.discord_clients[notifier].send_messages(
+                        formatted_messages)
+            else:
+                self.discord_clients[notifier].send_messages(
+                    formatted_messages)
 
     def notify_slack(self, new_analysis):
         """Send a notification via the slack notifier
