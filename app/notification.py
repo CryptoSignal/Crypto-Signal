@@ -345,13 +345,9 @@ class Notifier(IndicatorUtils):
                 formatted_messages.append(message_template.render(message))
 
             if self.enable_charts:
-                if chart_file and os.path.exists(chart_file):
-                    try:
-                        self.telegram_clients[notifier].send_chart_messages(
-                            open(chart_file, 'rb'), formatted_messages)
-                    except (IOError, SyntaxError):
-                        self.telegram_clients[notifier].send_messages(
-                            formatted_messages)
+                if chart_file:
+                    self.telegram_clients[notifier].send_chart_messages(
+                        chart_file, formatted_messages)
                 else:
                     self.logger.info(
                         'Chart file %s doesnt exist, sending text message.', chart_file)

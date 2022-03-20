@@ -17,6 +17,7 @@ __stop_after_attempt__ = 3
 __wait_fixed__ = 5
 __max_message_size__ = 4096
 
+
 class TelegramNotifier(NotifierUtils):
     """Used to notify user of events via telegram.
     """
@@ -39,7 +40,7 @@ class TelegramNotifier(NotifierUtils):
         stop=stop_after_attempt(__stop_after_attempt__),
         wait=wait_fixed(__wait_fixed__)
     )
-    def notify(self, message):
+    def notify(self, message: str):
         """Send the notification.
 
         Args:
@@ -60,13 +61,19 @@ class TelegramNotifier(NotifierUtils):
         stop=stop_after_attempt(__stop_after_attempt__),
         wait=wait_fixed(__wait_fixed__)
     )
-    def send_chart_messages(self, photo_url, messages=[]):
+    def send_chart_messages(self, photo_url: str, messages=[]):
         """Send image chart
 
         Args:
             photo_url (str): The photo url to send.
         """
-        self.bot.send_photo(chat_id=self.chat_id, photo=photo_url, timeout=40)
+        try:
+            with open(photo_url, 'rb') as f:
+                self.bot.send_photo(chat_id=self.chat_id,
+                                    photo=f.read(), timeout=__connect_timeout__)
+        except Exception as e:
+            self.logger.info('Unable to send chart messages using Telegram !')
+            self.logger.debug(e)
         self.send_messages(messages)
 
     def send_messages(self, messages=[]):
