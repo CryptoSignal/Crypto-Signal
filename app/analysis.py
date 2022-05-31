@@ -46,7 +46,8 @@ class StrategyAnalyzer():
             'bollinger': bollinger.Bollinger().analyze,
             'bbp': bbp.BBP().analyze,
             'macd_cross': macd_cross.MACDCross().analyze,
-            'stochrsi_cross': stochrsi_cross.StochRSICross().analyze
+            'stochrsi_cross': stochrsi_cross.StochRSICross().analyze,
+            'sqzmom': sqzmom.SQZMOM().analyze
         }
 
         return dispatcher
