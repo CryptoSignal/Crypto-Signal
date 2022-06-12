@@ -14,6 +14,7 @@ Development branch to testing new features. This develop version has a lot of im
 - New indicator Klinger Oscillator
 - New indicator MACD Cross
 - New indicator StochRSI Cross
+- New indicator Sqzmon - Squeeze Momentum Indicator
 - New option to customize ichimoku strategies and added chikou span
 
 
@@ -527,6 +528,25 @@ indicators:
       cold_label: 'Downtred is coming'
       indicator_label: 'StochRSI Cross 4h'
       mute_cold: false
+```
+
+#### Squeeze Momentum Indicator
+
+It is a volatility and momentum indicator which capitalizes on the tendency for price to break out strongly after consolidating in a tight trading range.
+
+The volatility component measures price compression using Bollinger Bands and Keltner Channels. If the Bollinger Bands are completely enclosed within the Keltner Channels, that indicates a period of very low volatility. This state is known as the squeeze. When the Bollinger Bands expand and move back outside of the Keltner Channel, the squeeze is said to have “fired”: volatility increases and prices are likely to break out of that tight trading range in one direction or the other. The on/off state of the squeeze is shown with small dots on the zero line of the indicator: red dots indicate the squeeze is on, and green dots indicate the squeeze is off.
+
+For more details: https://www.tradingview.com/script/nqQ1DT5a-Squeeze-Momentum-Indicator-LazyBear/
+
+```
+indicators:
+  sqzmom:
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: once
+      candle_period: 1d
+      signal:
+        - close    
 ```
 
 #### Chart images on webhook
