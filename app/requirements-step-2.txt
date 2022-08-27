@@ -12,5 +12,5 @@ python-telegram-bot==10.0.1
 webcord==0.2
 jinja2==2.10
 requests==2.18.4
-PyYAML==3.12
+PyYAML==5.4
 tulipy==0.2.1
