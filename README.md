@@ -16,6 +16,7 @@ Development branch to testing new features. This develop version has a lot of im
 - New indicator StochRSI Cross
 - New indicator Sqzmon - Squeeze Momentum Indicator
 - New option to customize ichimoku strategies and added chikou span
+- New indicator siiv (Signed Increase In Volume) It is a slightly revised version of iiv. It shows the direction of price chage also.
 
 
 ## Installing And Running
@@ -370,6 +371,50 @@ indicators:
 ```
 
 Of course, this indicator can be used in other candle periods, 15m, 1h.. etc.
+
+#### Signed Increase In Volume indicator - siiv
+
+There is a new indicator called "siiv". It is a slightly revise "iiv" indicator. The hot value is 10 by default, and cold value is -10. This value is a measure about how strong is the increase in volume in the direction of the price change.
+
+The main idea is to try to identify a possible pump or dump.
+
+```
+indicators:
+  siiv:
+    - enabled: false
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - siiv
+      hot: 10
+      cold: -10
+      hot_label: ' Increase in Volume Uptrend'
+      cold_label: ' Increase in Volume Downtrend'
+      candle_period: 5m
+      chart: true
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - siiv
+      hot: 10
+      cold: -10
+      hot_label: ' Increase in Volume Uptrend'
+      cold_label: ' Increase in Volume Downtrend'
+      candle_period: 15m
+      chart: true
+```
+
+If you don't want to receive such notifications just disable the iiv indicator in your config file.
+
+```
+indicators:
+  siiv:
+    - enabled: false
+      candle_period: 15m
+```
+
+Of course, this indicator can be used in other candle periods, 5m, 1h.. etc.
 
 #### Moving Average Ribbon
 

@@ -11,6 +11,7 @@ __all__ = [
     'mfi',
     'obv',
     'iiv',
+    'siiv',
     'ma_ribbon',
     'ma_crossover',
     'bollinger',

@@ -141,6 +141,29 @@ indicators:
       hot: 5
       cold: 0
       candle_period: 5m
+  siiv:  # working
+    - enabled: false
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - siiv
+      hot: 10
+      cold: -10
+      hot_label: ' Increase in Volume Uptrend'
+      cold_label: ' Increase in Volume Downtrend'
+      candle_period: 5m
+      chart: true
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - siiv
+      hot: 10
+      cold: -10
+      hot_label: ' Increase in Volume Uptrend'
+      cold_label: ' Increase in Volume Downtrend'
+      candle_period: 15m
+      chart: true
 informants:
   lrsi:
     - enabled: true
