@@ -24,19 +24,37 @@ Because this is a development branch you need to build your custom Docker image.
 
 Be sure you have git installed in your system.
 
-1. Clone this repo `git clone https://github.com/CryptoSignal/crypto-signal.git`
+1. Clone this repo `git clone https://github.com/ahmetax/Crypto-Signal.git`
 
-1. Enter to cripto-signal folder `cd crypto-signal`
+2. Enter to cripto-signal folder `cd Crypto-Signal`
 
-1. Switch to develop branch `git checkout develop`
+3. Switch to develop branch `git checkout newsiiv`
  
-1. Create a config.yml file and put it into "app" folder.
+4. Create a config.yml file and put it into "app" folder.
 
-1. Build your own Docker image, for example, `docker build -t dev/crypto-signals:latest .`
+5. Build your own Docker image, for example, `docker build -t dev/crypto-signals:latest .`
 
-1. For testing and debugging run docker with "-t" option `docker run --rm -ti -v  $PWD/app:/app dev/crypto-signals:latest`
+6. For testing and debugging run docker with "-t" option `docker run --rm -ti -v  $PWD/app:/app dev/crypto-signals:latest`
 
-1. For production run in daemon mode using "-d" option `docker run --rm -di -v  $PWD/app:/app dev/crypto-signals:latest`
+7. For production run in daemon mode using "-d" option `docker run --rm -di -v  $PWD/app:/app dev/crypto-signals:latest`
+
+8. If you want to run the script without docker, do the following intesd of items 5, 6, and 7:
+
+9. python3 -m venv env
+
+10. source env/bin/activate
+
+11. pip install --upgrade pip
+
+12. cd app
+
+13. pip install -r requirements-step-1.txt
+
+14. pip install -r requirements-step-2.txt
+
+15. In order to run: python app.py
+
+(Note: Give enough permissions to the chart directory and the files in it. )
 
 
 ### Configuring config.yml
@@ -374,7 +392,7 @@ Of course, this indicator can be used in other candle periods, 15m, 1h.. etc.
 
 #### Signed Increase In Volume indicator - siiv
 
-There is a new indicator called "siiv". It is a slightly revise "iiv" indicator. The hot value is 10 by default, and cold value is -10. This value is a measure about how strong is the increase in volume in the direction of the price change.
+There is a new indicator called "siiv". It is a slightly revised version of "iiv" indicator. The hot value is 10 by default, and cold value is -10. The strength is calculated as IIV, then the direction of changes in price is added as the sign.
 
 The main idea is to try to identify a possible pump or dump.
 
@@ -405,7 +423,7 @@ indicators:
       chart: true
 ```
 
-If you don't want to receive such notifications just disable the iiv indicator in your config file.
+If you don't want to receive such notifications just disable the siiv indicator in your config file.
 
 ```
 indicators:
@@ -436,7 +454,7 @@ indicators:
           hot: 10
           cold: -10
           hot_label: 'Uptrend is coming'
-          cold_label: 'Downtred is coming'
+          cold_label: 'Downtrend is coming'
           candle_period: 15m
           pval_th: 20
           ma_series: 5, 15, 25, 35, 45
@@ -466,7 +484,7 @@ indicators:
             - open
             - close
           hot_label: 'Uptrend is coming'
-          cold_label: 'Downtred is coming'
+          cold_label: 'Downtrend is coming'
           indicator_label: 'EMA 50/100 Cross'
 ```
 
@@ -541,7 +559,7 @@ indicators:
         - macd
         - signal
       hot_label: 'Uptrend is coming'
-      cold_label: 'Downtred is coming'
+      cold_label: 'Downtrend is coming'
       indicator_label: 'MACD Cross 4h'
       mute_cold: false
 ```
@@ -563,7 +581,7 @@ indicators:
         - smooth_k
         - smooth_d
       hot_label: 'Uptrend is coming'
-      cold_label: 'Downtred is coming'
+      cold_label: 'Downtrend is coming'
       indicator_label: 'StochRSI Cross 4h'
       mute_cold: false
 ```
@@ -649,7 +667,7 @@ indicators:
           hot: true
           cold: true
           hot_label: 'Uptrend is coming'
-          cold_label: 'Downtred is coming'
+          cold_label: 'Downtrend is coming'
           candle_period: 4h
           indicator_label: 'Ichimoku'
 ```
@@ -690,7 +708,7 @@ indicators:
           hot: true
           cold: true
           hot_label: 'Uptrend is coming'
-          cold_label: 'Downtred is coming'
+          cold_label: 'Downtrend is coming'
           candle_period: 4h
           indicator_label: 'Ichimoku'
 ```
