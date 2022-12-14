@@ -14,10 +14,11 @@ class Preprocessing():
         Returns:
             pandas.DataFrame: Two dataframe, one containing features, the other target variable.
         """
+        y = historical_data[target_name].copy()
+        del historical_data[target_name]
         x = historical_data.copy()
         x.dropna(how='all', inplace=True)
         x_scaled = pd.DataFrame(preprocessing.scale(x))
-        y = historical_data[target_name].copy()
         return x_scaled, y
 
     def correlation_matrix(self, data_set):

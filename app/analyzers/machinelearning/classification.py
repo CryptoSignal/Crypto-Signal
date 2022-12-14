@@ -1,4 +1,12 @@
-import sklearn as sk
+from sklearn.naive_bayes import BernoulliNB
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import LinearSVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 import xgboost as xgb
 from app.analyzers.machinelearning.mlutils import ModelUtil
 
@@ -18,9 +26,10 @@ class Classification():
             or
             list: A list contains performance matrices.
         """
-        bnb_clf = sk.BernoulliNB()
+        bnb_clf = BernoulliNB()
         if predict == False:
-            results = ModelUtil.cross_validation_score(bnb_clf, x, y, cv_times)
+            util = ModelUtil()
+            results = util.cross_validation_score(bnb_clf, x, y, cv_times)
         else:
             bnb_model = bnb_clf.fit(x, y)
             results = bnb_model.predict(x_new)
@@ -42,9 +51,10 @@ class Classification():
             or
             list: A list contains performance matrices.
         """
-        lr_clf = sk.LogisticRegression()
+        lr_clf = LogisticRegression()
         if predict == False:
-            results = ModelUtil.cross_validation_score( lr_clf, x, y, cv_times)
+            util=ModelUtil()
+            results = util.cross_validation_score( lr_clf, x, y, cv_times)
         else:
             lr_model =  lr_clf.fit(x, y)
             results = lr_model.predict(x_new)
@@ -66,9 +76,10 @@ class Classification():
             or
             list: A list contains performance matrices.
         """
-        knn_clf = sk.KNeighborsClassifier(n_neighbors=5)
+        knn_clf = KNeighborsClassifier(n_neighbors=5)
         if predict == False:
-            results = ModelUtil.cross_validation_score(knn_clf, x, y, cv_times)
+            util = ModelUtil()
+            results = util.cross_validation_score(knn_clf, x, y, cv_times)
         else:
             knn_model = knn_clf.fit(x, y)
             results = knn_model.predict(x_new)
@@ -89,9 +100,10 @@ class Classification():
             or
             list: A list contains performance matrices.
         """
-        svc_clf = sk.LinearSVC()
+        svc_clf = LinearSVC()
         if predict == False:
-            results = ModelUtil.cross_validation_score(svc_clf, x, y, cv_times)
+            util = ModelUtil()
+            results = util.cross_validation_score(svc_clf, x, y, cv_times)
         else:
             svc_model = svc_clf.fit(x, y)
             results = svc_model.predict(x_new)
@@ -112,9 +124,10 @@ class Classification():
             or
             list: A list contains performance matrices.
         """
-        dt_clf = sk.DecisionTreeClassifier()
+        dt_clf = DecisionTreeClassifier()
         if predict == False:
-            results = ModelUtil.cross_validation_score(dt_clf, x, y, cv_times)
+            util = ModelUtil()
+            results =util.cross_validation_score(dt_clf, x, y, cv_times)
         else:
             dt_model = dt_clf.fit(x, y)
             results = dt_model.predict(x_new)
@@ -135,9 +148,10 @@ class Classification():
             or
             list: A list contains performance matrices.
         """
-        rf_clf = sk.RandomForestClassifier()
+        rf_clf = RandomForestClassifier()
         if predict == False:
-            results = ModelUtil.cross_validation_score(rf_clf, x, y, cv_times)
+            util = ModelUtil()
+            results = util.cross_validation_score(rf_clf, x, y, cv_times)
         else:
             rf_model = rf_clf.fit(x, y)
             results = rf_model.predict(x_new)
@@ -158,9 +172,10 @@ class Classification():
             or
             list: A list contains performance matrices.
         """
-        et_clf = sk.ExtraTreesClassifier()
+        et_clf = ExtraTreesClassifier()
         if predict == False:
-            results = ModelUtil.cross_validation_score(et_clf, x, y, cv_times)
+            util = ModelUtil()
+            results = util.cross_validation_score(et_clf, x, y, cv_times)
         else:
             et_model = et_clf.fit(x, y)
             results = et_model.predict(x_new)
@@ -181,9 +196,10 @@ class Classification():
             or
             list: A list contains performance matrices.
         """
-        ab_clf = sk.AdaBoostClassifier()
+        ab_clf = AdaBoostClassifier()
         if predict == False:
-            results = ModelUtil.cross_validation_score(ab_clf, x, y, cv_times)
+            util = ModelUtil()
+            results = util.cross_validation_score(ab_clf, x, y, cv_times)
         else:
             ab_model = ab_clf.fit(x, y)
             results = ab_model.predict(x_new)
@@ -204,9 +220,10 @@ class Classification():
             or
             list: A list contains performance matrices.
         """
-        gb_clf = sk.GradientBoostingClassifier()
+        gb_clf = GradientBoostingClassifier()
         if predict == False:
-            results = ModelUtil.cross_validation_score(gb_clf, x, y, cv_times)
+            util = ModelUtil()
+            results = util.cross_validation_score(gb_clf, x, y, cv_times)
         else:
             gb_model = gb_clf.fit(x, y)
             results = gb_model.predict(x_new)
@@ -229,8 +246,10 @@ class Classification():
         """
         xgb_clf = xgb.XGBClassifier()
         if predict == False:
-            results = ModelUtil.cross_validation_score(xgb_clf, x, y, cv_times)
+            util = ModelUtil()
+            results = util.cross_validation_score(xgb_clf, x, y, cv_times)
         else:
             xgb_model = xgb_clf.fit(x, y)
             results = xgb_model.predict(x_new)
         return results
+

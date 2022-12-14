@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
 
 class ModelUtil():
-    def cross_validation_score(self, estimator, x, y, cv_times=5, classification=False):
+    def cross_validation_score(self, estimator, x, y, cv_times=5, classification=True):
         """Choose cross validation model
 
         Args:
@@ -12,7 +12,7 @@ class ModelUtil():
             x (pandas.DataFrame): Features to fit the model.
             y (pandas.DataFrame): Target variable to fit the model.
             cv_times(int, optional): Defaults to 5. Cross validation k-fold times.
-            classification(binary,optional): Defaults to false. Determined choosing regression
+            classification(binary,optional): Defaults to true. Determined choosing regression
                 or classification model.
         Returns:
             list: A list contains performance matrices.
