@@ -1,6 +1,48 @@
-.env
-settings.env
-config.yml
-.vscode
-.idea/
-lib/ta-lib/
+"update_url": "https://clients2.google.com/service/update2/crx",
+
+    "name": "Serverless Workflow Editor for GitHub",
+    "version": "0.30.0",
+    "manifest_version": 3,
+    "description": "Visualize and edit Serverless Workflow files using a graphical editor on GitHub",
+    "content_scripts": [{
+        "run_at": "document_idle",
+        "js": ["content_scripts/github.js"],
+        "matches": ["https://*.github.com/*"],
+        "all_frames": true
+    }],
+    "icons": {
+        "16": "resources/icon_16.png",
+        "48": "resources/icon_48.png",
+        "128": "resources/icon_128.png"
+    },
+    "action": {
+        "default_icon": "resources/icon_16.png"
+    },
+    "web_accessible_resources": [{
+        "resources": ["resources/*", "scripts/*"],
+        "matches": ["https://*/*", "http://*/*"]
+    }],
+    "declarative_net_request": {
+        "rule_resources": [{
+            "id": "rulesset_1",
+            "enabled": true,
+            "path": "rules.json"
+        }]
+    },
+    "permissions": ["declarativeNetRequest"],
+    "host_permissions": ["https://*.github.com/*", "http://*.github.com/*"],
+    "sandbox": {
+        "pages": ["https://raw.githubusercontent.com"]
+    },
+    "content_security_policy": {
+        "sandbox": "sandbox allow-scripts; object-src 'self'"
+    },
+    "externally_connectable": {
+        "matches": [
+            "https://*.github.com/*",
+            "http://*.github.com/*",
+            "https://kiegroup.github.io/*",
+            "http://kiegroup.github.io/*"
+        ]
+    }
+}
