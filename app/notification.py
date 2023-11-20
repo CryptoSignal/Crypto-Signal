@@ -4,15 +4,15 @@
 import copy
 import json
 import os
+import re
 import sys
 import traceback
-from datetime import datetime
+import datetime
 from time import sleep
 
 import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
 import pandas as pd
@@ -29,19 +29,21 @@ from telegram.error import TimedOut as TelegramTimedOut
 from analyzers.indicators import candle_recognition, ichimoku
 from analyzers.utils import IndicatorUtils
 from notifiers.discord_client import DiscordNotifier
-from notifiers.gmail_client import GmailNotifier
+from notifiers.email_client import EmailNotifier
 from notifiers.slack_client import SlackNotifier
 from notifiers.stdout_client import StdoutNotifier
 from notifiers.telegram_client import TelegramNotifier
 from notifiers.twilio_client import TwilioNotifier
 from notifiers.webhook_client import WebhookNotifier
 
+matplotlib.use('Agg')
+
 
 class Notifier(IndicatorUtils):
     """Handles sending notifications via the configured notifiers
     """
 
-    def __init__(self, notifier_config, indicator_config, market_data):
+    def __init__(self, notifier_config, indicator_config, conditional_config, market_data):
         """Initializes Notifier class
 
         Args:
@@ -51,79 +53,97 @@ class Notifier(IndicatorUtils):
         self.logger = structlog.get_logger()
         self.notifier_config = notifier_config
         self.indicator_config = indicator_config
+        self.conditional_config = conditional_config
         self.market_data = market_data
+        self.alert_frequencies = {}
         self.last_analysis = dict()
         self.enable_charts = False
         self.all_historical_data = False
         self.timezone = None
         self.first_run = False
+        self.twilio_clients = {}
+        self.discord_clients = {}
+        self.slack_clients = {}
+        self.email_clients = {}
+        self.telegram_clients = {}
+        self.webhook_clients = {}
+        self.stdout_clients = {}
 
         enabled_notifiers = list()
         self.logger = structlog.get_logger()
-        self.twilio_configured = self._validate_required_config(
-            'twilio', notifier_config)
-        if self.twilio_configured:
-            self.twilio_client = TwilioNotifier(
-                twilio_key=notifier_config['twilio']['required']['key'],
-                twilio_secret=notifier_config['twilio']['required']['secret'],
-                twilio_sender_number=notifier_config['twilio']['required']['sender_number'],
-                twilio_receiver_number=notifier_config['twilio']['required']['receiver_number']
-            )
-            enabled_notifiers.append('twilio')
+        for notifier in notifier_config.keys():
+            if notifier.startswith('twilio'):
+                self.twilio_configured = self._validate_required_config(
+                    notifier, notifier_config)
+                if self.twilio_configured:
+                    self.twilio_clients[notifier] = TwilioNotifier(
+                        twilio_key=notifier_config[notifier]['required']['key'],
+                        twilio_secret=notifier_config[notifier]['required']['secret'],
+                        twilio_sender_number=notifier_config[notifier]['required']['sender_number'],
+                        twilio_receiver_number=notifier_config[notifier]['required']['receiver_number']
+                    )
+                    enabled_notifiers.append(notifier)
 
-        self.discord_configured = self._validate_required_config(
-            'discord', notifier_config)
-        if self.discord_configured:
-            self.discord_client = DiscordNotifier(
-                webhook=notifier_config['discord']['required']['webhook'],
-                username=notifier_config['discord']['required']['username'],
-                avatar=notifier_config['discord']['optional']['avatar']
-            )
-            enabled_notifiers.append('discord')
+            if notifier.startswith('discord'):
+                self.discord_configured = self._validate_required_config(
+                    notifier, notifier_config)
+                if self.discord_configured:
+                    self.discord_clients[notifier] = DiscordNotifier(
+                        webhook=notifier_config[notifier]['required']['webhook'],
+                        username=notifier_config[notifier]['required']['username'],
+                        avatar=notifier_config[notifier]['optional']['avatar']
+                    )
+                    enabled_notifiers.append(notifier)
 
-        self.slack_configured = self._validate_required_config(
-            'slack', notifier_config)
-        if self.slack_configured:
-            self.slack_client = SlackNotifier(
-                slack_webhook=notifier_config['slack']['required']['webhook']
-            )
-            enabled_notifiers.append('slack')
+            if notifier.startswith('slack'):
+                self.slack_configured = self._validate_required_config(
+                    notifier, notifier_config)
+                if self.slack_configured:
+                    self.slack_clients[notifier] = SlackNotifier(
+                        slack_webhook=notifier_config[notifier]['required']['webhook']
+                    )
+                    enabled_notifiers.append(notifier)
 
-        self.gmail_configured = self._validate_required_config(
-            'gmail', notifier_config)
-        if self.gmail_configured:
-            self.gmail_client = GmailNotifier(
-                username=notifier_config['gmail']['required']['username'],
-                password=notifier_config['gmail']['required']['password'],
-                destination_addresses=notifier_config['gmail']['required']['destination_emails']
-            )
-            enabled_notifiers.append('gmail')
+            if notifier.startswith('email'):
+                self.email_configured = self._validate_required_config(
+                    notifier, notifier_config)
+                if self.email_configured:
+                    self.email_clients[notifier] = EmailNotifier(
+                        smtp_server=notifier_config[notifier]['required']['smtp_server'],
+                        username=notifier_config[notifier]['required']['username'],
+                        password=notifier_config[notifier]['required']['password'],
+                        destination_addresses=notifier_config[notifier]['required']['destination_emails']
+                    )
+                    enabled_notifiers.append(notifier)
 
-        self.telegram_configured = self._validate_required_config(
-            'telegram', notifier_config)
-        if self.telegram_configured:
-            self.telegram_client = TelegramNotifier(
-                token=notifier_config['telegram']['required']['token'],
-                chat_id=notifier_config['telegram']['required']['chat_id'],
-                parse_mode=notifier_config['telegram']['optional']['parse_mode']
-            )
-            enabled_notifiers.append('telegram')
+            if notifier.startswith('telegram'):
+                self.telegram_configured = self._validate_required_config(
+                    notifier, notifier_config)
+                if self.telegram_configured:
+                    self.telegram_clients[notifier] = TelegramNotifier(
+                        token=notifier_config[notifier]['required']['token'],
+                        chat_id=notifier_config[notifier]['required']['chat_id'],
+                        parse_mode=notifier_config[notifier]['optional']['parse_mode']
+                    )
+                    enabled_notifiers.append(notifier)
 
-        self.webhook_configured = self._validate_required_config(
-            'webhook', notifier_config)
-        if self.webhook_configured:
-            self.webhook_client = WebhookNotifier(
-                url=notifier_config['webhook']['required']['url'],
-                username=notifier_config['webhook']['optional']['username'],
-                password=notifier_config['webhook']['optional']['password']
-            )
-            enabled_notifiers.append('webhook')
+            if notifier.startswith('webhook'):
+                self.webhook_configured = self._validate_required_config(
+                    notifier, notifier_config)
+                if self.webhook_configured:
+                    self.webhook_clients[notifier] = WebhookNotifier(
+                        url=notifier_config[notifier]['required']['url'],
+                        username=notifier_config[notifier]['optional']['username'],
+                        password=notifier_config[notifier]['optional']['password']
+                    )
+                    enabled_notifiers.append(notifier)
 
-        self.stdout_configured = self._validate_required_config(
-            'stdout', notifier_config)
-        if self.stdout_configured:
-            self.stdout_client = StdoutNotifier()
-            enabled_notifiers.append('stdout')
+            if notifier.startswith('stdout'):
+                self.stdout_configured = self._validate_required_config(
+                    notifier, notifier_config)
+                if self.stdout_configured:
+                    self.stdout_clients[notifier] = StdoutNotifier()
+                    enabled_notifiers.append(notifier)
 
         self.logger.info('enabled notifers: %s', enabled_notifiers)
 
@@ -147,13 +167,78 @@ class Notifier(IndicatorUtils):
             for market_pair in messages[exchange]:
                 _messages = messages[exchange][market_pair]
 
-                for candle_period in _messages:
-                    if not isinstance(_messages[candle_period], list) or len(_messages[candle_period]) == 0:
-                        continue
+                if self.conditional_config:
+                    self.notify_conditional(exchange, market_pair, _messages)
+                else:
+                    for candle_period in _messages:
+                        if not isinstance(_messages[candle_period], list) or len(_messages[candle_period]) == 0:
+                            continue
 
-                    self.notify_all_messages(
-                        exchange, market_pair, candle_period, _messages[candle_period])
-                    sleep(4)
+                        self.notify_all_messages(
+                            exchange, market_pair, candle_period, _messages[candle_period])
+                        sleep(4)
+
+        if self.first_run:
+            self.first_run = False
+
+    def notify_conditional(self, exchange, market_pair, messages):
+        status = ['hot', 'cold']
+
+        for condition in self.conditional_config:
+            c_nb_conditions = 0
+            c_nb_once_muted = 0
+            c_nb_new_status = 0
+            nb_conditions = 0
+            should_alert = False
+            new_message = {}
+            new_message['values'] = []
+            new_message['indicator'] = []
+            new_message['price_value'] = {}
+
+            for stat in list(set(status) & set(condition.keys())):
+                nb_conditions += len(condition[stat])
+
+            for candle_period in messages:
+                if messages[candle_period]:
+                    new_message['exchange'] = messages[candle_period][0]['exchange']
+                    new_message['market'] = messages[candle_period][0]['market']
+                    new_message['base_currency'] = messages[candle_period][0]['base_currency']
+                    new_message['quote_currency'] = messages[candle_period][0]['quote_currency']
+                    new_message['prices'] = messages[candle_period][0]['prices']
+                    new_message['price_value'][candle_period] = messages[candle_period][0]['price_value']
+                    new_message['decimal_format'] = messages[candle_period][0]['decimal_format']
+                    for msg in messages[candle_period]:
+                        alert_frequency = msg['analysis']['config']['alert_frequency']
+                        for stat in status:
+                            if msg['status'] == stat and stat in condition.keys():
+                                for indicator in condition[stat]:
+                                    if msg['indicator'] in indicator.keys():
+                                        if indicator[msg['indicator']] == msg['indicator_number']:
+                                            new_message['values'].append(
+                                                msg['values'])
+                                            new_message['indicator'].append(
+                                                msg['indicator'])
+                                            c_nb_conditions += 1
+                                            if alert_frequency != 'once':
+                                                key = ''.join([msg['market'], list(
+                                                    msg['values'])[0], candle_period])
+                                                should_alert += self.should_i_alert(
+                                                    key, alert_frequency)
+                                            if msg['status'] == msg['last_status'] and alert_frequency == 'once' and not self.first_run:
+                                                c_nb_once_muted += 1
+                                            if msg['status'] != msg['last_status']:
+                                                c_nb_new_status += 1
+
+            if c_nb_conditions == nb_conditions and c_nb_conditions and should_alert:
+                if c_nb_once_muted and not c_nb_new_status:
+                    self.logger.info('Alert frecuency once. Dont alert. %s %s',
+                                     new_message['market'], new_message['indicator'])
+                else:
+                    new_message['status'] = condition['label']
+                    self.notify_discord([new_message], None)
+                    self.notify_webhook([new_message], None)
+                    self.notify_telegram([new_message], None)
+                    self.notify_stdout([new_message])
 
     def notify_all_messages(self, exchange, market_pair, candle_period, messages):
         chart_file = None
@@ -163,21 +248,21 @@ class Notifier(IndicatorUtils):
                 candles_data = self.all_historical_data[exchange][market_pair][candle_period]
                 chart_file = self.create_chart(
                     exchange, market_pair, candle_period, candles_data)
-                #self.logger.info('Chart file %s', chart_file)
+                # self.logger.info('Chart file %s', chart_file)
             except Exception as e:
                 self.logger.info('Error creating chart for %s %s',
                                  market_pair, candle_period)
                 self.logger.exception(e)
 
         # self.notify_slack(new_analysis)
-        self.notify_discord(messages)
+        self.notify_discord(messages, chart_file)
         self.notify_webhook(messages, chart_file)
         # self.notify_twilio(new_analysis)
-        # self.notify_gmail(new_analysis)
+        self.notify_email(messages)
         self.notify_telegram(messages, chart_file)
         self.notify_stdout(messages)
 
-    def notify_discord(self, messages):
+    def notify_discord(self, messages, chart_file):
         """Send a notification via the discord notifier
 
         Args:
@@ -187,13 +272,24 @@ class Notifier(IndicatorUtils):
         if not self.discord_configured:
             return
 
-        message_template = Template(
-            self.notifier_config['discord']['optional']['template'])
+        for notifier in self.discord_clients:
+            message_template = Template(
+                self.notifier_config[notifier]['optional']['template'])
 
-        for message in messages:
-            formatted_message = message_template.render(message)
+            formatted_messages = [message_template.render(
+                message) for message in messages]
 
-            self.discord_client.notify(formatted_message.strip())
+            if self.enable_charts:
+                if chart_file:
+                    self.discord_clients[notifier].send_chart_messages(chart_file, formatted_messages)
+                else:
+                    self.logger.info(
+                        'Chart file %s doesnt exist, sending text message.', chart_file)
+                    self.discord_clients[notifier].send_messages(
+                        formatted_messages)
+            else:
+                self.discord_clients[notifier].send_messages(
+                    formatted_messages)
 
     def notify_slack(self, new_analysis):
         """Send a notification via the slack notifier
@@ -225,20 +321,22 @@ class Notifier(IndicatorUtils):
             if message.strip():
                 self.twilio_client.notify(message)
 
-    def notify_gmail(self, new_analysis):
-        """Send a notification via the gmail notifier
+    def notify_email(self, new_analysis):
+        """Send a notification via the email notifier
 
         Args:
             new_analysis (dict): The new_analysis to send.
         """
+        if not self.email_configured:
+            return
 
-        if self.gmail_configured:
-            message = self._indicator_message_templater(
-                new_analysis,
-                self.notifier_config['gmail']['optional']['template']
-            )
-            if message.strip():
-                self.gmail_client.notify(message)
+        for notifier in self.email_clients:
+            message_template = Template(
+                self.notifier_config[notifier]['optional']['template'])
+
+            for message in new_analysis:
+                formatted_message = message_template.render(message)
+                self.email_clients[notifier].notify(formatted_message.strip())
 
     def notify_telegram(self, messages, chart_file):
         """Send notifications via the telegram notifier
@@ -251,27 +349,27 @@ class Notifier(IndicatorUtils):
         if not self.telegram_configured:
             return
 
-        message_template = Template(
-            self.notifier_config['telegram']['optional']['template'])
+        for notifier in self.telegram_clients:
+            message_template = Template(
+                self.notifier_config[notifier]['optional']['template'])
 
-        formatted_messages = []
+            formatted_messages = []
 
-        for message in messages:
-            formatted_messages.append(message_template.render(message))
+            for message in messages:
+                formatted_messages.append(message_template.render(message))
 
-        if self.enable_charts:
-            if chart_file and os.path.exists(chart_file):
-                try:
-                    self.telegram_client.send_chart_messages(
-                        open(chart_file, 'rb'), formatted_messages)
-                except (IOError, SyntaxError):
-                    self.telegram_client.send_messages(formatted_messages)
+            if self.enable_charts:
+                if chart_file:
+                    self.telegram_clients[notifier].send_chart_messages(
+                        chart_file, formatted_messages)
+                else:
+                    self.logger.info(
+                        'Chart file %s doesnt exist, sending text message.', chart_file)
+                    self.telegram_clients[notifier].send_messages(
+                        formatted_messages)
             else:
-                self.logger.info(
-                    'Chart file %s doesnt exist, sending text message.', chart_file)
-                self.telegram_client.send_messages(formatted_messages)
-        else:
-            self.telegram_client.send_messages(formatted_messages)
+                self.telegram_clients[notifier].send_messages(
+                    formatted_messages)
 
     def notify_webhook(self, messages, chart_file):
         """Send notifications via a new webhook notifier
@@ -284,7 +382,8 @@ class Notifier(IndicatorUtils):
         if not self.webhook_configured:
             return
 
-        self.webhook_client.notify(messages, chart_file)
+        for notifier in self.webhook_clients:
+            self.webhook_clients[notifier].notify(messages, chart_file)
 
     def notify_stdout(self, messages):
         """Send a notification via the stdout notifier
@@ -296,13 +395,14 @@ class Notifier(IndicatorUtils):
         if not self.stdout_configured:
             return
 
-        message_template = Template(
-            self.notifier_config['stdout']['optional']['template'])
+        for notifier in self.stdout_clients:
+            message_template = Template(
+                self.notifier_config[notifier]['optional']['template'])
 
-        for message in messages:
-            formatted_message = message_template.render(message)
+            for message in messages:
+                formatted_message = message_template.render(message)
 
-            self.stdout_client.notify(formatted_message.strip())
+                self.stdout_clients[notifier].notify(formatted_message.strip())
 
     def _validate_required_config(self, notifier, notifier_config):
         """Validate the required configuration items are present for a notifier.
@@ -440,6 +540,38 @@ class Notifier(IndicatorUtils):
         self.last_analysis = {**self.last_analysis, **new_analysis}
         return new_message
 
+    def parse_alert_fequency(self, alert_frequency):
+        now = datetime.datetime.now()
+        matches = re.findall(r'\d+[dhms]', alert_frequency)
+        if not matches:
+            return
+
+        for match in matches:
+            try:
+                value = int(match[:-1])
+            except Exception as e:
+                self.logger.info('Unable to parse alert_frequency "%s"', value)
+                self.logger.debug(e)
+                continue
+            if match.endswith('m'):
+                now += datetime.timedelta(minutes=value)
+            elif match.endswith('h'):
+                now += datetime.timedelta(hours=value)
+            elif match.endswith('s'):
+                now += datetime.timedelta(seconds=value)
+            elif match.endswith('d'):
+                now += datetime.timedelta(days=value)
+        return now
+
+    def should_i_alert(self, alert_frequency_key, alert_frequency):
+        if alert_frequency_key in self.alert_frequencies:
+            if self.alert_frequencies[alert_frequency_key] > datetime.datetime.now():
+                return False
+        timedelta = self.parse_alert_fequency(alert_frequency)
+        if timedelta:
+            self.alert_frequencies[alert_frequency_key] = timedelta
+        return True
+
     def get_indicator_messages(self, new_analysis):
         """Creates a message list from a user defined template
 
@@ -454,9 +586,9 @@ class Notifier(IndicatorUtils):
             self.last_analysis = new_analysis
             self.first_run = True
 
-        #self.logger.info('Is first run: {}'.format(self.first_run))
+        # self.logger.info('Is first run: {}'.format(self.first_run))
 
-        now = datetime.now(timezone(self.timezone))
+        now = datetime.datetime.now(timezone(self.timezone))
         creation_date = now.strftime("%Y-%m-%d %H:%M:%S")
 
         new_messages = dict()
@@ -520,6 +652,7 @@ class Notifier(IndicatorUtils):
                                     if isinstance(values[signal], float):
                                         values[signal] = format(
                                             values[signal], '.2f')
+
                             elif indicator_type == 'crossovers':
                                 latest_result = analysis['result'].iloc[-1]
 
@@ -574,15 +707,14 @@ class Notifier(IndicatorUtils):
 
                                 should_alert = True
 
-                                # if self.first_run:
-                                #self.logger.info('Alert once for %s %s %s', market_pair, indicator, candle_period)
-
-                                if not self.first_run:
-                                    if analysis['config']['alert_frequency'] == 'once':
-                                        if last_status == status:
-                                            self.logger.info('Alert frecuency once. Dont alert. %s %s %s',
-                                                             market_pair, indicator, candle_period)
-                                            should_alert = False
+                                if not self.first_run and not self.conditional_config:
+                                    if analysis['config']['alert_frequency'] == 'once' and last_status == status:
+                                        self.logger.info('Alert frecuency once. Dont alert. %s %s %s',
+                                                         market_pair, indicator, candle_period)
+                                        should_alert = False
+                                    else:
+                                        should_alert = self.should_i_alert(''.join(
+                                            [market_pair, indicator, candle_period]), analysis['config']['alert_frequency'])
 
                                 if not analysis['config']['alert_enabled']:
                                     should_alert = False
@@ -593,8 +725,10 @@ class Notifier(IndicatorUtils):
                                     should_alert = False
 
                                 if should_alert:
-                                    base_currency, quote_currency = market_pair.split(
-                                        '/')
+                                    base_currency = market_pair.split('/')
+                                    quote_currency = ''
+                                    if len(base_currency) == 2:
+                                        base_currency, quote_currency = base_currency
                                     precision = self.market_data[exchange][market_pair]['precision']
                                     decimal_format = '.{}f'.format(
                                         precision['price'])
@@ -610,7 +744,7 @@ class Notifier(IndicatorUtils):
 
                                             value = format(
                                                 value, decimal_format)
-                                            prices = '{} {}: {}' . format(
+                                            prices = '{} {}: {}'.format(
                                                 prices, key.title(), value)
 
                                     decimal_format = '%' + decimal_format
@@ -624,7 +758,7 @@ class Notifier(IndicatorUtils):
                                     new_message = message_template.render(
                                         values=values, exchange=exchange, market=market_pair, base_currency=base_currency,
                                         quote_currency=quote_currency, indicator=indicator, indicator_number=index,
-                                        analysis=analysis, status=status, last_status=last_status, 
+                                        analysis=analysis, status=status, last_status=last_status,
                                         prices=prices, lrsi=lrsi, creation_date=creation_date, indicator_label=indicator_label)
                                     """
 
@@ -644,9 +778,6 @@ class Notifier(IndicatorUtils):
 
         # Merge changes from new analysis into last analysis
         self.last_analysis = {**self.last_analysis, **new_analysis}
-
-        if self.first_run:
-            self.first_run = False
 
         return new_messages
 
@@ -682,13 +813,14 @@ class Notifier(IndicatorUtils):
                     except Exception as e:
                         self.logger.info(
                             'Error creating chart for %s %s', market_pair, candle_period)
-                        self.logger.exception(e)                           
+                        self.logger.exception(e)
+                        raise
 
     def create_chart(self, exchange, market_pair, candle_period, candles_data):
 
-        #self.logger.info("Beginning creation of charts: {} - {} - {}".format(exchange, market_pair, candle_period))
+        # self.logger.info("Beginning creation of charts: {} - {} - {}".format(exchange, market_pair, candle_period))
 
-        now = datetime.now(timezone(self.timezone))
+        now = datetime.datetime.now(timezone(self.timezone))
         creation_date = now.strftime("%Y-%m-%d %H:%M:%S")
 
         df = self.convert_to_dataframe(candles_data)

@@ -19,11 +19,11 @@ Development branch to testing new features. This develop version has a lot of im
 
 
 ## Installing And Running
-Because this is a development branch you need to build your custom Docker image. The commands listed below are intended to be run in a terminal.
+The commands listed below are intended to be run in a terminal.
 
 Be sure you have git installed in your system.
 
-1. Clone this repo `git clone https://github.com/CryptoSignal/crypto-signal.git`
+1. Clone this repo `git clone https://github.com/w1ld3r/crypto-signal.git`
 
 1. Enter to cripto-signal folder `cd crypto-signal`
 
@@ -31,11 +31,7 @@ Be sure you have git installed in your system.
  
 1. Create a config.yml file and put it into "app" folder.
 
-1. Build your own Docker image, for example, `docker build -t dev/crypto-signals:latest .`
-
-1. For testing and debugging run docker with "-t" option `docker run --rm -ti -v  $PWD/app:/app dev/crypto-signals:latest`
-
-1. For production run in daemon mode using "-d" option `docker run --rm -di -v  $PWD/app:/app dev/crypto-signals:latest`
+1. Build and run the docker container: `docker-compose up --build`
 
 
 ### Configuring config.yml
@@ -125,7 +121,7 @@ exchanges:
 
 #### Show me the price!
 
-If you want prices in your notification messages, you can use the "prices" variable.
+If you want prices in your notification messages, you can use the "prices" variable or "price_value".
 
 ```
 notifiers:
@@ -136,6 +132,17 @@ notifiers:
         optional:
             parse_mode: html
             template: "[{{analysis.config.candle_period}}] {{market}} {{values}} Prices: [{{prices}}]"
+```
+
+```
+notifiers:
+    telegram:
+        required:
+            token: 791615820:AAGFgGSumWUrb-CyXtGxzAuYaabababababababa
+            chat_id: 687950000
+        optional:
+            parse_mode: html
+            template: "[{{analysis.config.candle_period}}] {{market}} {{values}} Price 15m low: [{{price_value['15m'].low}}]"
 ```
 
 By the way, to have this feature you need to configure "ohlcv" informant for each candle period of your indicators.
@@ -723,8 +730,7 @@ informants:
             - low
             - close
           candle_period: 4h
-          period_count: 14
-          
+          period_count: 14  
 ```
 
 Then you can use the "price_value" variable to have the values of prices and be able to do some operations on them.
@@ -738,9 +744,9 @@ notifiers:
         optional:
             parse_mode: html
             template: "{{ market }} 
-            BUY {{ price_value.close }} 
-            SL: {{ decimal_format|format(price_value.low * 0.9) }} 
-            TP: {{ decimal_format|format(price_value.close * 1.02) }} {{ decimal_format|format(price_value.close * 1.04) }} "
+            BUY {{ price_value['1h'].close }} 
+            SL: {{ decimal_format|format(price_value['4h'].low * 0.9) }} 
+            TP: {{ decimal_format|format(price_value['1h'].close * 1.02) }} {{ decimal_format|format(price_value['4h'].close * 1.04) }} "
 ```
 
 The code for "decimal_format" and "format" is necessary to obtain the prices formatted with the corresponding zeros.

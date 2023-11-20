@@ -36,8 +36,9 @@ notifiers:
       webhook: null
     optional:
       template: "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
-  gmail:
+  email:
     required:
+      smtp_server: null
       username: null
       password: null
       destination_emails: null

@@ -7,7 +7,9 @@
 5) Indicators
 6) Informants
 7) Crossovers
-8) Examples
+8) Conditionals
+9) Advanced Settings
+10) Examples
 
 # 1) Configuration file structure
 The configuration file is YAML formatted and consists of the following top level keys.
@@ -145,20 +147,25 @@ notifiers:
             template: "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
 ```
 
-## Gmail
+## Email
+**smtp_server**\
+default: None\
+necessity: required for Email\
+description: Your smtp server hostname
+
 **username**\
 default: None\
-necessity: required for Gmail\
-description: Your gmail username which is required for sending emails.
+necessity: required for Email\
+description: Your email username which is required for sending emails.
 
 **password**\
 default: None\
-necessity: required for Gmail\
-description: Your gmail password which is required for sending emails.
+necessity: required for Email\
+description: Your email password which is required for sending emails.
 
 **destination_emails**\
 default: None\
-necessity: required for Gmail\
+necessity: required for Email\
 description: The email addresses to receive the emails that are sent.
 
 **template**\
@@ -166,13 +173,14 @@ default: {{exchange}}-{{market}}-{{analyzer}}-{{analyzer_number}} is {{status}}!
 necessity: optional\
 description: See the notifier templating section.
 
-An example of notifier settings for gmail
+An example of notifier settings for email
 
 ```yml
 notifiers:
-    gmail:
+    email:
         required:
-            username: my_user@gmail.com
+            smtp_server: smtp.gmail.com:587
+            username: example@gmail.com
             password: abcd1234
             destination_emails:
                 - my_user@gmail.com
@@ -299,6 +307,28 @@ notifiers:
             template: "{{exchange}}-{{market}}-{{indicator}}-{{indicator_number}} is {{status}}!{{ '\n' -}}"
 ```
 
+## Mutiple Notifiers
+The same type of notifier can be used multiple times like bellow:
+```yml
+notifiers:
+    telegram_00:
+        required:
+            token: XXX
+            chat_id: YYY
+        optional:
+            parse_mode: html
+            template: "[{{market}}] {{indicator}} {{status}} {{values}} {{ '\n' -}}"
+    telegram_01:
+        required:
+            token: AAA
+            chat_id: BBB
+        optional:
+            parse_mode: html
+            template: "[{{market}}] {{prices}} {{ '\n' -}}"
+```
+
+Be careful of the request rate to external services.
+
 ## Notifier Templating
 The notifier templates are built with a templating language called [Jinja2](http://jinja.pocoo.org/docs/2.10/templates/) and anything that is a valid Jinja message is valid for crypto-signal. The options available are as follows:
 
@@ -316,7 +346,7 @@ The notifier templates are built with a templating language called [Jinja2](http
 - analysis.result.is_cold - The raw boolean value of if the indicator is cold.
 - analysis.config.enabled - The raw config item of if this indicator is enabled. If you receive a message with a value other than True something has gone horribly wrong.
 - analysis.config.alert_enabled - The raw config item of if this indicator alert is enabled. If you receive a message with a value other than True something has gone horribly wrong.
-- analysis.config.alert_frequency - The raw config item of whether this alert is always sent or if it is only sent once per status change.
+- analysis.config.alert_frequency - The raw config item of whether this alert is always sent or if it is only sent once per status change. Can also define the sleep time of an alert.
 - analysis.config.hot - The raw config item of what the configured hot threshold is.
 - analysis.config.cold - The raw config item of what the configured cold threshold is.
 - analysis.config.candle_period - The raw config item of what time period of candles to gather.
@@ -342,6 +372,19 @@ description: Valid values are true or false. Whether to perform analysis on this
 default: True\
 necessity: optional\
 description: Valid values are true or false. Whether to send alerts for this particular indicator.
+
+**alert_frequency**\
+default: always\
+necessity: optional\
+description: Valid values are always, once or time period in the format described below. Whether to send alerts or frequency of alerts for this particular indicator.
+time period format: 
+  - `d` for number of days
+  - `h` for number of hours
+  - `m` for number of minutes
+  - `s` for number of seconds
+  ex 1: `1d12h20m10s`
+  ex 2: `15m`
+For conditional mode, if only one indicator of the condition has its alert frequency valid, the alert will be sent. (Should it stays like that ? Open an issue if you want to change that behaviour) 
 
 **signal**\
 default: A string\
@@ -508,8 +551,149 @@ crossovers:
           crossed_signal: sma
 ```
 
+# 8) Conditionals
 
-# 8) Examples
+It's allowing you to receive notifications, only if one or more conditions are respected.
+
+Use case examples:
+- Receive a buy notification if rsi is cold and bollinger is hot and aroon is cold.
+- Receive a sell notification if 1d rsi is hot and 1h rsi is hot and bollinger is cold and aroon is hot.
+
+**You will not receive notifications if all conditions, of one conditionnal, are not met.**
+
+## Example
+
+```yml
+settings:
+  log_level: INFO
+  update_interval: 120
+  start_worker_interval: 2
+  market_data_chunk_size: 1
+  timezone: Europe/Paris
+
+exchanges:
+  kraken:
+    required:
+      enabled: true
+    all_pairs:
+      - USD
+
+indicators:
+  rsi:
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - rsi
+      hot: 30
+      cold: 70
+      candle_period: 1h
+      period_count: 14
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - rsi
+      hot: 40
+      cold: 60
+      candle_period: 1d
+      period_count: 14
+  bollinger:
+    - enabled: true
+      candle_period: 1h
+      alert_enabled: true
+      alert_frequency: always
+      period_count: 25
+      std_dev: 2.5
+      signal:
+        - low_band
+        - close
+        - up_band
+      mute_cold: false
+    - enabled: true
+      candle_period: 1d
+      alert_enabled: true
+      alert_frequency: always
+      period_count: 25
+      std_dev: 2.5
+      signal:
+        - low_band
+        - close
+        - up_band
+      mute_cold: false
+  aroon_oscillator:
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: always
+      sma_vol_period: 50
+      period_count: 14
+      signal:
+        - aroon
+      candle_period: 1h
+
+conditionals:
+  - label: "Signal to buy"
+    hot:
+      - rsi: 0
+      - rsi: 1
+    cold:
+      - bollinger: 0
+  - label: "Signal to buy"
+    hot:
+      - rsi: 1
+  - label: "Signal to sell"
+    cold:
+      - rsi: 1
+      - rsi: 0
+    hot:
+      - aroon_oscillator: 0
+
+notifiers:
+    telegram:
+        required:
+            token: X
+            chat_id: Y
+        optional:
+            parse_mode: html
+            template: "[{{market}}] {{indicator}} {{status}} {{values}} {{ '\n' -}}"
+```
+
+## Template value available
+ - values
+ - indicator
+ - price_value
+ - exchange
+ - market
+ - base_currency
+ - quote_currency
+ - status
+ - price_value
+ - decimal_format
+
+ The `status` will be the string set in `label`.
+  
+# 9) Advanced Settings
+  ## `start_worker_interval`
+  `start_worker_interval` allows to define the number of the seconds between each start of a worker (use of multi processing to manage chunk of pairs).
+  It's usefull to manage time between requests to exchange servers.
+  ```yml
+  settings:
+    [...]
+    start_worker_interval: 2
+    [...]
+  ```
+  
+  ## `market_data_chunk_size`
+  `market_data_chunk_size` allows to define the number of pairs a worker will work on.
+  Lower the chunk is, faster the worker end his work. But, lower the chunk is, more workers will be required.
+  ```yml
+  settings:
+    [...]
+    market_data_chunk_size: 1
+    [...]
+  ```
+
+# 10) Examples
 Putting it all together an example config.yml might look like the config below if you want to use the default settings with bittrex
 
 ```yml

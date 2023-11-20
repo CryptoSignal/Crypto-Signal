@@ -76,8 +76,8 @@ class Ichimoku(IndicatorUtils):
             last_time = dataframe.index[-1]
             timedelta = dataframe.index[1] - dataframe.index[0]
             newindex = pandas.date_range(last_time + timedelta,
-                                            freq=timedelta,
-                                            periods=cloud_displacement)
+                                         freq=timedelta,
+                                         periods=cloud_displacement)
             ichimoku_values = ichimoku_values.append(
                 pandas.DataFrame(index=newindex))
             # cloud offset
