@@ -16,3 +16,4 @@ PyYAML>=5.1
 newtulipy
 matplotlib>=3.0.1
 scipy>=1.1.0
+numpy>=1.22.2 # not directly required, pinned by Snyk to avoid a vulnerability
