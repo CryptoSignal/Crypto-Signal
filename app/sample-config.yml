@@ -1,0 +1,301 @@
+# crypto-signal - Daily MACD Crossover Signal
+
+# Copy this file to config.yml to get started and then add your own configuration.
+# Full documentation here: https://github.com/CryptoSignal/crypto-signal/blob/master/docs/config.md
+
+settings:
+  log_mode: standard
+  log_level: INFO
+  # output_mode: cli  #deprecated
+  output_mode: cli  # csj , json        
+  update_interval: 900
+  enable_charts: true
+  alert_enabled: true
+  market_pairs: null
+exchanges:
+    binance:
+      required:
+        enabled: true
+      all_pairs: 
+        - USDT
+indicators:
+  momentum:
+    - enabled: false
+      alert_enabled: true
+      alert_frequency: once
+      signal:
+        - momentum
+      hot: 0
+      cold: 0
+      candle_period: 1d
+      period_count: 10
+  mfi:
+    - enabled: false
+      alert_enabled: true
+      alert_frequency: once
+      signal:
+        - mfi
+      hot: 0
+      cold: 0
+      candle_period: 1d
+      period_count: 10
+  obv:
+    - enabled: false
+      alert_enabled: true
+      alert_frequency: once
+      signal:
+        - obv
+      hot: 0
+      cold: 0
+      candle_period: 1d
+  rsi:
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: once
+      signal:
+        - rsi
+      hot: 20
+      cold: 80
+      hot_label: '(BUY) Uptrend'
+      cold_label: '(SELL) Downtrend'
+      candle_period: 1d
+      period_count: 14
+  stoch_rsi:
+    - enabled: false
+      alert_enabled: true
+      alert_frequency: once
+      signal:
+        - stoch_rsi
+      hot: 20
+      cold: 80
+      hot_label: '(BUY) Uptrend'
+      cold_label: '(SELL) Downtrend'
+      candle_period: 1d
+      period_count: 14
+  macd:
+    - enabled: false
+      alert_enabled: true
+      alert_frequency: once
+      signal:
+        - macd
+      hot: 0
+      cold: 0
+      hot_label: '(BUY) Uptrend'
+      cold_label: '(SELL) Downtrend'
+      candle_period: 1d
+    - enabled: false
+      alert_enabled: true
+      alert_frequency: once
+      signal:
+        - macdsignal
+      hot: 0
+      cold: 0
+      hot_label: '(BUY) Uptrend'
+      cold_label: '(SELL) Downtrend'
+      candle_period: 2h
+      mute_cold: false      
+  ichimoku:
+    - enabled: false
+      alert_enabled: true
+      alert_frequency: once
+      signal:
+        - leading_span_a
+        - leading_span_b
+        - tenkansen
+        - kijunsen
+      hot: true
+      cold: true
+      hot_label: '(BUY) Uptrend'
+      cold_label: '(SELL) Downtrend'
+      candle_period: 1d
+  adx:
+    - enabled: false
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - adx
+        - pdi
+        - ndi
+      hot: 50
+      cold: 25
+      hot_label: 'Strong trend'
+      cold_label: 'Weak trend'
+      candle_period: 1d
+      period_count: 14
+      mute_cold: true
+  iiv:
+    - enabled: false
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - iiv
+      hot: 10
+      cold: 0
+      hot_label: ' Increase in Volume'
+      candle_period: 5m
+      chart: true
+    - enabled: false
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - iiv
+      hot: 10
+      cold: 0
+      hot_label: ' Increase in Volume'
+      candle_period: 15m
+      chart: true
+  siiv:
+    - enabled: false
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - siiv
+      hot: 10
+      cold: -10
+      hot_label: ' Increase in Volume Uptrend'
+      cold_label: ' Increase in Volume Downtrend'
+      candle_period: 5m
+      chart: true
+    - enabled: true
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - siiv
+      hot: 10
+      cold: -10
+      hot_label: ' Increase in Volume Uptrend'
+      cold_label: ' Increase in Volume Downtrend'
+      candle_period: 15m
+      chart: true
+  ma_ribbon:
+    - enabled: false
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - pval
+        - corr
+      hot: 10
+      cold: -10
+      hot_label: '(BUY) Uptrend'
+      cold_label: '(SELL) Downtrend'
+      candle_period: 15m
+      # indicator_label: 'Ribbon'
+      pval_th: 20
+      ma_series: 5, 15, 25, 35, 45
+  ma_crossover: # working not useful
+      - enabled: false
+        candle_period: 1d
+        alert_enabled: true
+        alert_frequency: once
+        exponential: true
+        ma_fast: 50
+        ma_slow: 100
+        signal:
+          - open
+          - close
+        hot_label: '(BUY) Uptrend'
+        cold_label: '(SELL) Downtrend'
+        indicator_label: 'EMA 50/100 Cross'                                    
+      - enabled: true
+        candle_period: 1d
+        alert_enabled: true
+        alert_frequency: once
+        exponential: false
+        ma_fast: 2
+        ma_slow: 200
+        signal:
+          - open
+          - close
+        hot_label: '(BUY) Uptrend'
+        cold_label: '(SELL) Downtrend'
+        indicator_label: 'EMA 2/200 Cross'                                    
+  macd_cross:
+    - enabled: false
+      candle_period: 4h
+      alert_enabled: true
+      alert_frequency: always
+      signal:
+        - macd
+        - signal
+      hot_label: '(BUY) Uptrend'
+      cold_label: '(SELL) Downtrend'
+      # indicator_label: 'MACD Crossover 4h'
+      mute_cold: false          
+  stochrsi_cross:
+    - enabled: false
+      candle_period: 4h
+      alert_enabled: true
+      alert_frequency: always
+      smooth_k: 10
+      smooth_d: 3
+      signal:
+        - stoch_rsi
+        - smooth_k
+        - smooth_d
+      hot_label: '(BUY) Uptrend'
+      cold_label: '(SELL) Downtrend'
+      indicator_label: 'StochRSI Cross 4h'
+      mute_cold: false
+  sqzmom:
+    - enabled: false
+      alert_enabled: true
+      alert_frequency: once
+      candle_period: 1d
+      signal:
+        - close
+informants:
+  vwap:
+    - enabled: false
+      signal:
+        - vwap
+      candle_period: 1d
+      period_count: 15
+  sma:
+    - enabled: false
+      signal:
+        - sma
+      candle_period: 1d
+      period_count: 15
+  ema:
+    - enabled: true
+      signal:
+        - ema
+      candle_period: 1d
+      period_count: 15
+  bollinger_bands:
+    - enabled: false
+      signal:
+        - upperband
+        - middleband
+        - lowerband
+      candle_period: 1d
+  ohlcv:
+    - enabled: false
+      signal:
+        - close
+      candle_period: 1d
+      period_count: 15
+
+notifiers:
+  telegram:
+    required:
+      token: 2062509778:AAEKJsoxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      chat_id: 172xxxxxxxxxxxx
+    optional:
+      parse_mode: html
+      template: "{{market}} {{hot_cold_label}} {{creation_date}} {{values}} [{{exchange}}-{{indicator}}-{{indicator_number}}-{{analysis.config.candle_period}}] {{prices}}{{ '\n' -}}"
+  discord:
+    required:
+      # no support for charts
+      webhook: https://discordapp.com/api/webhooks/1037606799710363678/boA6YeA6-PoRaMyuo35z8ZYGe0JJykD5jm-XsjQ3I6YjUWYIlyaPLVb5BB-RuoiebTcv
+      username: ahmetax
+    optional:
+      avatar: null
+      template: "{{market}}-{{hot_cold_label}}-{{exchange}}-{{creation_date}} [{{indicator}}-{{indicator_number}}-{{analysis.config.candle_period}}] {{values}} {{prices}}{{ '\n' -}}"
+  stdout:
+    required:
+      enable: true
+    optional:
+      parse_mode: html
+      template: "\u001b[31m ** {{market}}-{{hot_cold_label}}-{{exchange}}-{{creation_date}} {{values}} [{{indicator}}-{{indicator_number}}-{{analysis.config.candle_period}}] {{prices}} ** \u001b[0m"
+      chart: true

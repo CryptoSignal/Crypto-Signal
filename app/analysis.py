@@ -41,6 +41,7 @@ class StrategyAnalyzer():
             'stoch_rsi': stoch_rsi.StochasticRSI().analyze,
             'obv': obv.OBV().analyze,
             'iiv': iiv.IIV().analyze,
+            'siiv': siiv.SIIV().analyze,
             'ma_ribbon': ma_ribbon.MARibbon().analyze,
             'ma_crossover': ma_crossover.MACrossover().analyze,
             'bollinger': bollinger.Bollinger().analyze,
