@@ -756,3 +756,6 @@ The code for "decimal_format" and "format" is necessary to obtain the prices for
 ```
 https://api.telegram.org/bot<BOT_TOKEN>/getUpdates
 ```
+
+# TODO:
+[ ] Fix use prev candle, not latest candle

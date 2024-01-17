@@ -511,8 +511,10 @@ class Notifier(IndicatorUtils):
                                 if not candle_period in new_messages[exchange][market_pair]:
                                     new_messages[exchange][market_pair][candle_period] = list(
                                     )
-
+                            reasons = []
                             if indicator_type == 'indicators':
+                                if "hammer" in analysis['config']['signal']:
+                                    is_candle_reg = True
                                 for signal in analysis['config']['signal']:
                                     latest_result = analysis['result'].iloc[-1]
 
@@ -520,6 +522,13 @@ class Notifier(IndicatorUtils):
                                     if isinstance(values[signal], float):
                                         values[signal] = format(
                                             values[signal], '.2f')
+                                        
+                                    if is_candle_reg and int(float(values[signal])) == 100:
+                                        reasons.append(signal)
+
+
+                                
+
                             elif indicator_type == 'crossovers':
                                 latest_result = analysis['result'].iloc[-1]
 
@@ -637,7 +646,10 @@ class Notifier(IndicatorUtils):
                                         quote_currency=quote_currency, indicator=indicator, indicator_number=index,
                                         analysis=analysis, status=status, last_status=last_status,
                                         prices=prices, lrsi=lrsi, creation_date=creation_date, hot_cold_label=hot_cold_label,
-                                        indicator_label=indicator_label, price_value=price_value, decimal_format=decimal_format)
+                                        indicator_label=indicator_label, price_value=price_value, decimal_format=decimal_format,
+                                        candle_period=candle_period,
+                                        reasons=" ,".join(reasons),
+                                        )
 
                                     new_messages[exchange][market_pair][candle_period].append(
                                         new_message)

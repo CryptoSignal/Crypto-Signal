@@ -1,4 +1,4 @@
-
+from typing import List
 import numpy
 import pandas
 import talib
@@ -7,7 +7,15 @@ from analyzers.utils import IndicatorUtils
 
 
 class Candle_recognition(IndicatorUtils):
-    def analyze(self, historical_data, signal, notification='hot', candle_check=1, hot_thresh=None, cold_thresh=None):
+    def analyze(
+        self,
+        historical_data,
+        signal,
+        notification="hot",
+        candle_check=1,
+        hot_thresh=None,
+        cold_thresh=None,
+    ):
         """Performs an candle pattern analysis on the historical data
 
         Args:
@@ -23,93 +31,121 @@ class Candle_recognition(IndicatorUtils):
         """
         dataframe = self.convert_to_dataframe(historical_data)
 
-        open = dataframe['open']
-        high = dataframe['high']
-        low = dataframe['low']
-        close = dataframe['close']
+        open = dataframe["open"]
+        high = dataframe["high"]
+        low = dataframe["low"]
+        close = dataframe["close"]
 
         candle_functions = {
-            'two_crows': talib.CDLTRISTAR,
-            'three_black_crows': talib.CDL3BLACKCROWS,
-            'three_inside_up_down': talib.CDL3INSIDE,
-            'three_line_strike': talib.CDL3LINESTRIKE,
-            'thee_stars_in_the_south': talib.CDL3OUTSIDE,
-            'three_advancing_white_soldiers': talib.CDL3WHITESOLDIERS,
-            'abandoned_baby': talib.CDLABANDONEDBABY,
-            'advance_block': talib.CDLADVANCEBLOCK,
-            'belt_hold': talib.CDLADVANCEBLOCK,
-            'breakaway': talib.CDLBREAKAWAY,
-            'closing_marubozu': talib.CDLCLOSINGMARUBOZU,
-            'concealing_baby_swallow': talib.CDLCONCEALBABYSWALL,
-            'counterattack': talib.CDLCOUNTERATTACK,
-            'dark_cloud_cover': talib.CDLDARKCLOUDCOVER,
-            'doji': talib.CDLDOJI,
-            'doji_star': talib.CDLDOJISTAR,
-            'dragonfly_doji': talib.CDLDRAGONFLYDOJI,
-            'engulfing_pattern': talib.CDLENGULFING,
-            'evening_doji_star': talib.CDLEVENINGDOJISTAR,
-            'evening_star': talib.CDLEVENINGSTAR,
-            'gap_sidesidewhite': talib.CDLGAPSIDESIDEWHITE,
-            'gravestone_doji': talib.CDLGRAVESTONEDOJI,
-            'hammer': talib.CDLHAMMER,
-            'hanging_man': talib.CDLHANGINGMAN,
-            'harami_pattern': talib.CDLHARAMI,
-            'harami_cross_patern': talib.CDLHARAMICROSS,
-            'high_wave_candle': talib.CDLHIGHWAVE,
-            'modified_hikkake_pattern': talib.CDLHIKKAKEMOD,
-            'homing_pigeon': talib.CDLHOMINGPIGEON,
-            'identical_three_crows': talib.CDLIDENTICAL3CROWS,
-            'in_neck_pattern': talib.CDLINNECK,
-            'inverted_hammer': talib.CDLINVERTEDHAMMER,
-            'kicking': talib.CDLKICKING,
-            'kicking_bb': talib.CDLKICKINGBYLENGTH,
-            'ladder_bottom': talib.CDLLADDERBOTTOM,
-            'long_legged_doji': talib.CDLLONGLEGGEDDOJI,
-            'long_line_candle': talib.CDLLONGLINE,
-            'marubozu': talib.CDLMARUBOZU,
-            'matching_low': talib.CDLMATCHINGLOW,
-            'mat_hold': talib.CDLMATHOLD,
-            'morning_doji_star': talib.CDLMORNINGDOJISTAR,
-            'morning_star': talib.CDLMORNINGSTAR,
-            'on_neck_pattern': talib.CDLONNECK,
-            'piercing_pattern': talib.CDLPIERCING,
-            'rickshaw_man': talib.CDLRICKSHAWMAN,
-            'risfall_three_methods': talib.CDLRISEFALL3METHODS,
-            'seperating_lines': talib.CDLSEPARATINGLINES,
-            'shooting_star': talib.CDLSHOOTINGSTAR,
-            'short_line_candle': talib.CDLSHORTLINE,
-            'spinning_top': talib.CDLSPINNINGTOP,
-            'stalled_pattern': talib.CDLSTALLEDPATTERN,
-            'stick_sandwich': talib.CDLSTICKSANDWICH,
-            'takuri': talib.CDLTAKURI,
-            'tasuki_gap': talib.CDLTASUKIGAP,
-            'thrusting_pattern': talib.CDLTHRUSTING,
-            'tristar_pattern': talib.CDLTRISTAR,
-            'unique_three_river': talib.CDLUNIQUE3RIVER,
-            'upside_gap_two_crows': talib.CDLUPSIDEGAP2CROWS,
-            'xside_gap_three_methods': talib.CDLXSIDEGAP3METHODS
+            "two_crows": talib.CDLTRISTAR,
+            "three_black_crows": talib.CDL3BLACKCROWS,
+            "three_inside_up_down": talib.CDL3INSIDE,
+            "three_line_strike": talib.CDL3LINESTRIKE,
+            "thee_stars_in_the_south": talib.CDL3OUTSIDE,
+            "three_advancing_white_soldiers": talib.CDL3WHITESOLDIERS,
+            "abandoned_baby": talib.CDLABANDONEDBABY,
+            "advance_block": talib.CDLADVANCEBLOCK,
+            "belt_hold": talib.CDLADVANCEBLOCK,
+            "breakaway": talib.CDLBREAKAWAY,
+            "closing_marubozu": talib.CDLCLOSINGMARUBOZU,
+            "concealing_baby_swallow": talib.CDLCONCEALBABYSWALL,
+            "counterattack": talib.CDLCOUNTERATTACK,
+            "dark_cloud_cover": talib.CDLDARKCLOUDCOVER,
+            "doji": talib.CDLDOJI,
+            "doji_star": talib.CDLDOJISTAR,
+            "dragonfly_doji": talib.CDLDRAGONFLYDOJI,
+            "engulfing_pattern": talib.CDLENGULFING,
+            "evening_doji_star": talib.CDLEVENINGDOJISTAR,
+            "evening_star": talib.CDLEVENINGSTAR,
+            "gap_sidesidewhite": talib.CDLGAPSIDESIDEWHITE,
+            "gravestone_doji": talib.CDLGRAVESTONEDOJI,
+            "hammer": talib.CDLHAMMER,
+            "hanging_man": talib.CDLHANGINGMAN,
+            "harami_pattern": talib.CDLHARAMI,
+            "harami_cross_patern": talib.CDLHARAMICROSS,
+            "high_wave_candle": talib.CDLHIGHWAVE,
+            "modified_hikkake_pattern": talib.CDLHIKKAKEMOD,
+            "homing_pigeon": talib.CDLHOMINGPIGEON,
+            "identical_three_crows": talib.CDLIDENTICAL3CROWS,
+            "in_neck_pattern": talib.CDLINNECK,
+            "inverted_hammer": talib.CDLINVERTEDHAMMER,
+            "kicking": talib.CDLKICKING,
+            "kicking_bb": talib.CDLKICKINGBYLENGTH,
+            "ladder_bottom": talib.CDLLADDERBOTTOM,
+            "long_legged_doji": talib.CDLLONGLEGGEDDOJI,
+            "long_line_candle": talib.CDLLONGLINE,
+            "marubozu": talib.CDLMARUBOZU,
+            "matching_low": talib.CDLMATCHINGLOW,
+            "mat_hold": talib.CDLMATHOLD,
+            "morning_doji_star": talib.CDLMORNINGDOJISTAR,
+            "morning_star": talib.CDLMORNINGSTAR,
+            "on_neck_pattern": talib.CDLONNECK,
+            "piercing_pattern": talib.CDLPIERCING,
+            "rickshaw_man": talib.CDLRICKSHAWMAN,
+            "risfall_three_methods": talib.CDLRISEFALL3METHODS,
+            "seperating_lines": talib.CDLSEPARATINGLINES,
+            "shooting_star": talib.CDLSHOOTINGSTAR,
+            "short_line_candle": talib.CDLSHORTLINE,
+            "spinning_top": talib.CDLSPINNINGTOP,
+            "stalled_pattern": talib.CDLSTALLEDPATTERN,
+            "stick_sandwich": talib.CDLSTICKSANDWICH,
+            "takuri": talib.CDLTAKURI,
+            "tasuki_gap": talib.CDLTASUKIGAP,
+            "thrusting_pattern": talib.CDLTHRUSTING,
+            "tristar_pattern": talib.CDLTRISTAR,
+            "unique_three_river": talib.CDLUNIQUE3RIVER,
+            "upside_gap_two_crows": talib.CDLUPSIDEGAP2CROWS,
+            "xside_gap_three_methods": talib.CDLXSIDEGAP3METHODS,
         }
 
         candles_values = pandas.DataFrame(index=dataframe.index)
 
-        candle_args = {'open': open, 'high': high, 'low': low, 'close': close}
+        candle_args = {"open": open, "high": high, "low": low, "close": close}
         for candle in signal:
             if candle in candle_functions.keys():
                 candles_values[candle] = candle_functions[candle](
-                    **candle_args)
+                    **candle_args
+                )
 
-        candles_values['is_hot'] = False
-        candles_values['is_cold'] = False
+        candles_values["is_hot"] = False
+        candles_values["is_cold"] = False
 
-        to_check = 0 - candle_check
+        to_check = 0 - candle_check  # check -candle_check to the end
         for candle in signal:
-            if len(set(candles_values[candle].iloc[to_check:])) != 1:
-                if notification == 'hot':
-                    candles_values['is_hot'][-1] = True
-                elif notification == 'cold':
-                    candles_values['is_cold'][-1] = True
+            if self._is_hot_candles(
+                candle_values=list(
+                    candles_values.loc[candles_values.index[to_check:], candle]
+                ),
+                threshold=100.0,
+                skip_latest_candle=True,
+            ):
+                if notification == "hot":
+                    candles_values["is_hot"].iloc[-1] = True
+                elif notification == "cold":
+                    candles_values["is_cold"].iloc[-1] = True
 
         for candle in signal:
             candles_values[candle] = candles_values[candle].astype(float)
 
         return candles_values
+
+    def _is_hot_candles(
+        self,
+        candle_values: List[float],
+        threshold: float = 100.0,
+        skip_latest_candle: bool = False,
+    ):
+        """Check if the candle values are hot
+
+        Args:
+            candle_values (List[float]): A list of candle values
+
+        Returns:
+            bool: True if hot, False if not
+        """
+        if skip_latest_candle:
+            candle_values = candle_values[:-1]
+        hot_candle_values = [
+            candle_value >= threshold for candle_value in candle_values
+        ]
+        return sum(hot_candle_values) > 0

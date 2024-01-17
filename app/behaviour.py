@@ -70,7 +70,7 @@ class Behaviour():
         if self.enable_charts:
             self.notifier.set_enable_charts(True)
             self.notifier.set_all_historical_data(self.all_historical_data)
-
+        print("new_result: ", new_result)
         self.notifier.notify_all(new_result)
 
     def get_all_historical_data(self, market_data):
@@ -132,6 +132,52 @@ class Behaviour():
         return data
 
     def _test_strategies(self, market_data, output_mode):
+        """Test the strategies and perform notifications as required
+
+        Args:
+            market_data (dict): A dictionary containing the market data of the symbols to analyze.
+            output_mode (str): Which console output mode to use.
+        """
+
+        new_result = dict()
+        for exchange in market_data:
+            self.logger.info("Beginning analysis of %s", exchange)
+            if exchange not in new_result:
+                new_result[exchange] = dict()
+
+            for market_pair in market_data[exchange]:
+                self.logger.info("Beginning analysis of %s", market_pair)
+                if market_pair not in new_result[exchange]:
+                    new_result[exchange][market_pair] = dict()
+
+                new_result[exchange][market_pair]['indicators'] = self._get_indicator_results(
+                    exchange,
+                    market_pair
+                )
+
+                new_result[exchange][market_pair]['informants'] = self._get_informant_results(
+                    exchange,
+                    market_pair
+                )
+
+                new_result[exchange][market_pair]['crossovers'] = self._get_crossover_results(
+                    new_result[exchange][market_pair]
+                )
+
+                if output_mode in self.output:
+                    output_data = deepcopy(new_result[exchange][market_pair])
+                    print(
+                        self.output[output_mode](output_data, market_pair),
+                        end=''
+                    )
+                else:
+                    self.logger.warn()
+
+        # Print an empty line when complete
+        print()
+        return new_result
+
+    def _henry_strategies(self, market_data, output_mode):
         """Test the strategies and perform notifications as required
 
         Args:
