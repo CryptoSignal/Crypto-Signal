@@ -6,6 +6,8 @@ COPY lib/ta-lib-0.4.0-src.tar.gz /tmp/ta-lib-0.4.0-src.tar.gz
 RUN cd /tmp && \
   tar -xvzf ta-lib-0.4.0-src.tar.gz && \
   cd ta-lib/ && \
+  wget http://savannah.gnu.org/cgi-bin/viewcvs/*checkout*/config/config/config.guess -O config.guess && \
+  wget http://savannah.gnu.org/cgi-bin/viewcvs/*checkout*/config/config/config.sub -O config.sub && \
   ./configure --prefix=/usr && \
   make && \
   make install
