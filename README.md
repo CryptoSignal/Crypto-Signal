@@ -744,3 +744,15 @@ notifiers:
 ```
 
 The code for "decimal_format" and "format" is necessary to obtain the prices formatted with the corresponding zeros.
+
+
+# Setup telegram channel
+- Setup a bot by using Bot Father
+- Setup a channel
+- Add bot to channel
+- Get chat_id of the channel:
+ + Write a message in the channel
+ + Call this api:
+```
+https://api.telegram.org/bot<BOT_TOKEN>/getUpdates
+```
