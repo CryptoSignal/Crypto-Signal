@@ -4,13 +4,18 @@
 import math
 
 import pandas
-from talib import abstract
-
 from analyzers.utils import IndicatorUtils
+from talib import abstract
 
 
 class OBV(IndicatorUtils):
-    def analyze(self, historical_data, signal=["obv"], hot_thresh=None, cold_thresh=None):
+    def analyze(
+        self,
+        historical_data,
+        signal=["obv"],
+        hot_thresh=None,
+        cold_thresh=None,
+    ):
         """Performs OBV analysis on the historical data
 
         Args:

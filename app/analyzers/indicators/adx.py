@@ -1,16 +1,21 @@
-
 """
 Average Directional Index indicator
 """
 
 import numpy
 import pandas
-
 from analyzers.utils import IndicatorUtils
 
 
 class Adx(IndicatorUtils):
-    def analyze(self, historical_data, signal=["adx"], period_count=14, hot_thresh=None, cold_thresh=None):
+    def analyze(
+        self,
+        historical_data,
+        signal=["adx"],
+        period_count=14,
+        hot_thresh=None,
+        cold_thresh=None,
+    ):
         """
         strength of a trend
         ADX > 25 = strength
@@ -25,62 +30,64 @@ class Adx(IndicatorUtils):
         dataframe = self.convert_to_dataframe(historical_data)
 
         adx_columns = {
-            'tr': [numpy.nan] * dataframe.index.shape[0],
-            'atr': [numpy.nan] * dataframe.index.shape[0],
-            'pdm': [numpy.nan] * dataframe.index.shape[0],
-            'ndm': [numpy.nan] * dataframe.index.shape[0],
-            'pdm_smooth': [numpy.nan] * dataframe.index.shape[0],
-            'ndm_smooth': [numpy.nan] * dataframe.index.shape[0],
-            'ndi': [numpy.nan] * dataframe.index.shape[0],
-            'pdi': [numpy.nan] * dataframe.index.shape[0],
-            'dx': [numpy.nan] * dataframe.index.shape[0],
-            'adx': [numpy.nan] * dataframe.index.shape[0]
+            "tr": [numpy.nan] * dataframe.index.shape[0],
+            "atr": [numpy.nan] * dataframe.index.shape[0],
+            "pdm": [numpy.nan] * dataframe.index.shape[0],
+            "ndm": [numpy.nan] * dataframe.index.shape[0],
+            "pdm_smooth": [numpy.nan] * dataframe.index.shape[0],
+            "ndm_smooth": [numpy.nan] * dataframe.index.shape[0],
+            "ndi": [numpy.nan] * dataframe.index.shape[0],
+            "pdi": [numpy.nan] * dataframe.index.shape[0],
+            "dx": [numpy.nan] * dataframe.index.shape[0],
+            "adx": [numpy.nan] * dataframe.index.shape[0],
         }
 
-        adx_values = pandas.DataFrame(adx_columns,
-                                      index=dataframe.index
-                                      )
+        adx_values = pandas.DataFrame(adx_columns, index=dataframe.index)
 
-        adx_values['tr'] = self.TR(dataframe['high'],
-                                   dataframe['low'],
-                                   dataframe['close'],
-                                   adx_values['tr']
-                                   )
-        adx_values['pdm'], adx_values['ndm'] = self.DM(dataframe['high'],
-                                                       dataframe['low'],
-                                                       adx_values['pdm'],
-                                                       adx_values['ndm']
-                                                       )
-        adx_values['pdm_smooth'], adx_values['ndm_smooth'] = self.DMsmooth(adx_values['pdm'],
-                                                                           adx_values['ndm'],
-                                                                           adx_values['pdm_smooth'],
-                                                                           adx_values['ndm_smooth'],
-                                                                           period_count
-                                                                           )
-        adx_values['pdi'], adx_values['ndi'] = self.DI(adx_values['pdm_smooth'],
-                                                       adx_values['ndm_smooth'],
-                                                       adx_values['tr'],
-                                                       adx_values['pdi'],
-                                                       adx_values['ndi']
-                                                       )
-        adx_values['atr'] = self.ATR(adx_values['tr'],
-                                     adx_values['atr'],
-                                     period_count
-                                     )
-        adx_values['dx'], adx_values['adx'] = self.ADX(adx_values['pdi'],
-                                                       adx_values['ndi'],
-                                                       adx_values['dx'],
-                                                       adx_values['adx'],
-                                                       period_count
-                                                       )
-        adx_values['is_hot'] = False
-        adx_values['is_cold'] = False
+        adx_values["tr"] = self.TR(
+            dataframe["high"],
+            dataframe["low"],
+            dataframe["close"],
+            adx_values["tr"],
+        )
+        adx_values["pdm"], adx_values["ndm"] = self.DM(
+            dataframe["high"],
+            dataframe["low"],
+            adx_values["pdm"],
+            adx_values["ndm"],
+        )
+        adx_values["pdm_smooth"], adx_values["ndm_smooth"] = self.DMsmooth(
+            adx_values["pdm"],
+            adx_values["ndm"],
+            adx_values["pdm_smooth"],
+            adx_values["ndm_smooth"],
+            period_count,
+        )
+        adx_values["pdi"], adx_values["ndi"] = self.DI(
+            adx_values["pdm_smooth"],
+            adx_values["ndm_smooth"],
+            adx_values["tr"],
+            adx_values["pdi"],
+            adx_values["ndi"],
+        )
+        adx_values["atr"] = self.ATR(
+            adx_values["tr"], adx_values["atr"], period_count
+        )
+        adx_values["dx"], adx_values["adx"] = self.ADX(
+            adx_values["pdi"],
+            adx_values["ndi"],
+            adx_values["dx"],
+            adx_values["adx"],
+            period_count,
+        )
+        adx_values["is_hot"] = False
+        adx_values["is_cold"] = False
 
         for index in range(0, adx_values.index.shape[0]):
-            if adx_values['adx'][index] < cold_thresh:
-                adx_values['is_cold'][index] = True
-            elif adx_values['adx'][index] >= hot_thresh:
-                adx_values['is_hot'][index] = True
+            if adx_values["adx"][index] < cold_thresh:
+                adx_values["is_cold"][index] = True
+            elif adx_values["adx"][index] >= hot_thresh:
+                adx_values["is_hot"][index] = True
 
         return adx_values
 
@@ -114,8 +121,8 @@ class Adx(IndicatorUtils):
         """
 
         for index in range(1, high.shape[0]):
-            up_move = high[index] - high[index-1]
-            down_move = low[index-1] - low[index]
+            up_move = high[index] - high[index - 1]
+            down_move = low[index - 1] - low[index]
 
             if up_move > down_move and up_move > 0:
                 pdm[index] = up_move
@@ -139,13 +146,15 @@ class Adx(IndicatorUtils):
         :return: pdm_smooth, ndm_smooth
         """
 
-        pdm_smooth[period_count-1] = pdm[0:period_count].sum() / period_count
+        pdm_smooth[period_count - 1] = pdm[0:period_count].sum() / period_count
         ndm_smooth[period_count - 1] = ndm[0:period_count].sum() / period_count
         for index in range(period_count, pdm.shape[0]):
             pdm_smooth[index] = (
-                pdm[index-1] - (pdm_smooth[index-1]/period_count)) + pdm_smooth[index-1]
+                pdm[index - 1] - (pdm_smooth[index - 1] / period_count)
+            ) + pdm_smooth[index - 1]
             ndm_smooth[index] = (
-                ndm[index - 1] - (ndm_smooth[index-1] / period_count)) + ndm_smooth[index-1]
+                ndm[index - 1] - (ndm_smooth[index - 1] / period_count)
+            ) + ndm_smooth[index - 1]
 
         return pdm_smooth, ndm_smooth
 
@@ -178,10 +187,11 @@ class Adx(IndicatorUtils):
         :return: atr
         """
 
-        atr[period_count-1] = tr[0:period_count].sum() / period_count
+        atr[period_count - 1] = tr[0:period_count].sum() / period_count
         for index in range(period_count, tr.shape[0]):
-            atr[index] = ((atr[index-1] * (period_count - 1)) +
-                          tr[index]) / period_count
+            atr[index] = (
+                (atr[index - 1] * (period_count - 1)) + tr[index]
+            ) / period_count
 
         return atr
 
@@ -197,14 +207,17 @@ class Adx(IndicatorUtils):
         """
 
         for index in range(0, pdi.shape[0]):
-            dx[index] = ((abs(pdi[index] - ndi[index])) /
-                         (abs(pdi[index] + ndi[index]))) * 100
+            dx[index] = (
+                (abs(pdi[index] - ndi[index])) / (abs(pdi[index] + ndi[index]))
+            ) * 100
 
-        period_count2 = period_count*2
-        adx[period_count2-1] = dx[period_count:period_count2].sum() / \
-            period_count
+        period_count2 = period_count * 2
+        adx[period_count2 - 1] = (
+            dx[period_count:period_count2].sum() / period_count
+        )
         for index in range(period_count2, dx.shape[0]):
-            adx[index] = ((adx[index-1] * (period_count - 1)) +
-                          dx[index]) / period_count
+            adx[index] = (
+                (adx[index - 1] * (period_count - 1)) + dx[index]
+            ) / period_count
 
         return dx, adx

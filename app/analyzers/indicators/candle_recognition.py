@@ -1,8 +1,8 @@
 from typing import List
+
 import numpy
 import pandas
 import talib
-
 from analyzers.utils import IndicatorUtils
 
 

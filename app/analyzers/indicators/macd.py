@@ -4,13 +4,18 @@
 import math
 
 import pandas
-from talib import abstract
-
 from analyzers.utils import IndicatorUtils
+from talib import abstract
 
 
 class MACD(IndicatorUtils):
-    def analyze(self, historical_data, signal=['macd'], hot_thresh=None, cold_thresh=None):
+    def analyze(
+        self,
+        historical_data,
+        signal=["macd"],
+        hot_thresh=None,
+        cold_thresh=None,
+    ):
         """Performs a macd analysis on the historical data
 
         Args:
@@ -28,10 +33,10 @@ class MACD(IndicatorUtils):
 
         dataframe = self.convert_to_dataframe(historical_data)
         macd_values = abstract.MACD(dataframe).iloc[:]
-        macd_values.dropna(how='all', inplace=True)
+        macd_values.dropna(how="all", inplace=True)
 
         if macd_values[signal[0]].shape[0]:
-            macd_values['is_hot'] = macd_values[signal[0]] > hot_thresh
-            macd_values['is_cold'] = macd_values[signal[0]] < cold_thresh
+            macd_values["is_hot"] = macd_values[signal[0]] > hot_thresh
+            macd_values["is_cold"] = macd_values[signal[0]] < cold_thresh
 
         return macd_values

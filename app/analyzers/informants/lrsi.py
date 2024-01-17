@@ -14,7 +14,6 @@
 """
 
 import numpy as np
-
 from analyzers.utils import IndicatorUtils
 
 
@@ -53,7 +52,7 @@ class LRSI(IndicatorUtils):
 
         return 1.0 if not den else cu / den
 
-    def analyze(self, historical_data, signal=['lrsi']):
+    def analyze(self, historical_data, signal=["lrsi"]):
         """Performs a better implementation of RSI
 
         Args:
@@ -71,7 +70,8 @@ class LRSI(IndicatorUtils):
 
         dataframe = self.convert_to_dataframe(historical_data)
 
-        dataframe['lrsi'] = dataframe.close.apply(
-            lambda x: self.apply_filter(x, 0.4))
+        dataframe["lrsi"] = dataframe.close.apply(
+            lambda x: self.apply_filter(x, 0.4)
+        )
 
         return dataframe

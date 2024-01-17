@@ -3,16 +3,15 @@
 
 import structlog
 
-class NotifierUtils():
-    """ Utilities for notifiers
-    """
+
+class NotifierUtils:
+    """Utilities for notifiers"""
 
     def __init__(self):
         self.logger = structlog.get_logger()
 
-
     def chunk_message(self, message, max_message_size):
-        """ Chunks message so that it meets max size of integration.
+        """Chunks message so that it meets max size of integration.
 
         Args:
             message (str): The message to chunk.
@@ -25,7 +24,7 @@ class NotifierUtils():
         chunked_message = list()
         if len(message) > max_message_size:
             split_message = message.splitlines(keepends=True)
-            chunk = ''
+            chunk = ""
 
             for message_part in split_message:
                 temporary_chunk = chunk + message_part
@@ -34,7 +33,7 @@ class NotifierUtils():
                     chunk += message_part
                 else:
                     chunked_message.append(chunk)
-                    chunk = ''
+                    chunk = ""
         else:
             chunked_message.append(message)
 

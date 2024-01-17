@@ -1,8 +1,1 @@
-__all__ = [
-    'bollinger_bands',
-    'ema',
-    'sma',
-    'vwap',
-    'ohlcv',
-    'lrsi'
-]
+__all__ = ["bollinger_bands", "ema", "sma", "vwap", "ohlcv", "lrsi"]

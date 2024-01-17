@@ -4,9 +4,8 @@
 import math
 
 import pandas
-from talib import abstract
-
 from analyzers.utils import IndicatorUtils
+from talib import abstract
 
 
 class SMA(IndicatorUtils):
@@ -24,7 +23,7 @@ class SMA(IndicatorUtils):
 
         dataframe = self.convert_to_dataframe(historical_data)
         sma_values = abstract.SMA(dataframe, period_count).to_frame()
-        sma_values.dropna(how='all', inplace=True)
-        sma_values.rename(columns={0: 'sma'}, inplace=True)
+        sma_values.dropna(how="all", inplace=True)
+        sma_values.rename(columns={0: "sma"}, inplace=True)
 
         return sma_values

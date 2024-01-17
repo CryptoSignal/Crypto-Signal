@@ -2,7 +2,7 @@ version: '3'
 
 services:
   app:
-    image: shadowreaver/crypto-signal:latest
+    image: dev/crypto-signals:latest
     volumes:
       - ./app:/app
       - ./config.yml:/app/config.yml

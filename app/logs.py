@@ -21,17 +21,17 @@ def configure_logging(loglevel, log_mode):
     if not loglevel:
         loglevel = logging.INFO
 
-    if log_mode == 'json':
+    if log_mode == "json":
         log_formatter = jsonlogger.JsonFormatter()
-    elif log_mode == 'text':
-        log_formatter = logging.Formatter('%(message)s')
-    elif log_mode == 'standard':
+    elif log_mode == "text":
+        log_formatter = logging.Formatter("%(message)s")
+    elif log_mode == "standard":
         log_formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         )
     else:
         log_formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         )
 
     handler = logging.StreamHandler(sys.stdout)
@@ -54,5 +54,5 @@ def configure_logging(loglevel, log_mode):
         context_class=dict,
         logger_factory=structlog.stdlib.LoggerFactory(),
         wrapper_class=structlog.stdlib.BoundLogger,
-        cache_logger_on_first_use=True
+        cache_logger_on_first_use=True,
     )

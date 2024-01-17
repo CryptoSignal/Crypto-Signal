@@ -1,4 +1,3 @@
-
 """Notify a user via discord
 """
 
@@ -6,9 +5,8 @@ import structlog
 from webcord import Webhook
 
 
-class DiscordNotifier():
-    """Class for handling Discord notifications
-    """
+class DiscordNotifier:
+    """Class for handling Discord notifications"""
 
     def __init__(self, webhook, username, avatar=None):
         """Initialize DiscordNotifier class

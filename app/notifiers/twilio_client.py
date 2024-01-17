@@ -2,16 +2,20 @@
 """
 
 import structlog
-from twilio.rest import Client
-
 from notifiers.utils import NotifierUtils
+from twilio.rest import Client
 
 
 class TwilioNotifier(NotifierUtils):
-    """Class for handling twilio notifications
-    """
+    """Class for handling twilio notifications"""
 
-    def __init__(self, twilio_key, twilio_secret, twilio_sender_number, twilio_receiver_number):
+    def __init__(
+        self,
+        twilio_key,
+        twilio_secret,
+        twilio_sender_number,
+        twilio_receiver_number,
+    ):
         """Initialize TwilioNotifer class
 
         Args:
@@ -35,11 +39,12 @@ class TwilioNotifier(NotifierUtils):
 
         max_message_size = 1600
         message_chunks = self.chunk_message(
-            message=message, max_message_size=max_message_size)
+            message=message, max_message_size=max_message_size
+        )
 
         for message_chunk in message_chunks:
             self.twilio_client.api.account.messages.create(
                 to=self.twilio_receiver_number,
                 from_=self.twilio_sender_number,
-                body=message_chunk
+                body=message_chunk,
             )

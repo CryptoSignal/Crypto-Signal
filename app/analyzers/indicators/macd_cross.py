@@ -5,13 +5,17 @@ import math
 
 import pandas
 import talib
-
 from analyzers.utils import IndicatorUtils
 
 
 class MACDCross(IndicatorUtils):
-
-    def analyze(self, historical_data, signal=['macd'], hot_thresh=None, cold_thresh=None):
+    def analyze(
+        self,
+        historical_data,
+        signal=["macd"],
+        hot_thresh=None,
+        cold_thresh=None,
+    ):
         """Performs a macd analysis on the historical data
 
         Args:
@@ -27,21 +31,33 @@ class MACDCross(IndicatorUtils):
         dataframe = self.convert_to_dataframe(historical_data)
 
         macd, macdsignal, macdhist = talib.MACD(
-            dataframe['close'], fastperiod=12, slowperiod=26, signalperiod=9)
+            dataframe["close"], fastperiod=12, slowperiod=26, signalperiod=9
+        )
 
         macd_values = pandas.DataFrame([macd, macdsignal]).T.rename(
-            columns={0: "macd", 1: "signal"})
+            columns={0: "macd", 1: "signal"}
+        )
 
         macd_cross = pandas.concat([dataframe, macd_values], axis=1)
-        macd_cross.dropna(how='all', inplace=True)
+        macd_cross.dropna(how="all", inplace=True)
 
-        previous_macd, previous_signal = macd_cross.iloc[-2]['macd'], macd_cross.iloc[-2]['signal']
-        current_macd, current_signal = macd_cross.iloc[-1]['macd'], macd_cross.iloc[-1]['signal']
+        previous_macd, previous_signal = (
+            macd_cross.iloc[-2]["macd"],
+            macd_cross.iloc[-2]["signal"],
+        )
+        current_macd, current_signal = (
+            macd_cross.iloc[-1]["macd"],
+            macd_cross.iloc[-1]["signal"],
+        )
 
-        macd_cross['is_hot'] = False
-        macd_cross['is_cold'] = False
+        macd_cross["is_hot"] = False
+        macd_cross["is_cold"] = False
 
-        macd_cross.at[macd_cross.index[-1], 'is_hot'] = previous_macd < previous_signal and current_macd > current_signal
-        macd_cross.at[macd_cross.index[-1], 'is_cold'] = previous_macd > previous_signal and current_macd < current_signal
+        macd_cross.at[macd_cross.index[-1], "is_hot"] = (
+            previous_macd < previous_signal and current_macd > current_signal
+        )
+        macd_cross.at[macd_cross.index[-1], "is_cold"] = (
+            previous_macd > previous_signal and current_macd < current_signal
+        )
 
         return macd_cross

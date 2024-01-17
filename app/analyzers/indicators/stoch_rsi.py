@@ -5,14 +5,19 @@ import math
 
 import numpy
 import pandas
-from talib import abstract
-
 from analyzers.utils import IndicatorUtils
+from talib import abstract
 
 
 class StochasticRSI(IndicatorUtils):
-    def analyze(self, historical_data, period_count=14,
-                signal=['stoch_rsi'], hot_thresh=None, cold_thresh=None):
+    def analyze(
+        self,
+        historical_data,
+        period_count=14,
+        signal=["stoch_rsi"],
+        hot_thresh=None,
+        cold_thresh=None,
+    ):
         """Performs a Stochastic RSI analysis on the historical data
 
         Args:
@@ -34,22 +39,27 @@ class StochasticRSI(IndicatorUtils):
 
         rsi = abstract.RSI(dataframe, period_count)
 
-        stochrsi  = (rsi - rsi.rolling(period_count).min()) / (rsi.rolling(period_count).max() - rsi.rolling(period_count).min())
+        stochrsi = (rsi - rsi.rolling(period_count).min()) / (
+            rsi.rolling(period_count).max() - rsi.rolling(period_count).min()
+        )
         stochrsi_K = stochrsi.rolling(3).mean()
         stochrsi_D = stochrsi_K.rolling(3).mean()
 
-        kd_values = pandas.DataFrame([stochrsi, stochrsi_K, stochrsi_D]).T.rename(
-            columns={0: "stoch_rsi", 1: "slow_k", 2: "slow_d"}).copy()
+        kd_values = (
+            pandas.DataFrame([stochrsi, stochrsi_K, stochrsi_D])
+            .T.rename(columns={0: "stoch_rsi", 1: "slow_k", 2: "slow_d"})
+            .copy()
+        )
 
-        kd_values['stoch_rsi'] = kd_values['stoch_rsi'].multiply(100)
-        kd_values['slow_k'] = kd_values['slow_k'].multiply(100)
-        kd_values['slow_d'] = kd_values['slow_d'].multiply(100)
+        kd_values["stoch_rsi"] = kd_values["stoch_rsi"].multiply(100)
+        kd_values["slow_k"] = kd_values["slow_k"].multiply(100)
+        kd_values["slow_d"] = kd_values["slow_d"].multiply(100)
 
         stoch_rsi = pandas.concat([dataframe, kd_values], axis=1)
-        stoch_rsi.dropna(how='all', inplace=True)
+        stoch_rsi.dropna(how="all", inplace=True)
 
         if stoch_rsi[signal[0]].shape[0]:
-            stoch_rsi['is_hot'] = stoch_rsi[signal[0]] < hot_thresh
-            stoch_rsi['is_cold'] = stoch_rsi[signal[0]] > cold_thresh
+            stoch_rsi["is_hot"] = stoch_rsi[signal[0]] < hot_thresh
+            stoch_rsi["is_cold"] = stoch_rsi[signal[0]] > cold_thresh
 
         return stoch_rsi

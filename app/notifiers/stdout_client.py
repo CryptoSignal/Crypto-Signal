@@ -2,17 +2,14 @@
 """
 
 import structlog
-
 from notifiers.utils import NotifierUtils
 
 
 class StdoutNotifier(NotifierUtils):
-    """Class for handling stdout notifications
-    """
+    """Class for handling stdout notifications"""
 
     def __init__(self):
-        """Initialize StdoutNotifier class
-        """
+        """Initialize StdoutNotifier class"""
 
     def notify(self, message):
         """stdout send the message.

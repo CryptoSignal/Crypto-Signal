@@ -8,9 +8,8 @@ import pandas
 import structlog
 
 
-class IndicatorUtils():
-    """ Utilities for technical indicators
-    """
+class IndicatorUtils:
+    """Utilities for technical indicators"""
 
     def __init__(self):
         self.logger = structlog.get_logger()
@@ -28,14 +27,21 @@ class IndicatorUtils():
         dataframe = pandas.DataFrame(historical_data)
         dataframe.transpose()
 
-        dataframe.columns = ['timestamp', 'open',
-                             'high', 'low', 'close', 'volume']
-        dataframe['datetime'] = dataframe.timestamp.apply(
+        dataframe.columns = [
+            "timestamp",
+            "open",
+            "high",
+            "low",
+            "close",
+            "volume",
+        ]
+        dataframe["datetime"] = dataframe.timestamp.apply(
             lambda x: pandas.to_datetime(
-                datetime.fromtimestamp(x / 1000).strftime('%c'))
+                datetime.fromtimestamp(x / 1000).strftime("%c")
+            )
         )
 
-        dataframe.set_index('datetime', inplace=True, drop=True)
-        dataframe.drop('timestamp', axis=1, inplace=True)
+        dataframe.set_index("datetime", inplace=True, drop=True)
+        dataframe.drop("timestamp", axis=1, inplace=True)
 
         return dataframe
