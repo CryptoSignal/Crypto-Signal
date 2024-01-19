@@ -4,4 +4,4 @@ services:
   app:
     image: shadowreaver/crypto-signal:master
     volumes:
-      - ./config.yml:/app/config.yml
+      # - ./config.yml:/app/config.yml

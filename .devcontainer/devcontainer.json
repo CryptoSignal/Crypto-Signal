@@ -1,0 +1,63 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/python
+{
+	"name": "signal_bot",
+    "dockerComposeFile": "../docker-compose.dev.yml",
+    "service": "app",
+    "workspaceFolder": "/app",
+	// "initializeCommand": "echo 'Hello World!'",
+
+	// "settings": {
+	// 	"terminal.integrated.shell.linux": null
+	// },
+	// // Add the IDs of extensions you want installed when the container is created.
+	"extensions": [
+		"ms-python.vscode-pylance",
+		"ms-python.python"
+	],
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+	// Uncomment the next line if you want startp specific services in your Docker Compose config.
+	// "runServices": [],
+	// Uncomment the next line if you want to keep your containers running after VS Code shuts down.
+	// "shutdownAction": "none",
+	// Uncomment the next line to run commands after the container is created - for example installing curl.
+	// "postCreateCommand": "pip install -U poetry localstack awscli-local"
+	// Uncomment to connect as a non-root user if you've added one. See https://aka.ms/vscode-remote/containers/non-root.
+	// "remoteUser": "vscode"
+	
+	// // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	// "image": "mcr.microsoft.com/devcontainers/python:0-3.11",
+
+	// // Features to add to the dev container. More info: https://containers.dev/features.
+	// // "features": {},
+
+	// // Configure tool-specific properties.
+	// "customizations": {
+	// 	// Configure properties specific to VS Code.
+	// 	"vscode": {
+	// 		"settings": {},
+	// 		"extensions": [
+	// 			"streetsidesoftware.code-spell-checker"
+	// 		]
+	// 	}
+	// },
+	
+	// // Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// // "forwardPorts": [9000],
+
+	// // Use 'portsAttributes' to set default properties for specific forwarded ports. 
+	// // More info: https://containers.dev/implementors/json_reference/#port-attributes
+	// "portsAttributes": {
+	// 	"9000": {
+	// 		"label": "Hello Remote World",
+	// 		"onAutoForward": "notify"
+	// 	}
+	// },
+
+	// // Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "pip3 install -r requirements.txt"
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}

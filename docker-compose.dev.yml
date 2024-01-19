@@ -4,5 +4,7 @@ services:
   app:
     image: dev/crypto-signals:latest
     volumes:
-      - ./app:/app
-      - ./config.yml:/app/config.yml
+      - .:/app
+      # - /Users/henry/Works/Bot/Crypto-Signal/app/config.yml:/app/config.yml
+
+    command: /bin/sh -c "while sleep 1000; do :; done"

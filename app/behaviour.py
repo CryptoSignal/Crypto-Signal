@@ -56,20 +56,17 @@ class Behaviour:
 
         self.logger.info("Starting default analyzer...")
 
-        self.logger.info(
-            "Using the following exchange(s): %s", list(market_data.keys())
-        )
+        self.logger.info("Using the following exchange(s): %s", list(market_data.keys()))
 
         self.all_historical_data = self.get_all_historical_data(market_data)
 
-        new_result = self._test_strategies(market_data, output_mode)
+        new_result = self._henry_strategies(market_data, output_mode)
 
         self.notifier.set_timezone(self.timezone)
 
         if self.enable_charts:
             self.notifier.set_enable_charts(True)
             self.notifier.set_all_historical_data(self.all_historical_data)
-        print("new_result: ", new_result)
         self.notifier.notify_all(new_result)
 
     def get_all_historical_data(self, market_data):
@@ -85,9 +82,7 @@ class Behaviour:
         data = dict()
 
         for exchange in market_data:
-            self.logger.info(
-                "Getting data for %s", list(market_data[exchange].keys())
-            )
+            self.logger.info("Getting data for %s", list(market_data[exchange].keys()))
             if exchange not in data:
                 data[exchange] = dict()
 
@@ -97,43 +92,29 @@ class Behaviour:
 
                 for indicator in self.indicator_conf:
                     if indicator not in indicator_dispatcher:
-                        self.logger.warn(
-                            "No such indicator %s, skipping.", indicator
-                        )
+                        self.logger.warn("No such indicator %s, skipping.", indicator)
                         continue
 
                     for indicator_conf in self.indicator_conf[indicator]:
                         if indicator_conf["enabled"]:
                             candle_period = indicator_conf["candle_period"]
 
-                            if (
-                                candle_period
-                                not in data[exchange][market_pair]
-                            ):
-                                data[exchange][market_pair][
-                                    candle_period
-                                ] = self._get_historical_data(
+                            if candle_period not in data[exchange][market_pair]:
+                                data[exchange][market_pair][candle_period] = self._get_historical_data(
                                     market_pair, exchange, candle_period
                                 )
 
                 for informant in self.informant_conf:
                     if informant not in informant_dispatcher:
-                        self.logger.warn(
-                            "No such informant %s, skipping.", informant
-                        )
+                        self.logger.warn("No such informant %s, skipping.", informant)
                         continue
 
                     for informant_conf in self.informant_conf[informant]:
                         if informant_conf["enabled"]:
                             candle_period = informant_conf["candle_period"]
 
-                            if (
-                                candle_period
-                                not in data[exchange][market_pair]
-                            ):
-                                data[exchange][market_pair][
-                                    candle_period
-                                ] = self._get_historical_data(
+                            if candle_period not in data[exchange][market_pair]:
+                                data[exchange][market_pair][candle_period] = self._get_historical_data(
                                     market_pair, exchange, candle_period
                                 )
 
@@ -158,17 +139,11 @@ class Behaviour:
                 if market_pair not in new_result[exchange]:
                     new_result[exchange][market_pair] = dict()
 
-                new_result[exchange][market_pair][
-                    "indicators"
-                ] = self._get_indicator_results(exchange, market_pair)
+                new_result[exchange][market_pair]["indicators"] = self._get_indicator_results(exchange, market_pair)
 
-                new_result[exchange][market_pair][
-                    "informants"
-                ] = self._get_informant_results(exchange, market_pair)
+                new_result[exchange][market_pair]["informants"] = self._get_informant_results(exchange, market_pair)
 
-                new_result[exchange][market_pair][
-                    "crossovers"
-                ] = self._get_crossover_results(
+                new_result[exchange][market_pair]["crossovers"] = self._get_crossover_results(
                     new_result[exchange][market_pair]
                 )
 
@@ -204,18 +179,17 @@ class Behaviour:
                 if market_pair not in new_result[exchange]:
                     new_result[exchange][market_pair] = dict()
 
-                new_result[exchange][market_pair][
-                    "indicators"
-                ] = self._get_indicator_results(exchange, market_pair)
+                new_result[exchange][market_pair]["indicators"] = self._get_indicator_results(exchange, market_pair)
 
-                new_result[exchange][market_pair][
-                    "informants"
-                ] = self._get_informant_results(exchange, market_pair)
+                new_result[exchange][market_pair]["informants"] = self._get_informant_results(exchange, market_pair)
 
-                new_result[exchange][market_pair][
-                    "crossovers"
-                ] = self._get_crossover_results(
+                new_result[exchange][market_pair]["crossovers"] = self._get_crossover_results(
                     new_result[exchange][market_pair]
+                )
+
+                price_info_of_pair = self.all_historical_data[exchange][market_pair]
+                new_result[exchange][market_pair] = self._update_new_result_of(
+                    new_result[exchange][market_pair], price_info_of_pair
                 )
 
                 if output_mode in self.output:
@@ -231,6 +205,68 @@ class Behaviour:
         print()
         return new_result
 
+    def _update_new_result_of(self, new_result_of_pair: dict, price_info_of_pair: dict):
+        candle_recognition_results = self._get_candle_recognition_result(new_result_of_pair)
+        for candle_recognition_result in candle_recognition_results:
+            candle_period = candle_recognition_result["config"]["candle_period"]
+            is_hot_candle = candle_recognition_result["result"].iloc[-1]["is_hot"]
+            ema_with_same_period = self._get_ema_result_with_same_period(new_result_of_pair, candle_period)
+            if ema_with_same_period is None:
+                is_hot_setup = False
+            if len(ema_with_same_period) < 2:
+                is_hot_setup = False
+            prev_ema = ema_with_same_period.iloc[-2]["ema"]
+            ohlc = self._get_ohlcv_with_same_period(price_info_of_pair, candle_period, previod_offset=-1)
+            if ohlc is None:
+                is_hot_setup = False
+            volumes = self._get_volumes_with_same_period(price_info_of_pair, candle_period)
+            is_hot_setup = self._is_hot_setup(prev_ema, ohlc, volumes)
+            is_hot_candle_updated = is_hot_candle and is_hot_setup
+            candle_recognition_result["result"].at[
+                candle_recognition_result["result"].index[-1], "is_hot"
+            ] = is_hot_candle_updated
+
+        new_result_of_pair["indicators"]["candle_recognition"] = candle_recognition_results
+        return new_result_of_pair
+
+    def _is_hot_setup(self, prev_ema: float, ohlc: list, volumes: list):
+        open, high, low, close = ohlc
+        if open > prev_ema and close > prev_ema and low < prev_ema and open < close:
+            return True
+        return False
+
+    def _get_ohlcv_with_same_period(
+        self, price_info_of_pair: dict, candle_period: str, previod_offset: int = 0
+    ):
+        price_of_pair = price_info_of_pair.get(candle_period)
+        if price_of_pair is None:
+            return None
+        date, open, high, low, close, volume = price_of_pair[previod_offset - 1]  # price of prev candle
+        return [open, high, low, close]
+
+    def _get_volumes_with_same_period(self, price_info_of_pair: dict, candle_period: str, length: int = 1):
+        volumes = []
+        price_of_pair = price_info_of_pair.get(candle_period)
+        if price_of_pair is None:
+            return None
+        volumes = [
+            price_of_pair_item[-1] for price_of_pair_item in price_of_pair[-length - 1 : -1]
+        ]  # skip latest candle
+        return volumes
+
+    def _get_ema_result_with_same_period(self, new_result_of_pair: dict, candle_period: str):
+        ema_results = self._get_ema_results(new_result_of_pair)
+        for ema_result in ema_results:
+            if ema_result["config"]["candle_period"] == candle_period:
+                return ema_result["result"]
+        return None
+
+    def _get_ema_results(self, new_result_of_pair: dict):
+        return new_result_of_pair["informants"]["ema"]
+
+    def _get_candle_recognition_result(self, new_result_of_pair: dict):
+        return new_result_of_pair["indicators"]["candle_recognition"]
+
     def _get_indicator_results(self, exchange, market_pair):
         """Execute the indicator analysis on a particular exchange and pair.
 
@@ -243,9 +279,7 @@ class Behaviour:
         """
 
         indicator_dispatcher = self.strategy_analyzer.indicator_dispatcher()
-        results = {
-            indicator: list() for indicator in self.indicator_conf.keys()
-        }
+        results = {indicator: list() for indicator in self.indicator_conf.keys()}
         historical_data_cache = self.all_historical_data[exchange][market_pair]
 
         for indicator in self.indicator_conf:
@@ -265,134 +299,75 @@ class Behaviour:
 
                 if historical_data_cache[candle_period]:
                     analysis_args = {
-                        "historical_data": historical_data_cache[
-                            candle_period
-                        ],
+                        "historical_data": historical_data_cache[candle_period],
                         "signal": indicator_conf["signal"],
-                        "hot_thresh": indicator_conf["hot"]
-                        if "hot" in indicator_conf
-                        else 0,
-                        "cold_thresh": indicator_conf["cold"]
-                        if "cold" in indicator_conf
-                        else 0,
+                        "hot_thresh": indicator_conf["hot"] if "hot" in indicator_conf else 0,
+                        "cold_thresh": indicator_conf["cold"] if "cold" in indicator_conf else 0,
                     }
 
                     if "period_count" in indicator_conf:
-                        analysis_args["period_count"] = indicator_conf[
-                            "period_count"
-                        ]
+                        analysis_args["period_count"] = indicator_conf["period_count"]
 
                     if indicator == "rsi" and "lrsi_filter" in indicator_conf:
-                        analysis_args["lrsi_filter"] = indicator_conf[
-                            "lrsi_filter"
-                        ]
+                        analysis_args["lrsi_filter"] = indicator_conf["lrsi_filter"]
 
                     if indicator == "ma_ribbon":
-                        analysis_args["pval_th"] = (
-                            indicator_conf["pval_th"]
-                            if "pval_th" in indicator_conf
-                            else 20
-                        )
+                        analysis_args["pval_th"] = indicator_conf["pval_th"] if "pval_th" in indicator_conf else 20
                         if "ma_series" in indicator_conf:
                             series = indicator_conf["ma_series"]
-                            analysis_args["ma_series"] = [
-                                int(i)
-                                for i in series.replace(" ", "").split(",")
-                            ]
+                            analysis_args["ma_series"] = [int(i) for i in series.replace(" ", "").split(",")]
                         else:
                             analysis_args["ma_series"] = [5, 15, 25, 35, 45]
 
                     if indicator == "ma_crossover":
                         analysis_args["exponential"] = (
-                            indicator_conf["exponential"]
-                            if "exponential" in indicator_conf
-                            else False
+                            indicator_conf["exponential"] if "exponential" in indicator_conf else False
                         )
-                        analysis_args["ma_fast"] = (
-                            indicator_conf["ma_fast"]
-                            if "ma_fast" in indicator_conf
-                            else 13
-                        )
-                        analysis_args["ma_slow"] = (
-                            indicator_conf["ma_slow"]
-                            if "ma_slow" in indicator_conf
-                            else 30
-                        )
+                        analysis_args["ma_fast"] = indicator_conf["ma_fast"] if "ma_fast" in indicator_conf else 13
+                        analysis_args["ma_slow"] = indicator_conf["ma_slow"] if "ma_slow" in indicator_conf else 30
 
                     if indicator == "stochrsi_cross":
-                        analysis_args["smooth_k"] = (
-                            indicator_conf["smooth_k"]
-                            if "smooth_k" in indicator_conf
-                            else 10
-                        )
-                        analysis_args["smooth_d"] = (
-                            indicator_conf["smooth_d"]
-                            if "smooth_d" in indicator_conf
-                            else 3
-                        )
+                        analysis_args["smooth_k"] = indicator_conf["smooth_k"] if "smooth_k" in indicator_conf else 10
+                        analysis_args["smooth_d"] = indicator_conf["smooth_d"] if "smooth_d" in indicator_conf else 3
 
                     if indicator == "bollinger" or indicator == "bbp":
-                        analysis_args["std_dev"] = (
-                            indicator_conf["std_dev"]
-                            if "std_dev" in indicator_conf
-                            else 2
-                        )
+                        analysis_args["std_dev"] = indicator_conf["std_dev"] if "std_dev" in indicator_conf else 2
 
                     if indicator == "klinger_oscillator":
                         analysis_args["ema_short_period"] = (
-                            indicator_conf["vf_ema_short"]
-                            if "vf_ema_short" in indicator_conf
-                            else 32
+                            indicator_conf["vf_ema_short"] if "vf_ema_short" in indicator_conf else 32
                         )
                         analysis_args["ema_long_period"] = (
-                            indicator_conf["vf_ema_long"]
-                            if "vf_ema_long" in indicator_conf
-                            else 55
+                            indicator_conf["vf_ema_long"] if "vf_ema_long" in indicator_conf else 55
                         )
                         analysis_args["signal_period"] = (
-                            indicator_conf["kvo_signal"]
-                            if "kvo_signal" in indicator_conf
-                            else 13
+                            indicator_conf["kvo_signal"] if "kvo_signal" in indicator_conf else 13
                         )
 
                     if indicator == "ichimoku":
                         analysis_args["tenkansen_period"] = (
-                            indicator_conf["tenkansen_period"]
-                            if "tenkansen_period" in indicator_conf
-                            else 20
+                            indicator_conf["tenkansen_period"] if "tenkansen_period" in indicator_conf else 20
                         )
                         analysis_args["kijunsen_period"] = (
-                            indicator_conf["kijunsen_period"]
-                            if "kijunsen_period" in indicator_conf
-                            else 60
+                            indicator_conf["kijunsen_period"] if "kijunsen_period" in indicator_conf else 60
                         )
                         analysis_args["senkou_span_b_period"] = (
-                            indicator_conf["senkou_span_b_period"]
-                            if "senkou_span_b_period" in indicator_conf
-                            else 120
+                            indicator_conf["senkou_span_b_period"] if "senkou_span_b_period" in indicator_conf else 120
                         )
                         analysis_args["custom_strategy"] = (
-                            indicator_conf["custom_strategy"]
-                            if "custom_strategy" in indicator_conf
-                            else None
+                            indicator_conf["custom_strategy"] if "custom_strategy" in indicator_conf else None
                         )
 
                     if indicator == "candle_recognition":
                         analysis_args["candle_check"] = (
-                            indicator_conf["candle_check"]
-                            if "candle_check" in indicator_conf
-                            else 1
+                            indicator_conf["candle_check"] if "candle_check" in indicator_conf else 1
                         )
                         analysis_args["notification"] = (
-                            indicator_conf["notification"]
-                            if "notification" in indicator_conf
-                            else "hot"
+                            indicator_conf["notification"] if "notification" in indicator_conf else "hot"
                         )
                     if indicator == "aroon_oscillator":
                         analysis_args["sma_vol_period"] = (
-                            indicator_conf["sma_vol_period"]
-                            if "sma_vol_period" in indicator_conf
-                            else 50
+                            indicator_conf["sma_vol_period"] if "sma_vol_period" in indicator_conf else 50
                         )
 
                     results[indicator].append(
@@ -420,9 +395,7 @@ class Behaviour:
         """
 
         informant_dispatcher = self.strategy_analyzer.informant_dispatcher()
-        results = {
-            informant: list() for informant in self.informant_conf.keys()
-        }
+        results = {informant: list() for informant in self.informant_conf.keys()}
         historical_data_cache = self.all_historical_data[exchange][market_pair]
 
         for informant in self.informant_conf:
@@ -441,14 +414,10 @@ class Behaviour:
                     continue
 
                 if historical_data_cache[candle_period]:
-                    analysis_args = {
-                        "historical_data": historical_data_cache[candle_period]
-                    }
+                    analysis_args = {"historical_data": historical_data_cache[candle_period]}
 
                     if "period_count" in informant_conf:
-                        analysis_args["period_count"] = informant_conf[
-                            "period_count"
-                        ]
+                        analysis_args["period_count"] = informant_conf["period_count"]
 
                     results[informant].append(
                         {
@@ -475,9 +444,7 @@ class Behaviour:
         """
 
         crossover_dispatcher = self.strategy_analyzer.crossover_dispatcher()
-        results = {
-            crossover: list() for crossover in self.crossover_conf.keys()
-        }
+        results = {crossover: list() for crossover in self.crossover_conf.keys()}
 
         for crossover in self.crossover_conf:
             if crossover not in crossover_dispatcher:
@@ -489,39 +456,29 @@ class Behaviour:
                     self.logger.debug("%s is disabled, skipping.", crossover)
                     continue
 
-                key_indicator = new_result[
-                    crossover_conf["key_indicator_type"]
-                ][crossover_conf["key_indicator"]][
+                key_indicator = new_result[crossover_conf["key_indicator_type"]][crossover_conf["key_indicator"]][
                     crossover_conf["key_indicator_index"]
                 ]
-                crossed_indicator = new_result[
-                    crossover_conf["crossed_indicator_type"]
-                ][crossover_conf["crossed_indicator"]][
-                    crossover_conf["crossed_indicator_index"]
-                ]
+                crossed_indicator = new_result[crossover_conf["crossed_indicator_type"]][
+                    crossover_conf["crossed_indicator"]
+                ][crossover_conf["crossed_indicator_index"]]
 
-                crossover_conf["candle_period"] = crossover_conf[
-                    "key_indicator"
-                ] + str(crossover_conf["key_indicator_index"])
+                crossover_conf["candle_period"] = crossover_conf["key_indicator"] + str(
+                    crossover_conf["key_indicator_index"]
+                )
 
                 dispatcher_args = {
                     "key_indicator": key_indicator["result"],
                     "key_signal": crossover_conf["key_signal"],
-                    "key_indicator_index": crossover_conf[
-                        "key_indicator_index"
-                    ],
+                    "key_indicator_index": crossover_conf["key_indicator_index"],
                     "crossed_indicator": crossed_indicator["result"],
                     "crossed_signal": crossover_conf["crossed_signal"],
-                    "crossed_indicator_index": crossover_conf[
-                        "crossed_indicator_index"
-                    ],
+                    "crossed_indicator_index": crossover_conf["crossed_indicator_index"],
                 }
 
                 results[crossover].append(
                     {
-                        "result": crossover_dispatcher[crossover](
-                            **dispatcher_args
-                        ),
+                        "result": crossover_dispatcher[crossover](**dispatcher_args),
                         "config": crossover_conf,
                     }
                 )
@@ -541,18 +498,14 @@ class Behaviour:
 
         historical_data = list()
         try:
-            historical_data = self.exchange_interface.get_historical_data(
-                market_pair, exchange, candle_period
-            )
+            historical_data = self.exchange_interface.get_historical_data(market_pair, exchange, candle_period)
         except RetryError:
             self.logger.error(
                 "Too many retries fetching information for pair %s, skipping",
                 market_pair,
             )
         except ExchangeError:
-            self.logger.error(
-                "Exchange supplied bad data for pair %s, skipping", market_pair
-            )
+            self.logger.error("Exchange supplied bad data for pair %s, skipping", market_pair)
         except ValueError as e:
             self.logger.error(e)
             self.logger.error(
@@ -568,9 +521,7 @@ class Behaviour:
             self.logger.debug(traceback.format_exc())
         return historical_data
 
-    def _get_analysis_result(
-        self, dispatcher, indicator, dispatcher_args, market_pair
-    ):
+    def _get_analysis_result(self, dispatcher, indicator, dispatcher_args, market_pair):
         """Get the results of performing technical analysis
 
         Args:

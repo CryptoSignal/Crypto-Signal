@@ -109,15 +109,16 @@ class Candle_recognition(IndicatorUtils):
 
         candles_values["is_hot"] = False
         candles_values["is_cold"] = False
-
-        to_check = 0 - candle_check  # check -candle_check to the end
+        
+        skip_latest_candle = True
+        to_check = 0 - candle_check if not skip_latest_candle else 0 - candle_check - 1 # check -candle_check to the end
         for candle in signal:
             if self._is_hot_candles(
                 candle_values=list(
                     candles_values.loc[candles_values.index[to_check:], candle]
                 ),
                 threshold=100.0,
-                skip_latest_candle=True,
+                skip_latest_candle=skip_latest_candle,
             ):
                 if notification == "hot":
                     candles_values["is_hot"].iloc[-1] = True

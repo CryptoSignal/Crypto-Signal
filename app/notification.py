@@ -59,25 +59,17 @@ class Notifier(IndicatorUtils):
 
         enabled_notifiers = list()
         self.logger = structlog.get_logger()
-        self.twilio_configured = self._validate_required_config(
-            "twilio", notifier_config
-        )
+        self.twilio_configured = self._validate_required_config("twilio", notifier_config)
         if self.twilio_configured:
             self.twilio_client = TwilioNotifier(
                 twilio_key=notifier_config["twilio"]["required"]["key"],
                 twilio_secret=notifier_config["twilio"]["required"]["secret"],
-                twilio_sender_number=notifier_config["twilio"]["required"][
-                    "sender_number"
-                ],
-                twilio_receiver_number=notifier_config["twilio"]["required"][
-                    "receiver_number"
-                ],
+                twilio_sender_number=notifier_config["twilio"]["required"]["sender_number"],
+                twilio_receiver_number=notifier_config["twilio"]["required"]["receiver_number"],
             )
             enabled_notifiers.append("twilio")
 
-        self.discord_configured = self._validate_required_config(
-            "discord", notifier_config
-        )
+        self.discord_configured = self._validate_required_config("discord", notifier_config)
         if self.discord_configured:
             self.discord_client = DiscordNotifier(
                 webhook=notifier_config["discord"]["required"]["webhook"],
@@ -86,44 +78,30 @@ class Notifier(IndicatorUtils):
             )
             enabled_notifiers.append("discord")
 
-        self.slack_configured = self._validate_required_config(
-            "slack", notifier_config
-        )
+        self.slack_configured = self._validate_required_config("slack", notifier_config)
         if self.slack_configured:
-            self.slack_client = SlackNotifier(
-                slack_webhook=notifier_config["slack"]["required"]["webhook"]
-            )
+            self.slack_client = SlackNotifier(slack_webhook=notifier_config["slack"]["required"]["webhook"])
             enabled_notifiers.append("slack")
 
-        self.gmail_configured = self._validate_required_config(
-            "gmail", notifier_config
-        )
+        self.gmail_configured = self._validate_required_config("gmail", notifier_config)
         if self.gmail_configured:
             self.gmail_client = GmailNotifier(
                 username=notifier_config["gmail"]["required"]["username"],
                 password=notifier_config["gmail"]["required"]["password"],
-                destination_addresses=notifier_config["gmail"]["required"][
-                    "destination_emails"
-                ],
+                destination_addresses=notifier_config["gmail"]["required"]["destination_emails"],
             )
             enabled_notifiers.append("gmail")
 
-        self.telegram_configured = self._validate_required_config(
-            "telegram", notifier_config
-        )
+        self.telegram_configured = self._validate_required_config("telegram", notifier_config)
         if self.telegram_configured:
             self.telegram_client = TelegramNotifier(
                 token=notifier_config["telegram"]["required"]["token"],
                 chat_id=notifier_config["telegram"]["required"]["chat_id"],
-                parse_mode=notifier_config["telegram"]["optional"][
-                    "parse_mode"
-                ],
+                parse_mode=notifier_config["telegram"]["optional"]["parse_mode"],
             )
             enabled_notifiers.append("telegram")
 
-        self.webhook_configured = self._validate_required_config(
-            "webhook", notifier_config
-        )
+        self.webhook_configured = self._validate_required_config("webhook", notifier_config)
         if self.webhook_configured:
             self.webhook_client = WebhookNotifier(
                 url=notifier_config["webhook"]["required"]["url"],
@@ -132,9 +110,7 @@ class Notifier(IndicatorUtils):
             )
             enabled_notifiers.append("webhook")
 
-        self.stdout_configured = self._validate_required_config(
-            "stdout", notifier_config
-        )
+        self.stdout_configured = self._validate_required_config("stdout", notifier_config)
         if self.stdout_configured:
             self.stdout_client = StdoutNotifier()
             enabled_notifiers.append("stdout")
@@ -162,10 +138,7 @@ class Notifier(IndicatorUtils):
                 _messages = messages[exchange][market_pair]
 
                 for candle_period in _messages:
-                    if (
-                        not isinstance(_messages[candle_period], list)
-                        or len(_messages[candle_period]) == 0
-                    ):
+                    if not isinstance(_messages[candle_period], list) or len(_messages[candle_period]) == 0:
                         continue
 
                     self.notify_all_messages(
@@ -176,19 +149,13 @@ class Notifier(IndicatorUtils):
                     )
                     sleep(4)
 
-    def notify_all_messages(
-        self, exchange, market_pair, candle_period, messages
-    ):
+    def notify_all_messages(self, exchange, market_pair, candle_period, messages):
         chart_file = None
 
         if self.enable_charts:
             try:
-                candles_data = self.all_historical_data[exchange][market_pair][
-                    candle_period
-                ]
-                chart_file = self.create_chart(
-                    exchange, market_pair, candle_period, candles_data
-                )
+                candles_data = self.all_historical_data[exchange][market_pair][candle_period]
+                chart_file = self.create_chart(exchange, market_pair, candle_period, candles_data)
                 # self.logger.info('Chart file %s', chart_file)
             except Exception as e:
                 self.logger.info(
@@ -216,9 +183,7 @@ class Notifier(IndicatorUtils):
         if not self.discord_configured:
             return
 
-        message_template = Template(
-            self.notifier_config["discord"]["optional"]["template"]
-        )
+        message_template = Template(self.notifier_config["discord"]["optional"]["template"])
 
         for message in messages:
             formatted_message = message_template.render(message)
@@ -281,9 +246,7 @@ class Notifier(IndicatorUtils):
         if not self.telegram_configured:
             return
 
-        message_template = Template(
-            self.notifier_config["telegram"]["optional"]["template"]
-        )
+        message_template = Template(self.notifier_config["telegram"]["optional"]["template"])
 
         formatted_messages = []
 
@@ -293,9 +256,7 @@ class Notifier(IndicatorUtils):
         if self.enable_charts:
             if chart_file and os.path.exists(chart_file):
                 try:
-                    self.telegram_client.send_chart_messages(
-                        open(chart_file, "rb"), formatted_messages
-                    )
+                    self.telegram_client.send_chart_messages(open(chart_file, "rb"), formatted_messages)
                 except (IOError, SyntaxError):
                     self.telegram_client.send_messages(formatted_messages)
             else:
@@ -330,9 +291,7 @@ class Notifier(IndicatorUtils):
         if not self.stdout_configured:
             return
 
-        message_template = Template(
-            self.notifier_config["stdout"]["optional"]["template"]
-        )
+        message_template = Template(self.notifier_config["stdout"]["optional"]["template"])
 
         for message in messages:
             formatted_message = message_template.render(message)
@@ -377,14 +336,8 @@ class Notifier(IndicatorUtils):
                 for indicator_type in new_analysis[exchange][market]:
                     if indicator_type == "informants":
                         continue
-                    for indicator in new_analysis[exchange][market][
-                        indicator_type
-                    ]:
-                        for index, analysis in enumerate(
-                            new_analysis[exchange][market][indicator_type][
-                                indicator
-                            ]
-                        ):
+                    for indicator in new_analysis[exchange][market][indicator_type]:
+                        for index, analysis in enumerate(new_analysis[exchange][market][indicator_type][indicator]):
                             if analysis["result"].shape[0] == 0:
                                 continue
 
@@ -394,13 +347,9 @@ class Notifier(IndicatorUtils):
                                 for signal in analysis["config"]["signal"]:
                                     latest_result = analysis["result"].iloc[-1]
 
-                                    values[signal] = analysis["result"].iloc[
-                                        -1
-                                    ][signal]
+                                    values[signal] = analysis["result"].iloc[-1][signal]
                                     if isinstance(values[signal], float):
-                                        values[signal] = format(
-                                            values[signal], ".8f"
-                                        )
+                                        values[signal] = format(values[signal], ".8f")
                             elif indicator_type == "crossovers":
                                 latest_result = analysis["result"].iloc[-1]
 
@@ -411,26 +360,16 @@ class Notifier(IndicatorUtils):
 
                                 crossed_signal = "{}_{}".format(
                                     analysis["config"]["crossed_signal"],
-                                    analysis["config"][
-                                        "crossed_indicator_index"
-                                    ],
+                                    analysis["config"]["crossed_indicator_index"],
                                 )
 
-                                values[key_signal] = analysis["result"].iloc[
-                                    -1
-                                ][key_signal]
+                                values[key_signal] = analysis["result"].iloc[-1][key_signal]
                                 if isinstance(values[key_signal], float):
-                                    values[key_signal] = format(
-                                        values[key_signal], ".8f"
-                                    )
+                                    values[key_signal] = format(values[key_signal], ".8f")
 
-                                values[crossed_signal] = analysis[
-                                    "result"
-                                ].iloc[-1][crossed_signal]
+                                values[crossed_signal] = analysis["result"].iloc[-1][crossed_signal]
                                 if isinstance(values[crossed_signal], float):
-                                    values[crossed_signal] = format(
-                                        values[crossed_signal], ".8f"
-                                    )
+                                    values[crossed_signal] = format(values[crossed_signal], ".8f")
 
                             status = "neutral"
                             if latest_result["is_hot"]:
@@ -439,9 +378,7 @@ class Notifier(IndicatorUtils):
                                 status = "cold"
 
                             if "indicator_label" in analysis["config"]:
-                                indicator_label = analysis["config"][
-                                    "indicator_label"
-                                ]
+                                indicator_label = analysis["config"]["indicator_label"]
                             else:
                                 indicator_label = "{} {}".format(
                                     indicator,
@@ -449,45 +386,25 @@ class Notifier(IndicatorUtils):
                                 )
 
                             # Save status of indicator's new analysis
-                            new_analysis[exchange][market][indicator_type][
-                                indicator
-                            ][index]["status"] = status
+                            new_analysis[exchange][market][indicator_type][indicator][index]["status"] = status
 
-                            if (
-                                latest_result["is_hot"]
-                                or latest_result["is_cold"]
-                            ):
+                            if latest_result["is_hot"] or latest_result["is_cold"]:
                                 # Custom 'hot' or 'cold' labels
                                 hot_cold_label = ""
-                                if (
-                                    latest_result["is_hot"]
-                                    and "hot_label" in analysis["config"]
-                                ):
-                                    hot_cold_label = analysis["config"][
-                                        "hot_label"
-                                    ]
-                                if (
-                                    latest_result["is_cold"]
-                                    and "cold_label" in analysis["config"]
-                                ):
-                                    hot_cold_label = analysis["config"][
-                                        "cold_label"
-                                    ]
+                                if latest_result["is_hot"] and "hot_label" in analysis["config"]:
+                                    hot_cold_label = analysis["config"]["hot_label"]
+                                if latest_result["is_cold"] and "cold_label" in analysis["config"]:
+                                    hot_cold_label = analysis["config"]["cold_label"]
 
                                 try:
-                                    last_status = self.last_analysis[exchange][
-                                        market
-                                    ][indicator_type][indicator][index][
-                                        "status"
-                                    ]
+                                    last_status = self.last_analysis[exchange][market][indicator_type][indicator][
+                                        index
+                                    ]["status"]
                                 except:
                                     last_status = str()
 
                                 should_alert = True
-                                if (
-                                    analysis["config"]["alert_frequency"]
-                                    == "once"
-                                ):
+                                if analysis["config"]["alert_frequency"] == "once":
                                     if last_status == status:
                                         should_alert = False
 
@@ -555,89 +472,50 @@ class Notifier(IndicatorUtils):
                 for indicator_type in new_analysis[exchange][market_pair]:
                     if indicator_type == "informants":
                         # Getting OHLC prices
-                        for index, analysis in enumerate(
-                            new_analysis[exchange][market_pair]["informants"][
-                                "ohlcv"
-                            ]
-                        ):
+                        for index, analysis in enumerate(new_analysis[exchange][market_pair]["informants"]["ohlcv"]):
                             values = dict()
                             for signal in analysis["config"]["signal"]:
-                                values[signal] = analysis["result"].iloc[-1][
-                                    signal
-                                ]
-                                ohlcv_values[exchange][market_pair][
-                                    analysis["config"]["candle_period"]
-                                ] = values
+                                values[signal] = analysis["result"].iloc[-1][signal]
+                                ohlcv_values[exchange][market_pair][analysis["config"]["candle_period"]] = values
 
                         # Getting LRSI values
-                        if (
-                            "lrsi"
-                            in new_analysis[exchange][market_pair][
-                                "informants"
-                            ]
-                        ):
-                            for index, analysis in enumerate(
-                                new_analysis[exchange][market_pair][
-                                    "informants"
-                                ]["lrsi"]
-                            ):
+                        if "lrsi" in new_analysis[exchange][market_pair]["informants"]:
+                            for index, analysis in enumerate(new_analysis[exchange][market_pair]["informants"]["lrsi"]):
                                 values = dict()
                                 for signal in analysis["config"]["signal"]:
-                                    values[signal] = analysis["result"].iloc[
-                                        -1
-                                    ][signal]
+                                    values[signal] = analysis["result"].iloc[-1][signal]
 
-                                lrsi_values[exchange][market_pair][
-                                    analysis["config"]["candle_period"]
-                                ] = values
-
+                                lrsi_values[exchange][market_pair][analysis["config"]["candle_period"]] = values
+                reasons = []
                 for indicator_type in new_analysis[exchange][market_pair]:
                     if indicator_type == "informants":
                         continue
 
-                    for indicator in new_analysis[exchange][market_pair][
-                        indicator_type
-                    ]:
+                    for indicator in new_analysis[exchange][market_pair][indicator_type]:
                         for index, analysis in enumerate(
-                            new_analysis[exchange][market_pair][
-                                indicator_type
-                            ][indicator]
+                            new_analysis[exchange][market_pair][indicator_type][indicator]
                         ):
                             if analysis["result"].shape[0] == 0:
                                 continue
 
                             values = dict()
                             if "candle_period" in analysis["config"]:
-                                candle_period = analysis["config"][
-                                    "candle_period"
-                                ]
+                                candle_period = analysis["config"]["candle_period"]
 
-                                if (
-                                    not candle_period
-                                    in new_messages[exchange][market_pair]
-                                ):
-                                    new_messages[exchange][market_pair][
-                                        candle_period
-                                    ] = list()
-                            reasons = []
+                                if not candle_period in new_messages[exchange][market_pair]:
+                                    new_messages[exchange][market_pair][candle_period] = list()
+
                             if indicator_type == "indicators":
                                 if "hammer" in analysis["config"]["signal"]:
                                     is_candle_reg = True
                                 for signal in analysis["config"]["signal"]:
                                     latest_result = analysis["result"].iloc[-1]
 
-                                    values[signal] = analysis["result"].iloc[
-                                        -1
-                                    ][signal]
+                                    values[signal] = analysis["result"].iloc[-1][signal]
                                     if isinstance(values[signal], float):
-                                        values[signal] = format(
-                                            values[signal], ".2f"
-                                        )
+                                        values[signal] = format(values[signal], ".2f")
 
-                                    if (
-                                        is_candle_reg
-                                        and int(float(values[signal])) == 100
-                                    ):
+                                    if is_candle_reg and int(float(analysis["result"].iloc[-2][signal])) == 100:  # check prev candle, not latest candle
                                         reasons.append(signal)
 
                             elif indicator_type == "crossovers":
@@ -650,26 +528,16 @@ class Notifier(IndicatorUtils):
 
                                 crossed_signal = "{}_{}".format(
                                     analysis["config"]["crossed_signal"],
-                                    analysis["config"][
-                                        "crossed_indicator_index"
-                                    ],
+                                    analysis["config"]["crossed_indicator_index"],
                                 )
 
-                                values[key_signal] = analysis["result"].iloc[
-                                    -1
-                                ][key_signal]
+                                values[key_signal] = analysis["result"].iloc[-1][key_signal]
                                 if isinstance(values[key_signal], float):
-                                    values[key_signal] = format(
-                                        values[key_signal], ".2f"
-                                    )
+                                    values[key_signal] = format(values[key_signal], ".2f")
 
-                                values[crossed_signal] = analysis[
-                                    "result"
-                                ].iloc[-1][crossed_signal]
+                                values[crossed_signal] = analysis["result"].iloc[-1][crossed_signal]
                                 if isinstance(values[crossed_signal], float):
-                                    values[crossed_signal] = format(
-                                        values[crossed_signal], ".2f"
-                                    )
+                                    values[crossed_signal] = format(values[crossed_signal], ".2f")
 
                             status = "neutral"
                             if latest_result["is_hot"]:
@@ -678,44 +546,25 @@ class Notifier(IndicatorUtils):
                                 status = "cold"
 
                             if "indicator_label" in analysis["config"]:
-                                indicator_label = analysis["config"][
-                                    "indicator_label"
-                                ]
+                                indicator_label = analysis["config"]["indicator_label"]
                             else:
                                 indicator_label = ""
 
                             # Save status of indicator's new analysis
-                            new_analysis[exchange][market_pair][
-                                indicator_type
-                            ][indicator][index]["status"] = status
+                            new_analysis[exchange][market_pair][indicator_type][indicator][index]["status"] = status
 
-                            if (
-                                latest_result["is_hot"]
-                                or latest_result["is_cold"]
-                            ):
+                            if latest_result["is_hot"] or latest_result["is_cold"]:
                                 # Custom 'hot' / 'cold' labels
                                 hot_cold_label = ""
-                                if (
-                                    latest_result["is_hot"]
-                                    and "hot_label" in analysis["config"]
-                                ):
-                                    hot_cold_label = analysis["config"][
-                                        "hot_label"
-                                    ]
-                                if (
-                                    latest_result["is_cold"]
-                                    and "cold_label" in analysis["config"]
-                                ):
-                                    hot_cold_label = analysis["config"][
-                                        "cold_label"
-                                    ]
+                                if latest_result["is_hot"] and "hot_label" in analysis["config"]:
+                                    hot_cold_label = analysis["config"]["hot_label"]
+                                if latest_result["is_cold"] and "cold_label" in analysis["config"]:
+                                    hot_cold_label = analysis["config"]["cold_label"]
 
                                 try:
-                                    last_status = self.last_analysis[exchange][
-                                        market_pair
-                                    ][indicator_type][indicator][index][
-                                        "status"
-                                    ]
+                                    last_status = self.last_analysis[exchange][market_pair][indicator_type][indicator][
+                                        index
+                                    ]["status"]
                                 except:
                                     last_status = str()
 
@@ -725,10 +574,7 @@ class Notifier(IndicatorUtils):
                                 # self.logger.info('Alert once for %s %s %s', market_pair, indicator, candle_period)
 
                                 if not self.first_run:
-                                    if (
-                                        analysis["config"]["alert_frequency"]
-                                        == "once"
-                                    ):
+                                    if analysis["config"]["alert_frequency"] == "once":
                                         if last_status == status:
                                             self.logger.info(
                                                 "Alert frecuency once. Dont alert. %s %s %s",
@@ -759,45 +605,26 @@ class Notifier(IndicatorUtils):
                                         base_currency,
                                         quote_currency,
                                     ) = market_pair.split("/")
-                                    precision = self.market_data[exchange][
-                                        market_pair
-                                    ]["precision"]
-                                    decimal_format = ".{}f".format(
-                                        precision["price"]
-                                    )
+                                    precision = self.market_data[exchange][market_pair]["precision"]
+                                    decimal_format = ".{}f".format(precision["price"])
 
                                     prices = ""
                                     price_value = {}
-                                    candle_period = analysis["config"][
-                                        "candle_period"
-                                    ]
-                                    candle_values = ohlcv_values[exchange][
-                                        market_pair
-                                    ]
+                                    candle_period = analysis["config"]["candle_period"]
+                                    candle_values = ohlcv_values[exchange][market_pair]
 
                                     if candle_period in candle_values:
-                                        for key, value in candle_values[
-                                            candle_period
-                                        ].items():
+                                        for key, value in candle_values[candle_period].items():
                                             price_value[key] = value
 
-                                            value = format(
-                                                value, decimal_format
-                                            )
-                                            prices = "{} {}: {}".format(
-                                                prices, key.title(), value
-                                            )
+                                            value = format(value, decimal_format)
+                                            prices = "{} {}: {}".format(prices, key.title(), value)
 
                                     decimal_format = "%" + decimal_format
 
                                     lrsi = ""
-                                    if (
-                                        candle_period
-                                        in lrsi_values[exchange][market_pair]
-                                    ):
-                                        lrsi = lrsi_values[exchange][
-                                            market_pair
-                                        ][candle_period]["lrsi"]
+                                    if candle_period in lrsi_values[exchange][market_pair]:
+                                        lrsi = lrsi_values[exchange][market_pair][candle_period]["lrsi"]
                                         lrsi = format(lrsi, ".2f")
 
                                     """
@@ -834,9 +661,7 @@ class Notifier(IndicatorUtils):
                                         reasons=" ,".join(reasons),
                                     )
 
-                                    new_messages[exchange][market_pair][
-                                        candle_period
-                                    ].append(new_message)
+                                    new_messages[exchange][market_pair][candle_period].append(new_message)
 
         # Merge changes from new analysis into last analysis
         self.last_analysis = {**self.last_analysis, **new_analysis}
@@ -870,14 +695,10 @@ class Notifier(IndicatorUtils):
                     if len(_messages[candle_period]) == 0:
                         continue
 
-                    candles_data = self.all_historical_data[exchange][
-                        market_pair
-                    ][candle_period]
+                    candles_data = self.all_historical_data[exchange][market_pair][candle_period]
 
                     try:
-                        self.create_chart(
-                            exchange, market_pair, candle_period, candles_data
-                        )
+                        self.create_chart(exchange, market_pair, candle_period, candles_data)
                     except Exception as e:
                         self.logger.info(
                             "Error creating chart for %s %s",
@@ -945,15 +766,11 @@ class Notifier(IndicatorUtils):
 
         fig.autofmt_xdate()
 
-        title = "{} {} {} - {}".format(
-            exchange, market_pair, candle_period, creation_date
-        ).upper()
+        title = "{} {} {} - {}".format(exchange, market_pair, candle_period, creation_date).upper()
         fig.suptitle(title, fontsize=14)
 
         market_pair = market_pair.replace("/", "_").lower()
-        chart_file = "{}/{}_{}_{}.png".format(
-            "./charts", exchange, market_pair, candle_period
-        )
+        chart_file = "{}/{}_{}_{}.png".format("./charts", exchange, market_pair, candle_period)
 
         plt.savefig(chart_file)
         plt.close(fig)
@@ -1091,32 +908,16 @@ class Notifier(IndicatorUtils):
 
             if "candle_recognition" in self.indicator_config:
                 for config in self.indicator_config["candle_recognition"]:
-                    if (
-                        config["enabled"]
-                        and config["candle_period"] == candle_period
-                        and config["chart"]
-                    ):
+                    if config["enabled"] and config["candle_period"] == candle_period and config["chart"]:
                         indicator_conf = config
                         break
 
             if bool(indicator_conf):
                 signal = indicator_conf["signal"]
-                notification = (
-                    indicator_conf["notification"]
-                    if "notification" in indicator_conf
-                    else "hot"
-                )
-                candle_check = (
-                    indicator_conf["candle_check"]
-                    if "candle_check" in indicator_conf
-                    else 1
-                )
-                hot_tresh = (
-                    indicator_conf["hot"] if "hot" in indicator_conf else 0
-                )
-                cold_tresh = (
-                    indicator_conf["cold"] if "cold" in indicator_conf else 0
-                )
+                notification = indicator_conf["notification"] if "notification" in indicator_conf else "hot"
+                candle_check = indicator_conf["candle_check"] if "candle_check" in indicator_conf else 1
+                hot_tresh = indicator_conf["hot"] if "hot" in indicator_conf else 0
+                cold_tresh = indicator_conf["cold"] if "cold" in indicator_conf else 0
 
                 historical_data = df
                 cdl = candle_recognition.Candle_recognition()
@@ -1128,18 +929,12 @@ class Notifier(IndicatorUtils):
                     hot_tresh,
                     cold_tresh,
                 )
-                candle_pattern = candle_pattern.drop(
-                    ["is_hot", "is_cold"], axis=1
-                )
+                candle_pattern = candle_pattern.drop(["is_hot", "is_cold"], axis=1)
             else:
                 candle_pattern = pd.DataFrame()
 
         except Exception:
-            self.logger.info(
-                "error in indicator config for candle pattern: {}".format(
-                    sys.exc_info()[0]
-                )
-            )
+            self.logger.info("error in indicator config for candle pattern: {}".format(sys.exc_info()[0]))
 
         return candle_pattern
 
@@ -1179,9 +974,7 @@ class Notifier(IndicatorUtils):
             print(traceback.print_exc())
 
         ax.plot(df.index, ma7, color="darkorange", lw=0.8, label="EMA (7)")
-        ax.plot(
-            df.index, ma25, color="mediumslateblue", lw=0.8, label="EMA (25)"
-        )
+        ax.plot(df.index, ma25, color="mediumslateblue", lw=0.8, label="EMA (25)")
         ax.plot(df.index, ma99, color="firebrick", lw=0.8, label="EMA (99)")
 
         ax.text(
@@ -1396,27 +1189,14 @@ class Notifier(IndicatorUtils):
 
         if "ichimoku" in self.indicator_config:
             for config in self.indicator_config["ichimoku"]:
-                if (
-                    config["enabled"]
-                    and config["candle_period"] == candle_period
-                ):
+                if config["enabled"] and config["candle_period"] == candle_period:
                     indicator_conf = config
                     break
 
-        tenkansen_period = (
-            indicator_conf["tenkansen_period"]
-            if "tenkansen_period" in indicator_conf
-            else 20
-        )
-        kijunsen_period = (
-            indicator_conf["kijunsen_period"]
-            if "kijunsen_period" in indicator_conf
-            else 60
-        )
+        tenkansen_period = indicator_conf["tenkansen_period"] if "tenkansen_period" in indicator_conf else 20
+        kijunsen_period = indicator_conf["kijunsen_period"] if "kijunsen_period" in indicator_conf else 60
         senkou_span_b_period = (
-            indicator_conf["senkou_span_b_period"]
-            if "senkou_span_b_period" in indicator_conf
-            else 120
+            indicator_conf["senkou_span_b_period"] if "senkou_span_b_period" in indicator_conf else 120
         )
 
         textsize = 11
@@ -1467,9 +1247,7 @@ class Notifier(IndicatorUtils):
             lw=0.6,
             linestyle="dashed",
         )
-        ax.plot(
-            _time2, leading_span_b, color="darkred", lw=0.6, linestyle="dashed"
-        )
+        ax.plot(_time2, leading_span_b, color="darkred", lw=0.6, linestyle="dashed")
         ax.plot(_time2, chikou_span, color="purple", lw=0.6)
 
         ax.fill_between(
