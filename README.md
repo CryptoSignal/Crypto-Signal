@@ -70,3 +70,7 @@ Underpinning crypto-signal for most of our technical analysis is [TA-Lib](https:
 I am not your financial adviser, nor is this tool. Use this program as an educational tool, and nothing more. None of the contributors to this project are liable for any losses you may incur. Be wise and always do your own research.
 
 We recommend you begin by learning the core principles used in traditional asset classes since they are less volatile & apply your knowledge in simulated trading before liquidating your dreams.
+
+
+
+TEST
